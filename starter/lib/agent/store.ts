@@ -104,10 +104,49 @@ class JsonFileStore implements AgentStore {
 }
 
 let current: AgentStore | undefined
+let currentKind: "foundation" | "local" = "local"
 
+/** The store in use. Call initStore() first to use the foundation's tables. */
 export function getStore(): AgentStore {
   if (!current) current = new JsonFileStore(paths.dataDir())
   return current
+}
+
+export function storeKind(): "foundation" | "local" {
+  return currentKind
+}
+
+/**
+ * Pick the store: CR_AGENT_STORE=foundation | local | auto (default). Auto uses
+ * the foundation's Postgres tables when they answer, else local JSON files.
+ */
+export async function initStore(kind = process.env.CR_AGENT_STORE ?? "auto"): Promise<"foundation" | "local"> {
+  const local = new JsonFileStore(paths.dataDir())
+  if (kind === "local") {
+    current = local
+    currentKind = "local"
+    return currentKind
+  }
+  const { FoundationStore, foundationReachable } = await import("./foundation-store")
+  if (kind === "foundation" || (await foundationReachable())) {
+    current = new FoundationStore(local)
+    currentKind = "foundation"
+    const { listPeople } = await import("@/lib/control-room/store")
+    const { registerPeople } = await import("./people")
+    registerPeople(await listPeople())
+    return currentKind
+  }
+  current = local
+  currentKind = "local"
+  return currentKind
+}
+
+/** Scripts call this at the end so the process can exit (closes the Postgres pool when used). */
+export async function closeStore(): Promise<void> {
+  if (currentKind === "foundation") {
+    const { closeCrDb } = await import("@/lib/control-room/db")
+    await closeCrDb()
+  }
 }
 
 /** The master calls this once to point the agent at the foundation's store. */

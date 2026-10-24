@@ -52,7 +52,10 @@ function chosenOption(c: Case, d: Decision) {
 /** The no-model version: the pickup place's own words plus what the person chose. */
 export function templateLesson(c: Case, d: Decision): string {
   const place = site(c.placeId)?.name ?? "This pickup place"
-  const placeFact = c.facts.find((f) => f.source.kind === "pickup_place" && /(release|fee|ready|keys|only|hold|yard|warehouse)/i.test(f.statement))
+  const fromPlace = c.facts.filter((f) => f.source.kind === "pickup_place")
+  const placeFact = [/only (after|when|if)/i, /release document/i, /(fee|euro)/i, /(ready|comes back)/i, /(keys|yard|warehouse|hold)/i]
+    .map((re) => fromPlace.find((f) => re.test(f.statement)))
+    .find(Boolean)
   const option = chosenOption(c, d)
   const did = d.optionId === "other" ? d.editedDetail ?? d.why ?? "decided otherwise" : option?.label ?? "decided"
   const rule = placeFact ? placeFact.statement.replace(/^We /, `${place} `).replace(/\bwe\b/g, "they").replace(/\bour\b/g, "their").replace(/\bus\b/g, "them") : `${place}: ${c.headline}`

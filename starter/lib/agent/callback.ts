@@ -46,7 +46,9 @@ function briefFor(c: Case, d: Decision): CallbackBrief {
 export async function carryOutDecision(c: Case, d: Decision, provider?: Provider): Promise<RunResult> {
   const order = findOrder(c.orderId)
   if (!order) throw new Error(`No order ${c.orderId}`)
-  return runReadinessAgent(order.reference, { provider, callback: briefFor(c, d), startAt: new Date(d.at) })
+  // On the dataset clock the callback happens shortly after the case; with CR_CLOCK=real, at the decision time.
+  const startAt = process.env.CR_CLOCK === "real" ? new Date(d.at) : new Date(new Date(c.createdAt).getTime() + 25 * 60_000)
+  return runReadinessAgent(order.reference, { provider, callback: briefFor(c, d), startAt })
 }
 
 /** CLI / local flow: record the decision, carry it out, propose a lesson. */

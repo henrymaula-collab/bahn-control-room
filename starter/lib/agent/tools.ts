@@ -15,6 +15,7 @@ import {
 import { channelFrom, sourceKindFrom, type FactRegistry } from "./facts"
 import { checkChanges, contactCheck, messageCommits, type TrustRule } from "./gate"
 import { acceptedLessons, lessonOrigin, lessonStatement } from "./learning"
+import { personName } from "./people"
 import type { CallbackBrief } from "./prompt"
 import { structured } from "./providers"
 import { simulateCall } from "./sim/call"
@@ -216,6 +217,9 @@ function toOptions(list: z.infer<typeof optionShape>[]): Option[] {
     return { id, label: o.label, effect: o.effect, changes: o.changes.map(toChange) }
   })
 }
+
+/** One agent case per order (a new run replaces the agent's earlier view; the engine's derived case steps aside). */
+const agentCaseId = (ctx: RunContext) => `case-${ctx.order.id}-agent`
 
 const VAGUE_LABELS = /^(approve|ok|okay|yes|accept|confirm|proceed|continue)\.?$/i
 
@@ -503,7 +507,7 @@ async function proposeCase(ctx: RunContext, a: z.infer<z.ZodObject<typeof TOOL_S
   const knownLessons = ctx.snap.lessons.filter((l) => l.status === "accepted")
   const badLesson = lessonIds.filter((id) => !knownLessons.some((l) => l.id === id))
   if (badLesson.length) return fail(`Unknown or not accepted lesson ids: ${badLesson.join(", ")}.`)
-  const caseId = `case-${ctx.order.reference.toLowerCase()}-${ctx.runId.slice(-6)}`
+  const caseId = agentCaseId(ctx)
   const inferred = a.new_facts.map((n) => ctx.registry.add(n.statement, { kind: "agent", name: "Readiness agent", channel: "record", recordRef: `inferred_from:${n.basis_fact_ids.join(",")}`, at: ctx.clock.now() }, "inferred"))
   const facts = [...a.fact_ids.map((id) => ctx.registry.get(id)!), ...inferred]
   // The call keeps all its facts (Call.factIds). If the model cited none of them, bring the call's facts along.
@@ -566,8 +570,8 @@ async function resolve(ctx: RunContext, a: z.infer<z.ZodObject<typeof TOOL_SHAPE
   let caseId: string | undefined
   if (gate.rule) {
     const { site } = siteFor(ctx)
-    caseId = `case-${ctx.order.reference.toLowerCase()}-${ctx.runId.slice(-6)}`
-    const ruleFact = ctx.registry.add(`Handled by the agent under trust rule ${gate.rule.id} (ON${gate.rule.changedBy ? `, turned on by ${gate.rule.changedBy}` : ""}): "${gate.rule.when}" -> "${gate.rule.then}". Evidence: the agent would have decided like people did in ${gate.rule.evidence.matched} of ${gate.rule.evidence.total} cases.`, { kind: "agent", name: "Readiness agent", channel: "record", recordRef: `trust_rules:${gate.rule.id}`, at: now }, "confirmed")
+    caseId = agentCaseId(ctx)
+    const ruleFact = ctx.registry.add(`Handled by the agent under trust rule ${gate.rule.id} (ON${gate.rule.changedBy ? `, turned on by ${personName(gate.rule.changedBy)}` : ""}): "${gate.rule.when}" -> "${gate.rule.then}". Evidence: the agent would have decided like people did in ${gate.rule.evidence.matched} of ${gate.rule.evidence.total} cases.`, { kind: "agent", name: "Readiness agent", channel: "record", recordRef: `trust_rules:${gate.rule.id}`, at: now }, "confirmed")
     const factIds = [...new Set([...a.checks.flatMap((c) => c.fact_ids), ...ctx.calls.flatMap((c) => c.factIds)])]
     const facts = [...factIds.map((id) => ctx.registry.get(id)!).filter(Boolean), ruleFact]
     const label = realChanges.map((c) => c.detail).join("; ") || gate.rule.then

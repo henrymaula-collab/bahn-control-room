@@ -14,11 +14,12 @@ import { config } from "dotenv"
 config({ path: ".env.local", override: true, quiet: true })
 
 import type { Call, Case, Fact } from "../lib/control-room/types"
-import { decideAndCarryOut, reviewLesson } from "../lib/agent/callback"
+import { carryOutDecision, decideAndCarryOut, reviewLesson } from "../lib/agent/callback"
+import { registerAgentHooks } from "../lib/agent/hooks"
 import { agentModel, effectiveProvider, type Provider } from "../lib/agent/config"
 import { findOrder, LANGUAGE_NAMES, site } from "../lib/agent/data"
 import { runReadinessAgent, replayTrace, type RunResult } from "../lib/agent/loop"
-import { getStore, resetLocalStore, type StoredRun } from "../lib/agent/store"
+import { closeStore, getStore, initStore, resetLocalStore, type StoredRun } from "../lib/agent/store"
 import { listTraces } from "../lib/agent/trace"
 import type { TrustRule } from "../lib/agent/gate"
 
@@ -86,7 +87,7 @@ function printCall(call: Call) {
 }
 
 function factLine(f: Fact) {
-  return `${f.statement}  ${dim(`(${f.source.name ?? f.source.kind}, ${f.source.channel ?? "record"}, ${f.source.at.slice(0, 16).replace("T", " ")}, ${f.strength})`)}`
+  return `${f.statement}  ${dim(`(${f.source.name ?? f.source.kind}, ${f.source.channel ?? "record"}, ${new Intl.DateTimeFormat("en-GB", { timeZone: "Europe/Helsinki", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit", hour12: false }).format(new Date(f.source.at))}, ${f.strength})`)}`
 }
 
 function printCase(c: Case) {
@@ -123,13 +124,16 @@ function providerArg(): Provider | undefined {
 }
 
 async function main() {
+  const kind = await initStore(flag("--store"))
   const store = getStore()
+  console.log(dim(`Store: ${kind === "foundation" ? "control room tables (Postgres)" : "local files (.cr-data)"}`))
   if (has("--reset")) {
     resetLocalStore()
     console.log("Local agent store cleared.")
     return
   }
   if (has("--seed-demo")) {
+    if (kind === "foundation") throw new Error("The foundation seeds its own trust rules (npm run db:seed:cr). --seed-demo is for the local store (--store local).")
     const rule: TrustRule = {
       id: "rule-readiness_facts_disagree-site-047-pause_gig",
       caseType: "readiness.facts_disagree",
@@ -159,16 +163,31 @@ async function main() {
     return
   }
   if (has("--accept-lesson")) {
-    const l = await reviewLesson(flag("--accept-lesson")!, true, flag("--by") ?? "mikko")
-    console.log(`Accepted ${l.id}: ${l.text}`)
+    const id = flag("--accept-lesson")!
+    const by = flag("--by") ?? "p-kaisa"
+    if (kind === "foundation") {
+      const { reviewLessonById } = await import("../lib/control-room/service")
+      const l = await reviewLessonById(id, true, by)
+      if (!l) throw new Error(`No lesson ${id}`)
+      console.log(`Accepted ${l.id}: ${l.text}`)
+    } else {
+      const l = await reviewLesson(id, true, by)
+      console.log(`Accepted ${l.id}: ${l.text}`)
+    }
     return
   }
   if (has("--trust-rule")) {
     const id = flag("--trust-rule")!
     const state = args[args.indexOf("--trust-rule") + 2] as "on" | "off"
-    const rule = (await store.listTrustRules()).find((r) => r.id === id)
-    if (!rule || !["on", "off"].includes(state)) throw new Error("Usage: --trust-rule <ruleId> on|off")
-    await store.saveTrustRule({ ...rule, status: state, changedBy: flag("--by") ?? "mikko", changedAt: new Date().toISOString() })
+    if (!["on", "off"].includes(state)) throw new Error("Usage: --trust-rule <ruleId> on|off")
+    if (kind === "foundation") {
+      const { setTrustRule } = await import("../lib/control-room/service")
+      if (!(await setTrustRule(id, state, flag("--by") ?? "p-kaisa"))) throw new Error(`No trust rule ${id}`)
+    } else {
+      const rule = (await store.listTrustRules()).find((r) => r.id === id)
+      if (!rule) throw new Error(`No trust rule ${id}`)
+      await store.saveTrustRule({ ...rule, status: state, changedBy: flag("--by") ?? "p-kaisa", changedAt: new Date().toISOString() })
+    }
     console.log(`Trust rule ${id} is now ${state}.`)
     return
   }
@@ -186,8 +205,22 @@ async function main() {
     const optionId = args[i + 2]
     if (!caseId || !optionId) throw new Error("Usage: --callback <caseId> <optionId>")
     const provider = providerArg()
-    console.log(`${bold("Decision")} ${caseId}: ${optionId} by ${flag("--person") ?? "aino"}  (${effectiveProvider(provider)})`)
-    const res = await decideAndCarryOut({ caseId, optionId, personId: flag("--person") ?? "aino", why: flag("--why"), editedDetail: flag("--edit"), provider })
+    const personId = flag("--person") ?? "p-aino"
+    console.log(`${bold("Decision")} ${caseId}: ${optionId} by ${personId}  (${effectiveProvider(provider)})`)
+    if (kind === "foundation") {
+      // The foundation records the decision and proposes the lesson (with our summariser); the agent carries it out.
+      registerAgentHooks()
+      const { decide } = await import("../lib/control-room/service")
+      const res = await decide({ caseId, optionId, personId, why: flag("--why"), editedDetail: flag("--edit") })
+      if ("error" in res) throw new Error(String(res.error))
+      const carried = await carryOutDecision(res.case, res.decision, provider)
+      for (const s of carried.run.steps) printStep(s)
+      printResult(carried)
+      console.log(`\n${bold("Lesson proposed")} ${res.lesson.id}: ${res.lesson.text}`)
+      console.log(dim(`  accept it with: npm run agent -- --accept-lesson ${res.lesson.id}`))
+      return
+    }
+    const res = await decideAndCarryOut({ caseId, optionId, personId, why: flag("--why"), editedDetail: flag("--edit"), provider })
     for (const s of res.carriedOut.run.steps) printStep(s)
     printResult(res.carriedOut)
     console.log(`\n${bold("Lesson proposed")} ${res.lesson.id}: ${res.lesson.text}`)
@@ -208,7 +241,10 @@ async function main() {
   printResult(res)
 }
 
-main().catch((e) => {
-  console.error(e instanceof Error ? e.message : e)
-  process.exit(1)
-})
+main()
+  .then(() => closeStore())
+  .catch(async (e) => {
+    console.error(e instanceof Error ? e.message : e)
+    await closeStore().catch(() => {})
+    process.exit(1)
+  })

@@ -68,7 +68,7 @@ function pickFacts(all: FactOut[], callFacts: FactOut[], extra: RegExp): string[
 export function mockTurn(messages: BetaMessageParam[]): BetaMessage {
   const h = history(messages)
   const done = (n: string) => h.calls.find((c) => c.name === n)
-  const ref = /Order (\S+)/.exec(firstUserText(messages))?.[1] ?? ""
+  const ref = /Order (CD-\d+|ord-\d+)/i.exec(firstUserText(messages))?.[1] ?? ""
   const first = firstUserText(messages)
   const callback = /A person decided case (\S+)\./.exec(first)
     ? {
@@ -82,7 +82,11 @@ export function mockTurn(messages: BetaMessageParam[]): BetaMessage {
   const last = h.calls[h.calls.length - 1]
   if (last && ["propose_case", "resolve_without_person"].includes(last.name) && !last.result.error) {
     const r = last.result
+    if (r.status === "done") return message([text("Carried out the decision and told the pickup place. The case is done.")], "end_turn")
     return message([text(r.case_id ? (r.handled_under_rule ? `Handled under trust rule ${r.handled_under_rule}; the case is recorded as handled by the agent.` : `Case ${r.case_id} is waiting for a person with the facts, the call and one suggestion. I will carry out the decision and call the pickup place back.`) : "Checked: nothing on this order needs a person now.")], "end_turn")
+  }
+  if (last?.result.error && h.calls.filter((c) => c.name === last.name && c.result.error).length >= 2) {
+    return message([text(`I stopped: ${last.name} was refused twice (${String(last.result.error)}). A person needs to look at this order.`)], "end_turn")
   }
   if (last?.name === "schedule_callback" && !last.result.error) {
     return message([text("Nobody answered. I wrote to the pickup place and will call again at the time I promised; the order stays on my list.")], "end_turn")

@@ -243,14 +243,14 @@ dialog.sheet[open] { animation: sheet-in 260ms var(--ease-open); }
 .sheet-head { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; padding: 14px 16px 0; min-height: 56px; }
 .sheet-head .title { font-weight: 600; text-align: center; }
 .sheet-head .end { justify-self: end; }
-.sheet-body { padding: 12px 28px 28px; }
+.sheet-body { padding: 0.7em 1.65em 1.65em; }
 .sheet-body .option { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 16px; align-items: center; width: 100%; padding: 14px 16px; margin: 0 -16px; width: calc(100% + 32px); border-radius: 14px; }
 .sheet-body .option:hover { background: var(--raise); }
 .sheet-body .option .title { font-weight: 400; }
 .sheet-body .option .chev { color: var(--ink-2); }
 .changes { display: flex; flex-direction: column; gap: 6px; margin-top: 12px; }
-.reasons { display: flex; flex-direction: column; gap: 8px; margin-top: 14px; }
-.reason { width: 100%; padding: 12px 18px; border-radius: 16px; background: var(--raise); text-align: left; transition: background-color 150ms var(--ease); }
+.reasons { display: flex; flex-direction: column; gap: 0.47em; margin-top: 0.8em; }
+.reason { width: 100%; padding: 0.7em 1.06em; border-radius: 0.94em; background: var(--raise); text-align: left; transition: background-color 150ms var(--ease); }
 .reason:hover { background: var(--press); }
 .reason.other { background: none; padding: 8px 18px; color: var(--ink-2); font-weight: 400; }
 .reason.other:hover { background: var(--raise); color: var(--ink); }

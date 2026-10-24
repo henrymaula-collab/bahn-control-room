@@ -11,7 +11,7 @@
   --h-s: var(--type-subhead);
   --h-pad: clamp(24px, 2.4vw - 6px, 56px);
   --h-row: calc(0.6 * var(--type-body));
-  --h-rec: max(380px, calc(700 * var(--cr-u)));
+  --h-rec: max(380px, calc(600 * var(--cr-u))); /* as wide as Your tasks' side panel */
   /* Car | Kind of case | Decision | Decided by | When */
   --h-cols: minmax(0, 1.25fr) minmax(0, 1fr) minmax(0, 1.5fr) minmax(0, 0.55fr) minmax(0, 0.75fr);
   position: absolute; inset: 0;
@@ -65,7 +65,7 @@
   padding: 10px 12px 8px; margin: 0 -12px; box-shadow: 0 1px 0 rgb(18 17 14 / 0.08);
 }
 .hist-col {
-  display: inline-flex; align-items: center; gap: 4px; justify-self: start;
+  display: inline-flex; align-items: center; gap: 4px; justify-self: start; max-width: 100%; white-space: nowrap; overflow: hidden;
   font-size: var(--h-s); line-height: var(--lh-subhead); color: var(--ink-2); font-weight: 400;
 }
 .hist-col:hover, .hist-col[aria-sort="ascending"], .hist-col[aria-sort="descending"] { color: var(--ink); }
@@ -140,3 +140,10 @@
   .hist { --h-cols: minmax(0, 1fr) minmax(0, 0.7fr); }
   .col-kind, .col-decision, .col-by { display: none; }
 }
+
+/* Icons follow the type they sit next to. */
+.hist-search svg { flex: none; width: 1em; height: 1em; }
+.hist-col svg, .hist-select svg { width: 0.85em; height: 0.85em; }
+.hist-close { width: max(36px, calc(1.9 * var(--type-headline))); height: max(36px, calc(1.9 * var(--type-headline))); }
+.hist-close svg { width: max(18px, calc(1.06 * var(--type-headline))); height: max(18px, calc(1.06 * var(--type-headline))); }
+.hist-open svg { width: 1.1em; height: 1.1em; }

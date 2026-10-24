@@ -10,9 +10,10 @@
 :root {
   --cr-u: clamp(0.6px, min(calc(0.0297vw + 0.24px), calc(0.0737vh + 0.189px)), 1px);
   --cr-su: max(0.74px, var(--cr-u));
-  /* Never under 236 px: the ramp's chrome steps (15/13 at 1512 x 800, design/TYPE_SCALE.md) need
-     a little more room than the old 14/12, so "Operations Associate" fits beside the photo. */
-  --side: max(236px, calc(300 * var(--cr-su)));
+  /* Never narrower than 236 px times the menu's type factor (--type-kc, control-room.css): the
+     ramp's chrome steps (15/13 at 1512 x 800, design/TYPE_SCALE.md) need a little more room than
+     the old 14/12, so "Operations Associate" fits beside the photo at every size. */
+  --side: max(calc(236 * var(--type-kc, 1px)), calc(300 * var(--cr-su)));
 }
 .side { padding: calc(20 * var(--cr-su)) calc(16 * var(--cr-su)) calc(16 * var(--cr-su)); }
 /* The lockup, after Aalto's "Aalto / Founder Sprint": line 2 starts under the end of the

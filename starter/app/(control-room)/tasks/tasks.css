@@ -112,7 +112,7 @@
 .work .situation-panel .open-order { margin-top: 1.5em; }
 .work .situation-panel .open-order svg { width: 1.2em; height: 1.2em; }
 .work .panel .kv { grid-template-columns: max(104px, calc(168 * var(--cr-u, 1px))) minmax(0, 1fr); }
-.work .route-map { height: max(150px, calc(196 * var(--cr-u, 1px))); }
+.work .route-map { height: max(150px, calc(10 * var(--type-subhead))); }
 
 
 /* The Other options sheet sits inside the card and takes the same ramp: body and subhead. */

@@ -19,6 +19,8 @@ type IconName =
   | "users"
   | "plus"
   | "minus"
+  | "mic"
+  | "arrow-up"
 
 const PATHS: Record<IconName, React.ReactNode> = {
   "chevron-down": <path d="m6 9 6 6 6-6" />,
@@ -91,6 +93,19 @@ const PATHS: Record<IconName, React.ReactNode> = {
     <>
       <path d="M5 12h14" />
       <path d="m13 6 6 6-6 6" />
+    </>
+  ),
+  mic: (
+    <>
+      <path d="M12 19v3" />
+      <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
+      <rect x="9" y="2" width="6" height="13" rx="3" />
+    </>
+  ),
+  "arrow-up": (
+    <>
+      <path d="m5 12 7-7 7 7" />
+      <path d="M12 19V5" />
     </>
   ),
 }

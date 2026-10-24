@@ -16,8 +16,10 @@ const TABS: { key: ListKey; label: string }[] = [
 /** Shown next to each row: the decide-by time, red only within the hour. Worked out on the server. */
 export type RowTime = Record<string, { text: string; now: boolean }>
 
-type Panel = { open: boolean; setOpen: (o: boolean) => void; slot: HTMLDivElement | null }
-const PanelContext = createContext<Panel>({ open: false, setOpen: () => {}, slot: null })
+/** One side panel at a time: the situation, or the conversation with the agent. */
+export type PanelKind = "situation" | "chat"
+type Panel = { open: PanelKind | null; setOpen: (o: PanelKind | null) => void; slot: HTMLDivElement | null }
+const PanelContext = createContext<Panel>({ open: null, setOpen: () => {}, slot: null })
 export const usePanel = () => useContext(PanelContext)
 
 const typing = (t: EventTarget | null) => {
@@ -32,7 +34,7 @@ export function WorkFrame({ lists, times, children }: { lists: WorkLists; times:
   const current = decodeURIComponent(path.split("/")[2] ?? "")
   const home: ListKey = (TABS.find((t) => lists[t.key].some((r) => r.caseId === current))?.key ?? "needYou") as ListKey
   const [tab, setTab] = useState<ListKey>(home)
-  const [open, setOpen] = useState(false)
+  const [open, setOpen] = useState<PanelKind | null>(null)
   const [slot, setSlot] = useState<HTMLDivElement | null>(null)
   const listRef = useRef<HTMLDivElement>(null)
 
@@ -50,7 +52,7 @@ export function WorkFrame({ lists, times, children }: { lists: WorkLists; times:
       if (e.metaKey || e.ctrlKey || e.altKey || typing(e.target)) return
       if (e.key === "Escape" && open) {
         e.preventDefault()
-        setOpen(false)
+        setOpen(null)
         return
       }
       if (e.key === "j" && next) router.push(`/work/${next.caseId}`)
@@ -75,7 +77,7 @@ export function WorkFrame({ lists, times, children }: { lists: WorkLists; times:
   return (
     <PanelContext.Provider value={panel}>
       <div className={`work${open ? " with-panel" : ""}`}>
-        <div className="list" ref={listRef} aria-hidden={open || undefined}>
+        <div className="list" ref={listRef} aria-hidden={open ? true : undefined}>
           <div className="tabs" role="tablist" aria-label="Work">
             {TABS.map((t) => (
               <button key={t.key} type="button" role="tab" className="tab" aria-selected={tab === t.key} onClick={() => setTab(t.key)}>

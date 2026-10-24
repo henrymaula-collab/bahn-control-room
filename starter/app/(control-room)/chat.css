@@ -1,0 +1,111 @@
+/* "Talk it through": the conversation with the agent beside a decision.
+   Same discipline as control-room.css: sizes 16 and 13 only, ink and one grey,
+   no bubbles for the agent (its words sit on the page like the card's), the
+   person's words in one soft block, no chips, no dots between facts. The agent's
+   mark breathes while it works, like an agent's car on the map. */
+
+/* The panel: head, the conversation (scrolls), the field (stays at the bottom). */
+.chat-panel { display: flex; flex-direction: column; padding: 0; overflow: hidden; }
+.chat-head { flex: none; align-items: center; padding: 16px 28px 4px; }
+.chat-head .close { margin: 0 -8px 0 0; }
+.chat { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+.chat-log {
+  flex: 1; min-height: 0; overflow: auto; overscroll-behavior: contain;
+  display: flex; flex-direction: column; gap: 24px;
+  padding: 12px 28px 28px;
+}
+
+/* The agent's mark */
+.amark {
+  position: relative; flex: none;
+  display: inline-flex; align-items: center; justify-content: center;
+  border-radius: 50%; background: var(--ink); color: var(--page);
+}
+.amark svg { position: relative; z-index: 1; display: block; }
+.amark.working::after {
+  content: ""; position: absolute; inset: 0; border-radius: 50%; background: var(--ink);
+  animation: amark-breathe 2.4s cubic-bezier(.2, 0, .2, 1) infinite;
+}
+@keyframes amark-breathe { 0% { transform: scale(1); opacity: .28; } 75%, 100% { transform: scale(2.1); opacity: 0; } }
+
+/* A turn by the agent: a byline (mark, steps), then its words */
+.turn.agent { display: flex; flex-direction: column; }
+.byline { display: flex; align-items: center; gap: 8px; min-height: 20px; font-weight: 500; color: var(--ink-2); }
+.words { display: flex; flex-direction: column; gap: 12px; margin-top: 10px; }
+
+.steps > summary { width: fit-content; margin: -2px -8px -2px -2px; padding: 2px 8px 2px 2px; border-radius: 999px; }
+.steps > summary:hover { background: var(--raise); color: var(--ink); }
+.steps > summary svg:last-child { transition: transform 240ms var(--ease-open); margin-left: -4px; }
+.steps[open] > summary svg:last-child { transform: rotate(90deg); }
+.steps > .step-lines { margin-top: 10px; }
+
+.step-lines { display: flex; flex-direction: column; gap: 6px; padding-left: 28px; }
+.byline + .step-lines { margin-top: 8px; }
+.step { display: flex; align-items: center; gap: 8px; animation: step-in 260ms var(--ease-open) both; }
+.step-state { width: 14px; height: 14px; flex: none; display: inline-flex; align-items: center; justify-content: center; color: var(--ink-2); }
+.spin {
+  width: 11px; height: 11px; border-radius: 50%;
+  border: 1.5px solid rgb(18 17 14 / 0.16); border-top-color: var(--ink-2);
+  animation: spin 900ms linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes step-in { from { opacity: 0; transform: translateY(3px); } to { opacity: 1; transform: none; } }
+
+/* "Thinking" and a step at work: one soft light passes over the grey words */
+.thinking, .step.running .step-label {
+  background: linear-gradient(90deg, var(--ink-2) 0%, var(--ink-2) 38%, var(--ink) 50%, var(--ink-2) 62%, var(--ink-2) 100%);
+  background-size: 250% 100%;
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+  animation: shimmer 2.2s linear infinite;
+}
+@keyframes shimmer { from { background-position: 100% 0; } to { background-position: 0% 0; } }
+
+/* A turn by the person: their words, right, in one soft block */
+.turn.person { display: flex; justify-content: flex-end; }
+.said { max-width: 86%; padding: 10px 16px; border-radius: 18px; background: var(--raise); }
+.said .via { display: inline-flex; margin-left: 8px; vertical-align: -2px; color: var(--ink-2); }
+
+/* What the agent knows about this kind: one quiet line under the opener */
+.knowledge { display: flex; flex-wrap: wrap; align-items: center; column-gap: 10px; row-gap: 2px; color: var(--ink-2); }
+.knowledge > span:nth-child(2) { color: var(--ink); font-weight: 500; }
+.turn.agent + .knowledge, .turn.agent + .knowledge-more { margin-top: -10px; }
+.knowledge-more > summary { width: fit-content; margin-left: -8px; padding: 4px 8px; border-radius: 10px; }
+.knowledge-more > summary:hover { background: var(--raise); }
+.knowledge-more > summary svg { color: var(--ink-2); margin-left: -6px; transition: transform 240ms var(--ease-open); }
+.knowledge-more[open] > summary svg { transform: rotate(90deg); }
+.precedents { display: flex; flex-direction: column; gap: 16px; margin-top: 14px; }
+.precedents .m { margin-top: 2px; }
+.precedents .s + .s, .precedents .m + .s { margin-top: 2px; }
+.gate { margin-top: 16px; }
+
+.chat-error { margin-top: -8px; }
+
+/* The field: type, talk, send */
+.composer {
+  flex: none; display: flex; align-items: flex-end; gap: 4px;
+  margin: 0 16px 16px; padding: 6px 6px 6px 18px;
+  border-radius: 24px; background: var(--raise);
+  transition: box-shadow 150ms var(--ease);
+}
+.composer:focus-within { box-shadow: 0 0 0 1px rgb(18 17 14 / 0.22); }
+.composer textarea {
+  flex: 1; min-width: 0; min-height: 36px; max-height: 120px; padding: 6px 0;
+  border: 0; outline: none; resize: none; background: none; color: var(--ink);
+}
+.composer textarea::placeholder { color: var(--ink-2); opacity: 1; }
+.composer .voice, .composer .send {
+  width: 36px; height: 36px; flex: none; border-radius: 50%;
+  display: inline-flex; align-items: center; justify-content: center;
+  transition: background-color 150ms var(--ease), color 150ms var(--ease);
+}
+.composer .voice { color: var(--ink); }
+.composer .voice:hover:not(:disabled) { background: var(--press); }
+.composer .voice:disabled { color: var(--ink-2); opacity: .55; cursor: default; }
+.composer .send { background: var(--ink); color: var(--page); }
+.composer .send:disabled { background: var(--press); color: var(--ink-2); cursor: default; }
+
+@media (prefers-reduced-motion: reduce) {
+  .amark.working::after, .spin, .step, .thinking, .step.running .step-label { animation: none; }
+  .thinking, .step.running .step-label { color: var(--ink-2); background: none; }
+}
+

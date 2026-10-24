@@ -53,14 +53,15 @@ async function main() {
   ok(`cases: ${state.cases.length} readiness cases, ${waiting.length} waiting for a person, all routed with a reason`)
 
   // 3. No order ids in engine code (reseed-safe)
-  const dir = join(process.cwd(), "lib", "control-room")
   // The shape files (contract and view types) name the hero order in example comments; engine code must not.
-  const contract = new Set(["types.ts", "types-v3.ts", "views.ts"])
-  for (const file of readdirSync(dir).filter((name) => name.endsWith(".ts") && !name.includes(".test.") && !contract.has(name))) {
-    const text = readFileSync(join(dir, file), "utf8")
-    assert.ok(!/\bord-\d{5}\b|\bCD-4\d{5}\b/.test(text), `${file} must not name an order`)
+  const contract = new Set(["types.ts", "types-v3.ts", "types-chat.ts", "views.ts"])
+  for (const dir of [join(process.cwd(), "lib", "control-room"), join(process.cwd(), "lib", "chat")]) {
+    for (const file of readdirSync(dir).filter((name) => name.endsWith(".ts") && !name.includes(".test.") && !contract.has(name))) {
+      const text = readFileSync(join(dir, file), "utf8")
+      assert.ok(!/\bord-\d{5}\b|\bCD-4\d{5}\b/.test(text), `${file} must not name an order`)
+    }
   }
-  ok("no order ids in lib/control-room")
+  ok("no order ids in lib/control-room or lib/chat")
 
   // 4. Desk for every person
   for (const person of state.people) {
@@ -169,6 +170,22 @@ async function main() {
     const bad: Response = await fetch(`${base}/api/cr/decisions`, { method: "POST", body: "{}" })
     assert.equal(bad.status, 400)
     ok(`http: every GET route answers 200 at ${base} (overview ${httpOverview.cars.length} cars); v3 counts agree with lead and desk; bad POST and missing person answer 400/404`)
+
+    // The case chat: thread, one scripted turn over SSE (mock, no keys), then the thread is cleared again.
+    const waiting = state.cases.find((c) => c.status === "waiting_for_person") ?? state.cases[0]!
+    const chatPath = `/api/cr/cases/${encodeURIComponent(waiting.id)}/chat`
+    const thread: Response = await fetch(`${base}${chatPath}?person=${person}`)
+    assert.equal(thread.status, 200, `${chatPath} -> ${thread.status}`)
+    const t = (await thread.json()) as { caseId: string; knowledge: { kindLabel: string; needed: number }; opener: { text: string }; messages: unknown[] }
+    assert.ok(t.knowledge.kindLabel && t.opener.text && Array.isArray(t.messages))
+    const turn: Response = await fetch(`${base}${chatPath}`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ person, text: "Why do you suggest this?", via: "text", provider: "mock" }) })
+    assert.match(turn.headers.get("content-type") ?? "", /text\/event-stream/)
+    const frames = (await turn.text()).split("\n\n").filter((f) => f.trim()).map((f) => JSON.parse(f.replace(/^data: /, "")) as { type: string })
+    assert.equal(frames[0]?.type, "thinking")
+    assert.equal(frames.at(-1)?.type, "done")
+    const cleared: Response = await fetch(`${base}${chatPath}?person=${person}`, { method: "DELETE" })
+    assert.equal(cleared.status, 200)
+    ok(`http: chat thread for ${waiting.id} (${t.knowledge.kindLabel}); one turn streamed ${frames.length} events, thinking first and done last; thread cleared`)
   }
 
   void inArray

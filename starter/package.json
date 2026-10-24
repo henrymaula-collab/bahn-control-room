@@ -18,7 +18,8 @@
     "agent": "tsx scripts/agent.ts",
     "calls:render": "tsx scripts/render-calls.ts",
     "test:agent": "node --import tsx --test lib/agent/*.test.ts",
-    "test:voice": "node --import tsx --test lib/voice/*.test.ts"
+    "test:voice": "node --import tsx --test lib/voice/*.test.ts",
+    "test:chat": "node --import tsx --test lib/chat/*.test.ts"
   },
   "dependencies": {
     "@anthropic-ai/claude-agent-sdk": "0.3.310",

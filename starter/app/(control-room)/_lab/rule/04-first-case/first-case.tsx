@@ -6,7 +6,7 @@
 import Link from "next/link"
 import { Icon } from "../../../_ui/icons"
 import { useLab } from "../../context"
-import { changedWords, day, dayW, Faces, historyHref, lower, names, useHandled, useNoPanel, useRuleData, type RuleCardProps } from "../shared/kit"
+import { changedWords, day, dayW, Faces, historyHref, lower, names, useHandled, useNoPanel, useRuleData, type RuleCardProps, ShotWait } from "../shared/kit"
 import "./first-case.css"
 
 export function RuleFirstCase({ proposal: p, personName, status, changed, pending, error, setStatus }: RuleCardProps) {
@@ -20,8 +20,9 @@ export function RuleFirstCase({ proposal: p, personName, status, changed, pendin
 
   return (
     <div className="detail-inner lab-rule-04 lab-rule-kit">
+      <ShotWait ready={d.ready} />
       <section className="question" aria-live="polite">
-        <p className="m due">{on ? changedWords(status, changed) : "The agent asks"}</p>
+        <p className="m due">{on ? changedWords(status, changed, p.changedAt) : "The agent asks"}</p>
         <h1 className="l what">{p.kindLabel}</h1>
         <p className="l ask">{on ? "The agent handles this kind alone now." : w ? "Let the agent handle these alone, starting with the one waiting now?" : "Let the agent handle these alone?"}</p>
 
@@ -30,7 +31,7 @@ export function RuleFirstCase({ proposal: p, personName, status, changed, pendin
             <div className="r04-case-head">
               <span className="r04-car">{w.vehicle}</span>
               <span className="r04-ref mono">{w.reference}</span>
-              <span className="r04-where">{handled ? `${w.place}. The agent paused the gig, and it left ${w.person}'s tasks.` : `${w.place}, waiting in ${w.person}'s tasks`}</span>
+              <span className="r04-where">{handled ? `${w.place}. The agent paused the gig${w.person ? `, and it left ${w.person}'s tasks` : "; nobody had to decide it"}.` : `${w.place}, waiting in ${w.person || "a person"}'s tasks`}</span>
             </div>
             {!on && (
               <div className="r04-compare">

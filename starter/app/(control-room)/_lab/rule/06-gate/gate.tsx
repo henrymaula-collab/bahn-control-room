@@ -8,7 +8,7 @@ import Link from "next/link"
 import { useState } from "react"
 import { Icon } from "../../../_ui/icons"
 import { useLab } from "../../context"
-import { afterWords, changedWords, day, dayW, Faces, historyHref, lower, names, useHandled, useNoPanel, useRuleData, type RuleCardProps } from "../shared/kit"
+import { afterWords, changedWords, day, dayW, Faces, historyHref, lower, names, useHandled, useNoPanel, useRuleData, type RuleCardProps, ShotWait } from "../shared/kit"
 import "./gate.css"
 
 export function RuleGate({ proposal: p, personName, status, changed, pending, error, setStatus }: RuleCardProps) {
@@ -22,8 +22,9 @@ export function RuleGate({ proposal: p, personName, status, changed, pending, er
 
   return (
     <div className="detail-inner lab-rule-06 lab-rule-kit">
+      <ShotWait ready={d.ready} />
       <section className="question" aria-live="polite">
-        <p className="m due">{on ? changedWords(status, changed) : "The agent asks"}</p>
+        <p className="m due">{on ? changedWords(status, changed, p.changedAt) : "The agent asks"}</p>
         <h1 className="l what">{p.kindLabel}</h1>
         <p className="l ask">{on ? `The agent will ${lower(p.then)}, without asking a person.` : `Let the agent ${lower(p.then)}, without asking a person?`}</p>
 

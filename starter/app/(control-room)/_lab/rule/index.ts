@@ -16,7 +16,7 @@ const variants: SlotRegistry = {
   "03": { slug: "thirty", title: "Thirty answers as one picture", parts: { RuleCard: RuleThirty } },
   "04": { slug: "first-case", title: "What changes, on the case waiting now", parts: { RuleCard: RuleFirstCase } },
   "05": { slug: "limits", title: "The limits first", parts: { RuleCard: RuleLimits } },
-  "06": { slug: "gate", title: "The gate as a merge box", parts: { RuleCard: RuleGate } },
+  "06": { slug: "gate", title: "The gate as a checklist", parts: { RuleCard: RuleGate } },
 }
 
 export default variants

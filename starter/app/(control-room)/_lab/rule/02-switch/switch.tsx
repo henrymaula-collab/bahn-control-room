@@ -8,7 +8,7 @@ import Link from "next/link"
 import { useState } from "react"
 import { Icon } from "../../../_ui/icons"
 import { useLab } from "../../context"
-import { afterWords, changedWords, day, dayW, Face, historyHref, lower, names, useHandled, useNoPanel, useRuleData, whenText, type RuleCardProps } from "../shared/kit"
+import { afterWords, changedWords, day, dayW, Face, historyHref, lower, names, useHandled, useNoPanel, useRuleData, whenText, type RuleCardProps, ShotWait } from "../shared/kit"
 import "./switch.css"
 
 export function RuleSwitch({ proposal: p, personName, status, changed, pending, error, setStatus }: RuleCardProps) {
@@ -21,8 +21,9 @@ export function RuleSwitch({ proposal: p, personName, status, changed, pending, 
 
   return (
     <div className="detail-inner lab-rule-02 lab-rule-kit">
+      <ShotWait ready={d.ready} />
       <section className="question" aria-live="polite">
-        <p className="m due">{on ? changedWords(status, changed) : "The agent asks to do this alone"}</p>
+        <p className="m due">{on ? changedWords(status, changed, p.changedAt) : "The agent asks to do this alone"}</p>
         <h1 className="l what">{p.kindLabel}</h1>
 
         <div className="r02-group" role="group" aria-label="The rule">

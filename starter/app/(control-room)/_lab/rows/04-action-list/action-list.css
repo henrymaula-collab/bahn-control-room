@@ -6,8 +6,8 @@
   font-size: var(--type-body); line-height: var(--lh-body);
 }
 @media (prefers-reduced-motion: no-preference) {
-  .lab-rows-04.r04-panel { animation: r04-in 150ms cubic-bezier(0.2, 0, 0, 1); }
-  @keyframes r04-in { from { opacity: 0; transform: translateY(-8px); } }
+  .lab-rows-04.r04-panel { animation: lab-rows-04-in 150ms cubic-bezier(0.2, 0, 0, 1); }
+  @keyframes lab-rows-04-in { from { opacity: 0; transform: translateY(-8px); } }
 }
 .lab-rows-04 .r04-head { display: flex; align-items: center; justify-content: space-between; padding: 0.35em 0.6em 0.45em; }
 .lab-rows-04 .r04-label { color: var(--ink-2); font-size: var(--type-subhead); line-height: var(--lh-subhead); }

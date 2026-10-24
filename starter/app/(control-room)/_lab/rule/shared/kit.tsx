@@ -35,6 +35,7 @@ export type Waiting = { caseId: string; reference: string; vehicle: string; plac
 export type Gate = { needed: number; minPeople: number; lowerBound: number }
 export type RuleData = {
   loading: boolean
+  ready: boolean // the answers and the waiting case are both in
   answers: Answer[] // newest first
   people: Person[] // most answers first
   differ: Answer[]
@@ -64,6 +65,7 @@ export function useRuleData(p: RuleProposal, personName: string): RuleData {
   const me = personName.split(" ")[0].toLowerCase()
   const [rows, setRows] = useState<HistRow[] | null>(null)
   const [waiting, setWaiting] = useState<Waiting[]>([])
+  const [looked, setLooked] = useState(false)
   const [gate, setGate] = useState<Gate>({ needed: 16, minPeople: 2, lowerBound: 0.806 })
 
   useEffect(() => {
@@ -78,8 +80,8 @@ export function useRuleData(p: RuleProposal, personName: string): RuleData {
       const cases = await Promise.all(ids.map((id) => json<CaseApi>(`/api/cr/cases/${encodeURIComponent(id)}?person=${encodeURIComponent(me)}`)))
       const found = cases
         .filter((c): c is CaseApi => !!c && c.kind?.key === kindKey && (c.case.status === "waiting_for_person" || c.case.status === "handled_by_agent"))
-        .map((c) => ({ caseId: c.case.id, reference: c.situation?.reference ?? "", vehicle: c.situation?.vehicle ?? "", place: c.situation?.pickup.place ?? "", person: c.routedTo?.person?.name ?? "a person", handled: c.case.status === "handled_by_agent" }))
-      if (live) setWaiting(found)
+        .map((c) => ({ caseId: c.case.id, reference: c.situation?.reference ?? "", vehicle: c.situation?.vehicle ?? "", place: c.situation?.pickup.place ?? "", person: c.routedTo?.person?.name ?? "", handled: c.case.status === "handled_by_agent" }))
+      if (live) (setWaiting(found), setLooked(true))
     })()
     return () => {
       live = false
@@ -101,6 +103,7 @@ export function useRuleData(p: RuleProposal, personName: string): RuleData {
     const sorted = [...answers].sort((a, b) => Date.parse(a.at) - Date.parse(b.at))
     return {
       loading: rows === null,
+      ready: rows !== null && looked,
       answers,
       people: [...by.values()].sort((a, b) => b.n - a.n),
       differ: answers.filter((a) => !a.same),
@@ -110,7 +113,7 @@ export function useRuleData(p: RuleProposal, personName: string): RuleData {
       waiting,
       gate,
     }
-  }, [rows, waiting, gate, p.then])
+  }, [rows, waiting, gate, p.then, looked])
 }
 
 /**
@@ -158,18 +161,19 @@ export const whenText = (s: string) => s.replace(/^When /, "")
 /** "Jonas, Mikko, Lea and Sofie" */
 export const names = (xs: string[]) => (xs.length < 2 ? xs.join("") : `${xs.slice(0, -1).join(", ")} and ${xs[xs.length - 1]}`)
 
-/** "Turned on by Kaisa at 12:04" */
-export function changedWords(status: RuleCardProps["status"], changed: RuleCardProps["changed"]): string {
+/** "Turned on by Kaisa at 12:04" (the time from the saved rule when the page was loaded after it). */
+export function changedWords(status: RuleCardProps["status"], changed: RuleCardProps["changed"], savedAt?: string): string {
   const who = changed?.by.split(" ")[0]
   const verb = status === "on" ? "Turned on" : "Turned off"
-  return `${verb}${who ? ` by ${who}` : ""}${changed?.at ? ` at ${changed.at}` : ""}`
+  const at = changed?.at ?? (savedAt ? new Date(savedAt).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit", hourCycle: "h23", timeZone: HEL }) : undefined)
+  return `${verb}${who ? ` by ${who}` : ""}${at ? ` at ${at}` : ""}`
 }
 
 /** One sentence on what just happened to the case waiting now, or what happens from now on. */
 export function afterWords(p: RuleProposal, waiting: Waiting[], handled: boolean): string {
   const w = waiting[0]
-  if (w && handled) return `The agent paused the gig for the ${w.vehicle} at ${w.place}, and it left ${w.person}'s tasks.`
-  if (w) return `The agent pauses the gig for the ${w.vehicle} at ${w.place} now, and it leaves ${w.person}'s tasks.`
+  if (w && handled) return w.person ? `The agent paused the gig for the ${w.vehicle} at ${w.place}, and it left ${w.person}'s tasks.` : `The agent paused the gig for the ${w.vehicle} at ${w.place}; nobody had to decide it.`
+  if (w) return `The agent pauses the gig for the ${w.vehicle} at ${w.place} now${w.person ? `, and it leaves ${w.person}'s tasks` : ""}.`
   return `From now on the agent will ${lower(p.then)} on its own.`
 }
 
@@ -192,3 +196,13 @@ export function Faces({ people, size }: { people: Pick<Person, "id" | "name">[];
 
 /** History, filtered to this kind and everyone's answers; `open` opens one row there. */
 export const historyHref = (p: RuleProposal, open?: string) => `/history?kind=${kindKeyOf(p.id)}&who=all${open ? `&open=${encodeURIComponent(open)}` : ""}`
+
+/**
+ * For the lab's shot pipeline only: while the evidence loads, an invisible box carries
+ * data-lab-map, which research/scratch-lab/ready.js counts as "not painted yet", so a shot waits
+ * for the real sentence instead of the fallback. Nothing a person can see or reach.
+ */
+export function ShotWait({ ready }: { ready: boolean }) {
+  if (ready) return null
+  return <div data-lab-map="" aria-hidden="true" style={{ position: "fixed", top: 0, left: 0, width: 41, height: 41, opacity: 0, pointerEvents: "none" }} />
+}

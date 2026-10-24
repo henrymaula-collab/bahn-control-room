@@ -43,9 +43,10 @@ export function ActionListSheet({ open, onClose, options, draftOf, whyChoices, l
     setSpot(below > 320 || below > r.top ? { left: r.left, top: r.bottom + 6, width, max: below - 22 } : { left: r.left, bottom: window.innerHeight - r.top + 6, width, max: r.top - 22 })
   }, [open])
 
+  // Focus moves into the panel once it is placed (and again on each step), so the keys work at once.
   useEffect(() => {
-    if (open) box.current?.focus()
-  }, [open, chosen])
+    if (open && spot) box.current?.focus()
+  }, [open, chosen, spot])
 
   useEffect(() => {
     if (!open) return

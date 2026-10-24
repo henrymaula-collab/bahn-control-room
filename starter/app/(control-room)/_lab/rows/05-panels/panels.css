@@ -4,8 +4,8 @@
   padding: max(14px, calc(18 * var(--cr-u, 1px))) max(20px, calc(28 * var(--cr-u, 1px))) 28px;
 }
 @media (prefers-reduced-motion: no-preference) {
-  .lab-rows-05.r05-panel { animation: r05-in 250ms cubic-bezier(0.2, 0, 0, 1); }
-  @keyframes r05-in { from { transform: translateX(24px); opacity: 0; } }
+  .lab-rows-05.r05-panel { animation: lab-rows-05-in 250ms cubic-bezier(0.2, 0, 0, 1); }
+  @keyframes lab-rows-05-in { from { transform: translateX(24px); opacity: 0; } }
 }
 .lab-rows-05 .r05-body { margin-top: 1.2em; }
 .lab-rows-05 .r05-body .kv { grid-template-columns: 6.5em minmax(0, 1fr); column-gap: 0.8em; row-gap: 0.5em; margin-top: 0; }

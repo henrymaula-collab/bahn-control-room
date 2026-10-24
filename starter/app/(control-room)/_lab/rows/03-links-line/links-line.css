@@ -16,10 +16,10 @@
 }
 .lab-rows-03 .r03-pop.r03-up { top: auto; bottom: calc(100% + 6px); }
 @media (prefers-reduced-motion: no-preference) {
-  .lab-rows-03 .r03-pop { animation: r03-in 150ms cubic-bezier(0.2, 0, 0, 1); }
-  .lab-rows-03 .r03-pop.r03-up { animation-name: r03-in-up; }
-  @keyframes r03-in { from { opacity: 0; transform: translateY(-8px); } }
-  @keyframes r03-in-up { from { opacity: 0; transform: translateY(8px); } }
+  .lab-rows-03 .r03-pop { animation: lab-rows-03-in 150ms cubic-bezier(0.2, 0, 0, 1); }
+  .lab-rows-03 .r03-pop.r03-up { animation-name: lab-rows-03-in-up; }
+  @keyframes lab-rows-03-in { from { opacity: 0; transform: translateY(-8px); } }
+  @keyframes lab-rows-03-in-up { from { opacity: 0; transform: translateY(8px); } }
 }
 .lab-rows-03 .r03-pop-title { font-weight: 600; margin-bottom: 0.5em; }
 .lab-rows-03 .r03-pop .kv { grid-template-columns: 6.5em minmax(0, 1fr); column-gap: 0.8em; row-gap: 0.4em; }

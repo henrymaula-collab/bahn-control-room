@@ -20,8 +20,8 @@
 .lab-rows-02 .r02-head[aria-expanded="true"] .r02-turn { transform: rotate(90deg); }
 @media (prefers-reduced-motion: no-preference) {
   .lab-rows-02 .r02-turn { transition: transform 200ms cubic-bezier(0.2, 0, 0, 1); }
-  .lab-rows-02 .r02-body, .lab-rows-02 .r02-list { animation: r02-in 150ms cubic-bezier(0.2, 0, 0, 1); }
-  @keyframes r02-in { from { opacity: 0; } }
+  .lab-rows-02 .r02-body, .lab-rows-02 .r02-list { animation: lab-rows-02-in 150ms cubic-bezier(0.2, 0, 0, 1); }
+  @keyframes lab-rows-02-in { from { opacity: 0; } }
 }
 .lab-rows-02 .r02-body { padding: 0.3em 1em 1em; }
 .lab-rows-02 .r02-body .kv { grid-template-columns: 8em minmax(0, 1fr); column-gap: 0.83em; row-gap: 0.4em; }

@@ -8,7 +8,7 @@ import Link from "next/link"
 import { useMemo, useRef, useState } from "react"
 import { Icon } from "../../../_ui/icons"
 import { useLab } from "../../context"
-import { afterWords, changedWords, day, dayW, historyHref, lower, useHandled, useNoPanel, useRuleData, type Answer, type RuleCardProps } from "../shared/kit"
+import { afterWords, changedWords, day, dayW, historyHref, lower, useHandled, useNoPanel, useRuleData, type Answer, type RuleCardProps, ShotWait } from "../shared/kit"
 import "./thirty.css"
 
 export function RuleThirty({ proposal: p, personName, status, changed, pending, error, setStatus }: RuleCardProps) {
@@ -33,8 +33,9 @@ export function RuleThirty({ proposal: p, personName, status, changed, pending, 
 
   return (
     <div className="detail-inner lab-rule-03 lab-rule-kit">
+      <ShotWait ready={d.ready} />
       <section className="question" aria-live="polite">
-        <p className="m due">{on ? changedWords(status, changed) : "The agent asks"}</p>
+        <p className="m due">{on ? changedWords(status, changed, p.changedAt) : "The agent asks"}</p>
         <h1 className="l what">{p.kindLabel}</h1>
 
         <figure className="r03-fig">
@@ -108,7 +109,7 @@ export function RuleThirty({ proposal: p, personName, status, changed, pending, 
         <p className="s next">
           {on
             ? agentNext
-              ? `It left ${d.waiting[0].person}'s tasks, and the next ones go the same way. If people start answering differently, it asks a person again.`
+              ? `${d.waiting[0].person ? `It left ${d.waiting[0].person}'s tasks, and the` : "The"} next ones go the same way. If people start answering differently, it asks a person again.`
               : `${afterWords(p, d.waiting, handled)} If people start answering differently, it asks a person again.`
             : `It will ${lower(p.then)} each time, without asking a person. If people start answering differently, it asks a person again.`}
         </p>

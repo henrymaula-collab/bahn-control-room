@@ -6,7 +6,7 @@
 import Link from "next/link"
 import { Icon } from "../../../_ui/icons"
 import { useLab } from "../../context"
-import { afterWords, changedWords, day, dayW, Faces, historyHref, lower, names, useHandled, useNoPanel, useRuleData, whenText, type RuleCardProps } from "../shared/kit"
+import { afterWords, changedWords, day, dayW, Faces, historyHref, lower, names, useHandled, useNoPanel, useRuleData, whenText, type RuleCardProps, ShotWait } from "../shared/kit"
 import "./limits.css"
 
 export function RuleLimits({ proposal: p, personName, status, changed, pending, error, setStatus }: RuleCardProps) {
@@ -18,8 +18,9 @@ export function RuleLimits({ proposal: p, personName, status, changed, pending, 
 
   return (
     <div className="detail-inner lab-rule-05 lab-rule-kit">
+      <ShotWait ready={d.ready} />
       <section className="question" aria-live="polite">
-        <p className="m due">{on ? changedWords(status, changed) : "The agent asks"}</p>
+        <p className="m due">{on ? changedWords(status, changed, p.changedAt) : "The agent asks"}</p>
         <h1 className="l what">{p.kindLabel}</h1>
         <p className="l ask">{on ? "The agent handles this kind alone now, within these limits." : "Let the agent handle this kind alone, within these limits?"}</p>
 

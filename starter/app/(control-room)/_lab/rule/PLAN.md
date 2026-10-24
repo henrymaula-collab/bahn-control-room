@@ -26,11 +26,11 @@ Facts the plan rests on (read in cr_lab, not guessed):
 | nn | Slug | The idea | References |
 |---|---|---|---|
 | 01 | beside | Like every case: the proposal is the card, the evidence is the panel beside it where the situation sits (the four people with their portraits and counts, the one answer that differs, their own reasons, History one tap on). | Stripe Radar rule test (past matches beside the rule), Apple HIG panels |
-| 02 | switch | The rule as a setting, not a question: When / Then in a grouped list and one real switch "The agent does this alone"; a Settings-style footnote says who taught it and how to take it back. | Apple Shortcuts automation (When / Do / Run Immediately), Vercel Deployment Protection toggle, Linear automations |
+| 02 | switch | The rule as a setting, not a question: When / Then in a grouped list and one real switch "The agent does this alone"; a Settings-style footnote says who taught it and how to take it back. | Apple Shortcuts automation ("Ask Before Running"), Linear triage rules (When / Then), Vercel Deployment Protection toggle |
 | 03 | thirty | One picture with a takeaway title: the 30 answers as 30 marks in time order, the one that differs hollow; hover or arrow keys read each answer in a line under it; turning it on adds the agent's first mark at the end. | Stripe Radar rule testing, GitHub rule insights |
-| 04 | first-case | What changes next time, shown on the case waiting now: Mikko's Mercedes-Benz EQE at Arvelano Hamburg, "Today" against "With the rule"; after the switch, it has left his list. | GitHub rulesets target preview, Apple Shortcuts automation summary |
-| 05 | limits | The contract first: what the agent will do, what still comes to a person, when it stops by itself, how to take it back; Turn it on under it. | Apple Screen Time (Always Allowed, Turn Off), GitHub branch protection bypass list |
-| 06 | gate | GitHub's merge box: the gate's three conditions, each met with a quiet tick (enough answers, more than one person, they agree), the people's faces on the second; Turn it on under them. | GitHub merge box and rulesets, Apple HIG Privacy (the purpose string) |
+| 04 | first-case | What changes next time, shown on the case waiting now: Mikko's Mercedes-Benz EQE at Arvelano Hamburg, "Today" against "With the rule"; after the switch, it has left his list. | GitHub rulesets in Evaluate mode, Stripe rule testing ("estimate its future impact") |
+| 05 | limits | The contract first: what the agent will do, what still comes to a person, when it stops by itself, how to take it back; Turn it on under it. | Apple Screen Time (ask first, loosened area by area, Always Allowed), GitHub rulesets (bypass, status changed without deleting) |
+| 06 | gate | A checklist like GitHub's rule checks: the gate's three conditions, each met with a quiet tick (enough answers, more than one person, they agree), the people's faces on the second; Turn it on under them. | GitHub rule insights (Pass / Fail rows), Stripe "Review new rule" (evidence on top, the button at the foot) |
 
 Spread: where the evidence lives (panel 01, footnote 02, the hero 03, a before/after 04, a
 contract 05, a checklist 06); the control (button 01 03 04 05 06, a switch 02); after "on" (the
@@ -39,3 +39,5 @@ Motion per research/premium/product/rules.md: hover 100 ms, popover 150 ms, the 
 `cubic-bezier(0.2, 0, 0, 1)`, all inside `prefers-reduced-motion: no-preference`. Words: Bahn's
 (gig, pickup place, person), never "ticket", "human", "escalate". No chips, no pills for state, no
 "·", no numbered circles, no caps.
+
+References checked against `research/premium/rule/board.md` (helper agent, 00:15 to 00:55): Apple's Shortcuts guide no longer says "Run Immediately" (it is "Ask Before Running" / "Don't Ask"), the Screen Time page is the iOS 27 one, and GitHub's merge box is not on the captured pages, so the rationales cite what the shots show.

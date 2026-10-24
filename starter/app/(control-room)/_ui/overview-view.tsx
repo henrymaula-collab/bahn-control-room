@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { useState } from "react"
+import { useLayoutEffect, useRef, useState } from "react"
 import { minutesUntil, NOW_WINDOW_MINUTES, when } from "@/lib/control-room/format"
 import type { Overview } from "@/lib/control-room/types-v3"
 import { CarMap, type RedInfo } from "./car-map"
@@ -14,6 +14,17 @@ const n = (x: number) => new Intl.NumberFormat("en-GB").format(x)
 /** The map edge to edge and one panel for the person: a welcome, their tasks, the colours in words. */
 export function OverviewView({ data, red, look, firstName }: { data: Overview; red: Record<string, RedInfo>; look: MapLook; firstName: string }) {
   const [lift, setLift] = useState<string | null>(null)
+  // The panel narrows with the page; the map keeps its cars beside it, never under it.
+  const panel = useRef<HTMLElement>(null)
+  const [panelWidth, setPanelWidth] = useState(840)
+  useLayoutEffect(() => {
+    const el = panel.current
+    if (!el) return
+    const ro = new ResizeObserver(() => setPanelWidth(el.offsetWidth))
+    ro.observe(el)
+    setPanelWidth(el.offsetWidth)
+    return () => ro.disconnect()
+  }, [])
   // The key follows the dots on the map.
   const needsPerson = data.cars.filter((c) => c.state === "needs_person").length
   const agentWorking = data.cars.filter((c) => c.state === "agent_working").length
@@ -27,11 +38,11 @@ export function OverviewView({ data, red, look, firstName }: { data: Overview; r
         red={red}
         lift={lift}
         look={look}
-        pad={{ top: 56, bottom: 56, left: 16 + 840 + 32, right: 48 }} // the panel is 840 px (Henry, 24 Oct)
+        pad={{ top: 56, bottom: 56, left: 16 + panelWidth + 32, right: 48 }}
         padPhone={{ top: 440, bottom: 24, left: 24, right: 24 }}
         card={(orderId, close) => <PinCard info={red[orderId]} close={close} />}
       />
-      <section className="float float-me" aria-label="Today">
+      <section ref={panel} className="float float-me" aria-label="Today">
         <h1 className="welcome">Welcome back to Bahn Express, {firstName}.</h1>
 
         <div className="me-tasks">

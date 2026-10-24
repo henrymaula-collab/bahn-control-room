@@ -162,8 +162,12 @@ export function CarMap({ cars, red, lift, look, pad, padPhone, focus, controls =
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cars, look])
 
+  // The latest padding, also inside the async first fit (the panel beside the map is measured after mount).
+  const pads = useRef({ pad, padPhone })
+  pads.current = { pad, padPhone }
   function padFor(el: HTMLElement): Pad {
-    return el.clientWidth < 700 && padPhone ? padPhone : pad
+    const { pad: p, padPhone: phone } = pads.current
+    return el.clientWidth < 700 && phone ? phone : p
   }
 
   // The country switch: fly there, gently; back to every car on "All".

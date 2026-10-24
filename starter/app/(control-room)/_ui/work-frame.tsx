@@ -4,7 +4,6 @@ import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { createContext, useContext, useEffect, useMemo, useRef, useState } from "react"
 import type { WorkLists, WorkRow } from "@/lib/control-room/types-v3"
-import { Icon } from "./icons"
 
 type ListKey = keyof WorkLists
 const TABS: { key: ListKey; label: string }[] = [
@@ -88,35 +87,10 @@ export function WorkFrame({ lists, times, children }: { lists: WorkLists; times:
           </div>
           <Rows rows={lists[tab]} current={current} times={tab === "needYou" ? times : {}} empty={emptyWords(tab)} />
         </div>
-        <div className="detail">
-          {index >= 0 && rows.length > 1 && (
-            <nav className="walk" aria-label="Walk the list">
-              <span className="pos num">
-                {index + 1} of {rows.length}
-              </span>
-              <WalkLink row={prev} icon="chevron-up" label="Previous case (K)" />
-              <WalkLink row={next} icon="chevron-down" label="Next case (J)" />
-            </nav>
-          )}
-          {children}
-        </div>
+        <div className="detail">{children}</div>
         <div ref={setSlot} style={{ display: "contents" }} />
       </div>
     </PanelContext.Provider>
-  )
-}
-
-function WalkLink({ row, icon, label }: { row?: WorkRow; icon: "chevron-up" | "chevron-down"; label: string }) {
-  if (!row)
-    return (
-      <span aria-disabled="true" role="link" aria-label={label}>
-        <Icon name={icon} size={18} />
-      </span>
-    )
-  return (
-    <Link href={`/tasks/${row.caseId}`} aria-label={label} title={label}>
-      <Icon name={icon} size={18} />
-    </Link>
   )
 }
 

@@ -1,24 +1,35 @@
 /* Your tasks at full size. The side menu already names the page, so the header row goes
-   (as on the Overview). The decision card is scaled up to fill the detail area at
-   1440x900: the same three sizes as before, larger (40, 20, 16), a wider measure, more
-   air. Scoped to .work .detail, so the list on the left, the side panels and the Other
-   options sheet keep the base sizes. */
+   (as on the Overview). The decision card owns the detail area: the same three sizes as
+   before, larger, and growing with the window (42/21/16 at 1440, up to 54/24/18 on a wide
+   screen), a measure that grows with them. Scoped to .work .detail, so the list on the
+   left, the side panels and the Other options sheet keep the base sizes. */
 
 .main:has(.work) .top { display: none; }
 .work .list { padding-top: 12px; }
 
+/* The closed side panels wait off to the right; clip them so the page never scrolls sideways. */
+.work { overflow: clip; }
+
+/* The side panel grows on wide screens so the card and the panel share the width. */
+.work { --panel: clamp(440px, 50vw - 280px, 600px); }
+
 .work .detail {
-  --size-l: 40px;
-  --size-m: 20px;
-  --size-s: 16px;
-  --column: 760px;
+  --size-l: clamp(42px, 1.9vw + 15px, 54px);
+  --size-m: clamp(20px, 0.6vw + 12px, 24px);
+  --size-s: clamp(16px, 0.4vw + 10px, 18px);
+  --column: clamp(760px, 52vw, 960px);
   padding: 56px 64px 56px;
   font-size: var(--size-m);
-  line-height: 30px;
+  line-height: 1.5;
 }
-.work .detail .l { line-height: 46px; letter-spacing: -0.9px; }
-.work .detail .m { line-height: 30px; }
-.work .detail .s { line-height: 24px; }
+.work .detail .l { line-height: calc(var(--size-l) + 6px); letter-spacing: -0.0225em; }
+.work .detail .m { line-height: 1.5; }
+.work .detail .s { line-height: 1.5; }
+
+/* No panel: the card in the middle of the space right of the list. With a panel: the card
+   sits against it, one gutter away, and the spare room goes to the left. */
+.work .detail-inner { margin-inline: auto; }
+.work.with-panel .detail-inner { margin-inline: auto 0; }
 
 /* The card */
 .work .question .what { margin-top: 10px; }
@@ -37,11 +48,10 @@
 .work .detail .row > .body { padding: 12px 0 32px; }
 .work .detail .kv { grid-template-columns: 220px minmax(0, 1fr); column-gap: 20px; row-gap: 14px; }
 
-/* The walk control stays at the frame's size, level with the list's tabs. */
-.work .walk { font-size: 13px; line-height: 18px; }
-
-/* With a side panel open the card keeps its size and gives up some air on the left. */
-.work.with-panel .detail { padding-left: 56px; padding-right: 48px; }
+/* With a side panel open the card gives up some air and a little size, so at 1440 the
+   question and the decide button stay above the fold next to the panel. */
+.work.with-panel .detail { --size-l: clamp(40px, 1.9vw + 13px, 54px); padding-left: 40px; padding-right: 40px; }
+@media (max-width: 860px) { .main:has(.work) .page { overflow-x: hidden; } }
 
 /* The Other options sheet sits inside the card but keeps the base sizes. */
 .work .detail dialog.sheet {

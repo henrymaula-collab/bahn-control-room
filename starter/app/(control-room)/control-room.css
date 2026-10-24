@@ -343,11 +343,6 @@ dialog.sheet[open] { animation: sheet-in 260ms var(--ease-open); }
 
 .detail { position: relative; min-width: 0; overflow: auto; padding: 56px 64px 64px; }
 .detail-inner { max-width: var(--column); }
-.walk { position: absolute; top: 12px; right: 20px; display: flex; align-items: center; gap: 2px; font-size: var(--size-s); line-height: 18px; color: var(--ink-2); }
-.walk .pos { margin-right: 6px; }
-.walk button, .walk a { width: 28px; height: 28px; display: inline-flex; align-items: center; justify-content: center; border-radius: 8px; color: var(--ink); }
-.walk button:hover, .walk a:hover { background: var(--raise); }
-.walk [aria-disabled="true"] { color: var(--ink-2); pointer-events: none; }
 .question .next { margin-top: 12px; }
 .work-rows { margin-top: 40px; }
 .state-line { display: flex; align-items: center; gap: 8px; color: var(--ink-2); font-weight: 500; }

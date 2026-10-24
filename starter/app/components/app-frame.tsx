@@ -7,7 +7,7 @@ export type Section = "board" | "inbox" | "customers" | "drivers" | "sites"
 
 const GROUPS: { label: string; links: { section: Section; href: string; label: string; icon: string }[] }[] = [
   { label: "Work", links: [
-    { section: "board", href: "/", label: "Orders", icon: "car" },
+    { section: "board", href: "/orders", label: "Orders", icon: "car" },
     { section: "inbox", href: "/inbox", label: "Inbox", icon: "inbox" },
   ] },
   { label: "People and places", links: [
@@ -20,7 +20,7 @@ const GROUPS: { label: string; links: { section: Section; href: string; label: s
 export function AppFrame({ children, section, snapshotAt, board = false }: { children: ReactNode; section: Section; snapshotAt?: string | null; board?: boolean }) {
   return <div className={`app${board ? " app-board" : ""}`}>
     <aside className="sidebar">
-      <Link href="/" className="wordmark" aria-label="Control Room home">Control Room</Link>
+      <a href="/" className="wordmark" aria-label="Back to the control room">Control Room</a>
       <nav className="sidebar-nav" aria-label="Main navigation">
         {GROUPS.map((group) => <div className="nav-group" key={group.label}>
           <div className="nav-label">{group.label}</div>

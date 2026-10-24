@@ -1,0 +1,362 @@
+/* Copied from design/tokens.css (Bahn's bx tokens, sections 1 to 8 and the dark palette).
+   Section 9 (--ops-*) is replaced by the corrected aliases in control-room.css,
+   see research/06-taste-direction.md section 5. */
+/* ==========================================================================
+   tokens.css : Bahn brand tokens for the hackathon control room
+   Extracted 2026-10-24 by the design agent. Values are read from Bahn's own
+   production CSS or from computed styles in Chrome, not guessed.
+
+   Sources
+   [M] Marketing design system "bx" (Bahn's own, prefix bx-):
+       https://www.bahnexpress.com/_next/static/immutable/chunks/1x_vi3tsdjh1n.css
+       blocks `:root,[data-bx-palette=light]`, `[data-bx-palette=dark]`, `:root`,
+       `[data-bx-theme=asphalt|light-grey|teal|green]`
+   [L] Layout tokens: https://www.bahnexpress.com/_next/static/immutable/chunks/1n9u4bc3w_b4a.css `:root`
+   [C] Computed styles on https://www.bahnexpress.com/ in Chrome (1440x900)
+   [A] Order portal https://app.bahnexpress.fi/login/ :
+       _next/static/chunks/22pdlg1y3-ord.css (shadcn/ui "stone" tokens) + computed styles
+   [P] Pixel samples from Bahn's own product screenshots on cdn.bahnexpress.fi
+       (website/brand/home/product/portal-new-order-fi-v2.png, website/brand/drivers/app/screen-*.png)
+
+   Bahn's own token names (--bx-*) are kept so anyone can grep the source.
+   Section 9 (--ops-*) is OUR recommendation for the control room, not Bahn's.
+   OKLCH computed from hex with Ottosson's OKLab matrices.
+   ========================================================================== */
+
+:root {
+  /* ---- 1. Primitive palette, light [M] `:root,[data-bx-palette=light]` ---- */
+  --bx-color-birch: #fffef7;                       /* #fffef7 | oklch(99.6% 0.009 100.0)  warm off-white, default page surface */
+  --bx-color-asphalt: #12110e;                     /* #12110e | oklch(17.8% 0.006 91.7)  warm near-black: ink, primary button, logo */
+  --bx-color-grey-50: #f1eee6;                     /* #f1eee6 | oklch(94.9% 0.011 89.7) */
+  --bx-color-grey-100: #e2ded4;                    /* #e2ded4 | oklch(90.1% 0.014 88.7) */
+  --bx-color-grey-200-sand: #ccc6ba;               /* #ccc6ba | oklch(82.8% 0.018 84.6)  divider / hairline colour */
+  --bx-color-grey-300: #b7afa0;                    /* #b7afa0 | oklch(75.6% 0.023 83.3) */
+  --bx-color-grey-400: #a09786;                    /* #a09786 | oklch(67.9% 0.027 83.4) */
+  --bx-color-grey-500: #8a7f6b;                    /* #8a7f6b | oklch(60.1% 0.032 82.5)  muted text on site (3.90:1 on birch, fails AA small text) */
+  --bx-color-grey-600: #726958;                    /* #726958 | oklch(52.4% 0.028 83.3)  use this for small muted text in the tool (5.36:1 on birch) */
+  --bx-color-grey-700: #5a5346;                    /* #5a5346 | oklch(44.5% 0.022 83.0) */
+  --bx-color-grey-800-brown: #423d33;              /* #423d33 | oklch(36.2% 0.018 84.6) */
+  --bx-color-grey-900: #2a2721;                    /* #2a2721 | oklch(27.4% 0.012 84.6) */
+  --bx-color-grey-950: #1e1c17;                    /* #1e1c17 | oklch(22.7% 0.010 88.8) */
+  --bx-color-red-50: #ffe8ec;                      /* #ffe8ec | oklch(95.1% 0.026 5.7) */
+  --bx-color-red-100: #ffd1d7;                     /* #ffd1d7 | oklch(90.2% 0.052 9.4) */
+  --bx-color-red-200: #ffafba;                     /* #ffafba | oklch(83.3% 0.095 10.3) */
+  --bx-color-red-300: #ff8e9d;                     /* #ff8e9d | oklch(77.2% 0.137 12.3) */
+  --bx-color-red-400: #fe6c7f;                     /* #fe6c7f | oklch(71.6% 0.178 14.9) */
+  --bx-color-red-500: #fd4a61;                     /* #fd4a61 | oklch(67.0% 0.214 18.1)  BRAND RED = --bx-critical, route destination (3.28:1 on birch: not for text) */
+  --bx-color-red-600: #d13f52;                     /* #d13f52 | oklch(58.4% 0.182 17.6)  = --bx-critical-foreground, red text (4.57:1 on birch, AA) */
+  --bx-color-red-700: #a13342;                     /* #a13342 | oklch(48.7% 0.145 16.5) */
+  --bx-color-red-800: #752832;                     /* #752832 | oklch(39.4% 0.108 15.9) */
+  --bx-color-red-900: #451c22;                     /* #451c22 | oklch(28.9% 0.063 12.8) */
+  --bx-color-red-950: #31171b;                     /* #31171b | oklch(24.3% 0.042 10.9) */
+  --bx-color-orange-50: #ffece3;                   /* #ffece3 | oklch(95.6% 0.024 47.1) */
+  --bx-color-orange-100: #ffd9c9;                  /* #ffd9c9 | oklch(91.3% 0.048 44.1) */
+  --bx-color-orange-200: #ffbda3;                  /* #ffbda3 | oklch(85.3% 0.085 42.4) */
+  --bx-color-orange-300: #ffa27e;                  /* #ffa27e | oklch(79.8% 0.121 41.8) */
+  --bx-color-orange-400: #fe8657;                  /* #fe8657 | oklch(74.5% 0.159 41.5) */
+  --bx-color-orange-500: #fd6a31;                  /* #fd6a31 | oklch(70.0% 0.192 39.9)  BRAND ORANGE = map origin / pickup pin (2.85:1 on birch: not for text) */
+  --bx-color-orange-600: #cf582a;                  /* #cf582a | oklch(60.6% 0.162 40.1) */
+  --bx-color-orange-700: #a14623;                  /* #a14623 | oklch(50.8% 0.130 40.3) */
+  --bx-color-orange-800: #75351c;                  /* #75351c | oklch(41.0% 0.098 41.0) */
+  --bx-color-orange-900: #472315;                  /* #472315 | oklch(30.2% 0.060 41.5) */
+  --bx-color-orange-950: #301a12;                  /* #301a12 | oklch(24.5% 0.038 40.7) */
+  --bx-color-teal-50: #dcf4f7;                     /* #dcf4f7 | oklch(95.1% 0.025 205.8) */
+  --bx-color-teal-100: #c6eaef;                    /* #c6eaef | oklch(91.3% 0.038 206.8) */
+  --bx-color-teal-200-light-blue: #a4dbe4;         /* #a4dbe4 | oklch(85.7% 0.058 208.6) */
+  --bx-color-teal-300: #85cdd9;                    /* #85cdd9 | oklch(80.5% 0.074 209.1) */
+  --bx-color-teal-400: #64becd;                    /* #64becd | oklch(75.1% 0.089 209.6) */
+  --bx-color-teal-500: #43afc1;                    /* #43afc1 | oklch(70.0% 0.100 210.5)  text-link colour in the portal ("Terms of Service", pixel-sampled #43afc1) [P] */
+  --bx-color-teal-600: #378f9e;                    /* #378f9e | oklch(60.4% 0.085 210.7) */
+  --bx-color-teal-700: #2c707b;                    /* #2c707b | oklch(50.7% 0.070 209.8) */
+  --bx-color-teal-800: #205058;                    /* #205058 | oklch(40.2% 0.053 210.0)  teal section surface (calculator) */
+  --bx-color-teal-900: #153135;                    /* #153135 | oklch(29.3% 0.035 207.6) */
+  --bx-color-teal-950: #0f2124;                    /* #0f2124 | oklch(23.4% 0.024 209.3) */
+  --bx-color-green-50: #daf4e9;                    /* #daf4e9 | oklch(94.5% 0.031 168.4) */
+  --bx-color-green-100: #c1ead9;                   /* #c1ead9 | oklch(90.3% 0.048 168.2) */
+  --bx-color-green-200: #9adbc0;                   /* #9adbc0 | oklch(84.0% 0.076 166.8) */
+  --bx-color-green-300: #76cda9;                   /* #76cda9 | oklch(78.3% 0.100 165.4) */
+  --bx-color-green-400: #50be90;                   /* #50be90 | oklch(72.5% 0.122 163.0) */
+  --bx-color-green-500: #29af77;                   /* #29af77 | oklch(67.1% 0.140 160.0) */
+  --bx-color-green-600: #238f62;                   /* #238f62 | oklch(57.9% 0.118 160.5) */
+  --bx-color-green-700: #1c704d;                   /* #1c704d | oklch(48.7% 0.097 160.9) */
+  --bx-color-green-800: #165038;                   /* #165038 | oklch(38.7% 0.073 162.0)  contact-card surface */
+  --bx-color-green-900: #0f3123;                   /* #0f3123 | oklch(28.3% 0.048 163.4)  green section surface (FAQ) */
+  --bx-color-green-950: #0c2119;                   /* #0c2119 | oklch(22.7% 0.032 166.6) */
+
+  /* ---- 2. Semantic roles, default birch theme [M] `:root` ---- */
+  --bx-surface: var(--bx-color-birch);             /* #fffef7 | oklch(99.6% 0.009 100.0) */
+  --bx-surface-subtle: var(--bx-color-grey-50);    /* #f1eee6 | oklch(94.9% 0.011 89.7) */
+  --bx-surface-sunken: var(--bx-color-grey-100);   /* #e2ded4 | oklch(90.1% 0.014 88.7) */
+  --bx-surface-pressed: var(--bx-color-grey-200-sand); /* #ccc6ba | oklch(82.8% 0.018 84.6) */
+  --bx-surface-raised: var(--bx-color-birch);      /* #fffef7 | oklch(99.6% 0.009 100.0) */
+  --bx-surface-selected: var(--bx-color-birch);    /* #fffef7 | oklch(99.6% 0.009 100.0) */
+  --bx-surface-selected-foreground: var(--bx-color-asphalt); /* #12110e | oklch(17.8% 0.006 91.7) */
+  --bx-divider: var(--bx-color-grey-200-sand);     /* #ccc6ba | oklch(82.8% 0.018 84.6) */
+  --bx-timeline-marker: var(--bx-color-grey-300);  /* #b7afa0 | oklch(75.6% 0.023 83.3) */
+  --bx-surface-disabled: var(--bx-color-grey-50);  /* #f1eee6 | oklch(94.9% 0.011 89.7) */
+  --bx-segmented-track: var(--bx-color-grey-100);  /* #e2ded4 | oklch(90.1% 0.014 88.7) */
+  --bx-feature-chip: var(--bx-color-grey-50);      /* #f1eee6 | oklch(94.9% 0.011 89.7) */
+  --bx-card-surface: var(--bx-color-grey-50);      /* #f1eee6 | oklch(94.9% 0.011 89.7) */
+  --bx-card-well: var(--bx-color-birch);           /* #fffef7 | oklch(99.6% 0.009 100.0) */
+  --bx-contact-card-surface: var(--bx-color-grey-50); /* #f1eee6 | oklch(94.9% 0.011 89.7) */
+  --bx-contact-card-action: var(--bx-color-grey-200-sand); /* #ccc6ba | oklch(82.8% 0.018 84.6) */
+  --bx-contact-card-action-hover: var(--bx-color-grey-300); /* #b7afa0 | oklch(75.6% 0.023 83.3) */
+  --bx-contact-card-headline: var(--bx-color-asphalt); /* #12110e | oklch(17.8% 0.006 91.7) */
+  --bx-contact-card-body: var(--bx-color-grey-900); /* #2a2721 | oklch(27.4% 0.012 84.6) */
+  --bx-contact-card-body-muted: var(--bx-color-grey-500); /* #8a7f6b | oklch(60.1% 0.032 82.5) */
+  --bx-headline: var(--bx-color-asphalt);          /* #12110e | oklch(17.8% 0.006 91.7) */
+  --bx-headline-muted: var(--bx-color-grey-500);   /* #8a7f6b | oklch(60.1% 0.032 82.5) */
+  --bx-body: var(--bx-color-grey-900);             /* #2a2721 | oklch(27.4% 0.012 84.6) */
+  --bx-body-muted: var(--bx-color-grey-500);       /* #8a7f6b | oklch(60.1% 0.032 82.5) */
+  --bx-link: var(--bx-color-grey-600);             /* #726958 | oklch(52.4% 0.028 83.3) */
+  --bx-link-muted: var(--bx-color-grey-500);       /* #8a7f6b | oklch(60.1% 0.032 82.5) */
+  --bx-link-muted-hover: var(--bx-color-grey-700); /* #5a5346 | oklch(44.5% 0.022 83.0) */
+  --bx-on-media: var(--bx-color-birch);            /* #fffef7 | oklch(99.6% 0.009 100.0) */
+  --bx-on-media-hover: var(--bx-color-grey-200-sand); /* #ccc6ba | oklch(82.8% 0.018 84.6) */
+  --bx-accent: var(--bx-color-asphalt);            /* #12110e | oklch(17.8% 0.006 91.7) */
+  --bx-accent-foreground: var(--bx-color-birch);   /* #fffef7 | oklch(99.6% 0.009 100.0) */
+  --bx-accent-hover: var(--bx-color-grey-900);     /* #2a2721 | oklch(27.4% 0.012 84.6) */
+  --bx-map-land: var(--bx-color-birch);            /* #fffef7 | oklch(99.6% 0.009 100.0) */
+  --bx-map-water: var(--bx-color-teal-50);         /* #dcf4f7 | oklch(95.1% 0.025 205.8) */
+  --bx-map-border: var(--bx-color-teal-100);       /* #c6eaef | oklch(91.3% 0.038 206.8) */
+  --bx-map-route: var(--bx-color-asphalt);         /* #12110e | oklch(17.8% 0.006 91.7) */
+  --bx-map-route-foreground: var(--bx-color-birch); /* #fffef7 | oklch(99.6% 0.009 100.0) */
+  --bx-map-crossing: var(--bx-color-asphalt);      /* #12110e | oklch(17.8% 0.006 91.7) */
+  --bx-map-pass-from: var(--bx-color-orange-500);  /* #fd6a31 | oklch(70.0% 0.192 39.9) */
+  --bx-map-pass-to: var(--bx-color-red-500);       /* #fd4a61 | oklch(67.0% 0.214 18.1) */
+  --bx-map-pin-origin: var(--bx-color-orange-500); /* #fd6a31 | oklch(70.0% 0.192 39.9) */
+  --bx-map-pin-origin-foreground: var(--bx-color-birch); /* #fffef7 | oklch(99.6% 0.009 100.0) */
+  --bx-map-pin-dot: var(--bx-color-asphalt);       /* #12110e | oklch(17.8% 0.006 91.7) */
+  --bx-map-pin-dot-ring: var(--bx-color-grey-100); /* #e2ded4 | oklch(90.1% 0.014 88.7) */
+  --bx-map-pin-dot-foreground: var(--bx-color-birch); /* #fffef7 | oklch(99.6% 0.009 100.0) */
+  --bx-map-pin-selected: var(--bx-color-orange-500); /* #fd6a31 | oklch(70.0% 0.192 39.9) */
+  --bx-input-surface: var(--bx-color-grey-50);     /* #f1eee6 | oklch(94.9% 0.011 89.7) */
+  --bx-input-hover: var(--bx-color-birch);         /* #fffef7 | oklch(99.6% 0.009 100.0) */
+  --bx-input-foreground: var(--bx-color-grey-950); /* #1e1c17 | oklch(22.7% 0.010 88.8) */
+  --bx-input-foreground-muted: var(--bx-color-grey-500); /* #8a7f6b | oklch(60.1% 0.032 82.5) */
+  --bx-input-foreground-faint: var(--bx-color-grey-300); /* #b7afa0 | oklch(75.6% 0.023 83.3) */
+  --bx-input-box: var(--bx-color-grey-100);        /* #e2ded4 | oklch(90.1% 0.014 88.7) */
+  --bx-input-box-foreground: var(--bx-color-asphalt); /* #12110e | oklch(17.8% 0.006 91.7) */
+  --bx-input-disabled: var(--bx-color-grey-50);    /* #f1eee6 | oklch(94.9% 0.011 89.7) */
+  --bx-input-disabled-foreground: var(--bx-color-grey-500); /* #8a7f6b | oklch(60.1% 0.032 82.5) */
+  --bx-slider-track: var(--bx-color-grey-200-sand); /* #ccc6ba | oklch(82.8% 0.018 84.6) */
+  --bx-slider-track-spent: var(--bx-color-teal-300); /* #85cdd9 | oklch(80.5% 0.074 209.1) */
+  --bx-focus-ring: var(--bx-color-grey-500);       /* #8a7f6b | oklch(60.1% 0.032 82.5) */
+  --bx-critical: var(--bx-color-red-500);          /* #fd4a61 | oklch(67.0% 0.214 18.1) */
+  --bx-critical-foreground: var(--bx-color-red-600); /* #d13f52 | oklch(58.4% 0.182 17.6) */
+  --bx-button-primary: var(--bx-color-asphalt);    /* #12110e | oklch(17.8% 0.006 91.7) */
+  --bx-button-primary-foreground: var(--bx-color-birch); /* #fffef7 | oklch(99.6% 0.009 100.0) */
+  --bx-button-primary-hover: var(--bx-color-grey-900); /* #2a2721 | oklch(27.4% 0.012 84.6) */
+  --bx-button-secondary: var(--bx-color-birch);    /* #fffef7 | oklch(99.6% 0.009 100.0) */
+  --bx-button-secondary-foreground: var(--bx-color-asphalt); /* #12110e | oklch(17.8% 0.006 91.7) */
+  --bx-button-secondary-hover: var(--bx-color-grey-100); /* #e2ded4 | oklch(90.1% 0.014 88.7) */
+  --bx-button-tertiary: var(--bx-color-grey-100);  /* #e2ded4 | oklch(90.1% 0.014 88.7) */
+  --bx-button-tertiary-foreground: var(--bx-color-asphalt); /* #12110e | oklch(17.8% 0.006 91.7) */
+  --bx-button-tertiary-hover: var(--bx-color-grey-200-sand); /* #ccc6ba | oklch(82.8% 0.018 84.6) */
+  --bx-button-ghost-primary-foreground: var(--bx-color-asphalt); /* #12110e | oklch(17.8% 0.006 91.7) */
+  --bx-button-ghost-primary-hover-foreground: var(--bx-color-grey-900); /* #2a2721 | oklch(27.4% 0.012 84.6) */
+  --bx-button-ghost-secondary-foreground: var(--bx-color-birch); /* #fffef7 | oklch(99.6% 0.009 100.0) */
+  --bx-button-ghost-secondary-hover-foreground: var(--bx-color-grey-200-sand); /* #ccc6ba | oklch(82.8% 0.018 84.6) */
+  --bx-button-disabled: var(--bx-color-grey-50);   /* #f1eee6 | oklch(94.9% 0.011 89.7) */
+  --bx-button-disabled-foreground: var(--bx-color-grey-500); /* #8a7f6b | oklch(60.1% 0.032 82.5) */
+  --bx-overlay: #f1eee6f2;                         /* #f1eee6f2 (alpha) | oklch(94.9% 0.011 89.7) */
+  --bx-scrim: #12110e80;                           /* #12110e80 (alpha) | oklch(17.8% 0.006 91.7) */
+  --bx-dialog-scrim: #12110eb3;                    /* #12110eb3 (alpha) | oklch(17.8% 0.006 91.7) */
+
+  /* ---- 3. Spacing, radii, strokes, focus [M] `:root` ---- */
+  --bx-spacing-1: 1px;
+  --bx-spacing-2: 2px;
+  --bx-spacing-3: 3px;
+  --bx-spacing-4: 4px;
+  --bx-spacing-5: 5px;
+  --bx-spacing-6: 6px;
+  --bx-spacing-8: 8px;
+  --bx-spacing-10: 10px;
+  --bx-spacing-12: 12px;
+  --bx-spacing-14: 14px;
+  --bx-spacing-16: 16px;
+  --bx-spacing-18: 18px;
+  --bx-spacing-20: 20px;
+  --bx-spacing-22: 22px;
+  --bx-spacing-24: 24px;
+  --bx-spacing-28: 28px;
+  --bx-spacing-32: 32px;
+  --bx-spacing-36: 36px;
+  --bx-spacing-40: 40px;
+  --bx-spacing-48: 48px;
+  --bx-spacing-56: 56px;
+  --bx-spacing-64: 64px;
+  --bx-spacing-72: 72px;
+  --bx-spacing-80: 80px;
+  --bx-spacing-96: 96px;
+  --bx-spacing-128: 128px;
+  --bx-spacing-144: 144px;
+  --bx-spacing-168: 168px;
+  --bx-spacing-192: 192px;
+  --bx-spacing-256: 256px;
+  --bx-radii-2: 2px;
+  --bx-radii-3: 3px;
+  --bx-radii-4: 4px;
+  --bx-radii-6: 6px;
+  --bx-radii-8: 8px;
+  --bx-radii-12: 12px;
+  --bx-radii-16: 16px;
+  --bx-radii-20: 20px;
+  --bx-radii-24: 24px;
+  --bx-radii-48: 48px;
+  --bx-radii-none: 0px;
+  --bx-radii-full: 999px;
+  --bx-stroke-1: 1px;
+  --bx-stroke-2: 2px;
+  --bx-stroke-3: 3px;
+  --bx-stroke-4: 4px;
+  --bx-stroke-5: 5px;
+  --bx-stroke-6: 6px;
+  --bx-stroke-8: 8px;
+  --bx-stroke-10: 10px;
+  --bx-stroke-12: 12px;
+  --bx-stroke-2-5: 2.5px;
+  --bx-stroke-4-5: 4.5px;
+  --bx-focus-width: 4px;
+  --bx-focus-offset: 0px;
+  --bx-focus-radius: 4px;
+
+  /* Radii actually used on components [C]: pill buttons/nav/segmented 999px; inputs 20px;
+     cards + calculator panels + contact cards 24px; quote blocks 20px; icon tiles 16px;
+     banners 12px; portal app login card 8px [A]; app inputs 8px (rounded-lg) [A]. */
+
+  /* ---- 4. Layout [L] `:root` ---- */
+  --bx-max-content-width: 1440px;
+  --bx-gutter: 24px;              /* page side padding is 48px at 1440 [C] (.bx-footer__inner padding 0 48px) */
+  --bx-section-gap: 120px;
+  --bx-header-height: 64px;       /* [M] --bx-page-header-height */
+  --bx-grid-gap: 4px;             /* [L] gap between joined panels; Bahn joins panels with 4px gaps + notches */
+
+  /* ---- 5. Typography ---- */
+  /* Brand fonts are COMMERCIAL (self-hosted woff2 on Bahn's site, not licensable from there):
+     Owners Wide / Owners XWide by MCKL Type (https://www.mckltype.com/typefaces/owners)
+     Duplet Open by Indian Type Foundry (https://www.indiantypefoundry.com/fonts/duplet-open)
+     Free fallbacks: Archivo (wdth 125) for Owners, Figtree for Duplet Open, Geist for app UI. */
+  --bx-font-display: "Owners Wide", "Archivo", system-ui, sans-serif;     /* [M] .bx-text--display/heading/title */
+  --bx-font-display-xwide: "Owners XWide", "Archivo", system-ui, sans-serif; /* [M] .bx-text--number-*, hero "DELIVERED" */
+  --bx-font-body: "Duplet Open", "Figtree", system-ui, sans-serif;       /* [M] .bx-text--body/caption/link, buttons */
+  --bx-font-ui: "Geist", "GeistSans", system-ui, -apple-system, "Segoe UI", sans-serif; /* [A] whole order portal; [L] --font-sans */
+  --bx-font-mono: "Geist Mono", "GeistMono", "Reddit Mono", ui-monospace, SFMono-Regular, Menlo, monospace; /* [L] --font-mono; Reddit Mono also loaded [M] */
+  --bx-font-features-body: "ss02", "ss06", "ss07";  /* [M] @font-feature-values Duplet Open { @styleset { bahn: 2 6 7 } } */
+
+  /* Type scale [M] .bx-text--* (desktop; size / line-height / weight / tracking) */
+  --bx-type-display-1: 900 96px/96px var(--bx-font-display);  /* uppercase, -0.3px; scale steps 96 80 72 56 48 40 36 32 */
+  --bx-type-display-3: 900 72px/72px var(--bx-font-display);  /* section H2 on site [C] */
+  --bx-type-display-8: 900 32px/32px var(--bx-font-display);
+  --bx-type-heading-3: 500 32px/36px var(--bx-font-display);  /* +0.3px; steps 48/56 40/48 32/36 28/32 24/28 20/24 18/20 16/18 */
+  --bx-type-heading-5: 500 24px/28px var(--bx-font-display);
+  --bx-type-heading-6: 500 20px/24px var(--bx-font-display);
+  --bx-type-heading-8: 500 16px/18px var(--bx-font-display);
+  --bx-type-title-5: 700 24px/28px var(--bx-font-display);    /* -0.3px; steps 40/48 36/40 32/36 28/32 24/28 20/24 */
+  --bx-type-title-6: 700 20px/24px var(--bx-font-display);
+  --bx-type-number-4: 700 40px/40px var(--bx-font-display-xwide); /* +1.8px; steps 64 56 48 40 */
+  --bx-type-body-2: 300 20px/28px var(--bx-font-body);        /* LIGHT 300 is the site's body weight */
+  --bx-type-body-4: 300 16px/22px var(--bx-font-body);
+  --bx-type-body-5: 300 14px/20px var(--bx-font-body);
+  --bx-type-body-6: 300 12px/18px var(--bx-font-body);
+  --bx-type-caption-3: 600 18px/22px var(--bx-font-body);     /* eyebrow labels, coloured grey-400/500 */
+  --bx-type-caption-4: 600 16px/20px var(--bx-font-body);
+  --bx-type-button-s: 600 18px/18px var(--bx-font-body);      /* [C] .bx-button--s, h48, pad 0 22px */
+  --bx-type-button-xl: 600 24px/24px var(--bx-font-body);     /* [C] .bx-button--xl, h72, pad 0 32px */
+  --bx-tracking-display: -0.3px;
+  --bx-tracking-heading: 0.3px;
+  --bx-tracking-number: 1.8px;
+  /* Order portal UI type [A] computed: card title 20px/500 Geist, -0.5px; labels 13px/500;
+     inputs 13px; helper 12-13px stone-500; buttons 15px/500. */
+
+  /* ---- 6. Elevation ---- */
+  /* [C] The bx marketing system uses NO box-shadows: depth comes from surface steps
+     (birch > grey-50 > grey-100 > sand) and 20-24px radii. The app [A] uses hairline ring shadows: */
+  --bx-shadow-none: none;
+  --bahn-app-shadow-input: 0 0 0 1px rgba(0,0,0,0.08), inset 0 1px 2px rgba(0,0,0,0.06);       /* [A] input */
+  --bahn-app-shadow-input-hover: 0 0 0 1px rgba(0,0,0,0.12), inset 0 1px 2px rgba(0,0,0,0.06); /* [A] input:hover */
+  --bahn-app-shadow-button: 0 1px 2px rgba(0,0,0,0.12), inset 0 0 0 1px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.25), 0 -1px 0 rgba(0,0,0,0.1); /* [A] gradient pill button */
+  --bahn-app-backdrop: blur(12px);   /* [A] login card bg-card/95 + backdrop-blur-md */
+
+  /* ---- 7. Motion [M] ---- */
+  --bx-ease-standard: cubic-bezier(.2,0,0,1);      /* nav slots, height, gap */
+  --bx-ease-emphasised: cubic-bezier(.22,1,.36,1); /* accordion open */
+  --bx-ease-material: cubic-bezier(.4,0,.2,1);
+  --bx-duration-fast: 150ms;   /* colour/background hovers */
+  --bx-duration-base: 200ms;
+  --bx-duration-slow: 320ms;   /* accordion */
+
+  /* ---- 8. Order-portal app tokens [A] `:root` (shadcn/ui stone; the app is mid-migration to bx) ---- */
+  --bahn-app-background: #fafaf9;        /* oklch(98.5% 0.001 106.4) stone-50 */
+  --bahn-app-foreground: #0c0a09;        /* oklch(14.7% 0.004 49.2) stone-950 */
+  --bahn-app-primary: #0c0a09;
+  --bahn-app-secondary: #f5f5f4;         /* oklch(97.0% 0.001 106.4) stone-100 */
+  --bahn-app-muted: #e7e5e4;             /* oklch(92.3% 0.003 48.7) stone-200 */
+  --bahn-app-muted-foreground: #78716c;  /* oklch(55.3% 0.012 58.1) stone-500 */
+  --bahn-app-border: #e7e5e4;
+  --bahn-app-destructive: #ef4444;       /* oklch(63.7% 0.208 25.3) */
+  --bahn-app-accent-orange: #ff5600;     /* oklch(67.7% 0.217 39.0) app-only accent (--accent-orange) */
+  --bahn-app-radius: 0.5rem;
+}
+
+/* ---- Dark palette [M] `[data-bx-palette=dark]`: Bahn inverts every ramp (50<->950) ---- */
+[data-bx-palette=dark] {
+  --bx-color-birch: #12110e;                 /* oklch(17.8% 0.006 91.7) */
+  --bx-color-asphalt: #fffef7;               /* oklch(99.6% 0.009 100.0) */
+  --bx-color-grey-50: #1e1c17;               /* oklch(22.7% 0.010 88.8) */
+  --bx-color-grey-100: #2a2721;              /* oklch(27.4% 0.012 84.6) */
+  --bx-color-grey-200-sand: #423d33;         /* oklch(36.2% 0.018 84.6) */
+  --bx-color-grey-300: #5a5346;              /* oklch(44.5% 0.022 83.0) */
+  --bx-color-grey-400: #726958;              /* oklch(52.4% 0.028 83.3) */
+  --bx-color-grey-500: #8a7f6b;              /* oklch(60.1% 0.032 82.5) */
+  --bx-color-grey-600: #a09786;              /* oklch(67.9% 0.027 83.4) */
+  --bx-color-grey-700: #b7afa0;              /* oklch(75.6% 0.023 83.3) */
+  --bx-color-grey-800-brown: #ccc6ba;        /* oklch(82.8% 0.018 84.6) */
+  --bx-color-grey-900: #e2ded4;              /* oklch(90.1% 0.014 88.7) */
+  --bx-color-grey-950: #f1eee6;              /* oklch(94.9% 0.011 89.7) */
+  --bx-color-red-50: #31171b;                /* oklch(24.3% 0.042 10.9) */
+  --bx-color-red-100: #451c22;               /* oklch(28.9% 0.063 12.8) */
+  --bx-color-red-200: #752832;               /* oklch(39.4% 0.108 15.9) */
+  --bx-color-red-300: #a13342;               /* oklch(48.7% 0.145 16.5) */
+  --bx-color-red-400: #d13f52;               /* oklch(58.4% 0.182 17.6) */
+  --bx-color-red-500: #fd4a61;               /* oklch(67.0% 0.214 18.1) */
+  --bx-color-red-600: #fe6c7f;               /* oklch(71.6% 0.178 14.9) */
+  --bx-color-red-700: #ff8e9d;               /* oklch(77.2% 0.137 12.3) */
+  --bx-color-red-800: #ffafba;               /* oklch(83.3% 0.095 10.3) */
+  --bx-color-red-900: #ffd1d7;               /* oklch(90.2% 0.052 9.4) */
+  --bx-color-red-950: #ffe8ec;               /* oklch(95.1% 0.026 5.7) */
+  --bx-color-orange-50: #301a12;             /* oklch(24.5% 0.038 40.7) */
+  --bx-color-orange-100: #472315;            /* oklch(30.2% 0.060 41.5) */
+  --bx-color-orange-200: #75351c;            /* oklch(41.0% 0.098 41.0) */
+  --bx-color-orange-300: #a14623;            /* oklch(50.8% 0.130 40.3) */
+  --bx-color-orange-400: #cf582a;            /* oklch(60.6% 0.162 40.1) */
+  --bx-color-orange-500: #fd6a31;            /* oklch(70.0% 0.192 39.9) */
+  --bx-color-orange-600: #fe8657;            /* oklch(74.5% 0.159 41.5) */
+  --bx-color-orange-700: #ffa27e;            /* oklch(79.8% 0.121 41.8) */
+  --bx-color-orange-800: #ffbda3;            /* oklch(85.3% 0.085 42.4) */
+  --bx-color-orange-900: #ffd9c9;            /* oklch(91.3% 0.048 44.1) */
+  --bx-color-orange-950: #ffece3;            /* oklch(95.6% 0.024 47.1) */
+  --bx-color-teal-50: #0f2124;               /* oklch(23.4% 0.024 209.3) */
+  --bx-color-teal-100: #153135;              /* oklch(29.3% 0.035 207.6) */
+  --bx-color-teal-200-light-blue: #205058;   /* oklch(40.2% 0.053 210.0) */
+  --bx-color-teal-300: #2c707b;              /* oklch(50.7% 0.070 209.8) */
+  --bx-color-teal-400: #378f9e;              /* oklch(60.4% 0.085 210.7) */
+  --bx-color-teal-500: #43afc1;              /* oklch(70.0% 0.100 210.5) */
+  --bx-color-teal-600: #64becd;              /* oklch(75.1% 0.089 209.6) */
+  --bx-color-teal-700: #85cdd9;              /* oklch(80.5% 0.074 209.1) */
+  --bx-color-teal-800: #a4dbe4;              /* oklch(85.7% 0.058 208.6) */
+  --bx-color-teal-900: #c6eaef;              /* oklch(91.3% 0.038 206.8) */
+  --bx-color-teal-950: #dcf4f7;              /* oklch(95.1% 0.025 205.8) */
+  --bx-color-green-50: #0c2119;              /* oklch(22.7% 0.032 166.6) */
+  --bx-color-green-100: #0f3123;             /* oklch(28.3% 0.048 163.4) */
+  --bx-color-green-200: #165038;             /* oklch(38.7% 0.073 162.0) */
+  --bx-color-green-300: #1c704d;             /* oklch(48.7% 0.097 160.9) */
+  --bx-color-green-400: #238f62;             /* oklch(57.9% 0.118 160.5) */
+  --bx-color-green-500: #29af77;             /* oklch(67.1% 0.140 160.0) */
+  --bx-color-green-600: #50be90;             /* oklch(72.5% 0.122 163.0) */
+  --bx-color-green-700: #76cda9;             /* oklch(78.3% 0.100 165.4) */
+  --bx-color-green-800: #9adbc0;             /* oklch(84.0% 0.076 166.8) */
+  --bx-color-green-900: #c1ead9;             /* oklch(90.3% 0.048 168.2) */
+  --bx-color-green-950: #daf4e9;             /* oklch(94.5% 0.031 168.4) */
+}
+

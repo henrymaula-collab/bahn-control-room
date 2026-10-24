@@ -1,0 +1,132 @@
+{
+  "_about": "The hidden truth of a few simulated pickup places for the demo. The phone is mocked (Bahn's rules allow it); the AI persona that answers knows this file plus what the dataset says about the place (hours, access, release rule). The agent never reads this file. Keys are pickup place ids; 'vehicles' match on make and model, never on an order id, so an edited or reseeded order still works and falls back to the dataset when nothing matches. Everything here is made up.",
+  "places": {
+    "site-042": {
+      "contact": {
+        "name": "Jonas Brandt",
+        "role": "workshop",
+        "roleLocal": {
+          "de": "Werkstatt"
+        }
+      },
+      "answers": true,
+      "truths": [
+        {
+          "id": "release_to_workshop",
+          "kind": "release_procedure",
+          "en": "We release a car only after the seller's signed release document has been e-mailed to the workshop, werkstatt@calverona.example. Documents sent to the front desk do not reach us.",
+          "de": "Wir geben ein Fahrzeug nur heraus, wenn die unterschriebene Freigabe des Verkäufers per E-Mail an die Werkstatt gegangen ist, werkstatt@calverona.example. Was an den Empfang geht, kommt bei uns nicht an."
+        },
+        {
+          "id": "storekeeper_keys",
+          "kind": "keys",
+          "en": "The storekeeper hands over the keys during the booked slot, against the driver's ID.",
+          "de": "Der Lagerist gibt die Schlüssel im gebuchten Zeitfenster heraus, gegen den Ausweis des Fahrers."
+        }
+      ],
+      "vehicles": {
+        "Ferrari Roma": [
+          {
+            "id": "seller_hold",
+            "kind": "hold",
+            "en": "The Ferrari is here, but the seller has put a hold on it because the invoice is not settled. Until the seller lifts the hold, we cannot hand it over.",
+            "de": "Der Ferrari steht hier, aber der Verkäufer hat ihn gesperrt, weil die Rechnung noch offen ist. Solange der Verkäufer die Sperre nicht aufhebt, können wir ihn nicht herausgeben."
+          },
+          {
+            "id": "no_release_doc",
+            "kind": "papers_missing",
+            "en": "No release document for the Ferrari has reached the workshop.",
+            "de": "Für den Ferrari ist bei der Werkstatt keine Freigabe angekommen."
+          }
+        ],
+        "Bentley Continental GT": [
+          {
+            "id": "bentley_ready",
+            "kind": "ready",
+            "en": "The Bentley is ready in the workshop for Friday morning.",
+            "de": "Der Bentley steht für Freitagvormittag fertig in der Werkstatt."
+          },
+          {
+            "id": "bentley_no_doc",
+            "kind": "papers_missing",
+            "en": "We have no release document for the Bentley yet. Without it, the storekeeper will not hand over the keys.",
+            "de": "Für den Bentley haben wir noch keine Freigabe. Ohne die gibt der Lagerist die Schlüssel nicht heraus."
+          }
+        ]
+      }
+    },
+    "site-047": {
+      "contact": {
+        "name": "Petra Lindner",
+        "role": "stock control",
+        "roleLocal": {
+          "de": "Bestandskontrolle"
+        }
+      },
+      "answers": true,
+      "truths": [],
+      "vehicles": {
+        "Mercedes-Benz EQE": [
+          {
+            "id": "eqe_still_checking",
+            "kind": "location",
+            "en": "Stock control has not found the EQE yet. Our booking screen says showroom, the handover sheet says the yard, and nobody has seen the keys today.",
+            "de": "Die Bestandskontrolle hat den EQE noch nicht gefunden. Unser Buchungssystem sagt Showroom, das Übergabeblatt sagt Hof, und die Schlüssel hat heute noch niemand gesehen."
+          },
+          {
+            "id": "eqe_callback_14",
+            "kind": "checking",
+            "en": "We are checking the showroom and the yard and will know by 14:00 today. Please do not send a driver before we confirm the collection point.",
+            "de": "Wir prüfen Showroom und Hof und wissen es bis 14 Uhr. Bitte schicken Sie keinen Fahrer, bevor wir den Abholort bestätigen."
+          }
+        ]
+      }
+    },
+    "site-001": {
+      "contact": {
+        "name": "Ville Saarinen",
+        "role": "stock control",
+        "roleLocal": {
+          "fi": "varastonhallinta"
+        }
+      },
+      "answers": true,
+      "truths": [],
+      "vehicles": {
+        "Volvo V60": [
+          {
+            "id": "volvo_in_warehouse",
+            "kind": "location",
+            "en": "The Volvo is not at the branch. It went to our warehouse in Vantaa on a transfer.",
+            "fi": "Volvo ei ole liikkeessä. Se on siirretty varastollemme Vantaalle."
+          },
+          {
+            "id": "volvo_ready_tuesday",
+            "kind": "not_ready",
+            "readyAt": "2026-10-27T10:00:00Z",
+            "en": "It comes back to the branch on Tuesday the 27th in the morning and is ready for collection from 12 o'clock.",
+            "fi": "Se tulee takaisin liikkeeseen tiistaina 27. päivä aamulla ja on noudettavissa kello 12 alkaen."
+          },
+          {
+            "id": "volvo_keys",
+            "kind": "keys",
+            "en": "The keys are with stock control at the collection bay desk, not at reception.",
+            "fi": "Avaimet ovat varastonhallinnalla noutokaistan tiskillä, eivät vastaanotossa."
+          }
+        ]
+      }
+    },
+    "site-005": {
+      "contact": {
+        "name": "Elena Alderbrook",
+        "role": "site desk",
+        "roleLocal": {
+          "fi": "myyntipalvelu"
+        }
+      },
+      "answers": false,
+      "noAnswerNote": "The branch line rang out. Nobody picked up.",
+      "truths": []
+    }
+  }
+}

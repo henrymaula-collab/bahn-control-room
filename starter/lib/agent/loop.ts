@@ -1,0 +1,249 @@
+// The Readiness desk agent loop. One run = one order. Three providers drive
+// the same tools: the Anthropic API (manual tool loop), Claude Code through
+// the Claude Agent SDK (our tools as an in-process MCP server, nothing else
+// allowed), and a deterministic mock. Every run is an AgentRun with a JSONL
+// trace; without a model, replay plays a recorded trace back.
+
+import { createSdkMcpServer, query, tool } from "@anthropic-ai/claude-agent-sdk"
+import { z } from "zod"
+import type { Case, Call } from "@/lib/control-room/types"
+import { RunClock, worldNow } from "./clock"
+import { agentModel, callModel, claudeCodeEnv, effectiveProvider, emptyUsage, guards, paths, type Provider } from "./config"
+import { findOrder } from "./data"
+import { FactRegistry } from "./facts"
+import { createTurn, type BetaContentBlock, type BetaMessage, type BetaMessageParam } from "./llm"
+import { mockTurn } from "./mock-policy"
+import { firstMessage, SYSTEM_PROMPT, type CallbackBrief } from "./prompt"
+import { getStore, type StoredRun } from "./store"
+import { apiToolDefinitions, executeTool, TOOL_DESCRIPTIONS, TOOL_NAMES, TOOL_SHAPES, type RunContext } from "./tools"
+import { listTraces, readTrace, TraceWriter, type TraceLine } from "./trace"
+import type { TrustRule } from "./gate"
+
+export interface RunOptions {
+  provider?: Provider
+  callback?: CallbackBrief
+  startAt?: Date
+  onStep?: (step: StoredRun["steps"][number]) => void
+}
+
+export interface RunResult {
+  run: StoredRun
+  case?: Case
+  calls: Call[]
+  traceFile: string
+  handover: string
+}
+
+const MCP_SERVER = "readiness"
+
+function runIdFor(orderRef: string, callback?: CallbackBrief): string {
+  const t = new Date().toISOString().replace(/[-:]/g, "").replace(/\..+/, "").replace("T", "-")
+  return `run-${orderRef.toLowerCase()}-${callback ? "cb-" : ""}${t}-${Math.random().toString(36).slice(2, 5)}`
+}
+
+export async function runReadinessAgent(orderRef: string, opts: RunOptions = {}): Promise<RunResult> {
+  const order = findOrder(orderRef)
+  if (!order) throw new Error(`No order ${orderRef} in the dataset.`)
+  const provider = effectiveProvider(opts.provider)
+  if (provider === "replay") return replayLatest(order.reference, opts)
+
+  const store = getStore()
+  const runId = runIdFor(order.reference, opts.callback)
+  const clock = new RunClock(opts.startAt ?? worldNow())
+  const model = provider === "mock" ? "mock" : agentModel()
+  const trace = new TraceWriter(runId, opts.onStep)
+  const usage = emptyUsage()
+  const run: StoredRun = { id: runId, agent: "readiness", orderId: order.id, model, startedAt: clock.now(), steps: [], outcome: "waiting", mode: provider === "mock" ? "mock" : "live" }
+  trace.write({ type: "run", run, orderRef: order.reference, provider })
+
+  const [lessons, decisions, trustRules, cases] = await Promise.all([store.listLessons(), store.listDecisions(), store.listTrustRules(), store.listCases()])
+  const ctx: RunContext = {
+    runId,
+    provider,
+    callModel: provider === "mock" ? "mock" : callModel(),
+    order,
+    clock,
+    registry: new FactRegistry(runId.replace(/^run-/, "")),
+    store,
+    usage,
+    trace,
+    steps: [],
+    calls: [],
+    lessonsUsed: [],
+    snap: { lessons, decisions, trustRules: trustRules as TrustRule[], cases },
+    callbackFor: opts.callback,
+  }
+  const prompt = firstMessage(order.reference, clock.now(), opts.callback)
+  trace.step("message", prompt, clock.now(), "brief")
+
+  let handover = ""
+  let error: string | undefined
+  try {
+    handover = provider === "claude-code" ? await sdkLoop(ctx, prompt, model) : await manualLoop(ctx, prompt, model, provider)
+  } catch (e) {
+    error = e instanceof Error ? e.message : String(e)
+    trace.step("message", `Stopped with an error: ${error}`, clock.now(), "error")
+  }
+
+  const outcome: StoredRun["outcome"] = error && !ctx.outcome ? "error" : ctx.outcome?.kind ?? (error ? "error" : "waiting")
+  const finished: StoredRun = {
+    ...run,
+    endedAt: clock.now(),
+    steps: trace.steps(),
+    outcome,
+    ...(ctx.outcome?.caseId ? { caseId: ctx.outcome.caseId } : {}),
+    usage: { ...usage, usd: Math.round(usage.usd * 10000) / 10000 },
+    callIds: ctx.calls.map((c) => c.id),
+  }
+  trace.write({ type: "facts", facts: ctx.registry.all() })
+  trace.write({ type: "end", run: finished })
+  await store.saveRun(finished)
+  const theCase = ctx.outcome?.caseId ? await store.getCase(ctx.outcome.caseId) : undefined
+  return { run: finished, case: theCase, calls: ctx.calls, traceFile: trace.file, handover: handover || ctx.outcome?.summary || error || "" }
+}
+
+function overBudget(ctx: RunContext, started: number): string | undefined {
+  if ((Date.now() - started) / 1000 > guards.maxSeconds) return `time limit (${guards.maxSeconds} s)`
+  if (ctx.usage.usd > guards.maxUsd) return `cost limit (USD ${guards.maxUsd})`
+  return undefined
+}
+
+function recordBlocks(ctx: RunContext, content: BetaContentBlock[]): string {
+  let lastText = ""
+  for (const b of content) {
+    if (b.type === "thinking" && b.thinking.trim()) ctx.trace.step("thinking", b.thinking, ctx.clock.now())
+    if (b.type === "text" && b.text.trim()) {
+      ctx.trace.step("message", b.text, ctx.clock.now())
+      lastText = b.text
+    }
+  }
+  return lastText
+}
+
+async function manualLoop(ctx: RunContext, prompt: string, model: string, provider: Provider): Promise<string> {
+  const messages: BetaMessageParam[] = [{ role: "user", content: prompt }]
+  const tools = provider === "api" ? apiToolDefinitions() : []
+  const started = Date.now()
+  let handover = ""
+  let endedWork = false
+  for (let turn = 0; turn < guards.maxModelTurns; turn++) {
+    const over = overBudget(ctx, started)
+    if (over) {
+      ctx.trace.step("message", `Stopped at the ${over}. Handing over what I found so far.`, ctx.clock.now(), "guard")
+      break
+    }
+    const response: BetaMessage =
+      provider === "mock"
+        ? mockTurn(messages)
+        : await createTurn({ model, system: SYSTEM_PROMPT, messages, tools: tools as never, effort: "medium", maxTokens: 16000 }, ctx.usage)
+    ctx.clock.advance(provider === "mock" ? 1 : 3)
+    if (response.stop_reason === "refusal") throw new Error("The model declined this request.")
+    const text = recordBlocks(ctx, response.content)
+    if (text) handover = text
+    messages.push({ role: "assistant", content: response.content as BetaMessageParam["content"] })
+    const uses = response.content.filter((b): b is Extract<BetaContentBlock, { type: "tool_use" }> => b.type === "tool_use")
+    if (uses.length === 0 || endedWork) break
+    if (response.stop_reason === "max_tokens") throw new Error("The model's tool input was cut off (max_tokens).")
+    const results = []
+    for (const u of uses) {
+      const r = await executeTool(ctx, u.name, u.input)
+      if (r.terminal) endedWork = true
+      results.push({ type: "tool_result" as const, tool_use_id: u.id, content: r.content, ...(r.isError ? { is_error: true } : {}) })
+    }
+    messages.push({ role: "user", content: results })
+  }
+  return handover
+}
+
+async function sdkLoop(ctx: RunContext, prompt: string, model: string): Promise<string> {
+  const server = createSdkMcpServer({
+    name: MCP_SERVER,
+    version: "1.0.0",
+    alwaysLoad: true,
+    tools: TOOL_NAMES.map((name) =>
+      tool(name, TOOL_DESCRIPTIONS[name], TOOL_SHAPES[name] as z.ZodRawShape, async (args: Record<string, unknown>) => {
+        const r = await executeTool(ctx, name, args)
+        return { content: [{ type: "text" as const, text: r.content }], ...(r.isError ? { isError: true } : {}) }
+      }),
+    ),
+  })
+  const abort = new AbortController()
+  const timer = setTimeout(() => abort.abort(), guards.maxSeconds * 1000)
+  let handover = ""
+  try {
+    const q = query({
+      prompt,
+      options: {
+        systemPrompt: SYSTEM_PROMPT,
+        model,
+        mcpServers: { [MCP_SERVER]: server },
+        tools: [],
+        allowedTools: TOOL_NAMES.map((n) => `mcp__${MCP_SERVER}__${n}`),
+        settingSources: [],
+        persistSession: false,
+        permissionMode: "dontAsk",
+        maxTurns: guards.maxModelTurns,
+        maxBudgetUsd: guards.maxUsd,
+        thinking: { type: "adaptive", display: "summarized" },
+        effort: "medium",
+        cwd: paths.starter(),
+        env: claudeCodeEnv(),
+        abortController: abort,
+      },
+    })
+    for await (const m of q) {
+      if (m.type === "assistant" && !m.parent_tool_use_id) {
+        const text = recordBlocks(ctx, m.message.content as BetaContentBlock[])
+        if (text) handover = text
+        ctx.clock.advance(3)
+      } else if (m.type === "result") {
+        ctx.usage.inputTokens += m.usage.input_tokens ?? 0
+        ctx.usage.outputTokens += m.usage.output_tokens ?? 0
+        ctx.usage.cacheReadTokens += m.usage.cache_read_input_tokens ?? 0
+        ctx.usage.cacheWriteTokens += m.usage.cache_creation_input_tokens ?? 0
+        ctx.usage.usd += m.total_cost_usd ?? 0
+        if (m.subtype !== "success") {
+          ctx.trace.step("message", `Stopped: ${m.subtype}${"errors" in m && m.errors?.length ? ` (${m.errors.join("; ")})` : ""}. Handing over what I found so far.`, ctx.clock.now(), "guard")
+        }
+      }
+    }
+  } finally {
+    clearTimeout(timer)
+  }
+  return handover
+}
+
+// ---------- replay ----------
+
+export async function replayTrace(file: string, opts: { onStep?: RunOptions["onStep"]; delayMs?: number } = {}): Promise<RunResult> {
+  const lines = readTrace(file)
+  const store = getStore()
+  const head = lines.find((l): l is Extract<TraceLine, { type: "run" }> => l.type === "run")
+  const end = lines.find((l): l is Extract<TraceLine, { type: "end" }> => l.type === "end")
+  if (!head || !end) throw new Error(`Trace ${file} is incomplete.`)
+  const calls: Call[] = []
+  let theCase: Case | undefined
+  for (const l of lines) {
+    if (l.type === "step") {
+      opts.onStep?.(l.step)
+      if (opts.delayMs) await new Promise((r) => setTimeout(r, opts.delayMs))
+    }
+    if (l.type === "call") calls.push(l.call)
+    if (l.type === "case") theCase = l.case
+  }
+  for (const c of calls) await store.saveCall(c)
+  if (theCase) await store.saveCase(theCase)
+  const run: StoredRun = { ...end.run, mode: "replay", replayOf: end.run.id }
+  await store.saveRun(run)
+  const lastMessage = [...end.run.steps].reverse().find((s) => s.type === "message" && !s.name)
+  return { run, case: theCase, calls, traceFile: file, handover: lastMessage?.content ?? "" }
+}
+
+/** The newest recorded run for this order; real-model traces before mock ones. */
+export async function replayLatest(orderRef: string, opts: RunOptions = {}): Promise<RunResult> {
+  const traces = listTraces().filter((t) => t.orderRef.toUpperCase() === orderRef.toUpperCase() && t.outcome !== "unfinished" && t.outcome !== "error")
+  const pick = traces.find((t) => t.provider === "api") ?? traces.find((t) => t.provider === "claude-code") ?? traces[0]
+  if (!pick) throw new Error(`No recorded run for ${orderRef}. Set CR_AGENT_PROVIDER=claude-code, api or mock to run the agent.`)
+  return replayTrace(pick.file, { onStep: opts.onStep })
+}
+

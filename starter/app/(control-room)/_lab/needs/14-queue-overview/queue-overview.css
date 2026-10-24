@@ -13,9 +13,8 @@
 .lab-needs-14 .n14-view:focus { outline: none; }
 .lab-needs-14 .n14-inner { max-width: calc(52 * var(--type-body)); margin: 0 auto; }
 
-.lab-needs-14 .n14-top { display: flex; align-items: flex-end; justify-content: space-between; gap: 1em 1.5em; flex-wrap: wrap; margin-bottom: 1.2em; }
+.lab-needs-14 .n14-top { display: flex; align-items: center; justify-content: space-between; gap: 1em 1.5em; flex-wrap: wrap; margin-bottom: 1.2em; }
 .lab-needs-14 .n14-title { margin: 0; font-size: var(--type-title1); line-height: var(--lh-title1); letter-spacing: var(--track-title1); font-weight: 600; }
-.lab-needs-14 .n14-sum { margin: 0.2em 0 0; font-size: var(--type-subhead); line-height: var(--lh-subhead); color: var(--ink-2); }
 .lab-needs-14 .n14-actions { display: flex; align-items: center; gap: 0.5em; }
 .lab-needs-14 .n14-actions .btn { min-height: max(40px, calc(2.4 * var(--type-body))); padding: 0 1.1em; font-size: var(--type-body); white-space: nowrap; }
 .lab-needs-14 .n14-actions .n14-back { gap: 0.15em; padding-left: 0.6em; color: var(--ink); }

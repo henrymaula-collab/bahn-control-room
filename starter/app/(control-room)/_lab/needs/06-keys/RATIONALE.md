@@ -1,5 +1,7 @@
 # needs 06: Keys for the queue
 
+Cut by the reviewer (RV1, 25 Oct): J and K already walk the queue in every variant; as its own answer it replaces Other tasks with a key legend, so at 12 or 37 tasks you can only step, never pick a task. The "? All keys" sheet can be lifted into any variant later.
+
 Borrows from Linear Triage (https://linear.app/docs/triage, `research/premium/product/shots/needs-01-linear-triage.png`), Raycast's action panel (https://manual.raycast.com/action-panel) and the key legend under Chatwoot's "Search or jump to" (https://nicelydone.club/examples/screens/ebdf1e5c-d4cb-44ed-b29e-65e5cb32adb0, `research/premium/visual/shots/needs-08-chatwoot-jump-palette.png`).
 What it takes: one key per verb, the same on every item (Linear: 1, 2, 3, H; J and K inside an open item); Raycast's "Enter runs the primary action"; Chatwoot's legend that teaches the keys once, at the foot, without a tutorial. Primer's advice is followed for the primary action (Cmd or Ctrl plus Enter rather than a bare letter).
 Here: a quiet line pinned to the bottom edge of the card column: "J Next, K Previous, ⌘↩ Send the email, ? All keys", the key in ink and semibold, its word in grey, the way a macOS menu shows a shortcut; a key lights its word when used. "?" opens one sheet with every key in three groups (Move, Decide, Look closer): O Other options, T Talk it through, W Why it came to you, S The situation, Esc.

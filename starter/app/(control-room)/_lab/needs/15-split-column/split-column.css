@@ -31,7 +31,8 @@
 }
 .lab-needs-15 .n15-row:hover { background: rgb(18 17 14 / 0.04); }
 .lab-needs-15 .n15-row[aria-current="true"] { background: var(--raise); }
-.lab-needs-15 .n15-car { grid-column: 1 / -1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: var(--type-body); line-height: var(--lh-body); }
+/* The car wraps rather than cut ("Bentley Continental GT" at 1064 px); the place may shorten. */
+.lab-needs-15 .n15-car { grid-column: 1 / -1; min-width: 0; overflow-wrap: anywhere; font-size: var(--type-body); line-height: var(--lh-body); }
 .lab-needs-15 .n15-place { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--ink-2); }
 .lab-needs-15 .n15-row[aria-current="true"] .n15-place { color: var(--ink); }
 .lab-needs-15 .n15-time { color: var(--ink-2); font-variant-numeric: tabular-nums; }

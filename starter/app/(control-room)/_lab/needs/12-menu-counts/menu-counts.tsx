@@ -88,7 +88,9 @@ export function MenuCounts() {
     return () => (document.removeEventListener("pointerdown", onDown), window.removeEventListener("keydown", onKey, true))
   }, [open])
 
-  if (!lines.length) return null
+  // A count that only repeats "Your tasks N" goes (Sofie's one task, "Tomorrow or later 1"): the
+  // section shows when it splits the queue or says that all of it is within the hour (in red).
+  if (!lines.length || live.length < 2 || (lines.length === 1 && lines[0].key !== "hour")) return null
   const shown = lines.find((l) => l.key === open)
 
   return (

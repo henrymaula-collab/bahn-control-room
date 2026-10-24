@@ -1,5 +1,7 @@
 # needs 08: One at a time, Skip with a reason
 
+Cut by the reviewer (RV1, 25 Oct): it takes away the list on purpose, the opposite of what Henry asked (to pick another task when needed); the open reasons push the decision below the fold at 1064 x 544, and skip plus a reason to the shift lead needs engine work.
+
 Borrows from Zendesk's Guided mode (https://support.zendesk.com/hc/en-us/articles/4408825479066-Setting-up-Guided-mode, `research/premium/product/shots/needs-08-zendesk-skip-reason.png`) and Play mode's "next available ticket that you have not skipped" (https://support.zendesk.com/hc/en-us/articles/9186492658714-Using-Play-mode-to-quickly-work-through-tickets, `needs-06-zendesk-play.png`).
 What it takes: agents "won't be able to see a list of the tickets in the view", only the next one; skipping asks why ("Skipping happens. By tracking the reasons ... your manager will be able to identify areas"), and skipped tickets come last.
 Here: no list on the page. One slim line above the card says "2 of 12, the most urgent first" and offers "Skip for now". It opens in place: "Why skip the Ferrari Roma?" with three one-tap reasons in Bahn's words and "Something else". The case goes to the end of your tasks, the next one opens, and its top says "Ferrari Roma went to the end of your tasks. Kaisa sees why: waiting for someone to call back." with Undo.

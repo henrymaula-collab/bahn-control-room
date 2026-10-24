@@ -39,9 +39,14 @@ export function NextOpensDone({ headline, option, suggestion, done, leadName, ne
   useEffect(() => {
     if (!nextHref || stay || held) return
     if (left <= 0) {
-      // The lab's ?decided=1 saved nothing, so it stays put; a real decision moves on.
-      if (!lab.decided) router.push(nextHref)
-      return
+      // A real decision moves on. The lab's ?decided=1 saved nothing, so it stays put and, after a
+      // beat, counts again (instead of resting on "opens in 0 s", which reads as broken).
+      if (!lab.decided) {
+        router.push(nextHref)
+        return
+      }
+      const again = setTimeout(() => setLeft(SECONDS * 10), 1500)
+      return () => clearTimeout(again)
     }
     const id = setTimeout(() => setLeft((l) => l - 1), 100)
     return () => clearTimeout(id)

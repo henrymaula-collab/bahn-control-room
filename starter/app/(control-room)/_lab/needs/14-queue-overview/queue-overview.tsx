@@ -1,8 +1,8 @@
 "use client"
 
 // needs 14: two modes, as Stripe Radar's review queue has them: a list view to scan and a detailed
-// view to decide. "Other tasks ›" turns the card column into the whole queue, one count line on top
-// (the ops exception queue's counts, said as a sentence), a quiet table grouped by time, the case
+// view to decide. "Other tasks ›" turns the card column into the whole queue, a quiet table grouped
+// by time with each group's count (no count sentence on top: Henry's rule against meta lines), the case
 // you were on highlighted. A row opens its card; Escape or "Back" returns to the card you left. One
 // button starts with the most urgent (Queues' "Start review").
 
@@ -30,7 +30,6 @@ export function QueueOverviewAround({ children }: { children: React.ReactNode })
   const was = useRef(list)
   const groups = useMemo(() => byTime(rows, times), [rows, times])
   const here = rows.find((r) => r.caseId === current)
-  const soon = rows.filter((r) => times[r.caseId]?.now).length
   const first = rows.find((r) => r.caseId !== current || !lab.decided)
 
   // The list takes the whole width; back on the card, the situation returns beside it.
@@ -88,12 +87,8 @@ export function QueueOverviewAround({ children }: { children: React.ReactNode })
           >
             <div className="n14-inner">
               <header className="n14-top">
-                <div>
-                  <h1 className="n14-title">Your tasks</h1>
-                  <p className="n14-sum">
-                    {rows.length} {rows.length === 1 ? "task needs" : "tasks need"} you.{soon > 0 ? ` ${soon} within the hour.` : ""}
-                  </p>
-                </div>
+                {/* No count line under the title: the menu says the total and each group says its own. */}
+                <h1 className="n14-title">Your tasks</h1>
                 <div className="n14-actions">
                   {here && (
                     <button type="button" className="btn btn-plain n14-back" onClick={back} aria-keyshortcuts="Escape">

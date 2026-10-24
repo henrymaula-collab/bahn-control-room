@@ -22,7 +22,7 @@ npm run demo:reset            # the demo's starting point
 npm run dev
 ```
 
-Open http://localhost:3000. You start as Aino, an operations associate. The first time a page opens it compiles for a few seconds.
+Open http://localhost:3000. You start as Aino, an operations associate. The first time each page opens, the dev server compiles it, which can take up to half a minute.
 
 The first run takes a few minutes while Docker and npm download; after that each step above takes seconds. `.env.example` runs everything without keys: the chat answers from a script (`CR_CHAT_PROVIDER=mock`), the agent plays back recorded runs (`CR_AGENT_PROVIDER=replay`), and the voice button turns any recording into one fixed question. The rest is the real app on a real database.
 
@@ -36,7 +36,7 @@ Two rounds of the same new kind of case, then a fast-forward. Run `npm run demo:
 4. **Talk it through.** The row under the card opens the conversation; it says "New kind of case", because nobody has decided a seller hold before. Ask, for example, "Has this happened before?" or "What did the pickup place say on the call?". Each lookup the agent makes shows as a plain step above its answer. The microphone button asks by voice.
 5. **Decide.** "Other options", then "Keep the gig unpublished and wait for the customer to bring the release", then tap a reason. This answer sends nothing to the customer, so this kind can later be handled without a person. The card now says "Decided by Aino".
 6. **History.** The Ferrari is under Today: the car, the kind of case ("Seller hold on the car"), what was decided and when. Click the row for the record: the reason, how the conversation went and what it counts toward.
-7. **Round 2.** Switch person at the bottom of the side menu to Sofie. A second seller hold has come to her: the Bentley at Orvendin Cars Stockholm (CD-420442). Its row says "Decided once, by Aino". Ask the agent how to handle it, and it tells her what Aino did and why, and that it is still her call.
+7. **Round 2.** Switch person at the bottom of the side menu to Sofie. A second seller hold has come to her: the Bentley at Orvendin Cars Stockholm (CD-420442). Its Talk it through row says "Decided once, by Aino". Open it: the agent starts with what Aino chose and her reason, and says that with one case behind it, the call is still Sofie's.
 8. **Fast-forward.** The kind "Details disagree while the gig is posted" already has 29 of 30 agreeing answers from 4 people, so the agent has proposed to handle it alone. Kaisa, the shift lead, turns the proposal on. That step has no screen yet, so it runs through the API (with `npm run dev` still running):
 
    ```sh

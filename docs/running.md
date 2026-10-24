@@ -36,7 +36,7 @@ Then go on from `docker compose up -d --wait`. For the app itself, `npm run dev 
 
 ## Faster pages
 
-`npm run dev` compiles each page the first time it opens. For a run without that wait, build once and start the built app (the build takes about 15 seconds):
+`npm run dev` compiles each page the first time it opens. For a run without that wait, build once and start the built app (the build takes one to three minutes):
 
 ```sh
 npm run build && npm start

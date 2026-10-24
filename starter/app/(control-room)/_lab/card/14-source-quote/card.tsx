@@ -20,7 +20,16 @@ export function SourceQuote(props: CardProps) {
   const quote = sourceQuote(data)
   const call = data?.calls[0]
   const theirName = quote?.who.split(",").slice(1).join(",").trim().replace(/\s*\(.*\)$/, "") || quote?.who
-  const text = quote ? sentences(quote.text).slice(0, 2).join(" ") : ""
+  // As many whole sentences as fit about three lines (215 characters); one long sentence is cut at a word.
+  const text = (() => {
+    if (!quote) return ""
+    let out = ""
+    for (const s of sentences(quote.text)) {
+      if (out && (out + " " + s).length > 215) break
+      out = out ? `${out} ${s}` : s
+    }
+    return out.length > 215 ? `${out.slice(0, out.lastIndexOf(" ", 210))}…` : out
+  })()
 
   return (
     <section className="lab-card lab-card-14" aria-labelledby={`q-${props.caseId}`}>

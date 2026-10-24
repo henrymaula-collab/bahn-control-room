@@ -13,6 +13,8 @@ import "./card.css"
 export function WhyPopover(props: CardProps) {
   const q = useCard(props)
   const [open, setOpen] = useState(false)
+  const [up, setUp] = useState(false)
+  const [room, setRoom] = useState<number | undefined>(undefined)
   const { data, loading } = useCaseData(props.caseId, open)
   const box = useRef<HTMLDivElement>(null)
   const trigger = useRef<HTMLButtonElement>(null)
@@ -20,6 +22,13 @@ export function WhyPopover(props: CardProps) {
 
   useEffect(() => {
     if (!open) return
+    // Opens upward when the window has no room under the answers (Henry's Safari window is 544 px tall).
+    const r = trigger.current?.getBoundingClientRect()
+    const below = r ? window.innerHeight - r.bottom : 999
+    const above = r ? r.top : 0
+    const goUp = below < 380 && above > below
+    setUp(goUp)
+    setRoom(Math.max(180, (goUp ? above : below) - 20))
     head.current?.focus({ preventScroll: true })
     const onDown = (e: PointerEvent) => {
       if (!box.current?.contains(e.target as Node) && !trigger.current?.contains(e.target as Node)) setOpen(false)
@@ -39,7 +48,7 @@ export function WhyPopover(props: CardProps) {
   }, [open])
 
   if (q.done) return <CardDone props={props} q={q} />
-  const facts = firstHandFacts(data, 2)
+  const facts = firstHandFacts(data, 1)
   const record = recordLine(data)
 
   return (
@@ -80,7 +89,7 @@ export function WhyPopover(props: CardProps) {
           </button>
         </div>
         {open && (
-          <div ref={box} id={`c04-pop-${props.caseId}`} className="c04-pop" role="dialog" aria-label="Why the agent suggests this">
+          <div ref={box} id={`c04-pop-${props.caseId}`} className={`c04-pop${up ? " up" : ""}`} role="dialog" aria-label="Why the agent suggests this" style={room ? { maxHeight: room } : undefined}>
             <p ref={head} tabIndex={-1} className="c04-pop-title">
               Why the agent suggests this
             </p>
@@ -109,10 +118,6 @@ export function WhyPopover(props: CardProps) {
                 ))}
               </div>
             )}
-            <button type="button" className="btn btn-primary c04-accept" disabled={q.pending} onClick={() => (setOpen(false), q.onPrimary())}>
-              <Icon name="check" size={16} />
-              {q.answer}
-            </button>
           </div>
         )}
       </div>

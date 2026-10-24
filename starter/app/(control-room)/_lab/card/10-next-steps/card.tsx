@@ -16,14 +16,16 @@ const cap = (s: string) => s.replace(/^./, (c) => c.toUpperCase())
 function agentSteps(text: string): Step[] {
   const out: Step[] = []
   for (const raw of sentences(text)) {
+    const afterYes = /^After a yes,\s*/i.test(raw)
     const s = raw.replace(/\.$/, "").replace(/^After a yes,\s*/i, "")
     const parts = s.split(/,?\s+and then\s+|\s+and\s+(?=(?:keeps|brings|books|publishes|asks|calls|sends|rebooks|checks|drafts|holds)\b)/)
-    for (const p of parts) {
+    parts.forEach((p, i) => {
       const agent = /^the agent\s+/i.test(p)
       const verbFirst = /^(keeps|brings|books|publishes|asks|calls|sends|rebooks|checks|drafts|holds)\b/.test(p)
-      if (agent || verbFirst) out.push({ who: "The agent", what: cap(p.replace(/^the agent\s+/i, "")) })
+      if (afterYes && i === 0) out.push({ who: "After a yes", what: cap(verbFirst ? `the agent ${p}` : p) })
+      else if (agent || verbFirst) out.push({ who: "The agent", what: cap(p.replace(/^the agent\s+/i, "")) })
       else out.push({ who: "Then", what: cap(p) })
-    }
+    })
   }
   return out
 }
@@ -33,11 +35,15 @@ export function NextSteps(props: CardProps) {
   if (q.done) return <CardDone props={props} q={q} />
 
   const draft = q.draftOf(props.suggestion)
+  // The first step is the person's press: the message it sends, or what it changes at once (never the button's words again).
+  const firstEffect = props.suggestion.effect.split(/;\s*|(?<=\.)\s+/)[0]?.replace(/\.$/, "")
   const you: Step = {
-    who: "You, now",
+    who: "Now",
     what: draft
-      ? `${/e-?mail/i.test(draft.to) ? "An email" : "A message"} to ${draft.to.split(",")[0]}${draft.language !== "en" ? `, in ${languageName(draft.language)}` : ""}`
-      : q.answer,
+      ? `${/e-?mail/i.test(draft.to) ? "An email" : "A message"} goes to ${draft.to.split(",")[0]}${draft.language !== "en" ? `, in ${languageName(draft.language)}` : ""}`
+      : firstEffect && !/^(the agent|a person)\b/i.test(firstEffect)
+        ? cap(firstEffect)
+        : q.answer,
   }
   const steps = [you, ...agentSteps(props.next ?? props.suggestion.effect)]
 

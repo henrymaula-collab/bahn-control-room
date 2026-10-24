@@ -4,7 +4,7 @@ import "./chat.css"
 import "./shell.css"
 import { cookies } from "next/headers"
 import { dataSource, getSignedIn, getWork } from "@/lib/control-room/client"
-import { deskTitle } from "@/lib/control-room/format"
+import { avatarOf, jobTitle } from "@/lib/control-room/people-look"
 import { currentPersonId } from "./_ui/session"
 import { Shell } from "./_ui/shell"
 
@@ -17,8 +17,8 @@ export default async function ControlRoomLayout({ children }: { children: React.
   const me = signedIn.person
   return (
     <Shell
-      person={{ id: me.id, name: me.name, desk: deskTitle(me.desks[0]) }}
-      people={signedIn.people.filter((p) => p.onShift).map((p) => ({ id: p.id, name: p.name, desk: deskTitle(p.desks[0]) }))}
+      person={{ id: me.id, name: me.name, desk: jobTitle(me), avatar: avatarOf(me) }}
+      people={signedIn.people.filter((p) => p.onShift).map((p) => ({ id: p.id, name: p.name, desk: jobTitle(p), avatar: avatarOf(p) }))}
       needYou={work.needYou.length}
     >
       {children}

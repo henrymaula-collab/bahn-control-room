@@ -7,7 +7,7 @@ import { BahnLogo } from "./logo"
 import { archivoItalic } from "./shell-fonts"
 import { PersonSwitcher } from "./person-switcher"
 
-type P = { id: string; name: string; desk: string }
+type P = { id: string; name: string; desk: string; avatar: string }
 
 const SECTIONS: { href: string; label: string; icon: IconName }[] = [
   { href: "/", label: "Overview", icon: "map" },
@@ -26,9 +26,9 @@ export function Shell({ person, people, needYou, children }: { person: P; people
   const path = usePathname() ?? "/"
   const here = sectionOf(path)
   return (
-    <div className="shell">
+    <div className={`shell ${archivoItalic.variable}`}>
       <aside className="side" aria-label="Control room">
-        <Link href="/" className={`brand ${archivoItalic.variable}`} aria-label="Bahn control room, overview">
+        <Link href="/" className="brand" aria-label="Bahn control room, overview">
           <BahnLogo />
           {/* A lockup like Aalto's "Founder Sprint": the brand, then the product set in under its end. */}
           <span className="brand-sub">

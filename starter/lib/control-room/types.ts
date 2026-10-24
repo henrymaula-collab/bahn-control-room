@@ -107,6 +107,8 @@ export interface OpsPerson {
   id: string;
   name: string; // first name only
   role: "ops" | "shift_lead";
+  title?: string; // Bahn's job title: "Operations Associate", or "Operations Lead" for the shift lead
+  avatar?: string; // "/control-room/people/aino.jpg"
   desks: string[];
   languages: string[]; // "fi", "sv", "en", "de", "da"
   onShift: boolean;

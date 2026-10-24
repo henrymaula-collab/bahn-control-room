@@ -254,6 +254,8 @@
   font-size: clamp(24px, 7.6cqi, 56px); line-height: 1.14; font-weight: 600; letter-spacing: -0.4px; text-wrap: balance;
   overflow-wrap: break-word;
 }
+/* "Bahn Express" in Archivo's true italic, same weight, echoing the "Control room" lockup. */
+.overview .float-me .welcome em { font-family: "Owners Wide", var(--font-archivo-italic), var(--font-archivo), var(--font); font-style: italic; font-weight: inherit; }
 .overview .float-me .me-tasks { margin-top: clamp(18px, 5.4cqi, 40px); }
 .overview .float-me .tasks-today {
   width: 100%; min-width: 0; justify-content: space-between; gap: 12px;

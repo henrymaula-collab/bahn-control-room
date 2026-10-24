@@ -43,19 +43,19 @@ function mulberry32(seed: number) {
 type Profile = OpsPerson & { count: number; from: string; types: Partial<Record<CaseType & string, number>>; countries: Record<string, number> }
 
 export const TEAM: Profile[] = [
-  { id: "p-aino", name: "Aino", role: "ops", desks: ["ops-readiness", "ops-support"], languages: ["fi", "sv", "en"], onShift: true, count: 70, from: "2026-08-03",
+  { id: "p-aino", name: "Aino", role: "ops", title: "Operations Associate", avatar: "/control-room/people/aino.jpg", desks: ["ops-readiness", "ops-support"], languages: ["fi", "sv", "en"], onShift: true, count: 70, from: "2026-08-03",
     types: { "readiness.car_not_ready": 3, "readiness.no_answer": 3, "readiness.facts_disagree": 2, "readiness.keys_or_access": 2 }, countries: { FI: 6, SE: 1 } },
-  { id: "p-mikko", name: "Mikko", role: "ops", desks: ["ops-readiness", "ops-import"], languages: ["fi", "en"], onShift: true, count: 55, from: "2026-08-10",
+  { id: "p-mikko", name: "Mikko", role: "ops", title: "Operations Associate", avatar: "/control-room/people/mikko.jpg", desks: ["ops-readiness", "ops-import"], languages: ["fi", "en"], onShift: true, count: 55, from: "2026-08-10",
     types: { "readiness.facts_disagree": 3, "readiness.keys_or_access": 3, "readiness.no_answer": 1, "readiness.car_not_ready": 1 }, countries: { FI: 4, DE: 1, AT: 1 } },
-  { id: "p-sofie", name: "Sofie", role: "ops", desks: ["ops-readiness", "ops-support"], languages: ["da", "en", "sv"], onShift: true, count: 45, from: "2026-08-17",
+  { id: "p-sofie", name: "Sofie", role: "ops", title: "Operations Associate", avatar: "/control-room/people/sofie.jpg", desks: ["ops-readiness", "ops-support"], languages: ["da", "en", "sv"], onShift: true, count: 45, from: "2026-08-17",
     types: { "readiness.car_not_ready": 2, "readiness.no_answer": 2, "readiness.facts_disagree": 2, "readiness.keys_or_access": 2, "readiness.fee_requested": 1 }, countries: { DK: 5, SE: 2 } },
-  { id: "p-jonas", name: "Jonas", role: "ops", desks: ["ops-readiness", "ops-import"], languages: ["de", "en"], onShift: true, count: 60, from: "2026-08-03",
+  { id: "p-jonas", name: "Jonas", role: "ops", title: "Operations Associate", avatar: "/control-room/people/jonas.jpg", desks: ["ops-readiness", "ops-import"], languages: ["de", "en"], onShift: true, count: 60, from: "2026-08-03",
     types: { "readiness.release_document_missing": 4, "readiness.facts_disagree": 2, "readiness.keys_or_access": 2, "readiness.car_not_ready": 1, "readiness.fee_requested": 1 }, countries: { DE: 5, AT: 2, FR: 1 } },
-  { id: "p-lea", name: "Lea", role: "ops", desks: ["ops-support", "ops-readiness"], languages: ["de", "en", "fr"], onShift: false, count: 40, from: "2026-08-24",
+  { id: "p-lea", name: "Lea", role: "ops", title: "Operations Associate", avatar: "/control-room/people/lea.jpg", desks: ["ops-support", "ops-readiness"], languages: ["de", "en", "fr"], onShift: false, count: 40, from: "2026-08-24",
     types: { "readiness.facts_disagree": 2, "readiness.no_answer": 2, "readiness.car_not_ready": 2, "readiness.fee_requested": 1 }, countries: { DE: 3, FR: 3, NL: 1, BE: 1 } },
-  { id: "p-emil", name: "Emil", role: "ops", desks: ["ops-import", "ops-readiness"], languages: ["da", "de", "en"], onShift: true, count: 6, from: "2026-10-05",
+  { id: "p-emil", name: "Emil", role: "ops", title: "Operations Associate", avatar: "/control-room/people/emil.jpg", desks: ["ops-import", "ops-readiness"], languages: ["da", "de", "en"], onShift: true, count: 6, from: "2026-10-05",
     types: { "readiness.no_answer": 2, "readiness.car_not_ready": 1 }, countries: { DK: 2, DE: 1 } },
-  { id: "p-kaisa", name: "Kaisa", role: "shift_lead", desks: ["ops-shift", "ops-readiness"], languages: ["fi", "sv", "en", "de"], onShift: true, count: 25, from: "2026-08-03",
+  { id: "p-kaisa", name: "Kaisa", role: "shift_lead", title: "Operations Lead", avatar: "/control-room/people/kaisa.jpg", desks: ["ops-shift", "ops-readiness"], languages: ["fi", "sv", "en", "de"], onShift: true, count: 25, from: "2026-08-03",
     types: { "readiness.car_not_ready": 1, "readiness.facts_disagree": 1, "readiness.keys_or_access": 1, "readiness.no_answer": 1 }, countries: { FI: 3, DE: 1, DK: 1 } },
 ]
 

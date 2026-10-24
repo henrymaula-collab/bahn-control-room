@@ -5,7 +5,7 @@ import { useEffect, useRef, useState, useTransition } from "react"
 import { choosePerson } from "../actions"
 import { Icon } from "./icons"
 
-type P = { id: string; name: string; desk: string }
+type P = { id: string; name: string; desk: string; avatar: string } // desk = Bahn job title
 
 /** Who is on shift on this screen. A switch for the demo, shaped like the portal's account menu. */
 export function PersonSwitcher({ current, people }: { current: P; people: P[] }) {
@@ -42,6 +42,8 @@ export function PersonSwitcher({ current, people }: { current: P; people: P[] })
   return (
     <div className="person" ref={ref}>
       <button type="button" className="person-button" aria-haspopup="menu" aria-expanded={open} onClick={() => setOpen((o) => !o)}>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img className="avatar" src={current.avatar} alt="" width={40} height={40} />
         <span className="person-name">
           <span>{current.name}</span>
           <span className="s">{current.desk}</span>
@@ -52,9 +54,13 @@ export function PersonSwitcher({ current, people }: { current: P; people: P[] })
         <div className="menu" role="menu">
           {people.map((p) => (
             <button key={p.id} type="button" role="menuitemradio" aria-checked={p.id === current.id} className="menu-item" onClick={() => choose(p)}>
-              <span>
-                {p.name}
-                <span className="s">{p.desk}</span>
+              <span className="menu-person">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img className="avatar avatar-s" src={p.avatar} alt="" width={28} height={28} />
+                <span>
+                  {p.name}
+                  <span className="s">{p.desk}</span>
+                </span>
               </span>
               {p.id === current.id && <Icon name="check" size={16} />}
             </button>

@@ -22,7 +22,13 @@
 .nav a { height: 46px; gap: 14px; padding: 0 14px; border-radius: 12px; font-size: 18px; line-height: 24px; }
 .nav a svg { width: 22px; height: 22px; }
 .nav .count { font-size: 17px; }
-.person-button { padding: 12px 14px; border-radius: 12px; }
+.person-button { padding: 10px 12px; border-radius: 12px; justify-content: flex-start; gap: 12px; }
+.person-button > svg { margin-left: auto; }
+/* The signed-in person's photo, round, as in Bahn's portal account menu. */
+.avatar { flex: none; width: 40px; height: 40px; border-radius: 50%; object-fit: cover; background: var(--press); box-shadow: 0 0 0 1px rgb(18 17 14 / 0.06); }
+.avatar-s { width: 28px; height: 28px; }
+.menu-person { display: flex; align-items: center; gap: 10px; }
+.menu-person .s { display: block; margin-left: 0; }
 .person-button svg { width: 22px; height: 22px; }
 .person-name { font-size: 18px; line-height: 24px; }
 .person-name .s { font-size: 15px; line-height: 20px; }

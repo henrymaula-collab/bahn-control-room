@@ -50,7 +50,7 @@ export function OverviewView({ data, red, look, firstName }: { data: Overview; r
         card={(orderId, close) => <PinCard info={red[orderId]} close={close} />}
       />
       <section ref={panel} className="float float-me" aria-label="Today">
-        <h1 className="welcome">Welcome back to Bahn Express, {firstName}.</h1>
+        <h1 className="welcome">Welcome back to <em>Bahn Express</em>, {firstName}.</h1>
 
         <div className="me-tasks">
           <TasksTodayCta

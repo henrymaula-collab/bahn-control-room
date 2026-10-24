@@ -1,0 +1,10 @@
+/* menu 01: two groups, the person's own work and the room's records, under a small grey
+   sentence-case header (Apple Mail and Notes sidebars; Linear's "Your teams"). Same rows as today. */
+.lab-menu-01 .brand { margin-bottom: calc(22 * var(--cr-su)); }
+.lab-menu-01 .lm01-head {
+  margin: calc(26 * var(--cr-su)) 0 calc(6 * var(--cr-su)); padding: 0 calc(14 * var(--cr-su));
+  font-size: var(--type-menu-sub); line-height: var(--lh-menu-sub); font-weight: 600; color: var(--ink-2);
+}
+@media (max-width: 860px) {
+  .lab-menu-01 .lm01-head { display: none; }
+}

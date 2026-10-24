@@ -1,0 +1,9 @@
+/* map 03: yours. Aino's own cases (red[id].mine) are the big dots with an ink ring, the same three
+   the welcome panel lists; everyone else's red is a small dot. Onfleet: the list and the pins are
+   the same objects. The agent's cars breathe as today. */
+.lab-map-03 .lp-dot { width: 8px; height: 8px; box-shadow: 0 0 0 1.5px var(--page), 0 1px 2px rgb(18 17 14 / 0.22); }
+.lab-map-03 .pin.lp.mine .lp-dot { width: 14px; height: 14px; box-shadow: 0 0 0 2px var(--page), 0 0 0 3.5px var(--ink), 0 2px 6px rgb(18 17 14 / 0.25); }
+.lab-map-03 .pin.lp.mine .lp-halo { width: 30px; height: 30px; background: rgb(253 74 97 / 0.12); }
+.lab-map-03 .pin.lp:hover .lp-dot, .lab-map-03 .pin.lp.lift .lp-dot { transform: scale(1.25); }
+.lab-map-03 .pin.lp.on .lp-dot { transform: scale(1.2); box-shadow: 0 0 0 2px var(--page), 0 0 0 4px var(--ink), 0 2px 6px rgb(18 17 14 / 0.3); }
+.lab-map-03 .lk-a::after { animation: breathe 2.8s cubic-bezier(.2, 0, .2, 1) infinite; }

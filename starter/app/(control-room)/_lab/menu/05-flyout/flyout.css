@@ -1,0 +1,27 @@
+/* menu 05: the fly-out beside Your tasks (Cushion's "Switch to"): a floating list in the welcome
+   panel's row style (car, place, time), first seven, then "All N tasks". */
+.lab-menu-05 .lm05-wrap { position: relative; }
+.lab-menu-05 .lm05-fly {
+  position: absolute; top: calc(-8 * var(--cr-su)); left: calc(100% + 14 * var(--cr-su)); z-index: 60;
+  width: max(300px, calc(380 * var(--cr-su))); padding: 6px; border-radius: 16px; background: var(--page);
+  box-shadow: 0 0 0 1px rgb(18 17 14 / 0.05), 0 2px 4px rgb(18 17 14 / 0.05), 0 14px 36px rgb(18 17 14 / 0.14);
+  animation: lm05-in 150ms var(--ease) both;
+}
+.lab-menu-05 .lm05-fly::before { content: ""; position: absolute; top: 0; bottom: 0; right: 100%; width: calc(16 * var(--cr-su)); } /* the hover bridge across the gap */
+@keyframes lm05-in { from { opacity: 0; transform: translateX(-6px); } to { opacity: 1; transform: none; } }
+.lab-menu-05 .lm05-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: 12px; padding: 8px 12px; border-radius: 10px; transition: background-color 100ms var(--ease); }
+.lab-menu-05 .lm05-row:hover, .lab-menu-05 .lm05-row:focus-visible { background: var(--raise); }
+.lab-menu-05 .lm05-row[aria-current="page"] { background: var(--press); }
+.lab-menu-05 .lm05-v { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: var(--type-menu); line-height: var(--lh-menu); }
+.lab-menu-05 .lm05-p { grid-column: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: var(--type-menu-sub); line-height: var(--lh-menu-sub); color: var(--ink-2); }
+.lab-menu-05 .lm05-t { grid-row: 1; grid-column: 2; font-size: var(--type-menu-sub); line-height: var(--lh-menu); color: var(--ink-2); }
+.lab-menu-05 .lm05-t.now { color: var(--now); font-weight: 600; }
+.lab-menu-05 .lm05-all { display: flex; align-items: center; gap: 2px; margin: 4px 0 0; padding: 10px 12px 8px; border-radius: 10px; font-size: var(--type-menu); line-height: var(--lh-menu); }
+.lab-menu-05 .lm05-all:hover { background: var(--raise); }
+.lab-menu-05 .lm05-all svg { color: var(--ink-2); }
+@media (max-width: 860px) {
+  .lab-menu-05 .lm05-fly { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .lab-menu-05 .lm05-fly { animation: none; }
+}

@@ -1,0 +1,10 @@
+/* menu 04: Your tasks on two lines: the name and count, then the next deadline in the menu's small
+   size; the time red within the hour (the app's .now rule). */
+.lab-menu-04 .nav a.lm04-tasks { height: auto; min-height: calc(46 * var(--cr-su)); padding-top: calc(7 * var(--cr-su)); padding-bottom: calc(7 * var(--cr-su)); }
+.lab-menu-04 .lm04-two { display: flex; flex-direction: column; min-width: 0; }
+.lab-menu-04 .lm04-next { font-size: var(--type-menu-sub); line-height: var(--lh-menu-sub); color: var(--ink-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.lab-menu-04 .nav a[aria-current="page"] .lm04-next { color: var(--bx-color-grey-700); } /* 5.6:1 on press; grey-600 would be 4.0:1 */
+.lab-menu-04 .lm04-next time { font-variant-numeric: tabular-nums; }
+@media (max-width: 860px) {
+  .lab-menu-04 .lm04-next { display: none; }
+}

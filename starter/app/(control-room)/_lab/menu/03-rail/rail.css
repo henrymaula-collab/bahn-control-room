@@ -1,0 +1,67 @@
+/* menu 03: the rail. Bahn's mark, the icons, the count as a small ink number on Your tasks, the
+   names as a tooltip on hover or focus, the person as their photo. Rail when pinned (any width above
+   phones) or, by default, under 1200 px, so Henry's Safari window at 125% gets the room back. The
+   rules below are the same block twice (generated), once per case. */
+.lab-menu-03 { --lm03-rail: max(64px, calc(84 * var(--cr-su))); }
+.lab-menu-03 .lm03-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 4px; margin-bottom: calc(26 * var(--cr-su)); }
+.lab-menu-03 .lm03-top .brand { margin-bottom: 0; }
+.lab-menu-03 .lm03-toggle { flex: none; width: 32px; height: 32px; display: grid; place-items: center; border-radius: 8px; color: var(--ink-2); transition: background-color 150ms var(--ease), color 150ms var(--ease); }
+.lab-menu-03 .lm03-toggle:hover { background: rgb(18 17 14 / 0.045); color: var(--ink); }
+@media (max-width: 860px) {
+  .lab-menu-03 .lm03-toggle { display: none; }
+  .lab-menu-03 .lm03-top { margin: 0; }
+}
+
+@media (min-width: 861px) {
+  .lab-menu-03[data-pin="rail"] { grid-template-columns: var(--lm03-rail) minmax(0, 1fr); }
+  .lab-menu-03[data-pin="rail"] .side { align-items: center; padding-left: 10px; padding-right: 10px; }
+  .lab-menu-03[data-pin="rail"] .lm03-top { flex-direction: column; align-items: center; gap: calc(10 * var(--cr-su)); margin-bottom: calc(22 * var(--cr-su)); }
+  .lab-menu-03[data-pin="rail"] .brand { padding: calc(8 * var(--cr-su)); margin: 0; }
+  .lab-menu-03[data-pin="rail"] .brand > svg:not(.lm-mark), .lab-menu-03[data-pin="rail"] .brand .brand-sub { display: none; }
+  .lab-menu-03[data-pin="rail"] .brand .lm-mark { display: block; height: calc(30 * var(--cr-su)); width: auto; color: var(--ink); }
+  .lab-menu-03[data-pin="rail"] .nav { align-items: center; align-self: stretch; }
+  .lab-menu-03[data-pin="rail"] .nav a { position: relative; width: calc(50 * var(--cr-su)); height: calc(46 * var(--cr-su)); padding: 0; gap: 0; justify-content: center; }
+  .lab-menu-03[data-pin="rail"] .nav a .lm-l { display: none; }
+  .lab-menu-03[data-pin="rail"] .nav a .count {
+    position: absolute; top: 2px; right: -5px; margin: 0;
+    min-width: 16px; height: 16px; padding: 0 4px; border-radius: 8px; background: var(--ink); color: var(--page);
+    font-size: 10.5px; line-height: 16px; font-weight: 600; text-align: center; box-shadow: 0 0 0 2px var(--raise);
+  }
+  .lab-menu-03[data-pin="rail"] .nav a:hover::after, .lab-menu-03[data-pin="rail"] .nav a:focus-visible::after {
+    content: attr(data-label); position: absolute; left: calc(100% + 10px); top: 50%; transform: translateY(-50%); z-index: 60;
+    padding: 5px 10px 6px; border-radius: 8px; background: var(--ink); color: var(--page); pointer-events: none; white-space: nowrap;
+    font-size: var(--type-menu-sub); line-height: var(--lh-menu-sub);
+  }
+  .lab-menu-03[data-pin="rail"] .side-foot { align-self: stretch; display: flex; justify-content: center; }
+  .lab-menu-03[data-pin="rail"] .person { display: flex; justify-content: center; }
+  .lab-menu-03[data-pin="rail"] .person-button { width: auto; padding: 6px; border-radius: 50%; }
+  .lab-menu-03[data-pin="rail"] .person-button .person-name, .lab-menu-03[data-pin="rail"] .person-button > svg { display: none; }
+  .lab-menu-03[data-pin="rail"] .menu { right: auto; width: 300px; }
+  }
+
+@media (min-width: 861px) and (max-width: 1199px) {
+  .lab-menu-03[data-pin="auto"] { grid-template-columns: var(--lm03-rail) minmax(0, 1fr); }
+  .lab-menu-03[data-pin="auto"] .side { align-items: center; padding-left: 10px; padding-right: 10px; }
+  .lab-menu-03[data-pin="auto"] .lm03-top { flex-direction: column; align-items: center; gap: calc(10 * var(--cr-su)); margin-bottom: calc(22 * var(--cr-su)); }
+  .lab-menu-03[data-pin="auto"] .brand { padding: calc(8 * var(--cr-su)); margin: 0; }
+  .lab-menu-03[data-pin="auto"] .brand > svg:not(.lm-mark), .lab-menu-03[data-pin="auto"] .brand .brand-sub { display: none; }
+  .lab-menu-03[data-pin="auto"] .brand .lm-mark { display: block; height: calc(30 * var(--cr-su)); width: auto; color: var(--ink); }
+  .lab-menu-03[data-pin="auto"] .nav { align-items: center; align-self: stretch; }
+  .lab-menu-03[data-pin="auto"] .nav a { position: relative; width: calc(50 * var(--cr-su)); height: calc(46 * var(--cr-su)); padding: 0; gap: 0; justify-content: center; }
+  .lab-menu-03[data-pin="auto"] .nav a .lm-l { display: none; }
+  .lab-menu-03[data-pin="auto"] .nav a .count {
+    position: absolute; top: 2px; right: -5px; margin: 0;
+    min-width: 16px; height: 16px; padding: 0 4px; border-radius: 8px; background: var(--ink); color: var(--page);
+    font-size: 10.5px; line-height: 16px; font-weight: 600; text-align: center; box-shadow: 0 0 0 2px var(--raise);
+  }
+  .lab-menu-03[data-pin="auto"] .nav a:hover::after, .lab-menu-03[data-pin="auto"] .nav a:focus-visible::after {
+    content: attr(data-label); position: absolute; left: calc(100% + 10px); top: 50%; transform: translateY(-50%); z-index: 60;
+    padding: 5px 10px 6px; border-radius: 8px; background: var(--ink); color: var(--page); pointer-events: none; white-space: nowrap;
+    font-size: var(--type-menu-sub); line-height: var(--lh-menu-sub);
+  }
+  .lab-menu-03[data-pin="auto"] .side-foot { align-self: stretch; display: flex; justify-content: center; }
+  .lab-menu-03[data-pin="auto"] .person { display: flex; justify-content: center; }
+  .lab-menu-03[data-pin="auto"] .person-button { width: auto; padding: 6px; border-radius: 50%; }
+  .lab-menu-03[data-pin="auto"] .person-button .person-name, .lab-menu-03[data-pin="auto"] .person-button > svg { display: none; }
+  .lab-menu-03[data-pin="auto"] .menu { right: auto; width: 300px; }
+  }

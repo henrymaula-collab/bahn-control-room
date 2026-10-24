@@ -1,0 +1,11 @@
+/* menu 07: above the signed-in person, the people on shift with them as overlapping faces (the
+   portal's round photos), one tap to Team. Air, not a divider, between the two. */
+.lab-menu-07 .side-foot { display: flex; flex-direction: column; gap: calc(10 * var(--cr-su)); }
+.lab-menu-07 .lm07-shift { display: flex; flex-direction: column; gap: calc(8 * var(--cr-su)); padding: calc(10 * var(--cr-su)) calc(12 * var(--cr-su)); border-radius: calc(12 * var(--cr-su)); transition: background-color 150ms var(--ease); }
+.lab-menu-07 .lm07-shift:hover { background: rgb(18 17 14 / 0.045); }
+.lab-menu-07 .lm07-l { font-size: var(--type-menu-sub); line-height: var(--lh-menu-sub); color: var(--ink-2); }
+.lab-menu-07 .lm07-row { display: flex; align-items: center; justify-content: space-between; color: var(--ink-2); }
+.lab-menu-07 .lm07-faces { display: flex; align-items: center; }
+.lab-menu-07 .lm07-face { width: calc(32 * var(--cr-su)); height: calc(32 * var(--cr-su)); box-shadow: 0 0 0 2px var(--raise); }
+.lab-menu-07 .lm07-face + .lm07-face { margin-left: calc(-8 * var(--cr-su)); }
+.lab-menu-07 .lm07-more { margin-left: calc(8 * var(--cr-su)); font-size: var(--type-menu-sub); line-height: var(--lh-menu-sub); color: var(--ink-2); }

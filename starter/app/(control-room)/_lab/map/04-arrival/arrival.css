@@ -1,0 +1,19 @@
+/* map 04: arrival. The first second of the video: the camera settles on the frame (1.7 s ease-out,
+   in kit.tsx), green fades in, then the agent's cars, then the red dots drop in one after another,
+   and the person's own pulse once. After that the map is still, as today. Reduced motion: no
+   choreography, the map is simply there. */
+.lab-map-04 .lp-halo { width: 24px; height: 24px; background: rgb(253 74 97 / 0.14); }
+.lab-map-04 .pin.lp:hover .lp-dot, .lab-map-04 .pin.lp.lift .lp-dot { transform: scale(1.2); }
+.lab-map-04 .pin.lp.on .lp-dot { box-shadow: 0 0 0 2px var(--page), 0 0 0 4px var(--ink), 0 2px 6px rgb(18 17 14 / 0.3); }
+.lab-map-04 .pin.lp.on .lp-halo { background: transparent; }
+.lab-map-04 .lk-a::after { animation: breathe 2.8s cubic-bezier(.2, 0, .2, 1) 2.2s infinite; }
+
+@media (prefers-reduced-motion: no-preference) {
+  .lab-map-04 .lk-a { animation: lk04-in 500ms var(--ease-open) backwards; animation-delay: calc(800ms + var(--i, 0) * 45ms); }
+  .lab-map-04 .pin.lp .lp-dot { animation: lk04-drop 460ms var(--ease-open) backwards; animation-delay: calc(1300ms + var(--i, 0) * 32ms); }
+  .lab-map-04 .pin.lp .lp-halo { animation: lk04-in 500ms ease-out backwards; animation-delay: calc(1450ms + var(--i, 0) * 32ms); }
+  .lab-map-04 .pin.lp.mine .lp-halo { animation: lk04-in 500ms ease-out backwards, lk04-pulse 1200ms cubic-bezier(.2, 0, .2, 1) 2400ms 2; }
+}
+@keyframes lk04-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes lk04-drop { from { opacity: 0; transform: translateY(-10px) scale(0.5); } 60% { opacity: 1; } to { opacity: 1; transform: none; } }
+@keyframes lk04-pulse { 0% { transform: scale(1); background: rgb(253 74 97 / 0.30); } 100% { transform: scale(2.4); background: rgb(253 74 97 / 0); } }

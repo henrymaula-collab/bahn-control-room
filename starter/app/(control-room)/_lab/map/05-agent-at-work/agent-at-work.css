@@ -1,0 +1,14 @@
+/* map 05: agent at work. The agent's cars are steady green dots; every 1.1 s one of them sends
+   out a ring, in turn (kit.tsx), like a call going out. One moving thing at a time instead of
+   fourteen breathing in sync: the map reads "working through a list", and it is calmer
+   (Apple HIG: avoid sustained oscillation; Onfleet: on-duty drivers flash subtly). */
+.lab-map-05 .lp-halo { width: 24px; height: 24px; background: rgb(253 74 97 / 0.14); }
+.lab-map-05 .pin.lp:hover .lp-dot, .lab-map-05 .pin.lp.lift .lp-dot { transform: scale(1.2); }
+.lab-map-05 .pin.lp.on .lp-dot { box-shadow: 0 0 0 2px var(--page), 0 0 0 4px var(--ink), 0 2px 6px rgb(18 17 14 / 0.3); }
+.lab-map-05 .pin.lp.on .lp-halo { background: transparent; }
+.lab-map-05 .lk-a { width: 8px; height: 8px; margin: -0.5px; box-shadow: 0 0 0 1.5px var(--page), 0 0 0 3.5px rgb(35 143 98 / 0.16); }
+.lab-map-05 .lk-a::before { content: ""; position: absolute; inset: 0; border-radius: 50%; border: 1.5px solid var(--green); opacity: 0; }
+.lab-map-05 .lk-agent.ping .lk-a::after { animation: lk05-ping 1.8s cubic-bezier(.2, 0, .2, 1) both; }
+.lab-map-05 .lk-agent.ping .lk-a::before { animation: lk05-ring 1.8s cubic-bezier(.2, 0, .2, 1) 120ms both; }
+@keyframes lk05-ping { 0% { transform: scale(1); opacity: 0.5; } 100% { transform: scale(3.4); opacity: 0; } }
+@keyframes lk05-ring { 0% { transform: scale(1); opacity: 0.8; } 100% { transform: scale(4.6); opacity: 0; } }

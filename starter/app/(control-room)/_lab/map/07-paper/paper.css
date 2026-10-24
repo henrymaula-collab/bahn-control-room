@@ -1,0 +1,10 @@
+/* map 07: paper. Apple's muted map (HIG Maps) in Bahn's paper tones: no green parks, grey-teal
+   water, lighter labels, so the cars are the only colour. The map fades to paper under the welcome
+   panel and comes in beside it, the way Apple Maps' sidebar sits over its map. Red dots are lifted
+   with a soft shadow instead of a halo. */
+.lab-map-07.map { background: #f6f4ed; }
+.lab-map-07 .lp-dot { width: 12px; height: 12px; box-shadow: 0 0 0 2px var(--page), 0 2px 5px rgb(18 17 14 / 0.25), 0 6px 14px rgb(161 51 66 / 0.18); }
+.lab-map-07 .pin.lp:hover .lp-dot, .lab-map-07 .pin.lp.lift .lp-dot { transform: translateY(-2px) scale(1.15); box-shadow: 0 0 0 2px var(--page), 0 4px 8px rgb(18 17 14 / 0.25), 0 10px 18px rgb(161 51 66 / 0.2); }
+.lab-map-07 .pin.lp.on .lp-dot { box-shadow: 0 0 0 2px var(--page), 0 0 0 4px var(--ink), 0 4px 10px rgb(18 17 14 / 0.3); }
+.lab-map-07 .lk-a::after { animation: breathe 3.4s cubic-bezier(.2, 0, .2, 1) infinite; }
+.lab-map-07 .maplibregl-ctrl-attrib { background: rgb(247 245 238 / 0.85) !important; }

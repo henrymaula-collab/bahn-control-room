@@ -1,0 +1,9 @@
+/* map 08: fly to. A click on a red dot flies the map to the car (Apple Maps selects a place the
+   same way) and its card docks bottom right: what stopped, the car, the time, one black button,
+   and previous/next through every red car (arrow keys). Escape or a click on the map flies back. */
+.lab-map-08 .lp-halo { width: 24px; height: 24px; background: rgb(253 74 97 / 0.14); transition: transform 200ms var(--ease); }
+.lab-map-08 .pin.lp:hover .lp-dot, .lab-map-08 .pin.lp.lift .lp-dot { transform: scale(1.2); }
+.lab-map-08 .pin.lp.on .lp-dot { transform: scale(1.35); box-shadow: 0 0 0 2px var(--page), 0 0 0 4px var(--ink), 0 3px 8px rgb(18 17 14 / 0.3); }
+.lab-map-08 .pin.lp.on .lp-halo { transform: scale(1.4); background: rgb(253 74 97 / 0.12); }
+.lab-map-08 .lk-a::after { animation: breathe 2.8s cubic-bezier(.2, 0, .2, 1) infinite; }
+.lab-map-08.lk-dock .lk-c-r { margin-top: 2px; }

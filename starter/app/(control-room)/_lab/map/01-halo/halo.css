@@ -1,0 +1,10 @@
+/* map 01: halo. A red dot with a soft halo invites the click (FrostFlow's one problem marker);
+   hover grows it and names the car; the open one is marked with an ink ring (Apple HIG Maps:
+   "distinct styling like an outline"). The agent's cars breathe as today. */
+.lab-map-01 .lp-halo { width: 26px; height: 26px; background: rgb(253 74 97 / 0.16); transition: transform 200ms var(--ease), background-color 200ms var(--ease); }
+.lab-map-01 .lp-dot { width: 12px; height: 12px; }
+.lab-map-01 .pin.lp:hover .lp-dot, .lab-map-01 .pin.lp.lift .lp-dot { transform: scale(1.18); }
+.lab-map-01 .pin.lp:hover .lp-halo, .lab-map-01 .pin.lp.lift .lp-halo { transform: scale(1.25); background: rgb(253 74 97 / 0.22); }
+.lab-map-01 .pin.lp.on .lp-dot { transform: scale(1.18); box-shadow: 0 0 0 2px var(--page), 0 0 0 4px var(--ink), 0 2px 6px rgb(18 17 14 / 0.3); }
+.lab-map-01 .pin.lp.on .lp-halo { background: transparent; }
+.lab-map-01 .lk-a::after { animation: breathe 2.8s cubic-bezier(.2, 0, .2, 1) infinite; }

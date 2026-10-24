@@ -1,0 +1,11 @@
+/* menu 06: go-to keys. A row's key shows at its end on hover or keyboard focus, in grey, as macOS
+   menus print their shortcuts (plain glyphs, no boxes); pressing G shows every key at once. */
+.lab-menu-06 .lm06-k { margin-left: auto; display: none; gap: 0.35em; font-family: var(--font); font-size: var(--type-menu-sub); line-height: var(--lh-menu-sub); font-weight: 400; color: var(--ink-2); }
+.lab-menu-06 .nav a:hover .lm06-k, .lab-menu-06 .nav a:focus-visible .lm06-k, .lab-menu-06[data-armed] .lm06-k { display: inline-flex; }
+.lab-menu-06 .nav a:hover .count, .lab-menu-06 .nav a:focus-visible .count, .lab-menu-06[data-armed] .nav .count { display: none; }
+.lab-menu-06[data-armed] .lm06-k { color: var(--ink); font-weight: 600; animation: lm06-in 120ms var(--ease) both; }
+.lab-menu-06[data-armed] .lm06-k span:first-child { color: var(--ink-2); font-weight: 400; }
+@keyframes lm06-in { from { opacity: 0; } to { opacity: 1; } }
+@media (max-width: 860px) {
+  .lab-menu-06 .lm06-k { display: none !important; }
+}

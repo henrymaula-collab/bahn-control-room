@@ -1,0 +1,9 @@
+/* menu 02: the open section is an asphalt pill with birch type: the same black and the same full
+   radius as the welcome panel's "3 tasks for you" pill and Bahn's portal buttons. Hover stays a
+   faint tint, so only one thing in the menu is black. */
+.lab-menu-02 .nav a { border-radius: 999px; transition: background-color 150ms var(--ease), color 150ms var(--ease); }
+.lab-menu-02 .nav a[aria-current="page"] { background: var(--ink); color: var(--page); }
+.lab-menu-02 .nav a[aria-current="page"] svg { color: var(--page); }
+.lab-menu-02 .nav a[aria-current="page"] .lm-l { font-weight: 600; }
+.lab-menu-02 .nav a[aria-current="page"] .count { color: var(--bx-color-grey-200-sand); }
+.lab-menu-02 .person-button { border-radius: calc(16 * var(--cr-su)); }

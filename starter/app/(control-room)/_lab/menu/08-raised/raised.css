@@ -1,0 +1,10 @@
+/* menu 08: the open section is a raised birch row on the grey frame, as Arc raises the open tab in
+   its sidebar: the same material and white as the page it opens, so menu and page read as one.
+   Hover is a half-raised tint. */
+.lab-menu-08 .nav a { transition: background-color 150ms var(--ease), box-shadow 150ms var(--ease); }
+.lab-menu-08 .nav a:hover:not([aria-current="page"]) { background: rgb(255 254 247 / 0.55); }
+.lab-menu-08 .nav a[aria-current="page"] {
+  background: var(--page);
+  box-shadow: 0 0 0 1px rgb(18 17 14 / 0.05), 0 1px 2px rgb(18 17 14 / 0.06), 0 3px 10px rgb(18 17 14 / 0.05);
+}
+.lab-menu-08 .person-button:hover { background: rgb(255 254 247 / 0.55); }

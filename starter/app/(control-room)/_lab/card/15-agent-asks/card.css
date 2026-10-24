@@ -1,11 +1,11 @@
 /* card 15: the agent asks. A byline with Bahn's mark ("The agent stopped here and needs a decision
    by 13:00", the time in deadline red); the situation and question as the agent's note behind a
-   2 px ink rule; the answers outside the note, aligned with the byline. */
-.lab-card-15 .c15-from { display: flex; align-items: center; gap: 0.6em; font-size: var(--size-s); line-height: var(--lh-subhead); color: var(--ink-2); }
+   2 px ink rule; the rule hangs in the card's left air, so the headline keeps the card's edge and full measure. */
+.lab-card-15 .c15-from { display: flex; align-items: center; gap: 0.5em; font-size: var(--size-s); line-height: var(--lh-subhead); color: var(--ink-2); }
 .lab-card-15 .c15-from .amark { flex: none; }
 .lab-card-15 .c15-due { font-weight: 600; color: var(--ink); font-variant-numeric: tabular-nums; }
 .lab-card-15 .c15-due.now { color: var(--now); }
-.lab-card-15 .c15-note { margin-top: 0.8em; margin-left: calc(11px - 1px); padding: 0.1em 0 0.25em calc(0.6em + 11px - 1px); border-left: 2px solid var(--ink); }
+.lab-card-15 .c15-note { margin-top: 0.7em; margin-left: -11px; padding: 0.1em 0 0.25em 9px; border-left: 2px solid var(--ink); }
 .lab-card-15 .c15-ask { margin-top: 0.9em; }
 .lab-card-15 .c15-acts { margin-top: calc(24 / 17 * 1em); }
 .lab-card-15 .c15-next { margin-top: 0.8em; }

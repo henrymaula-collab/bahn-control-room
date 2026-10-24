@@ -163,6 +163,7 @@ export function useMinutesLeft(caseId: string) {
   const opened = useRef(Date.now())
   const [tick, setTick] = useState(0)
   useEffect(() => {
+    // The room's clock is the same for every person; the overview route only needs some person to answer.
     roomNow ??= fetch("/api/cr/overview?person=p-aino", { cache: "no-store" })
       .then((r) => (r.ok ? r.json() : null))
       .then((d) => (d?.now as string) ?? null)

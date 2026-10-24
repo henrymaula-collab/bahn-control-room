@@ -21,7 +21,7 @@ export function AgentAsks(props: CardProps) {
   return (
     <section className="lab-card lab-card-15" aria-labelledby={`q-${props.caseId}`}>
       <p className="c15-from">
-        <AgentMark size={22} />
+        <AgentMark size={18} />
         <span>
           The agent stopped here and needs a decision
           {due && (

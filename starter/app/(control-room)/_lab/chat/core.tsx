@@ -22,6 +22,9 @@ export type OfferState = "open" | "saving" | "done" | "failed"
 /** The agent's offer under its answer: open until the person taps, then the line of what happened. */
 export type Offer = { after: string; action: ChatAction; state: OfferState; line?: string; at?: string }
 
+/** What happens now, after the yes (the head above it already says it was decided, and when). */
+const doneLine = (a: ChatAction) => a.next ?? `${a.label}.`
+
 const chatUrl = (caseId: string) => `/api/cr/cases/${encodeURIComponent(caseId)}/chat`
 
 const upsert = (steps: ChatToolStep[], step: ChatToolStep) =>
@@ -56,7 +59,7 @@ export function useChatCore(thread: ChatThread | null, personId: string) {
       const a = FIXTURE_OFFER.action
       setOffer(
         lab.decided
-          ? { after: FIXTURE_OFFER.answer.id, action: a, state: "done", line: `${a.label}.${a.next ? ` ${a.next}` : ""}`, at: "12:04" }
+          ? { after: FIXTURE_OFFER.answer.id, action: a, state: "done", line: doneLine(a), at: "12:04" }
           : { after: FIXTURE_OFFER.answer.id, action: a, state: "open" },
       )
     }
@@ -117,7 +120,7 @@ export function useChatCore(thread: ChatThread | null, personId: string) {
     setOffer({ ...offer, state: "saving" })
     try {
       const d = await decide({ id: `dec-${thread.caseId}-${Date.now().toString(36)}`, caseId: thread.caseId, optionId: action.optionId, why: action.summary })
-      setOffer({ ...offer, state: "done", line: `${action.label}.${action.next ? ` ${action.next}` : ""}`, at: clock(d.at) })
+      setOffer({ ...offer, state: "done", line: doneLine(action), at: clock(d.at) })
       router.refresh()
     } catch {
       setOffer({ ...offer, state: "failed" })
@@ -168,20 +171,39 @@ export function useField(onSend: (text: string) => void, focusWhen: boolean) {
   return { draft, setDraft, submit, props, ref }
 }
 
-/** Keeps a scrolling log pinned to the bottom while the answer grows, unless the person scrolled up. */
+/** A person's question in any variant's markup (the newest one is where reading starts). */
+const ASK = ".lc-person, .lc-q, .lc-ask, .lc-tturn.is-you, .lc-entry.is-person"
+
+/**
+ * Where the log rests: the newest question at the top, its answer under it (the way chat apps
+ * place a new question), so a long answer is read from its first line, not its end; a short one ends
+ * at the bottom. Before any question it rests on the opener. Once the person scrolls, the log is
+ * theirs until they ask again.
+ */
 export function useFollow(deps: unknown[]) {
   const ref = useRef<HTMLDivElement>(null)
-  const pinned = useRef(true)
+  const free = useRef(false)
+  const asked = useRef(0)
+  const ours = useRef(0)
   useLayoutEffect(() => {
     const el = ref.current
-    if (el && pinned.current) el.scrollTop = el.scrollHeight
+    if (!el) return
+    const asks = el.querySelectorAll<HTMLElement>(ASK)
+    if (asks.length > asked.current) free.current = false
+    asked.current = asks.length
+    if (free.current) return
+    const last = asks.length ? asks[asks.length - 1] : null
+    const max = el.scrollHeight - el.clientHeight
+    const at = last ? last.getBoundingClientRect().top - el.getBoundingClientRect().top + el.scrollTop - 12 : 0
+    ours.current = performance.now()
+    el.scrollTop = Math.max(0, Math.min(max, at))
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, deps)
-  const onScroll = (e: React.UIEvent<HTMLElement>) => {
-    const el = e.currentTarget
-    pinned.current = el.scrollHeight - el.scrollTop - el.clientHeight < 48
+  const onScroll = () => {
+    // A scroll we did not set is the person's: leave the log where they put it.
+    if (performance.now() - ours.current > 150) free.current = true
   }
-  return { ref, onScroll, pin: () => (pinned.current = true) }
+  return { ref, onScroll, pin: () => (free.current = false) }
 }
 
 /** ?voice=listening|speaking|transcribing: a voice state held still for a shot (no microphone). */

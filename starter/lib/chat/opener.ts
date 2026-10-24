@@ -11,7 +11,7 @@
 import type { Case } from "@/lib/control-room/types"
 import type { CaseKnowledge, ChatMessage, ChatToolStep, Precedent } from "@/lib/control-room/types-chat"
 import type { ChatCaseContext } from "./context"
-import { isExperienced, recordOf, type PersonRecord } from "./knowledge"
+import { isExperienced, recordOf, recordOfRows, type PersonRecord } from "./knowledge"
 import { chosePhrase, day, lc, names, needsYou, plural, restsOn, sentence } from "./words"
 
 export type OpenerVariant = "known_experienced" | "known_newer" | "once" | "rare" | "new"
@@ -25,10 +25,7 @@ export interface OpenerShape {
 export function openerShape(ctx: ChatCaseContext, k: CaseKnowledge): OpenerShape {
   const record = recordOf(ctx.history, ctx.person.id, k.kindKey, { excludeCaseId: ctx.case.id })
   // On a new kind nobody has a record; a strong record on the same case type still means the person knows the ground.
-  const typeRecord: PersonRecord = (() => {
-    const rows = ctx.history.filter((d) => d.personId === ctx.person.id && d.caseType === ctx.case.type && d.caseId !== ctx.case.id)
-    return { decided: rows.length, laterChanged: rows.filter((d) => d.laterChanged).length, onTime: rows.filter((d) => d.onTime).length }
-  })()
+  const typeRecord: PersonRecord = recordOfRows(ctx.history.filter((d) => d.personId === ctx.person.id && d.caseType === ctx.case.type && d.caseId !== ctx.case.id))
   const experienced = k.novelty === "new" ? isExperienced(typeRecord) : isExperienced(record)
   const variant: OpenerVariant =
     k.novelty === "new" ? "new" : k.decided === 1 ? "once" : k.novelty === "rare" ? "rare" : experienced ? "known_experienced" : "known_newer"
@@ -44,12 +41,17 @@ function suggestionLine(c: Case, tail = ""): string {
   return `My suggestion${tail}: ${lc(sentence(c.suggestion.label))}`
 }
 
-/** Less than 70 % agreeing: people answer this kind differently, and the opener says so. */
-const split = (k: CaseKnowledge) => k.decided > 0 && k.sameAsSuggestion / k.decided < 0.7
+/**
+ * People answer this kind differently, and the opener says so: the trust gate's
+ * word (the leading answer has less than 80% of the weighted answers), the same
+ * as Know-how. Without the gate's line, less than 70% chose the suggestion.
+ */
+const split = (k: CaseKnowledge) => (k.gate ? k.gate.status === "differ" : k.decided > 0 && k.sameAsSuggestion / k.decided < 0.7)
 
 function agreement(k: CaseKnowledge): string {
   if (k.sameAsSuggestion === 0) return `${k.decided} earlier cases of this kind, where people chose otherwise`
   if (split(k)) return `${k.sameAsSuggestion} of ${k.decided} earlier cases of this kind, though people answer this differently`
+  if (k.sameAsSuggestion * 2 < k.decided) return `${k.sameAsSuggestion} of ${k.decided} earlier cases of this kind, though most people chose otherwise`
   return `${k.sameAsSuggestion} of ${k.decided} earlier cases of this kind, where people chose the same`
 }
 

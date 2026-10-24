@@ -19,7 +19,8 @@ export interface Prepared {
 }
 
 export function prepare(ctx: ChatCaseContext): Prepared {
-  const knowledge = computeKnowledge({ case: ctx.case, kind: ctx.kind, history: ctx.history })
+  // Engine: the loop's own knowledge (the card, Know-how and History count the same). Fixtures: the same gate over the chat's history.
+  const knowledge = ctx.knowledge ?? computeKnowledge({ case: ctx.case, kind: ctx.kind, history: ctx.history })
   const shape = openerShape(ctx, knowledge)
   const { variant: _variant, ...opener } = buildOpener(ctx, knowledge)
   return { ctx, knowledge, shape, opener }

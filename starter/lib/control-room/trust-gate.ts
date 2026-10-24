@@ -170,3 +170,20 @@ export function evaluateKind(all: Answer[]): KindGate {
     weights,
   }
 }
+
+/**
+ * The one line for where a kind stands, the same on every surface (Know-how,
+ * the card's "Talk it through" row, the chat panel): "New kind of case",
+ * "Decided once, by Aino", "2 of 16, 2 people", "3 of 16, 1 person",
+ * "29 of 30 agree, 4 people", "People answer this differently".
+ * `names`: first names of the people who answered, first answer first. Only a
+ * single decision names who took it (as the opener does); a count never names
+ * a colleague, because the card shows it to everyone on shift.
+ */
+export function kindLine(gate: KindGate, names: string[]): string {
+  if (gate.status === "new") return "New kind of case"
+  if (gate.status === "differ") return "People answer this differently"
+  if (gate.decided === 1) return `Decided once, by ${names[0] ?? "one person"}`
+  if (gate.status === "ready") return `${gate.agreeing} of ${gate.decided} agree, ${gate.people} people`
+  return `${gate.agreeing} of ${gate.needed}, ${gate.people === 1 ? "1 person" : `${gate.people} people`}`
+}

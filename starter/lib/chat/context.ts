@@ -6,8 +6,9 @@
 import { site as datasetSite } from "@/lib/agent/data"
 import { registerPeople } from "@/lib/agent/people"
 import type { Call, Case, Decision, Lesson, OpsPerson, TrustRule } from "@/lib/control-room/types"
+import type { CaseKnowledge } from "@/lib/control-room/types-chat"
 import type { CaseDepth } from "@/lib/depth/types"
-import { kindOf, kindOfType, optionKey, storedKind, type Kind } from "./kind"
+import { kindOf, kindOfType, kindRef, optionKey, type Kind } from "./kind"
 import { firstName, type PastDecision } from "./knowledge"
 
 export interface ChatPlace {
@@ -27,7 +28,10 @@ export interface ChatCaseContext {
   person: OpsPerson
   people: OpsPerson[]
   kind: Kind
+  /** Earlier decisions, one per case (the latest), each with the loop's kind. */
   history: PastDecision[]
+  /** The learning loop's own CaseKnowledge for this case (engine): the chat says what the card, Know-how and History say. */
+  knowledge?: CaseKnowledge
   /** Lessons used on this case, or accepted for its pickup place. */
   lessons: Lesson[]
   calls: Call[]
@@ -114,10 +118,11 @@ function personOf(people: OpsPerson[], id: string): OpsPerson | undefined {
 // ---------- engine ----------
 
 export async function engineContext(caseId: string, personId: string): Promise<ContextResult> {
-  const [{ buildState }, { listCalls }, { vehicleName }] = await Promise.all([
+  const [{ buildState, loopInput }, { listCalls }, { vehicleName }, { kindAnswers, knowledgeFor }] = await Promise.all([
     import("@/lib/control-room/service"),
     import("@/lib/control-room/store"),
     import("@/lib/control-room/v3"),
+    import("@/lib/control-room/loop"),
   ])
   const state = await buildState()
   const refOf = (orderId: string) => state.world.byId.get(orderId)?.reference
@@ -130,9 +135,18 @@ export async function engineContext(caseId: string, personId: string): Promise<C
   const byId = new Map(state.cases.map((x) => [x.id, x]))
   const placeName = (id: string | null | undefined) => (id ? state.world.places.get(id)?.name ?? datasetSite(id)?.name ?? "a pickup place" : "a pickup place")
 
-  const history: PastDecision[] = state.decisions.map((row) => {
+  // The loop's answers: one per case (the latest), each with the kind the loop gave it (case record, else the case, else its type).
+  const loop = loopInput(state)
+  const answered = new Map(kindAnswers(loop).map((answer) => [answer.caseId, answer]))
+  const taken = new Set<string>()
+  const history: PastDecision[] = state.decisions.filter((row) => {
+    const answer = answered.get(row.caseId)
+    if (!answer || taken.has(row.caseId) || answer.at !== row.at || answer.personId !== row.personId || answer.optionId !== row.optionId) return false
+    taken.add(row.caseId)
+    return true
+  }).map((row) => {
     const stored = byId.get(row.caseId)
-    const kind = storedKind(row) ?? storedKind(row.data) ?? (stored ? kindOf(stored) : kindOfType(row.caseType))
+    const kind = kindRef(answered.get(row.caseId)!.kindKey)
     return {
       id: row.id,
       caseId: row.caseId,
@@ -174,6 +188,7 @@ export async function engineContext(caseId: string, personId: string): Promise<C
       people: state.people,
       kind: kindOf(c),
       history,
+      knowledge: knowledgeFor(loop, c),
       lessons: state.lessons.filter((l) => c.lessonIdsUsed?.includes(l.id) || (l.status === "accepted" && !!c.placeId && l.scope.placeId === c.placeId)),
       calls,
       placeCases: state.cases.filter((x) => !!c.placeId && x.placeId === c.placeId && x.orderId !== c.orderId),

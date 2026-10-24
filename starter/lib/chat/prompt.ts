@@ -2,6 +2,7 @@
 // it gets with every answer. The instructions stay byte-for-byte stable for
 // prompt caching; the case follows them.
 
+import { gateWords, knowledgeWords } from "@/lib/control-room/chat-words"
 import type { CaseKnowledge, ChatMessage } from "@/lib/control-room/types-chat"
 import type { ChatCaseContext } from "./context"
 import { depthLine } from "./depth"
@@ -62,7 +63,8 @@ export function contextBlock(ctx: ChatCaseContext, k: CaseKnowledge, shape: Open
     `# This kind of case: ${k.kindLabel}`,
     k.novelty === "new"
       ? "It has not happened before: nobody at Bahn has decided a case of this kind."
-      : `Decided ${k.decided} times before by ${k.peopleCount} ${k.peopleCount === 1 ? "person" : "people"}; ${k.sameAsSuggestion} chose what you suggest now. The agent may propose to handle this kind alone only after ${k.needed} agreeing answers from more than one person.`,
+      : `Decided ${k.decided} times before by ${k.peopleCount} ${k.peopleCount === 1 ? "person" : "people"}; ${k.sameAsSuggestion} chose what you suggest now.`,
+    `Where this kind stands (the same words as the card and Know-how): ${k.gate?.status === "differ" ? gateWords(k) : `${knowledgeWords(k)}. ${gateWords(k)}`}`,
     list(k.precedents, (p) => `- ${day(p.at)}, ${p.decidedBy}, ${carOf(ctx, p.caseId) ? `the ${carOf(ctx, p.caseId)} ` : ""}at ${p.place}${p.reference ? ` (${p.reference})` : ""}: ${p.choice}.${p.why ? ` Why: "${p.why}"` : ""}`, ""),
     calls(ctx),
     depthLine(ctx),

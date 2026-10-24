@@ -8,9 +8,9 @@
 import { OPTION_TEXT } from "./learning"
 import { type KindKey, kindDef, kindForType, kindOf } from "./kinds"
 import type { DecisionRecord, StoredTrustRule } from "./store"
-import { type Answer, type KindGate, GATE_N, evaluateKind, onePerCase, personWeight, recordsOf } from "./trust-gate"
+import { type Answer, type KindGate, GATE_N, evaluateKind, kindLine, onePerCase, personWeight, recordsOf } from "./trust-gate"
 import type { Case, OpsPerson } from "./types"
-import type { CaseKnowledge, Precedent } from "./types-chat"
+import type { CaseKnowledge, KindGateLine, Precedent } from "./types-chat"
 import type { CaseRecord, KindSummary } from "./types-loop"
 
 /** Fewer decisions than this and a kind is "rare"; none and it is "new". */
@@ -107,12 +107,10 @@ export function precedentsFor(input: LoopInput, kindKey: KindKey, opts: { except
     })
 }
 
-function summaryLine(gate: KindGate, names: string[]) {
-  if (gate.status === "new") return "New kind of case"
-  if (gate.status === "differ") return "People answer this differently"
-  if (gate.decided === 1) return `Decided once, by ${names[0]}`
-  if (gate.status === "ready") return `${gate.agreeing} of ${gate.decided} agree, ${gate.people} people`
-  return `${gate.agreeing} of ${gate.needed}, ${gate.people === 1 ? `all by ${names[0]}` : `${gate.people} people`}`
+/** The kind's gate as the chat's CaseKnowledge carries it: the line Know-how shows, and what it rests on. */
+export function gateLine(input: LoopInput, answers: KindAnswer[], gate = evaluateKind(answers)): KindGateLine {
+  const names = [...new Set(answers.map((answer) => answer.personId))].map((id) => firstName(input.people, id))
+  return { status: gate.status, line: kindLine(gate, names), agreeing: gate.agreeing, agreeingPeople: gate.agreeingPeople, needed: gate.decided ? gate.needed : GATE_N }
 }
 
 export function summarizeKind(input: LoopInput, kindKey: KindKey, rules: StoredTrustRule[] = [], answers = answersByKind(input).get(kindKey) ?? []): KindSummary {
@@ -134,7 +132,7 @@ export function summarizeKind(input: LoopInput, kindKey: KindKey, rules: StoredT
     leading: gate.leadingOptionId ? { optionId: gate.leadingOptionId, label: optionLabel(gate.leadingOptionId, answers) } : null,
     needed: gate.needed,
     status: gate.status,
-    line: summaryLine(gate, names),
+    line: kindLine(gate, names),
     lowerBound: Math.round(gate.lowerBound * 1000) / 1000,
     alone: gate.leadingOptionId ? !messagesCustomer(gate.leadingOptionId, answers) : true,
     medianMinutes: median(minutes),
@@ -156,7 +154,8 @@ export function kindSummaries(input: LoopInput, rules: StoredTrustRule[] = [], e
  */
 export function knowledgeFor(input: LoopInput, c: Case): CaseKnowledge {
   const kindKey = kindOf(c)
-  const answers = (answersByKind(input).get(kindKey) ?? []).filter((answer) => answer.caseId !== c.id)
+  const all = answersByKind(input).get(kindKey) ?? []
+  const answers = all.filter((answer) => answer.caseId !== c.id)
   const gate = evaluateKind(answers)
   return {
     kindKey,
@@ -167,6 +166,8 @@ export function knowledgeFor(input: LoopInput, c: Case): CaseKnowledge {
     peopleCount: gate.people,
     needed: gate.decided ? gate.needed : GATE_N,
     precedents: precedentsFor(input, kindKey, { exceptCaseId: c.id }),
+    // Where the kind stands now (this case's answer included once decided): the line Know-how shows.
+    gate: all.length === answers.length ? gateLine(input, answers, gate) : gateLine(input, all),
   }
 }
 

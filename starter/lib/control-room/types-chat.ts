@@ -48,6 +48,20 @@ export interface CaseKnowledge {
   peopleCount: number; // how many different people decided them
   needed: number; // agreeing decisions needed before the agent may propose to do it alone
   precedents: Precedent[]; // newest first, at most 5
+  /**
+   * Where the kind stands now in the trust gate (lib/control-room/trust-gate.ts),
+   * over every answer on it, this case's own once it is decided. `line` is the
+   * same words Know-how shows ("Decided once, by Aino", "2 of 16, 2 people").
+   */
+  gate?: KindGateLine;
+}
+
+export interface KindGateLine {
+  status: "new" | "learning" | "differ" | "ready";
+  line: string;
+  agreeing: number; // answers that chose the leading option
+  agreeingPeople: number;
+  needed: number; // agreeing answers the gate needs, at least 16
 }
 
 /** GET /api/cr/cases/:id/chat?person=<id> */

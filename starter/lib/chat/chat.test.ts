@@ -9,6 +9,7 @@ import { sql } from "drizzle-orm"
 import type { Case, OpsPerson } from "@/lib/control-room/types"
 import type { CaseKnowledge, ChatEvent, ChatThread } from "@/lib/control-room/types-chat"
 import type { ChatCaseContext } from "./context"
+import { kindLabel, kindOf as loopKindOf } from "@/lib/control-room/kinds"
 import { kindOf, kindOfType } from "./kind"
 import { answerWeight, computeKnowledge, NEEDED_DEFAULT, type PastDecision } from "./knowledge"
 import { buildOpener, openerShape } from "./opener"
@@ -86,8 +87,12 @@ test("kind is a property of the case, not one pickup place", () => {
   const plain = sellerHoldCase("case-c", "site-042", "Calverona Hamburg")
   plain.facts = plain.facts.slice(1)
   assert.equal(kindOf(plain).key, "release_document_missing", "without the hold it is the case type's kind")
-  assert.equal(kindOfType("readiness.keys_or_access").label, "Key holder not named")
-  assert.equal(kindOf({ ...plain, kind: { key: "fee_requested", label: "Pickup place asks a fee" } } as Case).key, "fee_requested", "a kind another track stored wins")
+  // One detector (track K, intended change): the chat names the learning loop's kind, key and label.
+  assert.equal(kindOfType("readiness.keys_or_access").label, "Keys or access")
+  for (const x of [a, kindOf(plain)]) assert.equal(x.label, kindLabel(x.key))
+  assert.equal(kindOf(plain).key, loopKindOf(plain))
+  const posted: Case = { ...plain, type: "readiness.facts_disagree", headline: "Arvelano gives another address than the order.", facts: [{ id: "g", statement: "The gig is posted to drivers.", source: { kind: "record", channel: "record", at: "2026-10-21T07:00:00.000Z" }, strength: "confirmed" }] }
+  assert.deepEqual(kindOf(posted), { key: "facts_disagree_open_gig", label: "Details disagree while the gig is posted" }, "the loop's narrower kind, not the case type")
 })
 
 // ---------- knowledge ----------
@@ -106,7 +111,9 @@ test("knowledge: new, once and known; counts, people, needed, precedents", () =>
   assert.equal(once.decided, 1)
   assert.equal(once.precedents[0].decidedBy, "Aino")
   assert.equal(once.precedents[0].why, "Seller holds take more than a day to clear.")
-  assert.equal(once.precedents[0].weight, 0.5, "a first answer counts half")
+  assert.equal(once.precedents[0].weight, 1, "the trust gate's weight: every answer starts at full weight")
+  assert.equal(once.gate?.line, "Decided once, by Aino", "the same line Know-how shows")
+  assert.equal(none.gate?.line, "New kind of case")
 
   const history = [...past(9, { personId: "p-jonas" }), ...past(3, { personId: "p-aino", optionId: "move_pickup_next_day", choice: "Move the pickup to the next working day" }), ...past(1, { personId: "p-emil", caseId: "case-now" })]
   const known = computeKnowledge({ case: c, kind: kindOf(c), history, needed: 20 })
@@ -121,11 +128,32 @@ test("knowledge: new, once and known; counts, people, needed, precedents", () =>
   for (const p of known.precedents) assert.ok(p.weight >= 0 && p.weight <= 1)
 })
 
-test("an answer's weight comes from the record on this kind, never a title", () => {
-  assert.equal(answerWeight({ decided: 0, laterChanged: 0, onTime: 0 }), 0.5)
-  assert.ok(answerWeight({ decided: 16, laterChanged: 0, onTime: 16 }) > 0.8)
-  assert.ok(answerWeight({ decided: 10, laterChanged: 6, onTime: 3 }) < 0.5)
-  assert.ok(answerWeight({ decided: 4, laterChanged: 0, onTime: 4 }) < answerWeight({ decided: 12, laterChanged: 0, onTime: 12 }), "more clean decisions count more")
+test("an answer's weight comes from the record on this kind, never a title (the trust gate's rule)", () => {
+  // Intended change (track K): the chat uses trust-gate.ts personWeight, (held + 1) / (decided + 1), like the loop and History.
+  assert.equal(answerWeight({ decided: 0, laterChanged: 0, onTime: 0, held: 0 }), 1, "a first answer counts in full")
+  assert.equal(answerWeight({ decided: 16, laterChanged: 0, onTime: 16, held: 16 }), 1)
+  assert.equal(answerWeight({ decided: 9, laterChanged: 1, onTime: 9, held: 8 }), 0.9, "one miss in nine")
+  assert.ok(answerWeight({ decided: 10, laterChanged: 6, onTime: 3, held: 2 }) < 0.5)
+})
+
+test("knowledge counts like the trust gate: one answer per case, differ, ready, the n of 16 line", () => {
+  const c = sellerHoldCase("case-now", "site-077", "Pellavaro Aarhus")
+  // A case decided twice (the choice, then the why) is one answer.
+  const twice = [...past(1, { personId: "p-aino" }), ...past(1, { personId: "p-aino", id: "d-again", at: "2026-10-20T11:00:00.000Z" })]
+  const once = computeKnowledge({ case: c, kind: kindOf(c), history: twice })
+  assert.equal(once.decided, 1)
+  const two = computeKnowledge({ case: c, kind: kindOf(c), history: [...past(1, { personId: "p-aino" }), ...past(1, { personId: "p-jonas" })] })
+  assert.equal(two.gate?.line, "2 of 16, 2 people")
+  assert.equal(two.needed, NEEDED_DEFAULT)
+  const differ = computeKnowledge({ case: c, kind: kindOf(c), history: [...past(6, { personId: "p-jonas" }), ...past(6, { personId: "p-aino", optionId: "move_pickup_next_day" })] })
+  assert.equal(differ.gate?.status, "differ")
+  assert.equal(differ.gate?.line, "People answer this differently")
+  const ready = computeKnowledge({ case: c, kind: kindOf(c), history: [...past(26, { personId: "p-jonas" }), ...past(3, { personId: "p-aino" }), ...past(1, { personId: "p-emil", optionId: "move_pickup_next_day" })] })
+  assert.equal(ready.gate?.line, "29 of 30 agree, 3 people")
+  // This case's own answer counts in the line once it is decided, never in the earlier cases.
+  const decided = computeKnowledge({ case: c, kind: kindOf(c), history: [...past(1, { personId: "p-aino" }), ...past(1, { personId: "p-jonas", caseId: "case-now" })] })
+  assert.equal(decided.decided, 1)
+  assert.equal(decided.gate?.line, "2 of 16, 2 people")
 })
 
 // ---------- openers ----------
@@ -361,7 +389,8 @@ test("route (fixtures): GET thread shape, POST streams events in order, messages
     assert.deepEqual(Object.keys(thread).sort(), ["caseId", "knowledge", "messages", "opener"])
     assert.equal(thread.caseId, "case-420458")
     const k: CaseKnowledge = thread.knowledge
-    assert.deepEqual(Object.keys(k).sort(), ["decided", "kindKey", "kindLabel", "needed", "novelty", "peopleCount", "precedents", "sameAsSuggestion"])
+    // Intended change (track K): knowledge carries the trust gate's line ("gate"), the words Know-how shows.
+    assert.deepEqual(Object.keys(k).sort(), ["decided", "gate", "kindKey", "kindLabel", "needed", "novelty", "peopleCount", "precedents", "sameAsSuggestion"])
     assert.equal(k.kindLabel, "Seller hold on the car")
     assert.equal(k.novelty, "new")
     assert.equal(g.headers.get("x-cr-opener"), "new")
@@ -423,6 +452,43 @@ after(async () => {
   if (closeDb) await closeDb()
 })
 
+test("engine: the chat names the loop's kind and n of 16 for every open case (one detector)", async (t) => {
+  if (!reachable) return t.skip("database not reachable: docker compose up -d --wait, then db:seed and db:seed:cr")
+  setChatStore(memoryStore)
+  try {
+    const service = await import("@/lib/control-room/service")
+    const { knowledgeWords } = await import("@/lib/control-room/chat-words")
+    const { getThread } = await import("./service")
+    const { loadContext } = await import("./context")
+    const state = await service.buildState()
+    const kinds = service.kindsOf(state)
+    const open = state.cases.filter((c) => c.status === "waiting_for_person")
+    assert.ok(open.length > 0)
+    for (const c of open) {
+      const person = c.routedTo?.personId ?? "p-emil"
+      const r = await getThread(c.id, person)
+      assert.ok(r.ok, `${c.id}: thread`)
+      if (!r.ok) continue
+      const k = r.thread.knowledge
+      const detail = (await service.getCaseDetail(c.id, state))!
+      assert.deepEqual(k, detail.knowledge, `${c.id}: the chat's knowledge is the loop's`)
+      assert.equal(k.kindKey, detail.kind.key)
+      assert.equal(k.kindLabel, detail.kind.label)
+      assert.equal(knowledgeWords(k), kinds.find((x) => x.kindKey === k.kindKey)?.line, `${c.id}: the card row says what Know-how says`)
+      // The history the chat's tools read counts the same through the same gate.
+      const ctx = await loadContext(c.id, person)
+      assert.ok(ctx.ok)
+      if (!ctx.ok) continue
+      const own = computeKnowledge({ case: ctx.ctx.case, kind: ctx.ctx.kind, history: ctx.ctx.history })
+      for (const key of ["kindKey", "kindLabel", "novelty", "decided", "sameAsSuggestion", "peopleCount", "needed", "gate"] as const) {
+        assert.deepEqual(own[key], k[key], `${c.id}: ${key} from the chat's history`)
+      }
+    }
+  } finally {
+    setChatStore(undefined)
+  }
+})
+
 test("engine: every waiting case has a thread whose opener fits its knowledge", async (t) => {
   if (!reachable) return t.skip("database not reachable: docker compose up -d --wait, then db:seed and db:seed:cr")
   setChatStore(memoryStore)
@@ -441,7 +507,8 @@ test("engine: every waiting case has a thread whose opener fits its knowledge", 
         assert.ok(!/\b(Hamburg|Helsinki|Odense|Vienna|Espoo)\b/.test(k.kindLabel), `${c.id}: the kind "${k.kindLabel}" is not a place`)
         assert.equal(k.novelty === "new", k.decided === 0)
         assert.ok(k.sameAsSuggestion <= k.decided && k.peopleCount <= k.decided)
-        assert.equal(k.needed, NEEDED_DEFAULT)
+        // The loop's gate: 16 for a new or unanimous kind, more when people differ (track K, intended change).
+        assert.ok(k.needed >= NEEDED_DEFAULT)
         if (k.novelty === "new") assert.match(r.thread.opener.text, /has not happened before/)
         if (k.decided === 1) assert.match(r.thread.opener.text, /once before/)
         assert.ok(endsWithTheirCall(r.thread.opener.text), `${c.id}: the opener leaves the decision to ${person}`)

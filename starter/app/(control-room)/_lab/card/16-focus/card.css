@@ -1,0 +1,48 @@
+/* card 16: Focus. The question owns the screen; the situation panel steps back until asked for.
+   The frame rules below reach outside the card with :has(.lab-card-16.c16-focus): they match only
+   while this variant is on screen in focus, so today's pages never change. */
+
+/* The frame in focus: no room kept for the panel, the card centred in the whole work area. */
+.work.has-panel:has(.lab-card-16.c16-focus) { padding-right: 0; --card-pad: max(calc(28 * var(--type-kf)), calc(64 * var(--cr-u, 1px))); }
+.work.has-panel:not(.look-column):has(.lab-card-16.c16-focus) { --card-room: calc(var(--cr-vw, 100vw) - var(--side) - 8px); }
+.work.has-panel.look-column:has(.lab-card-16.c16-focus) { --card-room: calc(var(--cr-vw, 100vw) - var(--side) - 8px - var(--list)); }
+.work.has-panel:has(.lab-card-16.c16-focus) .detail-inner { margin-inline: auto; }
+.work:has(.lab-card-16.c16-focus) .situation-panel.open { transform: translateX(100%); visibility: hidden; transition: transform 200ms var(--ease), visibility 0s linear 200ms; }
+
+/* The inspector button, top right of the work area (macOS puts the inspector toggle there). */
+.lab-card-16 .c16-inspector {
+  position: absolute; z-index: 2;
+  top: max(10px, calc(20 * var(--cr-u, 1px))); right: max(10px, calc(var(--card-pad) * 0.5));
+  display: inline-flex; align-items: center; gap: 0.4em; min-height: 32px; padding: 0.3em 0.7em 0.3em 0.55em; border-radius: 10px;
+  font-size: var(--size-s); line-height: var(--lh-subhead); color: var(--ink-2); font-weight: 400;
+}
+.lab-card-16 .c16-inspector:hover { background: var(--raise); color: var(--ink); }
+.lab-card-16 .c16-inspector svg { width: 1.3em; height: 1.3em; flex: none; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linejoin: round; }
+.lab-card-16 .c16-inspector .c16-pane { stroke: none; fill: transparent; transition: fill 150ms var(--lc-ease); }
+.lab-card-16 .c16-inspector[aria-pressed="true"] { color: var(--ink); }
+.lab-card-16 .c16-inspector[aria-pressed="true"] .c16-pane { fill: rgb(18 17 14 / 0.22); }
+
+/* The stage: centred, the question the one large line, air above it from the window's height
+   (none in Henry's 544 px high Safari view, about a fifth of the spare height on larger screens). */
+.lab-card-16 .c16-stage {
+  display: flex; flex-direction: column; align-items: center; text-align: center;
+  padding-top: max(4px, calc((var(--cr-vh, 100vh) - 560px) * 0.22));
+}
+.lab-card-16 .c16-due { justify-content: center; }
+.lab-card-16 .c16-what {
+  margin-top: 0.8em; max-width: 31em;
+  font-size: var(--size-m); line-height: var(--lh-body); color: var(--ink); text-wrap: pretty;
+}
+.lab-card-16 .c16-ask {
+  margin-top: 0.62em; max-width: 20em;
+  font-size: var(--size-l); line-height: var(--lh-title1); letter-spacing: var(--track-title1); font-weight: 600;
+  text-wrap: balance;
+}
+/* The default on the trailing side, as in an alert (HIG Alerts: "Always place the default button on the trailing side of a row"). */
+.lab-card-16 .c16-acts { justify-content: center; margin-top: calc(28 / 17 * 1em); }
+.lab-card-16 .c16-next { margin-top: 0.85em; max-width: 34em; text-wrap: pretty; }
+
+.lab-card-16 .c16-whole { white-space: nowrap; }
+
+/* The rows under it: centred at the next line's measure, with more air, so the stage reads as one block. */
+.detail-inner:has(> .lab-card-16.c16-focus) > .work-rows { max-width: 34em; margin: max(2em, calc(56 * var(--cr-u, 1px))) auto 0; }

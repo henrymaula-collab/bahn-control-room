@@ -1,0 +1,63 @@
+/* card 17: Timetable. A time column and a line down the card's left side: now, the deadline, then.
+   The line hangs in the card's left air so the times start at the card's edge; each dot sits in the
+   middle of its row's first line, worked out from that line's size, so the line meets every dot. */
+
+.lab-card-17 {
+  /* The situation keeps three lines in what is left beside the time column (tasks.css --card-head, less the gutter). */
+  --c17-gutter: calc(5.6 * var(--size-s));
+  --c17-head: max(calc(17 * var(--type-kf)), min(var(--size-l), calc((min(var(--column), var(--card-room) - 2 * var(--card-pad)) - var(--c17-gutter)) / var(--card-measure, 24))));
+  --c17-ask: max(var(--type-body), calc(var(--c17-head) * 22 / 28));
+  --c17-lh1: calc(var(--c17-head) * var(--lh-title1));
+  --c17-lh2: calc(var(--c17-ask) * var(--lh-title2));
+  --c17-lh3: calc(var(--size-s) * var(--lh-subhead));
+  --c17-dot: max(8px, calc(0.6 * var(--size-s)));
+  --c17-hang: max(18px, calc(1.5 * var(--size-s)));
+  --c17-rail: var(--bx-color-grey-300);
+}
+
+.lab-card-17 .c17-line { list-style: none; margin: 0; padding: 0; }
+.lab-card-17 .c17-stop {
+  position: relative;
+  display: grid; grid-template-columns: calc(var(--c17-gutter) - 1em) minmax(0, 1fr); column-gap: 1em;
+  margin-left: calc(-1 * var(--c17-hang)); padding-left: var(--c17-hang);
+  font-size: var(--size-s); line-height: var(--lh-subhead);
+}
+.lab-card-17 .c17-now { --first: var(--c17-lh1); --next: var(--c17-lh2); padding-bottom: 1.6em; }
+.lab-card-17 .c17-due { --first: var(--c17-lh2); --next: var(--c17-lh3); padding-bottom: 1.5em; }
+.lab-card-17 .c17-then { --first: var(--c17-lh3); }
+
+/* The dot, in the middle of the row's first line. */
+.lab-card-17 .c17-stop::before {
+  content: ""; position: absolute; z-index: 1;
+  left: calc((var(--c17-hang) - var(--c17-dot)) / 2 - 2px); top: calc(var(--first) / 2 - var(--c17-dot) / 2);
+  width: var(--c17-dot); height: var(--c17-dot); border-radius: 50%; box-sizing: border-box;
+}
+.lab-card-17 .c17-now::before { background: var(--ink); }
+.lab-card-17 .c17-due::before { background: var(--page); border: 2px solid var(--ink); }
+.lab-card-17 .c17-due.urgent::before { background: var(--red); border: 0; box-shadow: 0 0 0 3px var(--bx-color-red-100); }
+.lab-card-17 .c17-then::before { background: var(--page); border: 2px solid var(--c17-rail); }
+
+/* The line, from this dot to the next one: solid for the hour you have, dotted for what follows. */
+.lab-card-17 .c17-stop:not(:last-child)::after {
+  content: ""; position: absolute;
+  left: calc(var(--c17-hang) / 2 - 3px); width: 2px;
+  top: calc(var(--first) / 2); bottom: calc(-1 * var(--next) / 2);
+  background: var(--c17-rail); border-radius: 1px;
+}
+/* Within the hour the line runs from ink (now) to the map's red (the deadline), like the route line on the map. */
+.lab-card-17 .c17-now:has(+ .c17-due.urgent)::after { background: linear-gradient(var(--ink), var(--red)); }
+.lab-card-17 .c17-due:not(:last-child)::after { background: none; border-left: 2px dotted var(--c17-rail); width: 0; }
+
+/* The time column: the time, and under it what the time is. */
+.lab-card-17 .c17-time { display: flex; flex-direction: column; padding-top: calc((var(--first) - var(--c17-lh3)) / 2); color: var(--ink-2); font-variant-numeric: tabular-nums; }
+.lab-card-17 .c17-time time { color: var(--ink); font-weight: 600; }
+.lab-card-17 .c17-time .lc-due { display: block; font-size: inherit; }
+.lab-card-17 .c17-time .lc-due.now { color: var(--now); }
+
+.lab-card-17 .c17-what {
+  max-width: calc(var(--card-measure, 24) * 1em);
+  font-size: var(--c17-head); line-height: var(--lh-title1); letter-spacing: var(--track-title1); font-weight: 600;
+}
+.lab-card-17 .c17-ask { max-width: 32em; font-size: var(--c17-ask); line-height: var(--lh-title2); letter-spacing: var(--track-title2); }
+.lab-card-17 .c17-acts { margin-top: calc(20 / 17 * var(--size-m)); font-size: var(--size-m); }
+.lab-card-17 .c17-next { max-width: 36em; }

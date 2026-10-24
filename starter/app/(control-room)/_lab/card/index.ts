@@ -18,6 +18,12 @@ import { ReviewFrame } from "./12-review-frame/card"
 import { Labelled } from "./13-labelled/card"
 import { SourceQuote } from "./14-source-quote/card"
 import { AgentAsks } from "./15-agent-asks/card"
+// Builder C2: 16 to 20, structurally different cards (PLAN-C2.md).
+import { Focus } from "./16-focus/card"
+import { Timetable } from "./17-timetable/card"
+import { TwoRoads } from "./18-two-roads/card"
+import { MacAlert } from "./19-mac-alert/card"
+import { YourTurn } from "./20-your-turn/card"
 
 const variants: SlotRegistry = {
   "00": { slug: "today", title: "Today", parts: { Question } },
@@ -36,6 +42,11 @@ const variants: SlotRegistry = {
   "13": { slug: "labelled", title: "Labelled for a newcomer", parts: { Question: Labelled } },
   "14": { slug: "source-quote", title: "In their own words", parts: { Question: SourceQuote } },
   "15": { slug: "agent-asks", title: "The agent asks", parts: { Question: AgentAsks } },
+  "16": { slug: "focus", title: "Focus", parts: { Question: Focus } },
+  "17": { slug: "timetable", title: "Timetable", parts: { Question: Timetable } },
+  "18": { slug: "two-roads", title: "Two roads", parts: { Question: TwoRoads } },
+  "19": { slug: "mac-alert", title: "Mac alert", parts: { Question: MacAlert } },
+  "20": { slug: "your-turn", title: "Your turn", parts: { Question: YourTurn } },
 }
 
 export default variants

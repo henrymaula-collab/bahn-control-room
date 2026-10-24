@@ -1,0 +1,48 @@
+/* card 18: Two roads. Under the question a railway switch: the straight track (the suggestion) in ink,
+   the diverging track (the other answer) in grey, each running into its column. The columns are the
+   same height so both buttons sit on one line at the foot. */
+
+.lab-card-18 { --c18-gap: max(10px, calc(0.75 * var(--size-m))); --c18-in: max(18px, calc(1.25 * var(--size-m))); }
+
+.lab-card-18 .c18-ask { margin-top: 1em; }
+
+/* The switch: from one junction dot the straight track runs down into the suggestion (ink) and the
+   other turns off along the top into the other answer (grey), like a junction on a line map. */
+.lab-card-18 .c18-switch { position: relative; height: max(26px, calc(2.1 * var(--size-m))); margin-top: 0.9em; }
+/* The junction dot. */
+.lab-card-18 .c18-switch::before {
+  --d: max(8px, calc(0.5 * var(--size-s)));
+  content: ""; position: absolute; z-index: 1; top: calc(var(--d) / -2); left: calc(var(--c18-in) - var(--d) / 2);
+  width: var(--d); height: var(--d); border-radius: 50%; background: var(--ink); box-shadow: 0 0 0 3px var(--page);
+}
+.lab-card-18 .c18-thru { position: absolute; left: calc(var(--c18-in) - 1.25px); top: 0; bottom: 0; width: 2.5px; background: var(--ink); }
+.lab-card-18 .c18-turn {
+  position: absolute; left: var(--c18-in); top: -1px; bottom: 0; width: calc(50% + var(--c18-gap) / 2 + 1px);
+  border: solid var(--bx-color-grey-300); border-width: 2px 2px 0 0; border-top-right-radius: max(10px, 0.8em);
+}
+.lab-card-18 .c18-ask + .c18-roads { margin-top: 1em; }
+
+.lab-card-18 .c18-roads { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: var(--c18-gap); }
+.lab-card-18 .c18-roads.one { grid-template-columns: minmax(0, 1fr); max-width: 24em; }
+.lab-card-18 .c18-road {
+  display: flex; flex-direction: column; min-width: 0;
+  padding: 0.8em max(12px, calc(var(--c18-in) * 0.7)) max(12px, calc(var(--c18-in) * 0.7)) calc(var(--c18-in) - 1px);
+  border-radius: 16px;
+  font-size: var(--size-s); line-height: var(--lh-subhead);
+}
+.lab-card-18 .c18-suggested { background: var(--raise); }
+.lab-card-18 .c18-other { box-shadow: inset 0 0 0 1px var(--lc-hair); }
+.lab-card-18 .c18-label { color: var(--ink-2); }
+.lab-card-18 .c18-steps { list-style: none; margin: 0.3em 0 0; padding: 0; display: flex; flex-direction: column; gap: 0.35em; color: var(--ink); text-wrap: pretty; }
+
+/* The buttons: full width at the foot, two lines allowed ("Ask the driver to wait 30 minutes more"). */
+.lab-card-18 .c18-go {
+  margin-top: auto; width: 100%;
+  min-height: max(44px, calc(2.6 * var(--size-m))); padding: 0.45em 0.75em;
+  font-size: var(--size-m); line-height: 1.2; white-space: normal; text-align: center; text-wrap: balance;
+}
+.lab-card-18 .c18-road > .c18-go { margin-top: auto; }
+.lab-card-18 .c18-road > .c18-steps { margin-bottom: 0.9em; }
+
+.lab-card-18 .c18-more { margin-top: 0.7em; margin-left: -0.5em; padding: 0.3em 0.5em; }
+.lab-card-18 .c18-more:hover { background: var(--raise); }

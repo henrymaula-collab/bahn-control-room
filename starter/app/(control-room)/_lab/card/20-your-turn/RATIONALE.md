@@ -1,0 +1,7 @@
+# card 20: Your turn
+
+- References: Hark (https://nicelydone.club/examples/screens/93b5ead1-f484-4f77-9625-a77409b86e85, shot `research/premium/visual/shots/chat-05-hark-short-confirms.png`): the assistant speaks on the left, the person's short answer sits on the right. Zendesk's pre-approved action log (https://support.zendesk.com/hc/en-us/articles/7051314237466-Using-auto-assist-to-solve-tickets, shot `research/premium/product/shots/card-05-zendesk-preapproved-action-log.png`): one grey line for what the assistant did on its own. Claude in Chrome plan approval (shot `research/premium/product/shots/chat-05-claude-chrome-plan-approval.png`): the plan, then one approve.
+- Borrowed: the card as two turns. Left, the agent's: its mark and the time it stopped, one grey line of legwork ("Called Calverona Hamburg in German, and 6 more steps", all steps with times one tap away), what it found, its question. Right, the person's: the deadline written as "Your answer by 13:00", the default answer last on the trailing edge, what follows under it.
+- Why for ops: who did the legwork and whose move it is are told by position, the way a conversation reads; the person sees the agent already called the place before deciding, without reading a log.
+- Unlike 15 (the agent's note with the answers under it, all on the left): the answer moves to the person's side, and the legwork is the agent's first line.
+- Trade-off: right-aligned text reads slower over two lines, so only the short next line sits there; the legwork line arrives a moment after the card (it is fetched).

@@ -1,0 +1,7 @@
+# card 18: Two roads
+
+- References: approval flow written as linked steps (Oluwatosin, https://dribbble.com/shots/24444372-Approval-Workflow-Component, shot `research/premium/visual/shots/card-06-approval-flow-sentence.png`): a thin line joins each step. Polar's consequences listed before the action (https://nicelydone.club/examples/screens/0c9ae00f-3ad2-4f75-bbc5-e812d65afaa0, shot `research/premium/visual/shots/card-11-polar-consequences-list.png`). Stripe Radar writes each closing action's consequence (https://docs.stripe.com/radar/reviews, raw `research/premium/product/raw/pp/stripe-radar-reviews.md`).
+- Borrowed: the question splits the card. From one junction dot under it the straight ink track runs into the suggestion and a grey track turns off into the other answer; each column follows its answer to the end in short steps ("You send the email to Kovellin Automobilhandel.", "The agent checks with the branch again at 10:00.", "Nothing is sent."), with its own button at the foot, both on one line. A third option waits behind "One more option".
+- Why for ops: the person compares where each road leads, not two labels; the steps come from the option's own effect, so it works for any case the agent writes.
+- Unlike 09 (two buttons with one sentence each in today's column): the roads are followed to their end side by side and the switch shows which one the agent set.
+- Trade-off: the tallest card of the set; at Henry's Safari size the rows under it start below the fold.

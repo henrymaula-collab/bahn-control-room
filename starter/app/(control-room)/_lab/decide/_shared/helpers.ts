@@ -65,7 +65,7 @@ type Knowledge = {
   gate: { status: "new" | "learning" | "ready" | "differ"; line: string; agreeing: number; agreeingPeople: number; needed: number }
 }
 type CaseBack = {
-  case: { status: string; agentSteps: AgentStep[]; decideBy?: string }
+  case: { status: string; agentSteps: AgentStep[]; decideBy?: string; suggestion?: Option; alternatives?: Option[] }
   decision: { at: string; optionId: string } | null
   knowledge: Knowledge | null
   situation?: { pickup?: { place?: string }; delivery?: { place?: string } }
@@ -106,6 +106,8 @@ export function useCaseBack(caseId: string, poll = false) {
     steps: saved ? steps : [],
     done: data?.case.status === "done",
     count: data?.knowledge ? countOf(data.knowledge, saved) : null,
+    /** The option the decision chose (or the suggestion, before one). */
+    option: data ? ([data.case.suggestion, ...(data.case.alternatives ?? [])].find((o) => o?.id === data.decision?.optionId) ?? data.case.suggestion) : undefined,
   }
 }
 

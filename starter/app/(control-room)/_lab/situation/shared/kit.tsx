@@ -208,6 +208,11 @@ export function LabMap({ from, to, leg = "line", muted = false, labels, cluster 
       const pw = typeof want === "number" ? { top: want, bottom: want, left: want, right: want } : want
       const k = Math.min(1, (w - 60) / Math.max(1, pw.left + pw.right), (h - 40) / Math.max(1, pw.top + pw.bottom))
       const p = { top: Math.max(8, pw.top * k), bottom: Math.max(8, pw.bottom * k), left: Math.max(8, pw.left * k), right: Math.max(8, pw.right * k) }
+      // Keep the attribution's (i) corner free of pins (the BMW's A sat under it on a small map).
+      if (attribution === "bottom-right" && !labels) {
+        if (w - p.left - 46 >= 60 && p.right < 46) (p.left += (46 - p.right) / 2), (p.right = 46)
+        if (h - p.top - 46 >= 36 && p.bottom < 46) (p.top += (46 - p.bottom) / 2), (p.bottom = 46)
+      }
       m = new ml.Map({
         container: box.current,
         style,

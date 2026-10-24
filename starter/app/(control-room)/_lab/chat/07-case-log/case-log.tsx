@@ -150,7 +150,9 @@ function OfferEntry({ offer, me, onYes, onNo }: { offer: Offer; me: string; onYe
           Not now
         </button>
       </div>
-      <p className="lc-offer-note">Your yes is logged with this conversation as the reason.</p>
+      <p className="lc-offer-note">
+        {offer.read === "panel" ? "The email opens first; nothing goes before you tap Send. This conversation stays in the case record." : "Your yes is logged with this conversation as the reason."}
+      </p>
       {offer.state === "failed" && <p className="lc-error">This was not saved. Nothing was sent or booked. Try again.</p>}
     </div>
   )

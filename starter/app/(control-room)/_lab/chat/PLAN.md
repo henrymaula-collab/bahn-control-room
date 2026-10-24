@@ -28,3 +28,20 @@ Extra lab states this slot reads itself (not in states.json, shot by `research/p
 Motion: hover 100 to 150 ms colour; panel 250 ms in / 200 ms out with `cubic-bezier(0.2, 0, 0, 1)`;
 steps in 200 ms; nothing bounces; every loop stops under `prefers-reduced-motion`.
 Words: agent, person, pickup place, order, gig; never ticket, human, escalate, AI, assistant.
+
+## Review (RV4, 25 Oct ~01:00)
+- Henry's rule "the email is always shown before it is sent" did not hold: every variant's yes called the
+  decide action at once and none showed the option's draft (today's chat shows it inline; the lab fixture
+  has no draft, so the shots hid the gap). Now `core.tsx` reads the case's suggestion once: a yes on the
+  card's own suggestion with a draft opens the email panel (`usePanel().setOpen("email")`), so the slot
+  `decide` variant shows the email with Send, Edit, Cancel and its undo window, and Send there is the
+  decision. Any other option that sends a message shows it in the chat above the buttons (`OfferMessage`
+  in parts.tsx, today's OfferDraft); the rest is decided in the chat as before. The fixture offer's yes
+  never saves (it shows the moment after, like `decided=1`).
+- Gap for adoption: the email panel's Send saves without the chat's summary as the reason (SendPreview's
+  `onSend` has no `why`); History still shows the conversation (cr_chat_messages).
+- Voice: a spoken yes is only a question to the agent (core.send); no variant confirms by voice.
+- 09: the offer's buttons sat under the field at Henry's size; the log now shows them whole when the
+  offer arrives. The card's headline still scrolls up while the box is open (its trade-off).
+- 07: the note before the yes says the email opens first when it does.
+- New photo state `yes-email` (extra-shots.mjs): the offer tapped, the email open, nothing sent.

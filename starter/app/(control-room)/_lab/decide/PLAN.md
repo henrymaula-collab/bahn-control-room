@@ -35,3 +35,15 @@ split, log, receipt), after (receipt line, count, answered question, calm tick, 
 auto-advance, live log, receipt panel, timeline, queue). No chips, no "·", no caps kickers, no
 numbered circles; ink, ink-2, now, raise, press only; motion 150 to 250 ms, ease-out, off under
 reduced motion.
+
+## Review (RV4, 25 Oct ~01:00)
+- Checked: the 10 s window holds every save (send=wait freezes it, nothing posts); every variant keys on
+  `panel.open === "email"`, so the chat's yes (slot `chat`, core.tsx) opens each variant's preview.
+- The three `:has()` rules (03, 05, 10) do not start with the variant class but are gated on the
+  variant's own element: on today's pages and with the variant chosen but idle they match nothing
+  (checked in WebKit: 0 matches, `.detail` padding 31.14px as without `?v=`); 03's rule needs today's
+  `section.question`, so with a card variant 03 shows the draft without hiding that card's buttons.
+- 07: the marks were a filled disc, a radio-like ring and empty rings; now a plain tick, one breathing
+  dot and small grey dots, and the kind's count sits with the done lines before what is still to come.
+- 03: the reveal left Send under the frame edge at Henry's size; Send now keeps air under it.
+- Needs variants 01, 02, 03, 05, 07 and 11 have their own Done, which wins over this slot's Done.

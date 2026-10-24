@@ -1,57 +1,93 @@
-/* Your tasks at full size. The side menu already names the page, so the header row goes
-   (as on the Overview). The decision card owns the detail area: the same three sizes as
-   before, larger, and growing with the window (42/21/16 at 1440, up to 54/24/18 on a wide
-   screen), a measure that grows with them. Scoped to .work .detail, so the list on the
-   left, the side panels and the Other options sheet keep the base sizes. */
+/* Your tasks: the case card with The situation beside it (Henry, 24 Oct 20:40), the Needs you
+   list where the look puts it (work-frame.tsx: side menu by default, ?tasks=switcher, ?tasks=column).
+   Everything scales with the window (Henry, 20:26: "it must be more responsive"):
+   - widths and air follow R1's unit --cr-u (1px of the 2560 x 1300 design, shell.css);
+   - the card's type follows the card's own width (container units on .detail), so a long
+     headline keeps to three lines whatever the side menu, the list or the panel take.
+   Scoped to .work, so the side panels and the Other options sheet keep the base sizes. */
 
 .main:has(.work) .top { display: none; }
-.work .list { padding-top: 12px; }
 
 /* The closed side panels wait off to the right; clip them so the page never scrolls sideways. */
+.main:has(.work) .page { overflow: clip; }
 .work { overflow: clip; }
 
-/* The side panel grows on wide screens so the card and the panel share the width. */
-.work { --panel: clamp(440px, 50vw - 280px, 600px); }
-
-.work .detail {
-  --size-l: clamp(42px, 1.9vw + 15px, 54px);
-  --size-m: clamp(20px, 0.6vw + 12px, 24px);
-  --size-s: clamp(16px, 0.4vw + 10px, 18px);
-  --column: clamp(760px, 52vw, 960px);
-  padding: 56px 64px 56px;
-  font-size: var(--size-m);
-  line-height: 1.5;
+.work {
+  --panel: max(360px, calc(600 * var(--cr-u, 1px)));
+  --list: max(220px, calc(320 * var(--cr-u, 1px)));
+  /* The list's small type grows on a laptop (13 to 15 px, 16 to 17 px) and stays as it was at 2560. */
+  --list-m: clamp(16px, calc(19.4px - 0.133vw), 17px);
+  --list-s: clamp(13px, calc(18.4px - 0.21vw), 15px);
 }
+.work.look-menu, .work.look-switcher { grid-template-columns: minmax(0, 1fr); }
+.work.look-column { grid-template-columns: var(--list) minmax(0, 1fr); }
+.work.has-panel { padding-right: var(--panel); }
+
+/* The Needs you list (column, and the switcher's menu) */
+.work .list { padding: calc(16 * var(--cr-u, 1px)) 12px 24px; }
+.work .wrow { padding: 10px 12px; }
+.work .wrow .v { font-size: var(--list-m); line-height: calc(var(--list-m) + 6px); }
+.work .wrow .p { font-size: var(--list-s); line-height: calc(var(--list-s) + 5px); }
+.work .wrow time { font-size: var(--list-s); line-height: calc(var(--list-m) + 6px); }
+
+/* ?tasks=switcher: one slim row above the card, the menu under the car's name. */
+.work .switcher { position: relative; display: flex; align-items: center; gap: 4px; margin-bottom: max(16px, calc(36 * var(--cr-u, 1px))); font-size: var(--list-m); line-height: 24px; }
+.switch-car, .switch-next { display: inline-flex; align-items: center; gap: 4px; padding: 6px 10px; border-radius: 10px; font-weight: 500; }
+.switch-car { margin-left: -10px; }
+.switch-car svg, .switch-next svg { color: var(--ink-2); }
+.switch-car:hover, .switch-car[aria-expanded="true"], .switch-next:hover { background: var(--raise); }
+.switch-at { margin-left: auto; color: var(--ink-2); font-variant-numeric: tabular-nums; }
+.switch-next { margin-right: -10px; }
+.switch-menu {
+  position: absolute; top: calc(100% + 6px); left: -10px; z-index: 30; width: min(360px, 100%);
+  padding: 6px; border-radius: 16px; background: var(--page); box-shadow: var(--shadow-float);
+}
+
+/* The card: its type from its own width (cqw = 1% of the space right of the list and left of the panel). */
+@media (min-width: 861px) {
+  .work .detail { container-type: inline-size; }
+}
+.work .detail {
+  --size-l: clamp(20px, min(4cqw, calc(54 * var(--cr-u, 1px))), 54px);
+  --size-m: clamp(17px, calc(24 * var(--cr-u, 1px)), 24px);
+  --size-s: clamp(15px, calc(18 * var(--cr-u, 1px)), 18px);
+  --column: 960px;
+  overflow: hidden auto;
+  padding: max(28px, calc(56 * var(--cr-u, 1px))) max(28px, calc(64 * var(--cr-u, 1px)));
+}
+.work.has-panel .detail { padding-left: max(24px, calc(40 * var(--cr-u, 1px))); padding-right: max(24px, calc(40 * var(--cr-u, 1px))); }
+.work.look-switcher .detail { padding-top: max(16px, calc(28 * var(--cr-u, 1px))); }
+.work .detail-inner { font-size: var(--size-m); line-height: 1.5; }
 .work .detail .l { line-height: calc(var(--size-l) + 6px); letter-spacing: -0.0225em; }
 .work .detail .m { line-height: 1.5; }
 .work .detail .s { line-height: 1.5; }
 
-/* No panel: the card in the middle of the space right of the list. With a panel: the card
-   sits against it, one gutter away, and the spare room goes to the left. */
+/* No panel: the card in the middle. With a panel: the card sits against it, the spare room to the left. */
 .work .detail-inner { margin-inline: auto; }
-.work.with-panel .detail-inner { margin-inline: auto 0; }
+.work.has-panel .detail-inner { margin-inline: auto 0; }
 
-/* The card */
-.work .question .what { margin-top: 10px; }
-.work .question .context { margin-top: 16px; }
-.work .answers { margin-top: 36px; gap: 12px; }
-.work .answers .btn { min-height: 60px; padding: 0 30px; font-size: var(--size-m); }
-.work .answers .btn-plain { padding: 0 22px; }
-.work .question .next { margin-top: 16px; }
+/* The card. Air in em, so it scales with the type. */
+.work .question .what { margin-top: 0.185em; }
+.work .question .context { margin-top: 0.667em; }
+.work .answers { margin-top: 1.5em; gap: 0.5em; }
+.work .answers .btn { min-height: max(44px, calc(2.5 * var(--size-m))); padding: 0 1.25em; font-size: var(--size-m); }
+.work .answers .btn-plain { padding: 0 0.92em; }
+.work .question .next { margin-top: 0.89em; }
 
 /* The rows under it */
-.work .work-rows { margin-top: 40px; }
+.work .work-rows { margin-top: 1.67em; }
 .work .detail .row > summary,
-.work .detail .row-link { gap: 20px; padding: 14px 20px; margin: 0 -20px; border-radius: 18px; }
-.work .detail button.row-link { width: calc(100% + 40px); }
-.work .detail .chev svg { width: 24px; height: 24px; }
-.work .detail .row > .body { padding: 12px 0 32px; }
-.work .detail .kv { grid-template-columns: 220px minmax(0, 1fr); column-gap: 20px; row-gap: 14px; }
+.work .detail .row-link { gap: 0.83em; padding: 0.58em 0.83em; margin: 0 -0.83em; border-radius: 0.75em; }
+.work .detail button.row-link { width: calc(100% + 1.67em); }
+.work .detail .chev svg { width: 1em; height: 1em; }
+.work .detail .row > .body { padding: 0.5em 0 1.33em; }
+.work .detail .kv { grid-template-columns: 9.17em minmax(0, 1fr); column-gap: 0.83em; row-gap: 0.58em; }
 
-/* With a side panel open the card gives up some air and a little size, so at 1440 the
-   question and the decide button stay above the fold next to the panel. */
-.work.with-panel .detail { --size-l: clamp(40px, 1.9vw + 13px, 54px); padding-left: 40px; padding-right: 40px; }
-@media (max-width: 860px) { .main:has(.work) .page { overflow-x: hidden; } }
+/* The side panels: width and air from the unit, type at the base sizes. */
+.work .situation-panel { padding: max(14px, calc(18 * var(--cr-u, 1px))) max(20px, calc(28 * var(--cr-u, 1px))) 24px; }
+.work .panel .kv { grid-template-columns: max(104px, calc(168 * var(--cr-u, 1px))) minmax(0, 1fr); }
+.work .route-map { height: max(150px, calc(196 * var(--cr-u, 1px))); }
+
 
 /* The Other options sheet sits inside the card but keeps the base sizes. */
 .work .detail dialog.sheet {
@@ -68,7 +104,13 @@
 
 /* Narrow screens keep the base layout. */
 @media (max-width: 860px) {
-  .work .detail { --size-l: 24px; --size-m: 16px; --size-s: 13px; padding: 32px 16px; font-size: 16px; line-height: 24px; }
+  .main:has(.work) .page { overflow: hidden auto; }
+  .work.has-panel { padding-right: 0; }
+  /* The situation follows the card instead of covering it. */
+  .work .situation-panel { position: static; width: auto; transform: none; visibility: visible; box-shadow: none; padding: 0 16px 32px; }
+  .work .situation-panel:not(.open) { display: none; }
+  .work .detail { --size-l: 24px; --size-m: 16px; --size-s: 13px; padding: 32px 16px; }
+  .work .detail-inner { font-size: 16px; line-height: 24px; }
   .work .detail .l { line-height: 30px; letter-spacing: -0.45px; }
   .work .detail .m { line-height: 24px; }
   .work .detail .s { line-height: 18px; }

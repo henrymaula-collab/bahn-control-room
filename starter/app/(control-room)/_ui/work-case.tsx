@@ -13,9 +13,9 @@ import { RouteMap } from "./route-map"
 import { usePanel } from "./work-frame"
 
 /**
- * Under the decision: "Talk it through ›" opens the conversation with the agent and
- * "The situation ›" the facts, each as the side panel (one at a time, so the decision
- * stays in view); "Why it came to you ›" opens in place.
+ * Under the decision: "Talk it through ›" opens the conversation with the agent as the side
+ * panel, in place of The situation, which is there by default (Henry, 24 Oct 20:40: the card
+ * opens with the situation beside it); "Why it came to you ›" opens in place.
  */
 export function CaseRows({
   caseId,
@@ -32,10 +32,13 @@ export function CaseRows({
   whyTitle?: string
   now: string
 }) {
-  const { open, setOpen, slot } = usePanel()
-  const trigger = useRef<HTMLButtonElement>(null)
+  const { open, setOpen, reset, slot } = usePanel()
   const talk = useRef<HTMLButtonElement>(null)
   const { thread, missing } = useChatThread(caseId, personId)
+  const hasSituation = !!situation
+
+  // Each case opens on its situation; a case without one has no panel.
+  useEffect(() => reset(hasSituation ? "situation" : null), [caseId, hasSituation, reset])
 
   return (
     <div className="rows work-rows">
@@ -58,21 +61,6 @@ export function CaseRows({
           </span>
         </button>
       )}
-      {situation && (
-        <button
-          ref={trigger}
-          type="button"
-          className="row-link"
-          aria-expanded={open === "situation"}
-          aria-controls="situation"
-          onClick={() => setOpen(open === "situation" ? null : "situation")}
-        >
-          <span className="m title">The situation</span>
-          <span className="chev">
-            <Icon name="chevron-right" size={18} />
-          </span>
-        </button>
-      )}
       {whyTitle && why.length > 0 && (
         <details className="row">
           <summary>
@@ -86,12 +74,7 @@ export function CaseRows({
           </div>
         </details>
       )}
-      {situation &&
-        slot &&
-        createPortal(
-          <SituationPanel situation={situation} open={open === "situation"} now={now} onClose={() => (setOpen(null), trigger.current?.focus())} />,
-          slot,
-        )}
+      {situation && slot && createPortal(<SituationPanel situation={situation} open={open === "situation"} now={now} />, slot)}
       {!missing &&
         slot &&
         createPortal(
@@ -152,13 +135,8 @@ function when(stop: Stop, now: string): string | undefined {
   return tz ? `${range(stop.window.from, stop.window.to, now, tz)} in ${stop.city}` : range(stop.window.from, stop.window.to, now)
 }
 
-/** What "The situation ›" opens: the car, the route, both ends, who it waits on, the few facts that decide it. */
-function SituationPanel({ situation: s, open, now, onClose }: { situation: Situation; open: boolean; now: string; onClose: () => void }) {
-  const close = useRef<HTMLButtonElement>(null)
-  useEffect(() => {
-    if (open) close.current?.focus({ preventScroll: true })
-  }, [open])
-
+/** The situation, beside the card by default: the car, the route, both ends, who it waits on, the few facts that decide it. */
+function SituationPanel({ situation: s, open, now }: { situation: Situation; open: boolean; now: string }) {
   // Who it waits on first, then the engine's facts. Say nothing twice: a booked pickup or delivery
   // time is already under its stop above, and the engine's Driver row ("Gig posted at EUR 456") wins.
   const shown = (stop: Stop) => stop.booked && !!stop.window
@@ -169,15 +147,12 @@ function SituationPanel({ situation: s, open, now, onClose }: { situation: Situa
   if (!facts.some((f) => f.label === "Driver")) facts.push({ label: "Driver", value: s.driver ?? "Not booked" })
 
   return (
-    <aside id="situation" className={`panel${open ? " open" : ""}`} aria-label="The situation" aria-hidden={!open}>
+    <aside id="situation" className={`panel situation-panel${open ? " open" : ""}`} aria-label="The situation" aria-hidden={!open} inert={!open}>
       <div className="panel-head">
         <div>
           <h2 className="m strong">{s.vehicle}</h2>
           <p className="s mono">{s.reference}</p>
         </div>
-        <button ref={close} type="button" className="close" aria-label="Close" onClick={onClose} tabIndex={open ? 0 : -1}>
-          <Icon name="x" size={18} />
-        </button>
       </div>
       {open && <RouteMap from={s.pickup.position} to={s.delivery.position} />}
       <div className="stops">
@@ -197,7 +172,7 @@ function SituationPanel({ situation: s, open, now, onClose }: { situation: Situa
         ))}
       </div>
       <Facts facts={facts} />
-      <Link href={`/orders/${encodeURIComponent(s.orderId)}`} className="open-order m" tabIndex={open ? 0 : -1}>
+      <Link href={`/orders/${encodeURIComponent(s.orderId)}`} className="open-order m">
         Open the order
         <Icon name="chevron-right" size={18} />
       </Link>

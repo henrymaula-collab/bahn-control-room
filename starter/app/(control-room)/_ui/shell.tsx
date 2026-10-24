@@ -4,6 +4,7 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { Icon, type IconName } from "./icons"
 import { BahnLogo } from "./logo"
+import { archivoItalic } from "./shell-fonts"
 import { PersonSwitcher } from "./person-switcher"
 
 type P = { id: string; name: string; desk: string }
@@ -27,9 +28,12 @@ export function Shell({ person, people, needYou, children }: { person: P; people
   return (
     <div className="shell">
       <aside className="side" aria-label="Control room">
-        <Link href="/" className="brand" aria-label="Bahn control room, overview">
+        <Link href="/" className={`brand ${archivoItalic.variable}`} aria-label="Bahn control room, overview">
           <BahnLogo />
-          <span>Control room</span>
+          {/* A lockup like Aalto's "Founder Sprint": the brand, then the product set in under its end. */}
+          <span className="brand-sub">
+            <span className="brand-sub-1">Control</span> <span className="brand-sub-2">room</span>
+          </span>
         </Link>
         <nav className="nav">
           {SECTIONS.map((s) => (

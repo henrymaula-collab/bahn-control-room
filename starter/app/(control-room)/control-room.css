@@ -67,7 +67,11 @@ time, .num { font-variant-numeric: tabular-nums; }
 .s { font-size: var(--size-s); line-height: 18px; color: var(--ink-2); }
 .strong { font-weight: 600; }
 .quiet { color: var(--ink-2); }
-.now { color: var(--now); }
+/* Red text = a deadline within the hour or an error, semibold so it reads as danger (Henry,
+   24 Oct 20:43). Geist is the variable font, so 600 is its real semibold. The colour stays
+   red-700: red-600 (#d13f52) is 4.57:1 on birch but 3.99:1 on raise and 3.44:1 on press,
+   where the side menu, the selected task row and the nested rows put red times. */
+.now { color: var(--now); font-weight: 600; }
 
 
 /* ---------- The frame: side menu, header, page ---------- */
@@ -139,7 +143,7 @@ body { background: var(--raise); }
 
 /* ---------- The question ---------- */
 .question .due { font-weight: 500; color: var(--ink-2); }
-.question .due.now { color: var(--now); }
+.question .due.now { color: var(--now); font-weight: 600; }
 .question .what { margin-top: 8px; font-weight: 600; }
 .question .ask { font-weight: 400; }
 .question .context { margin-top: 12px; }

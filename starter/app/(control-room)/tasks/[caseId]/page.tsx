@@ -8,8 +8,10 @@ import { Question } from "../../_ui/question"
 import { currentPersonId } from "../../_ui/session"
 import { Keep } from "../../_ui/text"
 import { CaseRows } from "../../_ui/work-case"
+import { lookQuery } from "../look"
 
 type Params = Promise<{ caseId: string }>
+type Search = Promise<Record<string, string | string[] | undefined>>
 
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
   const { caseId } = await params
@@ -18,8 +20,9 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
 }
 
 /** One case in Your tasks: flow 1's decision card, then two rows, The situation and Why it came to you. */
-export default async function WorkCasePage({ params }: { params: Params }) {
+export default async function WorkCasePage({ params, searchParams }: { params: Params; searchParams: Search }) {
   const { caseId } = await params
+  const look = lookQuery((await searchParams).tasks)
   const personId = await currentPersonId()
   const [w, lists] = await Promise.all([getWorkCase(decodeURIComponent(caseId), personId), getWork(personId)])
   if (!w) notFound()
@@ -50,7 +53,7 @@ export default async function WorkCasePage({ params }: { params: Params }) {
           whyChoices={detail.whyChoices}
           leadName={lead?.name ?? "The shift lead"}
           personName={detail.person.name}
-          nextHref={nextId ? `/tasks/${nextId}` : undefined}
+          nextHref={nextId ? `/tasks/${nextId}${look}` : undefined}
           next={extras?.next}
           subject={`${detail.card.order.vehicle}, ${detail.card.order.reference}`}
           existing={

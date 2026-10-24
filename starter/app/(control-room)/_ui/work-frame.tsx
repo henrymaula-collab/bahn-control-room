@@ -4,23 +4,11 @@ import Link from "next/link"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react"
 import type { WorkLists, WorkRow } from "@/lib/control-room/types-v3"
+import { lookOf, lookQuery } from "../tasks/look"
 import { Icon } from "./icons"
 
 /** Shown next to each row: the decide-by time, red only within the hour. Worked out on the server. */
 export type RowTime = Record<string, { text: string; now: boolean }>
-
-/**
- * Where the Needs you list lives (Henry picks, 24 Oct 20:40). Default: in the side menu under
- * "Your tasks", so the page has no list. `?tasks=switcher`: a slim row above the card (the car
- * opens the list as a menu, "1 of 2", "Next"). `?tasks=column`: the narrow list on the left.
- */
-export type TasksLook = "menu" | "switcher" | "column"
-const lookOf = (v: string | null | undefined): TasksLook => (v === "switcher" || v === "column" ? v : "menu")
-/** The query that keeps the chosen look when moving between cases ("" for the default). */
-export const lookQuery = (v: string | string[] | null | undefined) => {
-  const look = lookOf(Array.isArray(v) ? v[0] : v)
-  return look === "menu" ? "" : `?tasks=${look}`
-}
 
 /**
  * One side panel at a time: the situation (always there by default), the conversation with the

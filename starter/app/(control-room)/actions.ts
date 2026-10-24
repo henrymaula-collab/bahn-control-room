@@ -12,7 +12,7 @@ export async function choosePerson(personId: string) {
 }
 
 /** Saves the choice at once. Called again with the same id to add the "why". */
-export async function decide(input: { id: string; caseId: string; optionId: string; why?: string }) {
+export async function decide(input: { id: string; caseId: string; optionId: string; why?: string; editedDetail?: string }) {
   const personId = await currentPersonId()
   return postDecision({ ...input, personId })
 }

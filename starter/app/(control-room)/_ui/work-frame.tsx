@@ -15,8 +15,8 @@ const TABS: { key: ListKey; label: string }[] = [
 /** Shown next to each row: the decide-by time, red only within the hour. Worked out on the server. */
 export type RowTime = Record<string, { text: string; now: boolean }>
 
-/** One side panel at a time: the situation, or the conversation with the agent. */
-export type PanelKind = "situation" | "chat"
+/** One side panel at a time: the situation, the conversation with the agent, or the message about to be sent. */
+export type PanelKind = "situation" | "chat" | "email"
 type Panel = { open: PanelKind | null; setOpen: (o: PanelKind | null) => void; slot: HTMLDivElement | null }
 const PanelContext = createContext<Panel>({ open: null, setOpen: () => {}, slot: null })
 export const usePanel = () => useContext(PanelContext)

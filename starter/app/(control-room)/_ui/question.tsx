@@ -9,7 +9,9 @@ import type { Draft } from "@/lib/control-room/views"
 import { decide } from "../actions"
 import { answerFor, questionFor } from "./ask"
 import { Icon } from "./icons"
+import { SendPreview } from "./send-preview"
 import { Keep } from "./text"
+import { usePanel } from "./work-frame"
 
 interface Props {
   variant: "desk" | "case"
@@ -25,6 +27,7 @@ interface Props {
   nextHref?: string
   existing?: { optionId: string; personName: string; timeWords: string; why?: string }
   next?: string // v3: one short line under the primary button, what the agent does next
+  subject?: string // the subject line when the suggestion sends an email: "Ferrari Roma, CD-420458"
   children?: React.ReactNode // the desk's one disclosure, rendered on the server
 }
 
@@ -43,13 +46,18 @@ export function Question(props: Props) {
   const [sheetOpen, setSheetOpen] = useState(false)
   const all = [suggestion, ...alternatives]
   const draftOf = (o: Option): Draft | undefined => props.drafts[o.id] ?? o.draft
+  // A suggestion that sends something shows the message first, as the side panel (Your tasks only).
+  const panel = usePanel()
+  const primary = useRef<HTMLButtonElement>(null)
+  const preview = variant === "case" && !!panel.slot ? draftOf(suggestion) : undefined
 
-  const save = (option: Option, why?: string) => {
+  const save = (option: Option, why?: string, editedDetail?: string) => {
     setError(null)
     start(async () => {
       try {
-        const d = await decide({ id: `dec-${caseId}-${Date.now().toString(36)}`, caseId, optionId: option.id, why })
+        const d = await decide({ id: `dec-${caseId}-${Date.now().toString(36)}`, caseId, optionId: option.id, why, editedDetail })
         setSheetOpen(false)
+        if (panel.open === "email") panel.setOpen(null)
         if (variant === "desk") {
           // Like Mail after you act on a message: the next question comes up, with a short receipt.
           router.push(`/?done=${encodeURIComponent(caseId)}${why ? "&why=1" : ""}`)
@@ -96,7 +104,15 @@ export function Question(props: Props) {
       </h1>
       <p className="l ask">{questionFor(suggestion)}</p>
       <div className="answers">
-        <button type="button" className="btn btn-primary" disabled={pending} onClick={() => save(suggestion)}>
+        <button
+          ref={primary}
+          type="button"
+          className="btn btn-primary"
+          disabled={pending}
+          aria-expanded={preview ? panel.open === "email" : undefined}
+          aria-controls={preview ? "email" : undefined}
+          onClick={() => (preview ? panel.setOpen(panel.open === "email" ? null : "email") : save(suggestion))}
+        >
           {answerFor(suggestion, draftOf(suggestion))}
         </button>
         {alternatives.length > 0 && (
@@ -108,6 +124,17 @@ export function Question(props: Props) {
       {props.next && <p className="s next">{props.next}</p>}
       {error && <p className="m now" style={{ marginTop: 12 }}>{error}</p>}
       {props.children}
+      {preview && (
+        <SendPreview
+          draft={preview}
+          subject={props.subject}
+          verb={answerFor(suggestion, preview)}
+          pending={pending}
+          error={error}
+          onSend={(edited) => save(suggestion, undefined, edited)}
+          returnFocus={() => primary.current?.focus()}
+        />
+      )}
       <OptionsSheet
         open={sheetOpen}
         onClose={() => setSheetOpen(false)}

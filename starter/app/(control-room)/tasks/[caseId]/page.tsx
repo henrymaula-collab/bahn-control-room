@@ -52,6 +52,7 @@ export default async function WorkCasePage({ params }: { params: Params }) {
           personName={detail.person.name}
           nextHref={nextId ? `/tasks/${nextId}` : undefined}
           next={extras?.next}
+          subject={`${detail.card.order.vehicle}, ${detail.card.order.reference}`}
           existing={
             detail.decision
               ? {

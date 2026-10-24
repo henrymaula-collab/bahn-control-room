@@ -1,0 +1,57 @@
+/* The voice button (voice-button.tsx). Uses the control room tokens (control-room.css).
+   Idle: a quiet round control on the sheet colour. Listening: ink, with a ring that
+   follows the person's voice. Speaking: the agent's green ring follows its voice.
+   Writing it down: the ring breathes like the agent's dot. No pills, no colour for state
+   beyond ink and the agent's green. */
+
+.voice { display: inline-flex; align-items: center; gap: 10px; min-width: 0; }
+
+.voice-button {
+  --voice-level: 0;
+  position: relative; flex: none;
+  width: 44px; height: 44px; border-radius: 50%;
+  display: inline-flex; align-items: center; justify-content: center;
+  background: var(--raise); color: var(--ink);
+  touch-action: none; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none;
+  transition: background-color 150ms var(--ease), color 150ms var(--ease);
+}
+.voice-button:hover { background: var(--press); }
+.voice-button:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+.voice-button:disabled { opacity: .5; cursor: default; }
+.voice-button:disabled:hover { background: var(--raise); }
+.voice-icon { position: relative; }
+
+.voice-ring {
+  position: absolute; inset: 0; border-radius: 50%;
+  background: var(--ink); opacity: 0; transform: scale(1);
+  pointer-events: none;
+}
+
+.voice-button[data-state="starting"],
+.voice-button[data-state="listening"] { background: var(--ink); color: var(--page); }
+.voice-button[data-state="listening"] .voice-ring {
+  opacity: calc(0.10 + var(--voice-level) * 0.16);
+  transform: scale(calc(1.08 + var(--voice-level) * 0.42));
+  transition: opacity 90ms linear;
+}
+
+.voice-button[data-state="transcribing"] { background: var(--ink); color: var(--page); }
+.voice-button[data-state="transcribing"] .voice-ring { animation: voice-breathe 2.8s cubic-bezier(.2, 0, .2, 1) infinite; }
+
+.voice-button[data-state="speaking"] { background: var(--raise); color: var(--ink); }
+.voice-button[data-state="speaking"] .voice-ring {
+  background: var(--green);
+  opacity: calc(0.12 + var(--voice-level) * 0.22);
+  transform: scale(calc(1.04 + var(--voice-level) * 0.36));
+}
+
+@keyframes voice-breathe { 0% { transform: scale(1); opacity: .22; } 70%, 100% { transform: scale(1.7); opacity: 0; } }
+
+.voice-word { font-size: var(--size-s); color: var(--ink-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.voice-word.voice-error { color: var(--ink); white-space: normal; }
+
+@media (prefers-reduced-motion: reduce) {
+  .voice-button .voice-ring { transform: none !important; animation: none !important; }
+  .voice-button[data-state="listening"] .voice-ring,
+  .voice-button[data-state="speaking"] .voice-ring { opacity: .14; transform: scale(1.12) !important; }
+}

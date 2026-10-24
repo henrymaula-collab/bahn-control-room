@@ -1,0 +1,16 @@
+.dev-page { min-height: 100vh; background: var(--page); }
+.lab { max-width: var(--column); margin: 0 auto; padding: 56px 16px 80px; display: flex; flex-direction: column; gap: 32px; }
+.lab-mode { margin-top: -20px; }
+.lab-ask { display: flex; flex-direction: column; gap: 12px; }
+.lab-lines { display: grid; grid-template-columns: 96px minmax(0, 1fr); row-gap: 12px; column-gap: 16px; }
+.lab-lines dt { line-height: 24px; }
+.lab-settings { display: flex; flex-wrap: wrap; gap: 16px; }
+.lab-say { display: flex; align-items: flex-end; gap: 12px; }
+.lab-field { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.lab-grow { flex: 1; }
+.lab-field select, .lab-field input {
+  height: 44px; padding: 0 14px; border-radius: 12px; border: 1px solid var(--press);
+  background: var(--page); color: var(--ink); min-width: 0;
+}
+.lab-times { margin-top: 12px; display: grid; grid-template-columns: minmax(0, 1fr) auto; row-gap: 8px; column-gap: 24px; }
+.lab-times dd { text-align: right; }

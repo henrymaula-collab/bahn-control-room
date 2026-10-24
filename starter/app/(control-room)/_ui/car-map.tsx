@@ -36,6 +36,7 @@ interface Props {
   focus?: Bounds | null // fly here when it changes (the Overview's country switch)
   controls?: "top-right" | "bottom-right" | "none"
   cooperative?: boolean // the map sits in a scrolling page: two fingers or a modifier key to zoom
+  minZoom?: number // never zoom out past this, even when the room beside a panel is narrow
   card: (orderId: string, close: () => void) => React.ReactNode
 }
 
@@ -45,7 +46,7 @@ interface Props {
  * person are the only labelled pins, in red. Crowded pins fold to a dot (Airbnb), the
  * person's own cases keep their label first.
  */
-export function CarMap({ cars, red, lift, look, pad, padPhone, focus, controls = "top-right", cooperative, card }: Props) {
+export function CarMap({ cars, red, lift, look, pad, padPhone, focus, controls = "top-right", cooperative, minZoom, card }: Props) {
   const box = useRef<HTMLDivElement>(null)
   const map = useRef<MlMap | null>(null)
   const pins = useRef(new Map<string, { marker: Marker; el: HTMLButtonElement; width: number }>())
@@ -68,6 +69,7 @@ export function CarMap({ cars, red, lift, look, pad, padPhone, focus, controls =
         touchPitch: false,
         fadeDuration: 0,
         cooperativeGestures: !!cooperative,
+        ...(minZoom ? { minZoom } : {}),
         bounds: focus ?? bounds(cars),
         fitBoundsOptions: { padding: padFor(box.current), maxZoom: 9 },
       })

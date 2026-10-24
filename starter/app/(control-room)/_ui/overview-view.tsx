@@ -16,15 +16,21 @@ export function OverviewView({ data, red, look, firstName }: { data: Overview; r
   const [lift, setLift] = useState<string | null>(null)
   // The panel narrows with the page; the map keeps its cars beside it, never under it.
   const panel = useRef<HTMLElement>(null)
-  const [panelWidth, setPanelWidth] = useState(840)
+  const [size, setSize] = useState({ panel: 840, room: 1200 })
   useLayoutEffect(() => {
     const el = panel.current
-    if (!el) return
-    const ro = new ResizeObserver(() => setPanelWidth(el.offsetWidth))
+    const room = el?.parentElement
+    if (!el || !room) return
+    const measure = () => setSize({ panel: el.offsetWidth, room: room.offsetWidth })
+    const ro = new ResizeObserver(measure)
     ro.observe(el)
-    setPanelWidth(el.offsetWidth)
+    ro.observe(room)
+    measure()
     return () => ro.disconnect()
   }, [])
+  // Beside the panel when there is room; never less than 300 px for the cars (then the
+  // panel's right edge overlaps the west of the frame a little).
+  const padLeft = Math.max(16, Math.min(16 + size.panel + 32, size.room - 48 - 300))
   // The key follows the dots on the map.
   const needsPerson = data.cars.filter((c) => c.state === "needs_person").length
   const agentWorking = data.cars.filter((c) => c.state === "agent_working").length
@@ -38,7 +44,8 @@ export function OverviewView({ data, red, look, firstName }: { data: Overview; r
         red={red}
         lift={lift}
         look={look}
-        pad={{ top: 56, bottom: 56, left: 16 + panelWidth + 32, right: 48 }}
+        pad={{ top: 56, bottom: 56, left: padLeft, right: 48 }}
+        minZoom={3.3} // Northern Europe, never half the globe when the panel leaves little room
         padPhone={{ top: 440, bottom: 24, left: 24, right: 24 }}
         card={(orderId, close) => <PinCard info={red[orderId]} close={close} />}
       />

@@ -4,11 +4,15 @@
 
 import "dotenv/config"
 import { closeCrDb } from "../lib/control-room/db"
+import { applyDemoDepth } from "../lib/demo/apply"
 import { databaseName, demoReset } from "./lib/demo-reset"
 
 async function main() {
   console.log(`demo:reset on database "${databaseName()}"`)
   const s = await demoReset()
+  // The demo cases' depth (lib/demo/depth.ts): the agent's calls go to the database; the rest is read in memory.
+  const depth = await applyDemoDepth()
+  console.log(`Demo depth: ${depth.calls.length} call(s) on the demo cases (${depth.calls.join(", ")}).`)
   console.log(`Seeded ${s.decisions} made-up past decisions; replayed ${s.replayed.length} recorded agent runs.`)
   console.log(`Round 1 ${s.round1.caseId}: ${s.round1.status}, for ${s.round1.routedTo}. Seller hold: ${s.sellerHold.line} (${s.sellerHold.needed} needed).`)
   console.log(`Round 2 ${s.round2.caseId}: stored ${s.round2.stored}, shown ${s.round2.visible} (shows after round 1 is decided), for ${s.round2.routedTo}.`)

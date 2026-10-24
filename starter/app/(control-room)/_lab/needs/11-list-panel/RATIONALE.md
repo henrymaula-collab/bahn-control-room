@@ -6,4 +6,6 @@ Borrowed from: Apple HIG, Sheets: "Use a panel instead of a sheet if people need
 
 Why it helps under time pressure: the card never moves or shrinks; the list and the decision sit side by side, so working down 12 tasks is click, decide, click.
 
+The panel is one place and the newest request wins it: Talk it through or the email preview replaces the list, and closing them brings the list back.
+
 Trade-off: while the list is open the situation is one close away. It uses the panel slot the app already has, so nothing new is learned.

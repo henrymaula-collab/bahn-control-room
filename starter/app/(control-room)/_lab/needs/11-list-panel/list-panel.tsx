@@ -7,6 +7,8 @@
 // row selected). Closing it brings the situation back. Right after a decision the panel turns to the
 // list by itself, the decided case marked, because the situation of a settled case is no longer the
 // next thing to read; the card's own "Next case" stays the one default.
+// One panel: Talk it through or the email preview takes it from the list (the newest request wins)
+// and gives it back when closed.
 
 import Link from "next/link"
 import { createContext, useContext, useEffect, useMemo, useRef, useState } from "react"
@@ -25,17 +27,42 @@ const OPENER = "n11-opener"
 /** Part Around: the panel lives beside the card for as long as Your tasks is open, so it survives moves between cases. */
 export function ListPanelAround({ children }: { children: React.ReactNode }) {
   const lab = useLab()
-  const [open, setOpenRaw] = useState(lab.others)
-  const { setOpen: setSide } = usePanel()
+  // ?others=open with ?panel=chat (or email): the chat is what the URL asks to see, the list waits behind it.
+  const asked = lab.panel === "chat" || lab.panel === "email"
+  const [open, setOpenRaw] = useState(lab.others && !asked)
+  const { open: side, setOpen: setSide } = usePanel()
   const { rows, current, times, href } = useNeedsYou()
   const listRef = useRef<HTMLDivElement>(null)
   const groups = useMemo(() => byTime(rows, times), [rows, times])
+  const openNow = useRef(open)
+  openNow.current = open
+  const resume = useRef(lab.others && asked) // the list stepped aside for the chat or the email and comes back after
 
   const setOpen = (o: boolean) => {
-    if (o) setSide(null) // a chat or a message open under it goes back to the situation
+    resume.current = false
+    if (o) setSide(null) // the list is the newest request: a chat or a message goes back to the situation
     setOpenRaw(o)
   }
   const value = useMemo(() => ({ open, setOpen }), [open]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // One panel, and the newest request wins it: Talk it through or the email preview replaces the
+  // list (no layer hidden under another); closing them brings back the list if it was open.
+  const sideWas = useRef(side)
+  useEffect(() => {
+    const was = sideWas.current
+    sideWas.current = side
+    if (was === side) return
+    const front = (k: typeof side) => k === "chat" || k === "email"
+    if (front(side)) {
+      if (openNow.current) {
+        resume.current = true
+        setOpenRaw(false)
+      }
+    } else if (front(was) && resume.current) {
+      resume.current = false
+      setOpenRaw(true)
+    }
+  }, [side])
 
   // The case you are on stays in view, also after J / K.
   useEffect(() => {
@@ -44,6 +71,7 @@ export function ListPanelAround({ children }: { children: React.ReactNode }) {
   }, [open, current])
 
   const close = () => {
+    resume.current = false
     setOpenRaw(false)
     document.getElementById(OPENER)?.focus()
   }

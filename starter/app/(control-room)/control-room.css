@@ -106,7 +106,7 @@ time, .num { font-variant-numeric: tabular-nums; }
 
 /* ---------- The frame: side menu, header, page ---------- */
 html, body { height: 100%; }
-body { background: var(--raise); }
+body { background: var(--raise); overflow-x: clip; } /* never a sideways page scroll (Safari zoom rounds the frame up by 1 px) */
 .shell { display: grid; grid-template-columns: var(--side) minmax(0, 1fr); height: 100vh; }
 .side { display: flex; flex-direction: column; min-height: 0; padding: 14px 12px 12px; }
 .brand { display: flex; align-items: center; gap: 10px; padding: 6px 8px; margin-bottom: 18px; border-radius: 8px; }

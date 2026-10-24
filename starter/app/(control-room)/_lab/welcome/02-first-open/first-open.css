@@ -1,0 +1,49 @@
+/* welcome 02: first open. Axiom's get-started list: the first item open, the rest closed rows. */
+.lab-welcome-02 {
+  top: calc(16 * var(--cr-u)); left: calc(16 * var(--cr-u));
+  width: max(calc(360 * var(--type-kf)), min(calc(840 * var(--cr-u)), calc(100% - 176px)));
+  max-height: calc(100% - 32 * var(--cr-u)); overflow: hidden;
+  padding: var(--lw-pad) calc(52 * var(--cr-u)) calc(30 * var(--cr-u));
+  border-radius: calc(32 * var(--cr-u));
+  display: flex; flex-direction: column;
+}
+.lab-welcome-02 > * { flex: none; }
+.lab-welcome-02 .calm { margin-top: calc(24 * var(--cr-u)); font-size: var(--type-body); line-height: var(--lh-body); color: var(--ink-2); }
+
+/* The open task: air and one raised surface, no box inside a box. */
+.lab-welcome-02 .open {
+  margin: calc(32 * var(--cr-u)) calc(-20 * var(--cr-u)) 0; padding: calc(22 * var(--cr-u)) calc(20 * var(--cr-u)) calc(20 * var(--cr-u));
+  border-radius: calc(24 * var(--cr-u)); background: var(--raise);
+}
+.lab-welcome-02 .due { font-size: var(--type-subhead); line-height: var(--lh-subhead); font-weight: 600; color: var(--ink-2); }
+.lab-welcome-02 .due.now { color: var(--now); }
+.lab-welcome-02 .car { margin-top: calc(6 * var(--type-k)); font-size: var(--type-headline); line-height: var(--lh-headline); font-weight: 600; letter-spacing: var(--track-headline); }
+.lab-welcome-02 .car span { font-weight: 400; color: var(--ink-2); }
+/* The case's own situation line; two lines reserved so nothing jumps when it arrives. */
+.lab-welcome-02 .what {
+  margin-top: calc(4 * var(--type-k)); min-height: calc(2 * var(--lh-body) * 1em);
+  font-size: var(--type-body); line-height: var(--lh-body); color: var(--ink);
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+  opacity: 0; transition: opacity 200ms var(--lw-ease);
+}
+.lab-welcome-02 .what.in { opacity: 1; }
+.lab-welcome-02 .what.none { display: none; }
+.lab-welcome-02 .go { margin-top: calc(18 * var(--type-k)); }
+
+.lab-welcome-02 .then { margin-top: calc(22 * var(--cr-u)); font-size: var(--type-subhead); line-height: var(--lh-subhead); color: var(--ink-2); }
+.lab-welcome-02 .closed { margin-top: calc(6 * var(--type-k)); }
+.lab-welcome-02 .closed li + li .line { box-shadow: inset 0 1px 0 var(--press); }
+.lab-welcome-02 .line {
+  display: grid; grid-template-columns: auto minmax(0, 1fr) auto auto; align-items: baseline; column-gap: calc(10 * var(--type-k));
+  padding: calc(10 * var(--type-k)) 0; transition: color 100ms var(--lw-ease);
+}
+.lab-welcome-02 .line .v { font-size: var(--type-body); line-height: var(--lh-body); white-space: nowrap; }
+.lab-welcome-02 .line .lw-t { grid-row: 1; grid-column: 3; }
+.lab-welcome-02 .line .p { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: var(--type-subhead); color: var(--ink-2); }
+.lab-welcome-02 .line svg { align-self: center; color: var(--ink-2); transition: transform 150ms var(--lw-ease); }
+.lab-welcome-02 .line:hover svg, .lab-welcome-02 .line.lift svg { transform: translateX(2px); color: var(--ink); }
+.lab-welcome-02 .line:hover .v, .lab-welcome-02 .line.lift .v { text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 3px; }
+.lab-welcome-02 .line.more { grid-template-columns: minmax(0, 1fr) auto; }
+.lab-welcome-02 .line.more .v { color: var(--ink-2); font-size: var(--type-subhead); }
+
+.lab-welcome-02 .lw-key { margin-top: calc(18 * var(--cr-u)); padding-top: calc(18 * var(--cr-u)); border-top: 1px solid var(--press); }

@@ -1,0 +1,53 @@
+/* welcome 14: find. Attio's "Good morning" over one field; the field finds any car on the map. */
+.lab-welcome-14 {
+  top: calc(16 * var(--cr-u)); left: calc(16 * var(--cr-u));
+  width: max(calc(360 * var(--type-kf)), min(calc(840 * var(--cr-u)), calc(100% - 176px)));
+  max-height: calc(100% - 32 * var(--cr-u)); overflow: hidden;
+  padding: var(--lw-pad) calc(52 * var(--cr-u)) calc(30 * var(--cr-u));
+  border-radius: calc(32 * var(--cr-u));
+  display: flex; flex-direction: column;
+}
+.lab-welcome-14 > * { flex: none; }
+/* The field: Bahn's pill shape, the raised fill, a focus ring in ink (the field is the way on). */
+.lab-welcome-14 .field {
+  margin-top: calc(32 * var(--cr-u)); display: flex; align-items: center; gap: calc(10 * var(--type-k));
+  height: calc(54 * var(--type-k)); padding: 0 calc(12 * var(--type-k)) 0 calc(20 * var(--type-k));
+  border-radius: 999px; background: var(--raise); color: var(--ink-2); cursor: text;
+  box-shadow: inset 0 0 0 1px transparent; transition: box-shadow 150ms var(--lw-ease), background-color 150ms var(--lw-ease);
+}
+.lab-welcome-14 .field:focus-within { background: var(--page); box-shadow: inset 0 0 0 1.5px var(--ink), 0 6px 18px rgb(66 61 51 / 0.10); color: var(--ink); }
+.lab-welcome-14 .field svg { flex: none; }
+.lab-welcome-14 .field input {
+  flex: 1 1 auto; min-width: 0; border: 0; outline: none; background: transparent; color: var(--ink);
+  font: inherit; font-size: max(16px, var(--type-body)); line-height: var(--lh-body);
+}
+.lab-welcome-14 .field input::placeholder { color: var(--ink-2); }
+.lab-welcome-14 .field input:focus-visible { outline: none; }
+.lab-welcome-14 kbd {
+  flex: none; padding: calc(3 * var(--type-k)) calc(9 * var(--type-k)); border-radius: calc(8 * var(--type-k));
+  background: var(--page); box-shadow: 0 0 0 1px var(--press); color: var(--ink-2);
+  font-family: var(--font); font-size: var(--type-subhead); line-height: var(--lh-subhead);
+}
+.lab-welcome-14 .clear { flex: none; display: grid; place-items: center; width: calc(32 * var(--type-k)); height: calc(32 * var(--type-k)); border-radius: 50%; color: var(--ink-2); }
+.lab-welcome-14 .clear:hover { background: var(--raise); color: var(--ink); }
+
+.lab-welcome-14 .yours { margin-top: calc(22 * var(--cr-u)); display: flex; align-items: center; gap: calc(8 * var(--type-k)); font-size: var(--type-subhead); line-height: var(--lh-subhead); font-weight: 600; width: fit-content; }
+.lab-welcome-14 .yours .c { color: var(--ink-2); font-weight: 400; font-variant-numeric: tabular-nums; }
+.lab-welcome-14 .yours svg { color: var(--ink-2); transition: transform 150ms var(--lw-ease); }
+.lab-welcome-14 .yours:hover svg { transform: translateX(2px); color: var(--ink); }
+.lab-welcome-14 .lw-rows { margin-top: calc(6 * var(--type-k)); }
+.lab-welcome-14 .calm { margin-top: calc(22 * var(--cr-u)); font-size: var(--type-body); line-height: var(--lh-body); color: var(--ink-2); }
+
+/* Results: the selected one on the raised fill with a thin ink bar (Chatwoot's palette). */
+.lab-welcome-14 .results { margin-top: calc(12 * var(--cr-u)); display: flex; flex-direction: column; }
+.lab-welcome-14 .hit {
+  position: relative; display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: calc(16 * var(--type-k)); align-items: baseline;
+  margin: 0 calc(-12 * var(--type-k)); padding: calc(8 * var(--type-k)) calc(12 * var(--type-k)); border-radius: calc(12 * var(--type-k));
+}
+.lab-welcome-14 .hit.on { background: var(--raise); }
+.lab-welcome-14 .hit .v { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: var(--type-body); line-height: var(--lh-body); }
+.lab-welcome-14 .hit .ref { margin-left: calc(6 * var(--type-k)); font-family: var(--font-mono); font-size: var(--type-subhead); color: var(--ink-2); }
+.lab-welcome-14 .hit .p { grid-column: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: var(--type-subhead); line-height: var(--lh-subhead); color: var(--ink-2); }
+.lab-welcome-14 .hit .st { grid-row: 1; grid-column: 2; display: inline-flex; align-items: center; gap: calc(8 * var(--type-k)); font-size: var(--type-subhead); white-space: nowrap; }
+.lab-welcome-14 .none { padding: calc(10 * var(--type-k)) 0; font-size: var(--type-subhead); color: var(--ink-2); }
+.lab-welcome-14 .lw-key { margin-top: calc(18 * var(--cr-u)); padding-top: calc(18 * var(--cr-u)); border-top: 1px solid var(--press); }

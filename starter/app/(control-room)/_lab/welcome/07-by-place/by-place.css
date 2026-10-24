@@ -1,0 +1,29 @@
+/* welcome 07: by place. Shopify Home's order tasks "organized by task, with the number of each". */
+.lab-welcome-07 {
+  top: calc(16 * var(--cr-u)); left: calc(16 * var(--cr-u));
+  width: max(calc(360 * var(--type-kf)), min(calc(840 * var(--cr-u)), calc(100% - 176px)));
+  max-height: calc(100% - 32 * var(--cr-u)); overflow: hidden;
+  padding: var(--lw-pad) calc(52 * var(--cr-u)) calc(30 * var(--cr-u));
+  border-radius: calc(32 * var(--cr-u));
+  display: flex; flex-direction: column;
+}
+.lab-welcome-07 > * { flex: none; }
+.lab-welcome-07 .brief { margin-top: calc(14 * var(--cr-u)); font-size: var(--type-body); line-height: var(--lh-body); color: var(--ink-2); }
+.lab-welcome-07 .go { margin-top: calc(28 * var(--cr-u)); }
+.lab-welcome-07 .places { margin-top: calc(14 * var(--cr-u)); display: flex; flex-direction: column; }
+/* A place: its name once, the cars under it, indented; hairlines between places. */
+.lab-welcome-07 .place { padding: calc(10 * var(--type-k)) 0 calc(8 * var(--type-k)); }
+.lab-welcome-07 .place + .place { border-top: 1px solid var(--press); }
+.lab-welcome-07 .pname { font-size: var(--type-subhead); line-height: var(--lh-subhead); color: var(--ink-2); }
+.lab-welcome-07 .car {
+  display: flex; align-items: baseline; justify-content: space-between; gap: calc(16 * var(--type-k));
+  margin: 0 calc(-12 * var(--type-k)); padding: calc(4 * var(--type-k)) calc(12 * var(--type-k)); border-radius: calc(10 * var(--type-k));
+  transition: background-color 100ms var(--lw-ease);
+}
+.lab-welcome-07 .car:hover, .lab-welcome-07 .car.lift { background: var(--raise); }
+.lab-welcome-07 .car .v { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: var(--type-body); line-height: var(--lh-body); }
+.lab-welcome-07 .car time { font-size: var(--type-subhead); color: var(--ink-2); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.lab-welcome-07 .car time.now { color: var(--now); font-weight: 600; }
+.lab-welcome-07 .also { padding: calc(2 * var(--type-k)) 0; font-size: var(--type-subhead); color: var(--ink-2); }
+.lab-welcome-07 .lw-more { margin-top: calc(4 * var(--type-k)); }
+.lab-welcome-07 .lw-key { margin-top: calc(14 * var(--cr-u)); padding-top: calc(18 * var(--cr-u)); border-top: 1px solid var(--press); }

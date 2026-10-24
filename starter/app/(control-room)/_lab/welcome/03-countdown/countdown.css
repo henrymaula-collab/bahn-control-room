@@ -1,0 +1,22 @@
+/* welcome 03: countdown. Apple's Live Activities: time left is the figure, and it moves. */
+.lab-welcome-03 {
+  top: calc(16 * var(--cr-u)); left: calc(16 * var(--cr-u));
+  width: max(calc(360 * var(--type-kf)), min(calc(840 * var(--cr-u)), calc(100% - 176px)));
+  max-height: calc(100% - 32 * var(--cr-u)); overflow: hidden;
+  padding: var(--lw-pad) calc(52 * var(--cr-u)) calc(30 * var(--cr-u));
+  border-radius: calc(32 * var(--cr-u));
+  display: flex; flex-direction: column;
+}
+.lab-welcome-03 > * { flex: none; }
+.lab-welcome-03 .calm { margin-top: calc(24 * var(--cr-u)); font-size: var(--type-body); line-height: var(--lh-body); color: var(--ink-2); }
+.lab-welcome-03 .go { margin-top: calc(36 * var(--cr-u)); justify-content: flex-start; }
+.lab-welcome-03 .go > span:first-child { flex: 1 1 auto; }
+/* The timer: the Live Activity's countdown, birch on asphalt, tabular so it never wobbles. */
+.lab-welcome-03 .timer { flex: none; color: var(--bx-color-grey-300); font-variant-numeric: tabular-nums; font-weight: 600; letter-spacing: 0; }
+.lab-welcome-03 .lw-rows { margin-top: calc(14 * var(--cr-u)); }
+.lab-welcome-03 .lw-row { align-items: center; }
+.lab-welcome-03 .when { grid-row: 1 / span 2; grid-column: 2; display: flex; flex-direction: column; align-items: flex-end; }
+.lab-welcome-03 .when .in { font-size: var(--type-headline); line-height: var(--lh-headline); font-weight: 600; letter-spacing: var(--track-headline); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.lab-welcome-03 .when .in.now { color: var(--now); }
+.lab-welcome-03 .when time { font-size: var(--type-subhead); line-height: var(--lh-subhead); color: var(--ink-2); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.lab-welcome-03 .lw-key { margin-top: calc(18 * var(--cr-u)); padding-top: calc(18 * var(--cr-u)); border-top: 1px solid var(--press); }

@@ -1,0 +1,46 @@
+/* welcome 04: maps card. Apple Maps' floating card: narrow, translucent, the map is the page. */
+.lab-welcome-04.lw-panel {
+  top: calc(16 * var(--cr-u)); left: calc(16 * var(--cr-u));
+  width: min(calc(384 * var(--type-k)), calc(100% - 176px));
+  max-height: calc(100% - 96 * var(--type-k)); overflow: hidden;
+  padding: calc(26 * var(--type-k)) calc(24 * var(--type-k)) calc(20 * var(--type-k));
+  border-radius: calc(22 * var(--type-k));
+  background: rgb(255 254 247 / 0.88); -webkit-backdrop-filter: blur(20px) saturate(1.5); backdrop-filter: blur(20px) saturate(1.5);
+  display: flex; flex-direction: column;
+}
+.lab-welcome-04 > * { flex: none; }
+.lab-welcome-04 .lw-display { font-size: var(--type-title2); line-height: 1.18; }
+.lab-welcome-04 .sub { margin-top: calc(6 * var(--type-k)); font-size: var(--type-body); line-height: var(--lh-body); color: var(--ink-2); }
+
+/* Apple's inset grouped list: one raised group, hairlines between rows, a mark at the left. */
+.lab-welcome-04 .list { margin-top: calc(18 * var(--type-k)); border-radius: calc(14 * var(--type-k)); background: var(--page); box-shadow: 0 0 0 1px rgb(18 17 14 / 0.06); overflow: hidden; }
+.lab-welcome-04 .item {
+  display: grid; grid-template-columns: calc(8 * var(--type-k)) minmax(0, 1fr) auto; column-gap: calc(12 * var(--type-k)); align-items: center;
+  padding: calc(9 * var(--type-k)) calc(14 * var(--type-k)); transition: background-color 100ms var(--lw-ease);
+}
+.lab-welcome-04 .item { position: relative; }
+.lab-welcome-04 li + li .item::before { content: ""; position: absolute; top: 0; right: 0; left: calc(34 * var(--type-k)); height: 1px; background: var(--press); }
+.lab-welcome-04 .item:hover, .lab-welcome-04 .item.lift { background: var(--raise); }
+.lab-welcome-04 .mark { grid-row: 1 / span 2; width: calc(8 * var(--type-k)); height: calc(8 * var(--type-k)); border-radius: 50%; background: var(--red); box-shadow: 0 0 0 calc(2 * var(--type-k)) rgb(253 74 97 / 0.18); }
+.lab-welcome-04 .mark:not(.now) { background: var(--bx-color-red-300); box-shadow: none; }
+.lab-welcome-04 .v { grid-column: 2; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: var(--type-body); line-height: var(--lh-body); }
+.lab-welcome-04 .p { grid-column: 2; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: var(--type-subhead); line-height: var(--lh-subhead); color: var(--ink-2); }
+.lab-welcome-04 time { grid-column: 3; grid-row: 1 / span 2; font-size: var(--type-subhead); color: var(--ink-2); font-variant-numeric: tabular-nums; }
+.lab-welcome-04 time.now { color: var(--now); font-weight: 600; }
+.lab-welcome-04 .item.more { grid-template-columns: minmax(0, 1fr) auto; }
+.lab-welcome-04 .item.more .v { grid-column: 1; color: var(--ink-2); font-size: var(--type-subhead); }
+.lab-welcome-04 .item.more svg { color: var(--ink-2); }
+.lab-welcome-04 .go { margin-top: calc(16 * var(--type-k)); min-height: calc(46 * var(--type-k)); }
+
+/* The legend: bottom-left of the map, one line, the map's own furniture. */
+.lab-welcome-04-legend {
+  position: absolute; z-index: 5; left: calc(16 * var(--cr-u)); bottom: calc(16 * var(--cr-u));
+  display: flex; flex-wrap: wrap; gap: calc(6 * var(--type-k)) calc(18 * var(--type-k));
+  max-width: calc(100% - 340px);
+  padding: calc(9 * var(--type-k)) calc(16 * var(--type-k)); border-radius: 999px;
+  background: rgb(255 254 247 / 0.88); -webkit-backdrop-filter: blur(16px) saturate(1.5); backdrop-filter: blur(16px) saturate(1.5);
+  box-shadow: 0 0 0 1px rgb(18 17 14 / 0.05), 0 4px 14px rgb(66 61 51 / 0.12);
+  font-size: var(--type-subhead); line-height: var(--lh-subhead);
+}
+.lab-welcome-04-legend p { display: inline-flex; align-items: center; gap: calc(8 * var(--type-k)); white-space: nowrap; }
+.lab-welcome-04-legend .c { color: var(--ink-2); font-variant-numeric: tabular-nums; }

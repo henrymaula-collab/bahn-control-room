@@ -1,0 +1,53 @@
+/* welcome 12: arrival. Flora's greeting alone while the page loads, then Daybridge's card over the
+   live product. One choreography, about two seconds, once per load; none under reduced motion. */
+.lab-welcome-12 {
+  top: calc(16 * var(--cr-u)); left: calc(16 * var(--cr-u));
+  width: max(calc(360 * var(--type-kf)), min(calc(840 * var(--cr-u)), calc(100% - 176px)));
+  max-height: calc(100% - 32 * var(--cr-u)); overflow: hidden;
+  padding: var(--lw-pad) calc(52 * var(--cr-u)) calc(30 * var(--cr-u));
+  border-radius: calc(32 * var(--cr-u));
+  display: flex; flex-direction: column;
+}
+.lab-welcome-12 > * { flex: none; }
+.lab-welcome-12 .go { margin-top: calc(36 * var(--cr-u)); }
+.lab-welcome-12 .lw-rows { margin-top: calc(14 * var(--cr-u)); }
+.lab-welcome-12 .lw-key { margin-top: calc(18 * var(--cr-u)); padding-top: calc(18 * var(--cr-u)); border-top: 1px solid var(--press); }
+
+/* The veil: birch over the map while the greeting stands alone (it also hides the tiles loading). */
+.lab-welcome-12-veil { position: absolute; inset: 0; z-index: 4; background: var(--page); pointer-events: none; opacity: 0; }
+.lab-welcome-12-veil.pre { opacity: 1; animation: lw12-unveil 0s 2.5s forwards; } /* no script: lift the veil anyway */
+.lab-welcome-12-veil.run { opacity: 1; animation: lw12-veil 650ms var(--lw-ease) calc(1150ms + 100ms) forwards; }
+
+/* Before the script runs: only the veil (and a failsafe that shows everything after 2.5 s). */
+.lab-welcome-12.pre { background: transparent; box-shadow: none; animation: lw12-surface-failsafe 0s 2.5s forwards; }
+.lab-welcome-12.pre > * { opacity: 0; animation: lw12-failsafe 0s 2.5s forwards; }
+
+/* Running: the surface fades in as the greeting arrives in it. */
+.lab-welcome-12.run { background: transparent; box-shadow: none; animation: lw12-surface 500ms var(--lw-ease) 1150ms forwards; }
+.lab-welcome-12.run .lw-display { opacity: 0; animation: lw12-show 0s 1900ms forwards; } /* own name: a renamed animation restarts */
+/* The stand-in greeting: over the veil, exactly where the real one ends, animated from the centre. */
+.lab-welcome-12-stage { position: absolute; inset: 0; z-index: 6; pointer-events: none; }
+.lab-welcome-12-stage .ghost { position: absolute; margin: 0; opacity: 0; transform-origin: center; }
+.lab-welcome-12-stage .ghost.run { animation: lw12-h1 1900ms both, lw12-out 0s 1900ms forwards; }
+@keyframes lw12-out { to { visibility: hidden; } }
+.lab-welcome-12.run .after { animation: lw12-rise 420ms var(--lw-ease-out) both; animation-delay: calc(1450ms + var(--i, 0) * 70ms); }
+
+@keyframes lw12-h1 {
+  0% { opacity: 0; transform: translate(var(--dx, 0), calc(var(--dy, 0) + 10px)) scale(var(--s, 1)); animation-timing-function: cubic-bezier(.2, 0, 0, 1); }
+  22% { opacity: 1; transform: translate(var(--dx, 0), var(--dy, 0)) scale(var(--s, 1)); }
+  60% { opacity: 1; transform: translate(var(--dx, 0), var(--dy, 0)) scale(var(--s, 1)); animation-timing-function: cubic-bezier(.65, 0, .2, 1); }
+  100% { opacity: 1; transform: none; }
+}
+@keyframes lw12-veil { to { opacity: 0; } }
+@keyframes lw12-unveil { to { opacity: 0; } }
+@keyframes lw12-show { to { opacity: 1; } }
+@keyframes lw12-surface { from { background: transparent; box-shadow: none; } to { background: var(--page); box-shadow: var(--lw-shadow); } }
+@keyframes lw12-surface-failsafe { to { background: var(--page); box-shadow: var(--lw-shadow); } }
+@keyframes lw12-rise { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+@keyframes lw12-failsafe { to { opacity: 1; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .lab-welcome-12-veil { display: none; }
+  .lab-welcome-12.pre, .lab-welcome-12.run { background: var(--page); box-shadow: var(--lw-shadow); }
+  .lab-welcome-12.pre > *, .lab-welcome-12.run .after, .lab-welcome-12.run .lw-display { opacity: 1; animation: none; }
+}

@@ -1,0 +1,42 @@
+/* welcome 11: strip. One line over the map (a Live Activity's banner); everything else on demand. */
+.lab-welcome-11-room { position: absolute; top: 0; left: 0; width: 0; height: 0; }
+.lab-welcome-11 {
+  top: calc(16 * var(--cr-u)); left: calc(16 * var(--cr-u)); max-width: calc(100% - 32 * var(--cr-u) - 64px);
+  display: flex; align-items: center; gap: calc(12 * var(--type-k));
+  padding: calc(10 * var(--type-k)) calc(10 * var(--type-k)) calc(10 * var(--type-k)) calc(26 * var(--type-k));
+  border-radius: 999px;
+}
+.lab-welcome-11 .lw-display { min-width: 0; font-size: var(--type-title2); line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-right: calc(10 * var(--type-k)); }
+.lab-welcome-11 .calm { color: var(--ink-2); }
+.lab-welcome-11 .go { width: auto; flex: none; min-height: calc(46 * var(--type-k)); padding: 0 calc(14 * var(--type-k)) 0 calc(20 * var(--type-k)); gap: calc(10 * var(--type-k)); }
+.lab-welcome-11 .more {
+  flex: none; display: inline-flex; align-items: center; gap: calc(6 * var(--type-k)); height: calc(46 * var(--type-k)); padding: 0 calc(14 * var(--type-k)) 0 calc(18 * var(--type-k));
+  border-radius: 999px; background: var(--raise); color: var(--ink); font-size: var(--type-headline); font-weight: 600; letter-spacing: var(--track-headline); cursor: pointer;
+  transition: background-color 150ms var(--lw-ease);
+}
+.lab-welcome-11 .more:hover, .lab-welcome-11 .more[aria-expanded="true"] { background: var(--press); }
+
+/* The rows, dropped under the strip on demand. */
+.lab-welcome-11-drop {
+  top: calc(16 * var(--cr-u) + 66 * var(--type-k) + 8px); left: calc(16 * var(--cr-u));
+  width: min(calc(440 * var(--type-k)), calc(100% - 32 * var(--cr-u)));
+  max-height: calc(100% - 16 * var(--cr-u) - 66 * var(--type-k) - 8px - 72 * var(--type-k)); overflow: hidden;
+  padding: calc(10 * var(--type-k)) calc(22 * var(--type-k)); border-radius: calc(22 * var(--type-k));
+  transform-origin: top left; animation: lw11-drop 200ms var(--lw-ease-out);
+}
+@keyframes lw11-drop { from { opacity: 0; transform: translateY(-6px) scale(.98); } to { opacity: 1; transform: none; } }
+
+/* The key as the map's legend, bottom-left. */
+.lab-welcome-11-legend {
+  position: absolute; z-index: 5; left: calc(16 * var(--cr-u)); bottom: calc(16 * var(--cr-u));
+  display: flex; flex-wrap: wrap; gap: calc(6 * var(--type-k)) calc(18 * var(--type-k)); max-width: calc(100% - 340px);
+  padding: calc(9 * var(--type-k)) calc(16 * var(--type-k)); border-radius: 999px;
+  background: rgb(255 254 247 / 0.9); -webkit-backdrop-filter: blur(16px) saturate(1.5); backdrop-filter: blur(16px) saturate(1.5);
+  box-shadow: 0 0 0 1px rgb(18 17 14 / 0.05), 0 4px 14px rgb(66 61 51 / 0.12);
+  font-size: var(--type-subhead); line-height: var(--lh-subhead);
+}
+.lab-welcome-11-legend p { display: inline-flex; align-items: center; gap: calc(8 * var(--type-k)); white-space: nowrap; }
+.lab-welcome-11-legend .c { color: var(--ink-2); font-variant-numeric: tabular-nums; }
+/* A narrow map (Henry's Safari at 125 %) keeps the sentence whole by dropping its deadline;
+   the pill and the rows still carry it. Measured against the Overview (container-type: size). */
+@container (max-width: 940px) { .lab-welcome-11 .by { display: none; } }

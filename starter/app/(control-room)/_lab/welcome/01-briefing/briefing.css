@@ -1,0 +1,16 @@
+/* welcome 01: briefing. Today's panel, with the day said in the greeting itself (Flighty, Town). */
+.lab-welcome-01 {
+  top: calc(16 * var(--cr-u)); left: calc(16 * var(--cr-u));
+  width: max(calc(360 * var(--type-kf)), min(calc(840 * var(--cr-u)), calc(100% - 176px)));
+  max-height: calc(100% - 32 * var(--cr-u)); overflow: hidden;
+  padding: var(--lw-pad) calc(52 * var(--cr-u)) calc(30 * var(--cr-u));
+  border-radius: calc(32 * var(--cr-u));
+  display: flex; flex-direction: column;
+}
+.lab-welcome-01 > * { flex: none; }
+/* Two tones in one sentence: who in ink, what in grey (Town's "Good evening, Bertrand." + next fact). */
+.lab-welcome-01 .lw-display .fact { color: var(--ink-2); }
+.lab-welcome-01 .go { margin-top: calc(36 * var(--cr-u)); }
+.lab-welcome-01 .lw-rows { margin-top: calc(14 * var(--cr-u)); }
+.lab-welcome-01 .lw-key { margin-top: calc(18 * var(--cr-u)); padding-top: calc(18 * var(--cr-u)); border-top: 1px solid var(--press); }
+.lab-welcome-01 .lw-display + .lw-key { border-top: 0; padding-top: 0; margin-top: calc(32 * var(--cr-u)); }

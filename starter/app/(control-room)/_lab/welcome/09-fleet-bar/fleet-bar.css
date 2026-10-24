@@ -1,0 +1,39 @@
+/* welcome 09: fleet bar. Apple's iPhone Storage bar, used as the map's key. */
+.lab-welcome-09 {
+  top: calc(16 * var(--cr-u)); left: calc(16 * var(--cr-u));
+  width: max(calc(360 * var(--type-kf)), min(calc(840 * var(--cr-u)), calc(100% - 176px)));
+  max-height: calc(100% - 32 * var(--cr-u)); overflow: hidden;
+  padding: var(--lw-pad) calc(52 * var(--cr-u)) calc(32 * var(--cr-u));
+  border-radius: calc(32 * var(--cr-u));
+  display: flex; flex-direction: column;
+}
+.lab-welcome-09 > * { flex: none; }
+.lab-welcome-09 .go { margin-top: calc(36 * var(--cr-u)); }
+.lab-welcome-09 .lw-rows { margin-top: calc(14 * var(--cr-u)); }
+
+.lab-welcome-09 .fleet { margin-top: calc(18 * var(--cr-u)); padding-top: calc(18 * var(--cr-u)); border-top: 1px solid var(--press); }
+.lab-welcome-09 .fhead { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; font-size: var(--type-subhead); line-height: var(--lh-subhead); }
+.lab-welcome-09 .ftotal { color: var(--ink-2); font-variant-numeric: tabular-nums; text-align: right; }
+/* The bar: segments in proportion, 2 px gaps the page colour (Apple's white seams), round ends. */
+.lab-welcome-09 .bar {
+  margin-top: calc(8 * var(--type-k)); height: calc(12 * var(--type-k)); display: flex; gap: 2px;
+  border-radius: 999px; overflow: hidden; background: var(--raise);
+}
+.lab-welcome-09 .seg { min-width: 6px; flex-basis: 0; transition: opacity 150ms var(--lw-ease); transform-origin: left center; animation: lw09-grow 700ms var(--lw-ease-out) both; }
+.lab-welcome-09 .seg-plan { background: var(--green); }
+.lab-welcome-09 .seg-agent { background: var(--bx-color-green-300); position: relative; overflow: hidden; animation-delay: 80ms; }
+.lab-welcome-09 .seg-red { background: var(--red); animation-delay: 160ms; }
+/* The agent's part works: a slow light passes through it, as the agent's dots breathe on the map. */
+.lab-welcome-09 .seg-agent::after {
+  content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, transparent, rgb(255 254 247 / 0.65), transparent);
+  transform: translateX(-100%); animation: lw09-pass 2.8s cubic-bezier(.2, 0, .2, 1) 900ms infinite;
+}
+@keyframes lw09-grow { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+@keyframes lw09-pass { to { transform: translateX(100%); } }
+.lab-welcome-09 .legend { margin-top: calc(10 * var(--type-k)); display: flex; flex-wrap: wrap; gap: calc(4 * var(--type-k)) calc(20 * var(--type-k)); }
+.lab-welcome-09 .litem { display: inline-flex; align-items: center; gap: calc(8 * var(--type-k)); font-size: var(--type-subhead); line-height: var(--lh-subhead); cursor: default; transition: opacity 150ms var(--lw-ease); }
+/* Hover one part: the others step back (Finder's storage bar on hover). */
+.lab-welcome-09 .fleet[class*="hot-"] .seg, .lab-welcome-09 .fleet[class*="hot-"] .litem { opacity: .3; }
+.lab-welcome-09 .fleet.hot-plan .seg-plan, .lab-welcome-09 .fleet.hot-plan .litem:nth-child(1),
+.lab-welcome-09 .fleet.hot-agent .seg-agent, .lab-welcome-09 .fleet.hot-agent .litem:nth-child(2),
+.lab-welcome-09 .fleet.hot-red .seg-red, .lab-welcome-09 .fleet.hot-red .litem:nth-child(3) { opacity: 1; }

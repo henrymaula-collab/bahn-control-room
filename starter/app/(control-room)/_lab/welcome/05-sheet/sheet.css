@@ -1,0 +1,20 @@
+/* welcome 05: sheet. Apple Maps' sidebar sheet: full height, the list scrolls, the foot stays. */
+.lab-welcome-05 {
+  top: calc(16 * var(--cr-u)); bottom: calc(16 * var(--cr-u)); left: calc(16 * var(--cr-u));
+  width: min(calc(420 * var(--type-k)), calc(100% - 176px));
+  border-radius: calc(28 * var(--cr-u));
+  display: flex; flex-direction: column; overflow: hidden;
+}
+.lab-welcome-05 .head { flex: none; padding: calc(40 * var(--cr-u)) calc(36 * var(--cr-u)) calc(18 * var(--cr-u)); }
+.lab-welcome-05 .lw-display { font-size: var(--type-title1); line-height: 1.14; }
+.lab-welcome-05 .go { margin-top: calc(24 * var(--cr-u)); min-height: calc(50 * var(--type-k)); }
+/* The list: scrolls inside the sheet, fading under the header and over the foot. */
+.lab-welcome-05 .scroll {
+  flex: 1 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin;
+  padding: calc(4 * var(--cr-u)) calc(36 * var(--cr-u)) calc(16 * var(--cr-u));
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 calc(12 * var(--cr-u)), #000 calc(100% - 28 * var(--cr-u)), transparent 100%);
+  mask-image: linear-gradient(to bottom, transparent 0, #000 calc(12 * var(--cr-u)), #000 calc(100% - 28 * var(--cr-u)), transparent 100%);
+}
+.lab-welcome-05 .scroll:focus { outline: none; }
+.lab-welcome-05 .calm { padding-top: calc(8 * var(--cr-u)); font-size: var(--type-body); line-height: var(--lh-body); color: var(--ink-2); }
+.lab-welcome-05 .foot { flex: none; margin: 0 calc(36 * var(--cr-u)); padding: calc(16 * var(--cr-u)) 0 calc(24 * var(--cr-u)); border-top: 1px solid var(--press); }

@@ -1,0 +1,69 @@
+/* Slot `welcome`, shared by every variant (builder W). Every rule starts with .lab-welcome, a
+   class only this slot's variants carry, so today's Overview is untouched. Sizes on the ramp
+   (--type-*, design/TYPE_SCALE.md) and --cr-u (shell.css); never vw / vh / cq in font-size. */
+.lab-welcome {
+  --lw-ease: cubic-bezier(.2, 0, 0, 1);         /* M3 Standard (research/premium/product/rules.md 1) */
+  --lw-ease-out: cubic-bezier(.23, 1, .32, 1);  /* Raycast's ease-out for entrances (principles.md 1) */
+  --lw-shadow: 0 0 0 1px rgb(18 17 14 / 0.05), 0 1px 2px rgb(18 17 14 / 0.05), 0 14px 36px rgb(66 61 51 / 0.14);
+  --lw-pad: calc(48 * var(--cr-u));
+  font-family: var(--font);
+  color: var(--ink);
+}
+.lab-welcome.lw-panel { position: absolute; z-index: 5; background: var(--page); box-shadow: var(--lw-shadow); }
+
+/* The display line: Owners Wide (Archivo at width 125), Bahn's site headline face. */
+.lab-welcome .lw-display {
+  font-family: "Owners Wide", var(--font-archivo), var(--font); font-stretch: 125%; font-variation-settings: "wdth" 125;
+  font-size: var(--type-display); line-height: var(--lh-display); font-weight: 600; letter-spacing: var(--track-display);
+  text-wrap: balance; overflow-wrap: break-word;
+}
+.lab-welcome .lw-display em { font-family: "Owners Wide", var(--font-archivo-italic), var(--font-archivo), var(--font); font-style: italic; font-weight: inherit; }
+
+/* The black pill: Bahn's "Get a quote" button (bahnexpress.com), the one way on. */
+.lab-welcome .lw-pill {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px; width: 100%;
+  min-height: calc(54 * var(--type-k)); padding: 0 calc(18 * var(--type-k)) 0 calc(24 * var(--type-k));
+  border-radius: 999px; background: var(--ink); color: var(--page);
+  font-size: var(--type-headline); line-height: var(--lh-headline); letter-spacing: var(--track-headline); font-weight: 600;
+  transition: background-color 150ms var(--lw-ease), transform 150ms var(--lw-ease);
+}
+.lab-welcome .lw-pill > span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.lab-welcome .lw-pill:hover { background: var(--bx-color-grey-900); }
+.lab-welcome .lw-pill:active { transform: scale(0.985); }
+.lab-welcome .lw-pill svg { flex: none; opacity: .75; }
+.lab-welcome .lw-pill.quiet { background: var(--press); color: var(--ink); }
+.lab-welcome .lw-pill.quiet:hover { background: var(--bx-color-grey-200-sand); }
+
+/* A task row: car, place under it, the decide-by time on the right (red within the hour). */
+.lab-welcome .lw-rows { display: flex; flex-direction: column; }
+.lab-welcome .lw-row {
+  display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: calc(20 * var(--cr-u)); align-items: baseline;
+  padding: calc(8 * var(--type-k)) calc(12 * var(--type-k)); margin: 0 calc(-12 * var(--type-k)); border-radius: calc(12 * var(--type-k));
+  transition: background-color 100ms var(--lw-ease);
+}
+.lab-welcome .lw-row:hover, .lab-welcome .lw-row.lift { background: var(--raise); }
+.lab-welcome .lw-v { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: var(--type-body); line-height: var(--lh-body); }
+.lab-welcome .lw-p { grid-column: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: var(--type-subhead); line-height: var(--lh-subhead); color: var(--ink-2); }
+.lab-welcome .lw-t { grid-row: 1; grid-column: 2; font-size: var(--type-subhead); line-height: var(--lh-body); color: var(--ink-2); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.lab-welcome .lw-t.now { color: var(--now); font-weight: 600; }
+.lab-welcome .lw-more { display: flex; align-items: center; justify-content: space-between; gap: 8px; color: var(--ink-2); font-size: var(--type-subhead); line-height: var(--lh-subhead); }
+.lab-welcome .lw-more svg { flex: none; }
+
+/* The key: a dot, a word, a count (the map's colours). */
+.lab-welcome .lw-key { display: flex; flex-direction: column; gap: calc(4 * var(--type-k)); }
+.lab-welcome .lw-state { display: grid; grid-template-columns: calc(8 * var(--type-k)) minmax(0, 1fr) auto; align-items: center; column-gap: calc(10 * var(--type-k)); font-size: var(--type-subhead); line-height: var(--lh-subhead); }
+.lab-welcome .lw-n { color: var(--ink-2); font-variant-numeric: tabular-nums; }
+.lab-welcome .dot { width: calc(8 * var(--type-k)); height: calc(8 * var(--type-k)); }
+
+.lab-welcome a:focus-visible, .lab-welcome button:focus-visible, .lab-welcome input:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+
+/* The row-to-pin hairline (Tether in shared.tsx): an overlay over the whole Overview. */
+.lab-welcome.lw-tether { position: absolute; inset: 0; z-index: 4; width: 100%; height: 100%; pointer-events: none; overflow: visible; opacity: 0; transition: opacity 150ms var(--lw-ease); }
+.lab-welcome.lw-tether path { fill: none; stroke: var(--ink); stroke-width: 1.25; stroke-opacity: .55; stroke-linecap: round; }
+.lab-welcome.lw-tether .ring { fill: none; stroke: var(--ink); stroke-width: 1.25; stroke-opacity: .7; }
+.lab-welcome.lw-tether .start { fill: var(--ink); }
+.lab-welcome.lw-tether.strong path { stroke-opacity: .8; }
+
+@media (prefers-reduced-motion: reduce) {
+  .lab-welcome *, .lab-welcome.lw-tether { transition: none !important; animation: none !important; }
+}

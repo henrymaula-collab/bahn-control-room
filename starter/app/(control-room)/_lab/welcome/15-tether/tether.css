@@ -1,0 +1,17 @@
+/* welcome 15: tether. A hairline from the row to its pin, the way live maps tie a card to its dot. */
+.lab-welcome-15 {
+  top: calc(16 * var(--cr-u)); left: calc(16 * var(--cr-u));
+  width: max(calc(360 * var(--type-kf)), min(calc(840 * var(--cr-u)), calc(100% - 200px)));
+  max-height: calc(100% - 32 * var(--cr-u)); overflow: hidden;
+  padding: var(--lw-pad) calc(52 * var(--cr-u)) calc(30 * var(--cr-u));
+  border-radius: calc(32 * var(--cr-u));
+  display: flex; flex-direction: column;
+}
+.lab-welcome-15 > * { flex: none; }
+.lab-welcome-15 .go { margin-top: calc(36 * var(--cr-u)); }
+.lab-welcome-15 .lw-rows { margin-top: calc(14 * var(--cr-u)); }
+/* The tied row keeps a thin ink bar at its right edge, where the line leaves the panel. */
+.lab-welcome-15 .lw-row { position: relative; }
+.lab-welcome-15 .lw-row::after { content: ""; position: absolute; right: calc(-40 * var(--cr-u)); top: 50%; width: calc(28 * var(--cr-u)); height: 1.25px; background: var(--ink); opacity: 0; transition: opacity 150ms var(--lw-ease); }
+.lab-welcome-15 .lw-row.tied::after { opacity: .55; }
+.lab-welcome-15 .lw-key { margin-top: calc(18 * var(--cr-u)); padding-top: calc(18 * var(--cr-u)); border-top: 1px solid var(--press); }

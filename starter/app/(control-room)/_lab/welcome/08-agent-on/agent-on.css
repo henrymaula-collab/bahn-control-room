@@ -1,0 +1,27 @@
+/* welcome 08: agent on. Tembo's home: what the agent is working on, beside what needs you. */
+.lab-welcome-08 {
+  top: calc(16 * var(--cr-u)); left: calc(16 * var(--cr-u));
+  width: max(calc(360 * var(--type-kf)), min(calc(840 * var(--cr-u)), calc(100% - 176px)));
+  max-height: calc(100% - 32 * var(--cr-u)); overflow: hidden;
+  padding: var(--lw-pad) calc(52 * var(--cr-u)) calc(30 * var(--cr-u));
+  border-radius: calc(32 * var(--cr-u));
+  display: flex; flex-direction: column;
+}
+.lab-welcome-08 > * { flex: none; }
+.lab-welcome-08 .go { margin-top: calc(36 * var(--cr-u)); }
+.lab-welcome-08 .lw-rows { margin-top: calc(14 * var(--cr-u)); }
+
+/* The agent's line, under its key row: one of its cases, changing every five seconds. */
+.lab-welcome-08 .key { margin-top: calc(18 * var(--cr-u)); padding-top: calc(18 * var(--cr-u)); border-top: 1px solid var(--press); }
+.lab-welcome-08 .aline { position: relative; margin: calc(2 * var(--type-k)) 0 calc(6 * var(--type-k)) calc(18 * var(--type-k)); min-height: calc(var(--type-subhead) * var(--lh-subhead) * 3 + 8 * var(--type-k)); }
+.lab-welcome-08 .aitem {
+  display: flex; flex-direction: column; margin: 0 calc(-10 * var(--type-k)); padding: calc(4 * var(--type-k)) calc(10 * var(--type-k));
+  border-radius: calc(10 * var(--type-k)); transition: background-color 100ms var(--lw-ease);
+  animation: lw08-in 320ms var(--lw-ease-out);
+}
+.lab-welcome-08 .aitem:hover { background: var(--raise); }
+.lab-welcome-08 .acar, .lab-welcome-08 .ahead { font-size: var(--type-subhead); line-height: var(--lh-subhead); min-width: 0; }
+.lab-welcome-08 .acar { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.lab-welcome-08 .ahead { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.lab-welcome-08 .acar span, .lab-welcome-08 .ahead { color: var(--ink-2); }
+@keyframes lw08-in { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }

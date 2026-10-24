@@ -1,0 +1,25 @@
+/* welcome 06: by time. Things 3's Today / This Evening: the day split by when, the first part open. */
+.lab-welcome-06 {
+  top: calc(16 * var(--cr-u)); left: calc(16 * var(--cr-u));
+  width: max(calc(360 * var(--type-kf)), min(calc(840 * var(--cr-u)), calc(100% - 176px)));
+  max-height: calc(100% - 32 * var(--cr-u)); overflow: hidden;
+  padding: var(--lw-pad) calc(52 * var(--cr-u)) calc(30 * var(--cr-u));
+  border-radius: calc(32 * var(--cr-u));
+  display: flex; flex-direction: column;
+}
+.lab-welcome-06 > * { flex: none; }
+.lab-welcome-06 .go { margin-top: calc(36 * var(--cr-u)); }
+.lab-welcome-06 .groups { margin-top: calc(18 * var(--cr-u)); display: flex; flex-direction: column; }
+/* The open group's header: a sentence-case label, the count beside it (Town's "Tasks 0 completed"). */
+.lab-welcome-06 .ghead { display: flex; align-items: baseline; gap: calc(10 * var(--type-k)); padding: calc(4 * var(--type-k)) 0 calc(2 * var(--type-k)); font-size: var(--type-subhead); line-height: var(--lh-subhead); }
+.lab-welcome-06 .gname { font-weight: 600; }
+.lab-welcome-06 .gcount { color: var(--ink-2); font-variant-numeric: tabular-nums; }
+/* The other groups as one line of words, grey; a click opens that one in place of this. */
+.lab-welcome-06 .folded { margin-top: calc(8 * var(--type-k)); display: flex; flex-wrap: wrap; gap: calc(2 * var(--type-k)) calc(6 * var(--type-k)); margin-left: calc(-10 * var(--type-k)); }
+.lab-welcome-06 .fold {
+  padding: calc(5 * var(--type-k)) calc(10 * var(--type-k)); border-radius: 999px; cursor: pointer;
+  font-size: var(--type-subhead); line-height: var(--lh-subhead); color: var(--ink-2); transition: background-color 100ms var(--lw-ease), color 100ms var(--lw-ease);
+}
+.lab-welcome-06 .fold span { font-variant-numeric: tabular-nums; }
+.lab-welcome-06 .fold:hover { background: var(--raise); color: var(--ink); }
+.lab-welcome-06 .lw-key { margin-top: calc(18 * var(--cr-u)); padding-top: calc(18 * var(--cr-u)); border-top: 1px solid var(--press); }

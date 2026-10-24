@@ -1,0 +1,32 @@
+/* welcome 13: asphalt. Bahn's driver app and the website's stat strip: grey-950, birch type, a
+   birch pill. Contrast on #1e1c17: birch 16.8:1, grey-400 #a09786 5.9:1, red-400 #fe6c7f 6.2:1. */
+.lab-welcome-13.lw-panel {
+  --a-surface: rgb(30 28 23 / 0.96); /* grey-950 at 96 % (the site's strip is 95 %) */
+  --a-ink: var(--bx-color-birch);
+  --a-ink-2: var(--bx-color-grey-400);
+  --a-line: rgb(255 254 247 / 0.12);
+  --a-hover: var(--bx-color-grey-900);
+  top: calc(16 * var(--cr-u)); left: calc(16 * var(--cr-u));
+  width: max(calc(360 * var(--type-kf)), min(calc(840 * var(--cr-u)), calc(100% - 176px)));
+  max-height: calc(100% - 32 * var(--cr-u)); overflow: hidden;
+  padding: var(--lw-pad) calc(52 * var(--cr-u)) calc(30 * var(--cr-u));
+  border-radius: calc(32 * var(--cr-u));
+  display: flex; flex-direction: column;
+  background: var(--a-surface); color: var(--a-ink);
+  -webkit-backdrop-filter: blur(18px); backdrop-filter: blur(18px);
+  box-shadow: 0 0 0 1px rgb(18 17 14 / 0.4), 0 18px 44px rgb(18 17 14 / 0.28);
+}
+.lab-welcome-13 > * { flex: none; }
+.lab-welcome-13 .lw-display em { color: var(--a-ink); }
+/* The birch pill: the primary button of Bahn's dark driver app ("Book", "Reserve"). */
+.lab-welcome-13 .go { margin-top: calc(36 * var(--cr-u)); background: var(--bx-color-birch); color: var(--bx-color-asphalt); }
+.lab-welcome-13 .go:hover { background: var(--bx-color-grey-100); }
+.lab-welcome-13 .go.quiet { background: var(--bx-color-grey-900); color: var(--a-ink); }
+.lab-welcome-13 .lw-rows { margin-top: calc(14 * var(--cr-u)); }
+.lab-welcome-13 .lw-row:hover, .lab-welcome-13 .lw-row.lift { background: var(--a-hover); }
+.lab-welcome-13 .lw-p, .lab-welcome-13 .lw-t, .lab-welcome-13 .lw-n, .lab-welcome-13 .lw-more { color: var(--a-ink-2); }
+.lab-welcome-13 .lw-t.now { color: var(--bx-color-red-400); }
+.lab-welcome-13 .lw-key { margin-top: calc(18 * var(--cr-u)); padding-top: calc(18 * var(--cr-u)); border-top: 1px solid var(--a-line); }
+/* The dots as on Bahn's dark map (?map=dark): the brighter green, rings in asphalt. */
+.lab-welcome-13 .dot-green, .lab-welcome-13 .dot-agent, .lab-welcome-13 .dot-agent::after { background: var(--bx-color-green-500); }
+.lab-welcome-13 a:focus-visible { outline-color: var(--a-ink); }

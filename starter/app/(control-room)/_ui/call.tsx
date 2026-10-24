@@ -21,6 +21,9 @@ export function CallBlock({ call, placeName, meta }: { call: Call; placeName: st
     const onMeta = () => setDur(Number.isFinite(a.duration) ? a.duration : null)
     const onEnd = () => setPlaying(false)
     const onErr = () => setMissing(true)
+    // The file may have failed before this component hydrated.
+    if (a.error || a.networkState === HTMLMediaElement.NETWORK_NO_SOURCE) setMissing(true)
+    if (Number.isFinite(a.duration)) setDur(a.duration)
     a.addEventListener("timeupdate", onTime)
     a.addEventListener("loadedmetadata", onMeta)
     a.addEventListener("ended", onEnd)

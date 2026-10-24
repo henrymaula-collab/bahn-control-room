@@ -2,7 +2,7 @@ import type { Metadata } from "next"
 import Link from "next/link"
 import { notFound } from "next/navigation"
 import { getCase } from "@/lib/control-room/client"
-import { clock, day, languageName, localNote, onDay, range, reasonWords, when } from "@/lib/control-room/format"
+import { clock, day, languageName, localNote, onDay, range, reasonWords, ruleSentence, when } from "@/lib/control-room/format"
 import type { Call } from "@/lib/control-room/types"
 import type { CaseDetail, Endpoint, OrderSummary } from "@/lib/control-room/views"
 import { CallBlock } from "../../_ui/call"
@@ -192,10 +192,14 @@ function AgentOwned({ detail }: { detail: CaseDetail }) {
         <p className="t-lead">{card.case.suggestion.label}</p>
         <p className="t-body">{card.case.suggestion.effect}</p>
         {rule && (
-          <p className="t-2" style={{ marginTop: 8 }}>
-            Under the rule {detail.people.find((p) => p.id === rule.changedBy)?.name ?? "the shift lead"} turned on
-            {rule.changedAt ? ` ${dayPhrase(rule.changedAt, detail.asOf)}` : ""}: {rule.when}. {rule.then}. The shift lead can turn it off at any time.
-          </p>
+          <div className="block" style={{ marginTop: 16 }}>
+            <p className="t-label">Under the trust rule</p>
+            <p className="t-body">{ruleSentence(rule)}</p>
+            <p className="t-2" style={{ marginTop: 4 }}>
+              Turned on by {detail.people.find((p) => p.id === rule.changedBy)?.name ?? "the shift lead"}
+              {rule.changedAt ? ` ${dayPhrase(rule.changedAt, detail.asOf)}` : ""}, after {rule.evidence.matched} of {rule.evidence.total} matching decisions. The shift lead can turn it off at any time.
+            </p>
+          </div>
         )}
       </div>
     )
@@ -230,9 +234,13 @@ function RouteEnd({ end, now }: { end: Endpoint; now: string }) {
       <p className="place">{end.placeName}</p>
       <p className="detail">{end.placeName.includes(end.city) ? end.address : `${end.address}, ${end.city}`}</p>
       {w && (
-        <p className="detail">
-          {w.label}: {range(w.start, w.end, now)} {localNote(w.start, w.end, end.timezone, end.city)}
-        </p>
+        <>
+          <p className="when">{w.label}</p>
+          <p className="detail">
+            <span className="nowrap">{range(w.start, w.end, now)}</span>{" "}
+            <span className="nowrap">{localNote(w.start, w.end, end.timezone, end.city)}</span>
+          </p>
+        </>
       )}
     </div>
   )

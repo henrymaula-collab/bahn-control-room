@@ -261,7 +261,7 @@ export const CASES: Case[] = [
       },
       {
         id: "f593-2",
-        statement: "Yara wrote: \"I can wait another 30 minutes. After that I need a new plan for my travel back.\" Nobody has written back since.",
+        statement: "Yara wrote: “I can wait another 30 minutes. After that I need a new plan for my travel back.” Nobody has written back since.",
         source: { kind: "driver", name: "Driver Yara Sivellin", channel: "app", at: today("10:57") },
         strength: "stated",
       },
@@ -342,7 +342,7 @@ export const CASES: Case[] = [
       },
       {
         id: "f015-3",
-        statement: "The customer has asked twice. This morning: \"We still have no name from the branch.\"",
+        statement: "The customer has asked twice. This morning: “We still have no name from the branch.”",
         source: { kind: "customer", name: "Suvellio Motors", channel: "message", at: today("10:52") },
         strength: "stated",
       },

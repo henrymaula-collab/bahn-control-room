@@ -77,7 +77,10 @@ export function deskView(personId?: string, opts: { extraRows?: number } = {}): 
   const me = person(personId)
   const mine = waitingFor(me.id).map(card)
   const [decision, ...queue] = mine
-  if (opts.extraRows) queue.push(...stressRows(opts.extraRows, new Set(mine.map((m) => m.case.id))))
+  if (opts.extraRows) {
+    queue.push(...stressRows(opts.extraRows, new Set(mine.map((m) => m.case.id))))
+    queue.sort((a, b) => byDecideBy(a.case, b.case))
+  }
   const onMyDesks = (c: Case) => me.desks.includes(c.desk)
   return {
     asOf: ROOM_NOW,

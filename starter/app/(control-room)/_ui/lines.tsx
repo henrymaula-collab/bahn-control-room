@@ -34,7 +34,7 @@ export function DecideBy({ card, now }: { card: CaseCard; now: string }) {
   return (
     <span className={`decide-by${urgent ? " now" : ""}`}>
       {past ? "Was due at " : "Decide by "}
-      <time dateTime={c.decideBy}>{when(c.decideBy, now)}</time>
+      <time dateTime={c.decideBy}>{when(c.decideBy, now, undefined, true)}</time>
     </span>
   )
 }
@@ -43,7 +43,8 @@ export function DecideBy({ card, now }: { card: CaseCard; now: string }) {
 export function orderLine(card: CaseCard, now: string): string {
   const o = card.order
   const w = o.pickup.window
-  const pickup = w ? ` Pickup ${range(w.start, w.end, now).replace(/^Today/, "today").replace(/^Tomorrow/, "tomorrow")}.` : ""
+  const lower = (s: string) => s.replace(/^Today/, "today").replace(/^Tomorrow/, "tomorrow")
+  const pickup = !w ? "" : /not booked/i.test(w.label) ? " No pickup booked yet." : ` Pickup ${lower(range(w.start, w.end, now))}.`
   return `${o.vehicle} at ${o.pickup.placeName}.${pickup}`
 }
 
@@ -56,7 +57,7 @@ export function QueueRow({ card, now }: { card: CaseCard; now: string }) {
         <span className="headline">{card.case.headline}</span>
         <span className={`due num${urgent ? " now" : ""}`}>
           {card.case.decideBy
-            ? `${Date.parse(card.case.decideBy) <= Date.parse(now) ? "Was due at" : "Decide by"} ${when(card.case.decideBy, now)}`
+            ? `${Date.parse(card.case.decideBy) <= Date.parse(now) ? "Was due at" : "Decide by"} ${when(card.case.decideBy, now, undefined, true)}`
             : ""}
         </span>
         <span className="sub">{orderLine(card, now)}</span>

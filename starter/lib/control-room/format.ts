@@ -54,13 +54,14 @@ function dayDiff(iso: string, now: string, tz = ROOM_TZ): number {
   return Math.round((a - b) / 86_400_000)
 }
 
-/** One form per distance: "11:38", "Yesterday 23:41", "Tomorrow 10:00", "Mon 26 Oct 10:00", "19 Oct 13:59". */
-export function when(iso: string, now: string, tz = ROOM_TZ): string {
+/** One form per distance: "11:38", "Yesterday 23:41", "Tomorrow 10:00", "Mon 26 Oct 10:00", "19 Oct 13:59".
+ *  Pass mid = true inside a sentence ("Decide by tomorrow 10:00"). */
+export function when(iso: string, now: string, tz = ROOM_TZ, mid = false): string {
   const d = dayDiff(iso, now, tz)
   const t = clock(iso, tz)
   if (d === 0) return t
-  if (d === -1) return `Yesterday ${t}`
-  if (d === 1) return `Tomorrow ${t}`
+  if (d === -1) return `${mid ? "yesterday" : "Yesterday"} ${t}`
+  if (d === 1) return `${mid ? "tomorrow" : "Tomorrow"} ${t}`
   if (d > 1 && d < 14) return `${day(iso, tz)} ${t}`
   return `${shortDay(iso, tz)} ${t}`
 }
@@ -104,9 +105,10 @@ export function minutesUntil(iso: string, now: string): number {
   return Math.round((Date.parse(iso) - Date.parse(now)) / 60_000)
 }
 
-/** A case needs a person now when its decide-by time is within two hours, or already past. */
+/** A case needs a person now when its decide-by time is within the hour, or already past. Rare on purpose. */
+export const NOW_WINDOW_MINUTES = 60
 export function needsPersonNow(c: Case, now: string): boolean {
-  return c.status === "waiting_for_person" && !!c.decideBy && minutesUntil(c.decideBy, now) <= 120
+  return c.status === "waiting_for_person" && !!c.decideBy && minutesUntil(c.decideBy, now) <= NOW_WINDOW_MINUTES
 }
 
 export function euro(amount: number): string {
@@ -139,7 +141,7 @@ const CHANNEL: Record<string, string> = {
 export function sourceLine(f: Fact, now: string): string {
   const who = f.source.name ?? KIND_NAME[f.source.kind]
   const how = f.source.channel ? CHANNEL[f.source.channel] : undefined
-  return [who, how, when(f.source.at, now)].filter(Boolean).join(", ")
+  return [who, how, when(f.source.at, now, ROOM_TZ, true)].filter(Boolean).join(", ")
 }
 
 /** How strong a fact is, in words (never a percentage). */
@@ -207,4 +209,16 @@ const DESK_TITLES: Record<string, string> = {
 
 export function deskTitle(deskId?: string): string {
   return (deskId && DESK_TITLES[deskId]) || "Ops"
+}
+
+// Lower-case the first word only when it is a common word, never a name ("Arvellumio ...").
+const COMMON_FIRST = new Set(["a", "an", "the", "accept", "ask", "pay", "move", "keep", "send", "tell", "book", "withdraw", "pause", "hold", "release", "wait", "when", "if", "any"])
+export function lcFirst(s: string): string {
+  const first = s.split(/\s+/)[0] ?? ""
+  return COMMON_FIRST.has(first.toLowerCase()) ? s.charAt(0).toLowerCase() + s.slice(1) : s
+}
+
+/** A trust rule as one sentence: "When a pickup place in Germany asks for a storage fee up to €50, accept the fee and confirm the pickup." */
+export function ruleSentence(r: { when: string; then: string }): string {
+  return `When ${lcFirst(r.when)}, ${lcFirst(r.then)}.`
 }

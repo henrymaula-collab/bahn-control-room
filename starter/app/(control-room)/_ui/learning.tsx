@@ -2,15 +2,9 @@
 
 import { useState, useTransition } from "react"
 import type { TrustRule } from "@/lib/control-room/types"
+import { lcFirst, ruleSentence } from "@/lib/control-room/format"
 import type { EvidenceRow } from "@/lib/control-room/views"
 import { reviewLesson, setTrustRule } from "../actions"
-
-const lcFirst = (s: string) => s.charAt(0).toLowerCase() + s.slice(1)
-
-/** "When a pickup place in Germany asks for a storage fee up to €50, accept the fee and confirm the pickup." */
-export function ruleSentence(r: Pick<TrustRule, "when" | "then">): string {
-  return `When ${lcFirst(r.when)}, ${lcFirst(r.then)}.`
-}
 
 /** Earned trust: one narrow rule, its evidence, one button to turn it on, and the way back. */
 export function SuggestedRule({

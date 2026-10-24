@@ -41,7 +41,8 @@ export function PersonSwitcher({ current, people }: { current: P; people: P[] })
     <div className="person" ref={ref}>
       <button type="button" className="person-button" aria-haspopup="menu" aria-expanded={open} onClick={() => setOpen((o) => !o)}>
         <span>
-          {current.name}, <span className="desk">{current.desk}</span>
+          {current.name}
+          <span className="desk">, {current.desk}</span>
         </span>
         <Icon name="chevron-down" size={18} />
       </button>
@@ -51,7 +52,8 @@ export function PersonSwitcher({ current, people }: { current: P; people: P[] })
           {people.map((p) => (
             <button key={p.id} type="button" role="menuitemradio" aria-checked={p.id === current.id} className="menu-item" onClick={() => choose(p)}>
               <span>
-                {p.name}, <span className="desk">{p.desk}</span>
+                {p.name}
+                <span className="desk">, {p.desk}</span>
               </span>
               {p.id === current.id && <Icon name="check" size={16} />}
             </button>

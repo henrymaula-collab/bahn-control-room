@@ -105,7 +105,7 @@ export default async function LeadPage({ searchParams }: { searchParams: Search 
             <h2 className="t-heading" id="coverage">
               Who can handle what
             </h2>
-            <p className="t-2">Three decisions of a kind, and we count you in.</p>
+            <p className="t-2">Counted from past decisions. Three of a kind and a person is counted in.</p>
           </div>
           <ul className="rows">
             {[...coverage].sort((a, b) => Number(b.onlyOne) - Number(a.onlyOne)).map((row) => (

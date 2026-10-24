@@ -156,16 +156,16 @@ export function DecisionControls(props: Props) {
       </div>
       {isSuggestion && props.lessons && props.lessons.length > 0 && (
         <div className="block">
-          <p className="t-label">Learned before</p>
+          <p className="t-label">Because</p>
           {props.lessons.map((l) => (
-            <p key={l.id} className="t-body">
-              {l.text}{" "}
+            <div key={l.id} className="lesson-used">
+              <p className="t-body">{l.text}</p>
               {l.personName && (
-                <span className="t-2">
-                  From {l.personName}&apos;s decision {l.dayWords}.
-                </span>
+                <p className="t-2">
+                  Learned from {l.personName}&apos;s decision {l.dayWords}.
+                </p>
               )}
-            </p>
+            </div>
           ))}
         </div>
       )}
@@ -199,14 +199,20 @@ export function DecisionControls(props: Props) {
 function DraftCard({ draft }: { draft: Draft }) {
   const lang = { de: "German", fi: "Finnish", sv: "Swedish", da: "Danish", fr: "French", en: "English" }[draft.language] ?? draft.language
   return (
-    <div className="draft">
-      <p className="to">
-        To {draft.to}
-        {draft.language !== "en" ? `, in ${lang}` : ""}
+    <details className="draft">
+      <summary>
+        <span>
+          Read the draft
+          {draft.language !== "en" ? <span className="to">, in {lang}</span> : null}
+        </span>
+        <Icon name="chevron-down" size={18} />
+      </summary>
+      <p className="to">To {draft.to}</p>
+      <p className="original" lang={draft.language}>
+        {draft.text}
       </p>
-      <p className="original">{draft.text}</p>
       {draft.translation && <p className="translated">Translated: {draft.translation}</p>}
-    </div>
+    </details>
   )
 }
 

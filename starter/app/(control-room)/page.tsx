@@ -1,6 +1,6 @@
 import type { Metadata } from "next"
 import { dataSource, getDesk } from "@/lib/control-room/client"
-import { clock, count, dayKey, needsPersonNow } from "@/lib/control-room/format"
+import { clock, count, dayKey, needsPersonNow, ruleSentence } from "@/lib/control-room/format"
 import type { CaseCard, DeskView } from "@/lib/control-room/views"
 import { DecisionControls } from "./_ui/decision"
 import { Frame } from "./_ui/frame"
@@ -102,12 +102,14 @@ function DecisionPanel({ card, now, personName, leadName }: { card: CaseCard; no
   )
 }
 
+const FOLD_AFTER = 5
+
 /** The rest of the queue as calm rows, grouped by when they are due once the list gets long. */
 function Queue({ cards, now }: { cards: CaseCard[]; now: string }) {
   if (cards.length === 0) return null
   const isToday = (c: CaseCard) => !!c.case.decideBy && dayKey(c.case.decideBy) === dayKey(now)
   const groups: { title: string; cards: CaseCard[] }[] = [
-    { title: "Due within two hours", cards: cards.filter((c) => needsPersonNow(c.case, now)) },
+    { title: "Due within the hour", cards: cards.filter((c) => needsPersonNow(c.case, now)) },
     {
       title: "Later today",
       cards: cards.filter((c) => !needsPersonNow(c.case, now) && isToday(c)),
@@ -121,18 +123,36 @@ function Queue({ cards, now }: { cards: CaseCard[]; now: string }) {
   return (
     <section className="queue" aria-label="Next for you">
       {grouped ? (
-        groups.map((g) => (
-          <div className="queue-group" key={g.title}>
-            <div className="queue-head">
-              <h3 className="t-heading">{g.title}</h3>
+        groups.map((g, gi) => {
+          // Later groups fold after a few rows, so a long queue never becomes a wall.
+          const fold = gi > 0 && g.cards.length > FOLD_AFTER
+          const shown = fold ? g.cards.slice(0, FOLD_AFTER) : g.cards
+          const hidden = fold ? g.cards.slice(FOLD_AFTER) : []
+          return (
+            <div className="queue-group" key={g.title}>
+              <div className="queue-head">
+                <h3 className="t-heading">{g.title}</h3>
+              </div>
+              <ul className="queue-list">
+                {shown.map((c) => (
+                  <QueueRow key={c.case.id} card={c} now={now} />
+                ))}
+              </ul>
+              {hidden.length > 0 && (
+                <details className="queue-more">
+                  <summary className="btn-text">
+                    {hidden.length} more {g.title.toLowerCase()}
+                  </summary>
+                  <ul className="queue-list">
+                    {hidden.map((c) => (
+                      <QueueRow key={c.case.id} card={c} now={now} />
+                    ))}
+                  </ul>
+                </details>
+              )}
             </div>
-            <ul className="queue-list">
-              {g.cards.map((c) => (
-                <QueueRow key={c.case.id} card={c} now={now} />
-              ))}
-            </ul>
-          </div>
-        ))
+          )
+        })
       ) : (
         <>
           <div className="queue-head">
@@ -171,9 +191,7 @@ function Quiet({ desk, lead }: { desk: DeskView; lead: string }) {
       id: c.case.id,
       href: `/cases/${c.case.id}`,
       headline: c.case.headline,
-      sub: c.ruleUsed
-        ? `Handled by the agent under the rule: ${c.ruleUsed.when}. ${c.ruleUsed.then}.`
-        : "Handled by the agent under a trust rule.",
+      sub: c.ruleUsed ? `Handled by the agent under the rule: ${ruleSentence(c.ruleUsed)}` : "Handled by the agent under a trust rule.",
     })),
   ]
   return <QuietLine lead={lead} rest={rest} more={more} items={items} />

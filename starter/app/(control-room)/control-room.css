@@ -187,6 +187,9 @@ p { text-wrap: pretty; }
 /* Queue */
 .queue { margin-top: 48px; }
 .queue-group + .queue-group { margin-top: 32px; }
+.queue-more summary { list-style: none; margin: 8px 16px 0; font-size: 14px; color: var(--ops-text); cursor: pointer; }
+.queue-more summary::-webkit-details-marker { display: none; }
+.queue-more[open] summary { display: none; }
 .queue-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px; padding: 0 20px; }
 .queue-list { border-top: 1px solid var(--ops-hairline); }
 .queue-row {
@@ -269,6 +272,8 @@ textarea.text-input { resize: vertical; min-height: 88px; }
 .pin-b { background: var(--ops-route-to); margin-left: auto; }
 .route-end .place { font-size: 15px; line-height: 22px; font-weight: 500; color: var(--ops-ink); }
 .route-end .detail { font-size: 13px; line-height: 18px; color: var(--ops-text-2); }
+.route-end .when { font-size: 13px; line-height: 18px; color: var(--ops-text); margin-top: 6px; }
+.nowrap { white-space: nowrap; }
 .route-end:last-of-type { text-align: right; }
 
 .case-aside { position: sticky; top: 24px; }
@@ -276,8 +281,16 @@ textarea.text-input { resize: vertical; min-height: 88px; }
 .aside-panel .block + .block { margin-top: 20px; }
 .aside-panel .t-label { margin-bottom: 4px; }
 .changes { display: grid; gap: 6px; }
-.draft { margin-top: 10px; background: var(--ops-page); border-radius: var(--ops-radius-inner); padding: 16px; }
+.draft { margin-top: 10px; background: var(--ops-page); border-radius: var(--ops-radius-inner); padding: 0 16px; }
+.draft summary { list-style: none; display: flex; justify-content: space-between; align-items: center; gap: 12px; min-height: 48px; cursor: pointer; font-size: 15px; font-weight: 500; color: var(--ops-ink); }
+.draft summary::-webkit-details-marker { display: none; }
+.draft summary .to { font-weight: 400; margin: 0; font-size: 15px; }
+.draft summary svg { color: var(--ops-edge); flex: none; transition: transform 320ms cubic-bezier(.22, 1, .36, 1); }
+.draft[open] { padding-bottom: 16px; }
+.draft[open] summary svg { transform: rotate(180deg); }
 .draft .to { font-size: 13px; line-height: 18px; color: var(--ops-text-2); margin-bottom: 6px; }
+.lesson-used + .lesson-used { margin-top: 10px; }
+.lesson-used .t-2 { margin-top: 2px; }
 .draft .original { font-size: 14px; line-height: 21px; color: var(--ops-ink); }
 .draft .translated { margin-top: 8px; font-size: 13px; line-height: 19px; color: var(--ops-text-2); }
 .aside-panel .btn-primary { margin-top: 24px; }

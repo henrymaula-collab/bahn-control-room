@@ -1,0 +1,10 @@
+/* rule 05: limits. Label and value, the house style for facts: label grey, value ink. */
+.lab-rule-05 .r05-kv {
+  display: grid; grid-template-columns: 7.4em minmax(0, 1fr); column-gap: 1em; row-gap: 0.55em;
+  margin-top: 1.3em; max-width: 36em;
+}
+.lab-rule-05 .r05-kv dt { color: var(--ink-2); }
+.lab-rule-05 .r05-kv dd { margin: 0; }
+.lab-rule-05 .r05-sum { display: flex; flex-direction: column; min-width: 0; }
+.lab-rule-05 .r05-body { display: flex; flex-direction: column; gap: 0.7em; max-width: 36em; }
+.lab-rule-05 .r05-people { display: flex; align-items: center; gap: 0.8em; }

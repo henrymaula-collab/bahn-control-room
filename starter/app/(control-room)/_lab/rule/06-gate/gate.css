@@ -1,0 +1,31 @@
+/* rule 06: gate. One box, hairline ring, the checks on top and the button at its foot. */
+.lab-rule-06 .r06-box {
+  margin-top: 1.4em; max-width: 36em; border-radius: 1em;
+  box-shadow: inset 0 0 0 1px rgb(18 17 14 / 0.1);
+}
+.lab-rule-06 .r06-checks { padding: 0.5em 1.1em; }
+.lab-rule-06 .r06-checks > li {
+  display: grid; grid-template-columns: 1.5em minmax(0, 1fr); column-gap: 0.7em; row-gap: 0.1em;
+  padding: 0.65em 0;
+}
+.lab-rule-06 .r06-checks > li + li { border-top: 1px solid rgb(18 17 14 / 0.08); }
+.lab-rule-06 .r06-tick {
+  grid-row: 1 / span 2; width: 1.5em; height: 1.5em; border-radius: 50%; margin-top: 0.05em;
+  display: inline-flex; align-items: center; justify-content: center; color: var(--green);
+  box-shadow: inset 0 0 0 1.5px var(--green);
+}
+.lab-rule-06 .r06-tick svg { width: 0.9em; height: 0.9em; }
+.lab-rule-06 .r06-what { grid-column: 2; font-weight: 600; justify-self: start; }
+.lab-rule-06 .r06-more { display: inline-flex; align-items: center; gap: 0.2em; margin: -0.15em -0.4em; padding: 0.15em 0.4em; border-radius: 0.5em; }
+.lab-rule-06 .r06-more svg { color: var(--ink-2); width: 1em; height: 1em; }
+.lab-rule-06 .r06-more:hover { background: var(--raise); }
+.lab-rule-06 .r06-how { grid-column: 2; color: var(--ink-2); font-size: var(--size-s); line-height: var(--lh-subhead); }
+.lab-rule-06 .r06-faces { display: flex; align-items: center; gap: 0.6em; margin-top: 0.15em; }
+.lab-rule-06 .r06-detail { grid-column: 2; display: flex; flex-direction: column; gap: 0.5em; margin-top: 0.6em; font-size: var(--size-s); line-height: var(--lh-subhead); }
+.lab-rule-06 .r06-foot {
+  display: flex; align-items: center; gap: 1em; padding: 0.9em 1.1em 1em;
+  border-top: 1px solid rgb(18 17 14 / 0.08); background: var(--raise); border-radius: 0 0 1em 1em;
+}
+.lab-rule-06 .r06-foot .btn { flex: none; min-height: max(44px, calc(2.6 * var(--size-m))); padding: 0 1.25em; }
+.lab-rule-06 .r06-foot .btn-secondary { background: var(--page); box-shadow: inset 0 0 0 1px rgb(18 17 14 / 0.12); }
+.lab-rule-06 .r06-foot .s { max-width: 24em; }

@@ -1,0 +1,35 @@
+/* rule 01: beside. The card is today's card classes; the evidence is a side panel like the situation. */
+.lab-rule-01.r01-panel {
+  padding: max(14px, calc(18 * var(--cr-u, 1px))) max(20px, calc(28 * var(--cr-u, 1px))) 28px;
+  font-size: var(--type-subhead); line-height: var(--lh-subhead);
+}
+.lab-rule-01.r01-panel > .s { margin-top: 2px; }
+.lab-rule-01 .r01-people { margin: 1.1em -0.6em 0; display: flex; flex-direction: column; }
+.lab-rule-01 .r01-people summary {
+  display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; column-gap: 0.75em;
+  padding: 0.45em 0.6em; border-radius: 0.8em; cursor: pointer;
+  transition: background-color 100ms cubic-bezier(0.2, 0, 0, 1);
+}
+.lab-rule-01 .r01-people summary:hover { background: var(--raise); }
+.lab-rule-01 .r01-people summary .chev { color: var(--ink-2); display: inline-flex; }
+.lab-rule-01 .r01-people details[open] > summary .chev { transform: rotate(90deg); }
+@media (prefers-reduced-motion: no-preference) {
+  .lab-rule-01 .r01-people summary .chev { transition: transform 200ms cubic-bezier(0.2, 0, 0, 1); }
+}
+.lab-rule-01 .r01-who { display: flex; flex-direction: column; min-width: 0; }
+.lab-rule-01 .r01-name { color: var(--ink); }
+.lab-rule-01 .r01-sub { color: var(--ink-2); }
+.lab-rule-01 .r01-answers { margin: 0.2em 0 0.6em calc(2.1em + 0.75em); display: flex; flex-direction: column; }
+.lab-rule-01 .r01-answers a {
+  display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: 0.75em;
+  padding: 0.35em 0.6em; border-radius: 0.6em;
+}
+.lab-rule-01 .r01-answers a:hover { background: var(--raise); }
+.lab-rule-01 .r01-car { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.lab-rule-01 .r01-place { grid-column: 1; color: var(--ink-2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.lab-rule-01 .r01-answers time { grid-row: 1; grid-column: 2; color: var(--ink-2); }
+.lab-rule-01 .r01-said { padding: 0 0.6em 0.4em; color: var(--ink); }
+.lab-rule-01 .r01-block { margin-top: 1.6em; display: flex; flex-direction: column; gap: 0.3em; }
+.lab-rule-01 .r01-h { font-size: var(--type-subhead); line-height: var(--lh-subhead); font-weight: 600; color: var(--ink); }
+.lab-rule-01 .r01-words { display: flex; flex-direction: column; gap: 0.7em; }
+.lab-rule-01 .r01-all { margin-top: 1.4em; }

@@ -1,0 +1,7 @@
+# rule 03: Thirty answers as one picture
+
+- Reference: Stripe Radar rule testing (https://docs.stripe.com/radar/rules, `research/premium/rule/shots/rule-06-stripe-radar-rules.png`): before a rule goes live you see the past it would have matched. GitHub rulesets "rule insights" (https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/about-rulesets, `research/premium/rule/shots/rule-04-github-rulesets.png`): every evaluation listed with its outcome.
+- Borrowed: the evidence as the hero, in one figure with a takeaway title ("29 of 30 answers were the same: pause the gig until the pickup place confirms"). Each answer is one mark in time order, 12 Aug to 19 Oct; the one that differs is a ring. Hover, focus or the arrow keys (Home, End) read an answer in one line: who, when, the car and place, their own reason; the name opens it in History.
+- After "Turn it on": the agent's first mark joins the end in Bahn's orange ("Today") and the line reads the case it just took (the Mercedes-Benz EQE at Arvelano Hamburg).
+- Why for ops: agreement you can see at a glance, and the dissent is visible without being searched for; the loop's payoff (people's answers become the agent's next move) is literally one more mark on the line.
+- Trade-off: a figure is the least Apple-plain of the six; marks are in order, not on a time scale, so gaps in time do not show.

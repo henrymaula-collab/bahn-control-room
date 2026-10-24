@@ -1,0 +1,39 @@
+/* rule 02: switch. A Settings group (inset, grouped, hairlines between rows), one switch, a footnote. */
+.lab-rule-02 .r02-group {
+  margin-top: 1.2em; border-radius: 0.9em; background: var(--raise); overflow: hidden;
+}
+.lab-rule-02 .r02-row {
+  display: grid; grid-template-columns: 4.2em minmax(0, 1fr); column-gap: 0.9em; align-items: baseline;
+  padding: 0.75em 1em; position: relative;
+}
+.lab-rule-02 .r02-row + .r02-row::before {
+  content: ""; position: absolute; top: 0; left: 1em; right: 0; height: 1px; background: rgb(18 17 14 / 0.08);
+}
+.lab-rule-02 .r02-label { color: var(--ink-2); }
+.lab-rule-02 .r02-toggle { grid-template-columns: minmax(0, 1fr) auto; align-items: center; }
+.lab-rule-02 .r02-text { display: flex; flex-direction: column; }
+.lab-rule-02 .r02-title { font-weight: 600; }
+.lab-rule-02 .r02-sub { color: var(--ink-2); font-size: var(--size-s); line-height: var(--lh-subhead); }
+.lab-rule-02 .r02-switch {
+  position: relative; flex: none; width: 3em; height: 1.82em; border-radius: 999px;
+  background: rgb(18 17 14 / 0.16); cursor: pointer;
+}
+.lab-rule-02 .r02-switch[aria-checked="true"] { background: var(--ink); }
+.lab-rule-02 .r02-switch:disabled { opacity: 0.6; cursor: default; }
+.lab-rule-02 .r02-knob {
+  position: absolute; top: 0.14em; left: 0.14em; width: 1.54em; height: 1.54em; border-radius: 50%;
+  background: var(--page); box-shadow: 0 1px 2px rgb(18 17 14 / 0.18), 0 2px 6px rgb(18 17 14 / 0.12);
+}
+.lab-rule-02 .r02-switch[aria-checked="true"] .r02-knob { transform: translateX(1.18em); }
+.lab-rule-02 .r02-switch:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
+@media (prefers-reduced-motion: no-preference) {
+  .lab-rule-02 .r02-switch { transition: background-color 200ms cubic-bezier(0.2, 0, 0, 1); }
+  .lab-rule-02 .r02-knob { transition: transform 200ms cubic-bezier(0.2, 0, 0, 1); }
+}
+.lab-rule-02 .r02-foot { margin-top: 0.7em; padding: 0 1em; max-width: 40em; }
+.lab-rule-02 .r02-rows { margin-top: 1.4em; }
+.lab-rule-02 .r02-people { display: flex; flex-direction: column; gap: 0.45em; }
+.lab-rule-02 .r02-people li { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; column-gap: 0.7em; }
+.lab-rule-02 .r02-n { color: var(--ink-2); font-size: var(--size-s); }
+.lab-rule-02 .r02-differ { margin-top: 1em; max-width: 36em; }
+.lab-rule-02 .r02-all { margin-top: 0.8em; }

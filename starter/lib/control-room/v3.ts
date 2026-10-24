@@ -488,14 +488,19 @@ export function situation(state: EngineState, c: Case): Situation | null {
 
 /**
  * The one line under the primary button: what the agent does after a yes. Taken from the
- * suggestion's effect, only the part where the agent acts ("The agent then calls the pickup
- * place back on Thursday ..."); the person's own step is already on the button. None when
- * the effect has no agent step, or when nobody is asked any more.
+ * suggestion's effect: the first sentence where the agent acts, preferring one after the
+ * opening sentence (that one usually restates the button), with "it" read as the agent
+ * ("When the release arrives, the agent checks it ..."). Never the person's own step
+ * ("A person sends ..."). None when the effect has no agent step, or nobody is asked any more.
  */
 export function nextLine(c: Pick<Case, "status" | "suggestion">): string | undefined {
   if (c.status !== "waiting_for_person") return undefined
-  const parts = c.suggestion.effect.split(/(?<=[.;])\s+/).map((p) => p.replace(/;$/, ".").trim()).filter(Boolean)
-  const agent = parts.find((p) => /\bthe agent\b/i.test(p) && !/^(a person|you)\b/i.test(p))
+  const parts = c.suggestion.effect
+    .split(/(?<=[.;])\s+/)
+    .map((p) => p.replace(/;$/, ".").trim().replace(/^((?:after a yes|once [^,]+|when [^,]+|if [^,]+), )?it (?=[a-z])/i, (_m, lead) => `${lead ?? ""}the agent `))
+    .filter(Boolean)
+  const acts = (p: string) => /\bthe agent\b/i.test(p) && !/^(a person|you)\b/i.test(p)
+  const agent = parts.slice(1).find(acts) ?? (acts(parts[0] ?? "") ? parts[0] : undefined)
   if (!agent) return undefined
   const line = sentence(agent)
   return /[.!?]$/.test(line) ? line : `${line}.`

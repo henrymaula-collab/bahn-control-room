@@ -43,6 +43,16 @@ test("next line: only the agent's part of the effect, never the person's own ste
     nextLine(waiting("The driver leaves and is paid for the empty pickup; the agent drafts a question to the customer about where the car is.")),
     "The agent drafts a question to the customer about where the car is.",
   )
+  assert.equal(
+    nextLine(waiting("The agent sends the email and keeps the pickup unbooked. When the release arrives, it checks it with Calverona before any driver is booked.")),
+    "When the release arrives, the agent checks it with Calverona before any driver is booked.",
+    "after the button's own action, with it read as the agent",
+  )
+  assert.equal(
+    nextLine(waiting("The agent sends the reply and calls Mervikko again at 13:00. If nobody answers by 14:00, this comes back to you.")),
+    "The agent sends the reply and calls Mervikko again at 13:00.",
+    "the opening sentence when it is the only agent step",
+  )
   assert.equal(nextLine(waiting("You call them and note what they say.")), undefined, "no agent step, no line")
   assert.equal(nextLine({ ...waiting("A person sends it. The agent checks again at 10:00."), status: "done" }), undefined, "nobody is asked any more")
 })

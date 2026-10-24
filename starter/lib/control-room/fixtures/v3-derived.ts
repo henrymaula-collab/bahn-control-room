@@ -74,7 +74,7 @@ const VEHICLES = ["Volvo V60", "Toyota RAV4", "BMW i4", "Audi Q8 e-tron", "Merce
 const QUIET = 380
 const UNCASED_RED = 6
 /** Why the made-up red cars without a case are red, in the engine's words (../v3.ts redReason). */
-const UNCASED_REASONS = ["Ferry sold out", "Vehicle warning", "No driver for the pickup", "Customer waiting for an answer", "Driver may not reach the pickup", "Cancelled, money still open"]
+const UNCASED_REASONS = ["Safety stop", "Vehicle warning", "No driver for the pickup", "Customer waiting for an answer", "Driver may not reach the pickup", "Cancelled, money still open"]
 
 function pickCity(random: () => number): [string, string] {
   const total = CITIES.reduce((sum, [, , w]) => sum + w, 0)

@@ -1,9 +1,12 @@
+import "./overview.css"
 import type { Metadata } from "next"
-import { getCase, getOverview } from "@/lib/control-room/client"
+import { getCase, getLead, getOverview } from "@/lib/control-room/client"
 import { minutesUntil, NOW_WINDOW_MINUTES, when } from "@/lib/control-room/format"
 import { questionFor } from "./_ui/ask"
 import type { RedInfo } from "./_ui/car-map"
 import type { MapLook } from "./_ui/map-style"
+import { figtree } from "./_ui/overview-fonts"
+import { OverviewLooks, type Look, type Quote } from "./_ui/overview-looks"
 import { OverviewView } from "./_ui/overview-view"
 import { currentPersonId } from "./_ui/session"
 
@@ -18,6 +21,9 @@ export default async function OverviewPage({ searchParams }: { searchParams: Sea
   const data = await getOverview(personId)
   // ?map=positron or ?map=liberty shows the raw OpenFreeMap styles, for comparing.
   const look: MapLook = sp.map === "positron" || sp.map === "liberty" ? sp.map : "bahn"
+  // ?look=a|b|c picks the website layout (DEFAULT_LOOK otherwise); ?look=v3 is the calm v3 panel.
+  const asked = typeof sp.look === "string" ? sp.look : ""
+  const page: Look | "v3" = asked === "v3" ? "v3" : LOOKS.includes(asked as Look) ? (asked as Look) : DEFAULT_LOOK
 
   // Each red pin's card: with a case, its one question (one read per case); without one, the order.
   const red: Record<string, RedInfo> = {}
@@ -53,5 +59,27 @@ export default async function OverviewPage({ searchParams }: { searchParams: Sea
         }
       }),
   )
-  return <OverviewView data={data} red={red} look={look} />
+  if (page === "v3") return <OverviewView data={data} red={red} look={look} />
+  const quote = page === "a" ? await latestLesson(personId) : undefined
+  return (
+    <div className={`${figtree.variable} ovx-root`}>
+      <OverviewLooks look={page} data={data} red={red} mapLook={look} quote={quote} handledAlone={data.counts.handledByAgentToday} />
+    </div>
+  )
+}
+
+const LOOKS: Look[] = ["a", "b", "c"]
+const DEFAULT_LOOK: Look = "b"
+
+/** The newest know-how the agents use, with the person it came from (look a's quote card). */
+async function latestLesson(personId: string): Promise<Quote | undefined> {
+  try {
+    const lead = await getLead(personId)
+    const l = lead.lessons
+      .filter((x) => x.status === "accepted" && x.source?.personName)
+      .sort((a, b) => b.createdAt.localeCompare(a.createdAt))[0]
+    return l ? { text: l.text, who: l.source!.personName, where: l.source!.placeName } : undefined
+  } catch {
+    return undefined // the page stands without it
+  }
 }

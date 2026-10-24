@@ -1,19 +1,17 @@
 import Link from "next/link"
 import { Icon } from "./icons"
 
-const n = (x: number) => new Intl.NumberFormat("en-GB").format(x)
-
 /**
- * The Overview's one line to Your tasks: "2 tasks for you today ›". `count` is the signed-in
- * person's Needs you, the same number as the side menu. Kept as one small component so a
- * restyled Overview can place it anywhere; with nothing waiting it says so once, without a link.
+ * The one way on from the Overview: the signed-in person's tasks today, as Bahn's black
+ * pill ("Get a quote" on bahnexpress.com). Track 5 sends the live count and owns the
+ * route; this component only draws it. With nothing waiting it steps back to a quiet pill.
  */
-export function TasksTodayCta({ count, href }: { count: number; href: string }) {
-  if (count <= 0) return <p className="none m">No tasks for you right now</p>
+export function TasksTodayCta({ count, href = "/tasks", size = "l" }: { count: number; href?: string; size?: "l" | "m" }) {
+  const label = count === 0 ? "Nothing for you right now" : `${count} task${count === 1 ? "" : "s"} for you today`
   return (
-    <Link href={href} className="need-head m">
-      {n(count)} {count === 1 ? "task" : "tasks"} for you today
-      <Icon name="chevron-right" size={18} />
+    <Link href={href} className={`tasks-today tasks-today-${size}${count === 0 ? " tasks-today-none" : ""}`}>
+      <span>{label}</span>
+      <Icon name="chevron-right" size={size === "l" ? 22 : 18} />
     </Link>
   )
 }

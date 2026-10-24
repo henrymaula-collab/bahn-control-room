@@ -6,6 +6,10 @@ import { useEffect, useRef, useState } from "react"
 import { createPortal } from "react-dom"
 import type { MapCar } from "@/lib/control-room/types-v3"
 import { WORKER_URL, loadStyle, type MapLook } from "./map-style"
+import type { Bounds } from "./regions"
+
+/** Room around the cars, in px, for what floats over the map. */
+export type Pad = { top: number; bottom: number; left: number; right: number }
 
 /** What a red pin's card says. With a case: its one question and the way to Your tasks. Without one
  *  (the order check is red but no case exists yet): the order, one tap away. Keyed by order id. */
@@ -27,7 +31,11 @@ interface Props {
   red: Record<string, RedInfo>
   lift?: string | null // an order id hovered in the panel
   look: MapLook
-  padLeft: number // room for the floating panel
+  pad: Pad // room for what floats over the map
+  padPhone?: Pad // under 700 px wide
+  focus?: Bounds | null // fly here when it changes (the Overview's country switch)
+  controls?: "top-right" | "bottom-right" | "none"
+  cooperative?: boolean // the map sits in a scrolling page: two fingers or a modifier key to zoom
   card: (orderId: string, close: () => void) => React.ReactNode
 }
 
@@ -37,7 +45,7 @@ interface Props {
  * person are the only labelled pins, in red. Crowded pins fold to a dot (Airbnb), the
  * person's own cases keep their label first.
  */
-export function CarMap({ cars, red, lift, look, padLeft, card }: Props) {
+export function CarMap({ cars, red, lift, look, pad, padPhone, focus, controls = "top-right", cooperative, card }: Props) {
   const box = useRef<HTMLDivElement>(null)
   const map = useRef<MlMap | null>(null)
   const pins = useRef(new Map<string, { marker: Marker; el: HTMLButtonElement; width: number }>())
@@ -59,16 +67,13 @@ export function CarMap({ cars, red, lift, look, padLeft, card }: Props) {
         pitchWithRotate: false,
         touchPitch: false,
         fadeDuration: 0,
-        bounds: bounds(cars),
-        // The panel sits top left; on a phone it spans the top, so the cars go below it.
-        fitBoundsOptions: {
-          padding: box.current.clientWidth < 700 ? { top: 380, bottom: 24, left: 24, right: 24 } : { top: 48, bottom: 48, left: padLeft, right: 72 },
-          maxZoom: 9,
-        },
+        cooperativeGestures: !!cooperative,
+        bounds: focus ?? bounds(cars),
+        fitBoundsOptions: { padding: padFor(box.current), maxZoom: 9 },
       })
       map.current = m
       m.touchZoomRotate.disableRotation()
-      m.addControl(new ml.NavigationControl({ showCompass: false }), "top-right")
+      if (controls !== "none") m.addControl(new ml.NavigationControl({ showCompass: false }), controls)
 
       m.on("load", () => {
         if (!m) return
@@ -155,6 +160,25 @@ export function CarMap({ cars, red, lift, look, padLeft, card }: Props) {
     // The map is built once per data set and look.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cars, look])
+
+  function padFor(el: HTMLElement): Pad {
+    return el.clientWidth < 700 && padPhone ? padPhone : pad
+  }
+
+  // The country switch: fly there, gently; back to every car on "All".
+  const first = useRef(true)
+  useEffect(() => {
+    if (first.current) {
+      first.current = false
+      return
+    }
+    const m = map.current
+    if (!m || !box.current) return
+    hide()
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    m.fitBounds(focus ?? bounds(cars), { padding: padFor(box.current), maxZoom: 9, duration: reduce ? 0 : 900 })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [focus])
 
   function hide() {
     popup.current?.remove()

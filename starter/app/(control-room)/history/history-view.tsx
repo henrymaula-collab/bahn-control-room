@@ -261,7 +261,7 @@ function Record({ row, now, me, lead, onClose }: { row: HistoryRow; now: string;
   const mine = row.by.id === me
   const agent = row.by.id === "agent"
   const weight = row.weight
-    ? row.weight.value >= 1 ? "Full" : `${row.weight.value.toFixed(2)}, ${row.weight.held} of ${row.weight.decided} earlier answers held`
+    ? row.weight.value >= 1 ? "Full" : `${row.weight.value.toFixed(2)}: ${row.weight.held} of ${mine ? "your" : `${row.by.name}'s`} ${row.weight.decided} earlier decisions on this kind stood`
     : null
   const via = row.chat?.via === "voice" ? "By voice" : row.chat?.via === "mixed" ? "By voice and text" : "In text"
   return (
@@ -313,7 +313,7 @@ function Record({ row, now, me, lead, onClose }: { row: HistoryRow; now: string;
           </>
         ) : (
           <>
-            <dt>Counted toward</dt>
+            <dt>Toward a trust rule</dt>
             <dd>
               {row.counted}
               {row.countedNow && <span className="hist-quiet">, now {row.countedNow}</span>}

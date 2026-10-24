@@ -21,6 +21,8 @@
 .hist.with-record { grid-template-columns: minmax(0, 1fr) var(--h-rec); }
 
 .hist-main { min-width: 0; overflow: auto; padding: 0 var(--h-pad) calc(var(--h-pad) * 1.5); }
+/* On a wide screen the list keeps a readable width; the rest is air. */
+.hist-main > * { max-width: 1720px; }
 .hist-quiet, .hist-sub { color: var(--ink-2); }
 .hist-sub { display: block; font-size: var(--h-s); line-height: 1.35; }
 
@@ -49,6 +51,7 @@
 .hist-select select {
   appearance: none; -webkit-appearance: none; border: 0; background: none; cursor: pointer;
   font: inherit; font-size: var(--h-m); color: var(--ink); padding: 5px 26px 5px 10px; border-radius: 999px;
+  field-sizing: content;
 }
 .hist-select select:hover { background: var(--raise); }
 .hist-select svg { position: absolute; right: 8px; pointer-events: none; }

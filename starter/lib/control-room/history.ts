@@ -93,7 +93,7 @@ function carFor(caseId: string, fleet: string[]): string {
 /** Made-up summaries of talking a case through, per kind: what was asked, what the agent said. */
 const CHAT_SUMMARIES: Record<string, string[]> = {
   no_answer: [
-    "Asked when the pickup place last answered. The agent had called at 09:05 and 09:40 with no answer; they usually pick up after ten.",
+    "Asked when the pickup place last answered. The agent had called twice that morning with no answer and left a message.",
     "Asked whether anyone else at the place could confirm. The agent had no second number on file.",
   ],
   car_not_ready: [

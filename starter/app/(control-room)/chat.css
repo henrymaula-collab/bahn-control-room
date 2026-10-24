@@ -123,3 +123,21 @@
   .thinking, .step.running .step-label { color: var(--ink-2); background: none; }
 }
 
+
+/* The agent's offer to do it: the option's own button and "Not now", right under its answer.
+   The tap is the person's decision; after it, one line of what happened. */
+.turn-group { display: contents; }
+.chat-offer { margin-top: -10px; display: flex; flex-direction: column; gap: 8px; }
+.chat-offer-buttons { display: flex; flex-wrap: wrap; gap: 8px; }
+.chat-offer .btn { min-height: 40px; padding: 0 18px; }
+.chat-offer .btn-plain { padding: 0 14px; }
+.chat-offer .btn:disabled { opacity: .5; }
+.chat-offer .chat-error { margin-top: 0; }
+.offer-done .byline span { display: inline-flex; align-items: center; gap: 4px; }
+/* The message the option sends, shown before the yes: a few lines, then "Read it all". */
+.chat-draft { display: flex; flex-direction: column; gap: 6px; padding: 12px 14px; border-radius: 12px; background: var(--raise); }
+.chat-draft .s { color: var(--ink-2); }
+.chat-draft .draft-text { white-space: pre-line; }
+.chat-draft .draft-text.clamped { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 4; line-clamp: 4; overflow: hidden; }
+.chat-draft .read-all { align-self: flex-start; display: inline-flex; align-items: center; gap: 2px; margin: 0 -6px; padding: 2px 6px; border-radius: 999px; color: var(--ink); font-weight: 500; }
+.chat-draft .read-all:hover { background: var(--press); }

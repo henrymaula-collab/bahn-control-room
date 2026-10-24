@@ -42,6 +42,11 @@ export function Question(props: Props) {
   const router = useRouter()
   const [pending, start] = useTransition()
   const [done, setDone] = useState<Done | null>(props.existing ?? null)
+  // Decided elsewhere (a yes in the chat beside it): the refreshed page brings the decision in.
+  const existing = props.existing
+  useEffect(() => {
+    if (existing) setDone((d) => d ?? existing)
+  }, [existing])
   const [error, setError] = useState<string | null>(null)
   const [sheetOpen, setSheetOpen] = useState(false)
   const all = [suggestion, ...alternatives]

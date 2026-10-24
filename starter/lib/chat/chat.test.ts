@@ -13,7 +13,7 @@ import { kindOf, kindOfType } from "./kind"
 import { answerWeight, computeKnowledge, NEEDED_DEFAULT, type PastDecision } from "./knowledge"
 import { buildOpener, openerShape } from "./opener"
 import { memoryStore, setChatStore } from "./store"
-import { CHAT_TOOLS, chatApiTools, chatRunContext, executeChatTool } from "./tools"
+import { CHAT_TOOLS, chatApiTools, chatRunContext, executeChatTool, PROPOSE_TOOL, proposeApiTool, proposeOption } from "./tools"
 import { BANNED_WORDS } from "./words"
 
 process.env.CR_CHAT_PROVIDER = "mock"
@@ -187,12 +187,43 @@ test("opener, known kind: two lines for a strong record, an explanation for some
 
 // ---------- the tool fence ----------
 
+test("propose_option offers only the case's own options, only while it waits, and never acts", async () => {
+  const c = sellerHoldCase("case-offer", "site-042", "Calverona Hamburg")
+  const ctx = ctxFor(c, [], "p-aino")
+  const schema = proposeApiTool(ctx).input_schema.properties.option_id
+  assert.deepEqual(schema.enum, ["ask_customer_for_release", "move_pickup_next_day"], "the model can name only the case's options")
+  const ok = proposeOption(ctx, { option_id: "ask_customer_for_release", summary: "Aino asked the agent to send the email." }, "fallback")
+  assert.equal(ok.isError, false)
+  assert.equal(ok.action?.label, "Send the message", "the option's own button label")
+  assert.equal(ok.action?.summary, "Aino asked the agent to send the email.")
+  assert.ok(proposeOption(ctx, { option_id: "cancel_order" }, "x").isError, "an invented action is refused")
+  assert.ok(proposeOption({ ...ctx, case: { ...c, status: "decided" } }, { option_id: "ask_customer_for_release" }, "x").isError, "a decided case gets no offer")
+
+  // The mock agent, asked to do it, offers the option as an action event and does not decide.
+  const { answer } = await import("./brain")
+  const k = computeKnowledge({ case: c, kind: kindOf(c), history: [] })
+  const shape = openerShape(ctx, k)
+  const { variant: _v, ...opener } = buildOpener(ctx, k)
+  for (const text of ["Can you send the email?", "Kan du skicka eposten?", "Voitko lähettää viestin?"]) {
+    const events: ChatEvent[] = []
+    const res = await answer({ ctx, knowledge: k, shape, opener, history: [], text, via: "text", emit: (e) => events.push(e) }, "mock")
+    const acts = events.filter((e) => e.type === "action")
+    assert.equal(acts.length, 1, `one offer for "${text}"`)
+    assert.equal(res.action?.optionId, "ask_customer_for_release")
+    assert.match(res.text, /Tap "Send the message"/)
+    assert.ok(!/\b(sent|done)\b/i.test(res.text.replace(/before you tap/i, "")), "it never says it is done")
+  }
+  const events: ChatEvent[] = []
+  await answer({ ctx, knowledge: k, shape, opener, history: [], text: "Has this happened before?", via: "text", emit: (e) => events.push(e) }, "mock")
+  assert.ok(!events.some((e) => e.type === "action"), "a lookup stays a lookup")
+})
+
 test("no action tool is reachable from the chat", async () => {
   const actions = ["message_driver", "message_pickup_place", "call_pickup_place", "propose_case", "resolve_without_person", "schedule_callback"]
   for (const a of actions) assert.ok(!(CHAT_TOOLS as readonly string[]).includes(a), `${a} is not a chat tool`)
   assert.deepEqual(chatApiTools().map((t) => t.name), [...CHAT_TOOLS], "the model is offered exactly the chat tools")
   const { SDK_ALLOWED_TOOLS } = await import("./brain")
-  assert.deepEqual(SDK_ALLOWED_TOOLS, CHAT_TOOLS.map((n) => `mcp__chat__${n}`), "Claude Code may use only the chat tools")
+  assert.deepEqual(SDK_ALLOWED_TOOLS, [...CHAT_TOOLS, PROPOSE_TOOL].map((n) => `mcp__chat__${n}`), "Claude Code may use only the chat tools and propose_option")
   const c = sellerHoldCase("case-fence", "site-042", "Calverona Hamburg")
   const ctx = ctxFor(c, [], "p-emil")
   const run = chatRunContext(ctx)

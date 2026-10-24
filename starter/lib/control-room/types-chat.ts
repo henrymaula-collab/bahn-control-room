@@ -58,10 +58,24 @@ export interface ChatThread {
   messages: ChatMessage[]; // earlier turns, oldest first
 }
 
+/**
+ * The agent offers to carry out one of the case's own options (never a new one).
+ * The chat shows it as one tap: the option's button label, plus "Not now".
+ * Nothing happens until the person taps it; the tap is their decision.
+ */
+export interface ChatAction {
+  optionId: string // the suggestion's or an alternative's id
+  label: string // the option's own button label: "Send the email"
+  summary: string // a short summary of the conversation, saved as the decision's reason
+  next?: string // what the agent does once it is decided, from the option's effect
+  draft?: { to: string; language: string; text: string; translation?: string } // the message this option sends, shown before the yes
+}
+
 /** POST /api/cr/cases/:id/chat  body { person, text, via } answers with text/event-stream of ChatEvent. */
 export type ChatEvent =
   | { type: "thinking" }
   | { type: "tool"; step: ChatToolStep }
+  | { type: "action"; action: ChatAction }
   | { type: "delta"; text: string }
   | { type: "done"; message: ChatMessage }
   | { type: "error"; message: string };

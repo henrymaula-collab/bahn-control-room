@@ -2,19 +2,36 @@
 // picks lookups the way the model would, runs them for real (read-only), and
 // answers from the case, the lookups and the precedents in Bahn's words.
 
-import type { CaseKnowledge } from "@/lib/control-room/types-chat"
+import type { CaseKnowledge, ChatAction } from "@/lib/control-room/types-chat"
 import type { ChatCaseContext } from "./context"
 import { earlierOfKind } from "./knowledge"
 import type { ChatToolName } from "./tools"
 import { chosePhrase, day, dayTime, lc, names, plural, rankFacts, restsOn, sentence, sourcePhrase } from "./words"
 
 export interface MockPlan {
-  intent: "precedents" | "call" | "customer" | "documents" | "time" | "why" | "summary"
+  intent: "act" | "precedents" | "call" | "customer" | "documents" | "time" | "why" | "summary"
   tools: ChatToolName[]
+  /** For "act": the case option the person asked the agent to carry out. */
+  optionId?: string
+}
+
+/** "Can you send the email?", "go ahead", "skicka den", "lähetä se", "schick es": the person asks the agent to do it. */
+const ACT =
+  /(\bsend\b(\s+\w+){0,2}\s+(it|email|e-mail|mail|message|now)\b|\bsend it\b|\bgo ahead\b|\bdo (it|that)\b|\bcarry (it|that) out\b|\bskicka|\bgör det|\blähet|\btee se\b|\bschick|\bmach (es|das)\b|\bkeep the gig unpublished\b|\bpause the gig\b)/
+
+/** The option the words point at: waiting/pausing, else the one that writes, else the suggestion. */
+function optionFor(t: string, ctx: ChatCaseContext): string {
+  const options = [ctx.case.suggestion, ...ctx.case.alternatives].filter(Boolean)
+  const quiet = options.find((o) => o.changes.every((ch) => ch.kind === "none"))
+  if (quiet && /\b(pause|wait|keep the gig|unpublished|do nothing|odota|vänta|warte)\b/.test(t)) return quiet.id
+  const writes = options.find((o) => o.changes.some((ch) => ch.kind === "customer_message" || ch.kind === "driver_message"))
+  if (writes && /\b(send|email|e-mail|mail|message|skicka|lähet|schick)/.test(t)) return writes.id
+  return ctx.case.suggestion.id
 }
 
 export function mockPlan(text: string, ctx: ChatCaseContext): MockPlan {
   const t = text.toLowerCase()
+  if (ACT.test(t) && ctx.case.status === "waiting_for_person") return { intent: "act", tools: [], optionId: optionFor(t, ctx) }
   if (/\b(before|last time|earlier|usually|others|other people|precedents?|happened|who decided|did people|how did)\b/.test(t)) return { intent: "precedents", tools: ["get_precedents"] }
   if (/\b(call|called|said|say|says|phone|told|answer(ed)?)\b/.test(t)) return { intent: "call", tools: ctx.calls.length ? ["get_calls"] : ["get_conversations"] }
   if (/\b(customer|dealer|message|draft|email|e-mail|write|send)\b/.test(t)) return { intent: "customer", tools: ["get_conversations"] }
@@ -44,6 +61,7 @@ export function mockAnswer(input: {
   turn: number
   via: "text" | "voice"
   experienced: boolean
+  offered?: ChatAction
 }): string {
   const { ctx, knowledge: k, plan, results } = input
   const c = ctx.case
@@ -55,6 +73,16 @@ export function mockAnswer(input: {
   const out: string[] = []
 
   switch (plan.intent) {
+    case "act": {
+      const o = input.offered
+      if (!o) {
+        out.push("That is not one of the options on this case, so I cannot offer it here.")
+        break
+      }
+      out.push(`I can do that. Tap "${o.label}" below and it is decided${o.next ? `; then ${lc(o.next)}` : ""}`)
+      out.push("Nothing happens before you tap.")
+      break
+    }
     case "precedents": {
       if (!earlier.length) {
         out.push(`Nobody at Bahn has decided a case of this kind before, so there is nothing to copy.`)

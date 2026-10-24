@@ -1,8 +1,10 @@
 // The chat agent's tools: read-only lookups, nothing else. Six reuse the
 // Readiness agent's read tools in lib/agent (same data, same facts); three
 // are the chat's own (precedents, the pickup place's history, calls). Every
-// call shows as a ChatToolStep in plain words. The agent cannot act from the
-// chat: no booking, no message, no call. The decision button does that.
+// call shows as a ChatToolStep in plain words. The agent does not act on its
+// own from the chat: no booking, no message, no call. It can offer one of the
+// case's own options (propose_option), which the chat shows as one tap; the
+// person's tap is the decision, and it goes the same way as the card's button.
 
 import { RunClock } from "@/lib/agent/clock"
 import { findOrder } from "@/lib/agent/data"
@@ -10,7 +12,9 @@ import { FactRegistry } from "@/lib/agent/facts"
 import type { AgentStore } from "@/lib/agent/store"
 import { executeTool, type RunContext } from "@/lib/agent/tools"
 import type { TraceWriter } from "@/lib/agent/trace"
-import type { ChatToolStep } from "@/lib/control-room/types-chat"
+import { answerFor } from "@/app/(control-room)/_ui/ask"
+import type { Option } from "@/lib/control-room/types"
+import type { ChatAction, ChatToolStep } from "@/lib/control-room/types-chat"
 import type { ChatCaseContext } from "./context"
 import { answerWeight, earlierOfKind, recordOf } from "./knowledge"
 import { day, dayTime } from "./words"
@@ -166,7 +170,7 @@ export interface ChatToolResult {
  * before lib/agent is reached.
  */
 export async function executeChatTool(ctx: ChatCaseContext, name: string, getRun: () => RunContext): Promise<ChatToolResult> {
-  if (!isChatTool(name)) return { content: JSON.stringify({ error: `The chat cannot use ${name}. It only looks things up; the decision button acts.` }), isError: true }
+  if (!isChatTool(name)) return { content: JSON.stringify({ error: `The chat cannot use ${name}. It only looks things up, and offers one of the case's options with propose_option.` }), isError: true }
   try {
     if (name === "get_precedents") return { content: JSON.stringify(precedents(ctx)), isError: false }
     if (name === "get_place_history") return { content: JSON.stringify(placeHistory(ctx)), isError: false }
@@ -195,4 +199,87 @@ export function stepId(n: number, name: string): string {
 export function toolStep(id: string, name: ChatToolName, ctx: ChatCaseContext, status: ChatToolStep["status"]): ChatToolStep {
   const l = stepLabels(name, ctx)
   return { id, tool: name, label: status === "running" ? l.running : status === "failed" ? `${l.running} failed` : l.done, status }
+}
+
+// ---------- offering one of the case's options (the person's tap decides) ----------
+
+export const PROPOSE_TOOL = "propose_option" as const
+
+export const PROPOSE_DESCRIPTION =
+  "Offer to carry out one of the case's options when the person asks you to do it (send the email, keep the gig unpublished...). " +
+  "The chat shows the option's button and 'Not now'; nothing happens until the person taps it, and that tap is their decision. " +
+  "Only the option ids listed under Options. Call it at most once per answer."
+
+export function caseOptions(ctx: ChatCaseContext): Option[] {
+  return [ctx.case.suggestion, ...ctx.case.alternatives].filter(Boolean)
+}
+
+/** The option's own button label, as on the card ("Send the email"). */
+export const buttonLabel = (o: Option): string => answerFor(o, o.draft)
+
+/** What the agent does once it is decided: the effect's sentences about the agent, else the whole effect. */
+export function nextWords(o: Option): string {
+  const sentences = o.effect.split(/(?<=\.)\s+/).map((x) => x.trim()).filter(Boolean)
+  const agent = sentences.filter((x) => /^the agent\b/i.test(x))
+  return (agent.length ? agent : sentences).join(" ")
+}
+
+/** Tool definition for the Anthropic API: the option ids are the case's own, nothing else. */
+export function proposeApiTool(ctx: ChatCaseContext) {
+  const ids = caseOptions(ctx).map((o) => o.id)
+  return {
+    name: PROPOSE_TOOL,
+    description: PROPOSE_DESCRIPTION,
+    input_schema: {
+      type: "object" as const,
+      properties: {
+        option_id: { type: "string", enum: ids, description: "The id of the option the person asked you to carry out." },
+        summary: { type: "string", description: "One short sentence, in English, of what the person asked and weighed in this conversation. Saved as the reason for the decision." },
+      },
+      additionalProperties: false,
+      required: ["option_id", "summary"],
+    },
+  }
+}
+
+export interface Proposal {
+  action?: ChatAction
+  content: string
+  isError: boolean
+}
+
+/** Checks a propose_option call: only an open case, only one of its options. */
+export function proposeOption(ctx: ChatCaseContext, input: { option_id?: unknown; summary?: unknown }, fallbackSummary: string): Proposal {
+  if (ctx.case.status !== "waiting_for_person")
+    return { content: JSON.stringify({ error: "This case is not waiting for a decision any more. Say so; do not offer anything." }), isError: true }
+  const option = caseOptions(ctx).find((o) => o.id === input.option_id)
+  if (!option)
+    return { content: JSON.stringify({ error: `No option ${String(input.option_id)} on this case. Offer only the listed options; for anything else, say the card's Other options is the way.` }), isError: true }
+  const summary = typeof input.summary === "string" && input.summary.trim() ? input.summary.trim().slice(0, 240) : fallbackSummary
+  const draft = draftOf(ctx, option)
+  const action: ChatAction = { optionId: option.id, label: buttonLabel(option), summary, next: nextWords(option), ...(draft ? { draft } : {}) }
+  return {
+    action,
+    content: JSON.stringify({
+      shown: true,
+      button: action.label,
+      note: "The person now sees this button and 'Not now' under your answer. Nothing has happened yet. In one short sentence say what happens when they tap it. Do not say it is done, and do not ask them to confirm in words.",
+    }),
+    isError: false,
+  }
+}
+
+/** The message the option sends, so the yes is given on the actual text: the option's draft, else its message change. */
+export function draftOf(ctx: ChatCaseContext, o: Option): ChatAction["draft"] {
+  if (o.draft?.text) return { to: o.draft.to, language: o.draft.language, text: o.draft.text, ...(o.draft.translation ? { translation: o.draft.translation } : {}) }
+  const msg = o.changes.find((ch) => ch.kind === "customer_message" || ch.kind === "driver_message")
+  if (!msg?.detail) return undefined
+  return { to: msg.kind === "customer_message" ? ctx.order.customer : "The driver", language: "en", text: msg.detail }
+}
+
+/** The conversation in one line, for the decision's reason when the model gives none. */
+export function chatSummary(asked: string[]): string {
+  const short = (q: string) => (q.length > 70 ? `${q.slice(0, 67).trimEnd()}...` : q)
+  const qs = asked.map((q) => q.trim()).filter(Boolean)
+  return qs.length ? `Decided in the chat after asking: ${qs.map((q) => `"${short(q)}"`).join(", ")}` : "Decided in the chat"
 }

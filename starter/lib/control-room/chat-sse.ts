@@ -5,7 +5,7 @@
 
 import type { ChatEvent } from "./types-chat"
 
-const TYPES = new Set<ChatEvent["type"]>(["thinking", "tool", "delta", "done", "error"])
+const TYPES = new Set<ChatEvent["type"]>(["thinking", "tool", "action", "delta", "done", "error"])
 
 /** One ChatEvent as one server-sent event block. */
 export function encodeChatEvent(event: ChatEvent): string {

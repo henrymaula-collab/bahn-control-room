@@ -7,12 +7,12 @@
 import type { RunContext } from "@/lib/agent/tools"
 import { agentModel, agentProvider, claudeCodeEnv, effectiveProvider, paths, supportsDefaultFallback, type Provider } from "@/lib/agent/config"
 import type { BetaMessageParam } from "@/lib/agent/llm"
-import type { CaseKnowledge, ChatEvent, ChatMessage, ChatToolStep } from "@/lib/control-room/types-chat"
+import type { CaseKnowledge, ChatAction, ChatEvent, ChatMessage, ChatToolStep } from "@/lib/control-room/types-chat"
 import type { ChatCaseContext } from "./context"
 import { mockAnswer, mockPlan } from "./mock"
 import type { OpenerShape } from "./opener"
 import { chatSystem } from "./prompt"
-import { CHAT_TOOL_DESCRIPTIONS, CHAT_TOOLS, chatApiTools, chatRunContext, executeChatTool, isChatTool, stepId, toolStep, type ChatToolName, type ChatToolResult } from "./tools"
+import { CHAT_TOOL_DESCRIPTIONS, CHAT_TOOLS, chatApiTools, chatRunContext, chatSummary, executeChatTool, isChatTool, PROPOSE_DESCRIPTION, PROPOSE_TOOL, proposeApiTool, proposeOption, stepId, toolStep, type ChatToolName, type ChatToolResult, type Proposal } from "./tools"
 
 export type ChatProvider = Exclude<Provider, "replay">
 
@@ -44,6 +44,8 @@ export interface AnswerInput {
 export interface AnswerResult {
   text: string
   toolSteps: ChatToolStep[]
+  /** The option the agent offered to carry out, if it did (shown as one tap). */
+  action?: ChatAction
   provider: ChatProvider
   model: string
 }
@@ -73,6 +75,22 @@ class Steps {
     this.run ??= chatRunContext(this.ctx)
     return this.run
   }
+}
+
+/** propose_option for one answer: checked against the case, emitted once as an action event. */
+function offerer(input: AnswerInput) {
+  let offered: ChatAction | undefined
+  const asked = [...input.history.filter((m) => m.role === "person").map((m) => m.text), input.text]
+  const offer = (raw: unknown): Proposal => {
+    if (offered) return { content: JSON.stringify({ error: "You already offered an option in this answer." }), isError: true }
+    const p = proposeOption(input.ctx, (raw ?? {}) as { option_id?: unknown; summary?: unknown }, chatSummary(asked))
+    if (p.action) {
+      offered = p.action
+      input.emit({ type: "action", action: p.action })
+    }
+    return p
+  }
+  return { offer, offered: () => offered }
 }
 
 function userText(input: { text: string; via: "text" | "voice" }): string {
@@ -117,9 +135,11 @@ async function mockRun(input: AnswerInput): Promise<AnswerResult> {
     if (delay) await sleep(delay * 4)
     results[name] = (await steps.call(name)).content
   }
+  const { offer, offered } = offerer(input)
+  const proposal = plan.intent === "act" && plan.optionId ? offer({ option_id: plan.optionId }) : undefined
   const text = mockAnswer({
     ctx: input.ctx, knowledge: input.knowledge, plan, results, via: input.via, experienced: input.shape.experienced,
-    turn: input.history.filter((m) => m.role === "agent").length,
+    turn: input.history.filter((m) => m.role === "agent").length, offered: proposal?.action,
   })
   // Stream it the way a model does: a few words at a time.
   const parts = text.match(/\S+\s*/g) ?? [text]
@@ -128,7 +148,7 @@ async function mockRun(input: AnswerInput): Promise<AnswerResult> {
     if (delay) await sleep(delay)
     input.emit({ type: "delta", text: parts.slice(i, i + 3).join("") })
   }
-  return { text, toolSteps: steps.list, provider: "mock", model: "mock" }
+  return { text, toolSteps: steps.list, action: offered(), provider: "mock", model: "mock" }
 }
 
 // ---------- Anthropic API (streamed) ----------
@@ -139,7 +159,8 @@ async function apiAnswer(input: AnswerInput): Promise<AnswerResult> {
   const steps = new Steps(input.ctx, input.emit)
   const system = chatSystem(input.ctx, input.knowledge, input.shape, input.opener)
   const messages = apiMessages(input)
-  const tools = chatApiTools()
+  const { offer, offered } = offerer(input)
+  const tools = [...chatApiTools(), proposeApiTool(input.ctx)]
   const fallback = supportsDefaultFallback(model)
   let text = ""
   for (let turn = 0; turn < MAX_TURNS; turn++) {
@@ -181,20 +202,20 @@ async function apiAnswer(input: AnswerInput): Promise<AnswerResult> {
     if (!uses.length || message.stop_reason !== "tool_use") break
     messages.push({ role: "assistant", content: message.content as BetaMessageParam["content"] })
     const results = await Promise.all(uses.map(async (u) => {
-      const r = await steps.call(u.name)
+      const r = u.name === PROPOSE_TOOL ? offer(u.input) : await steps.call(u.name)
       return { type: "tool_result" as const, tool_use_id: u.id, content: r.content, ...(r.isError ? { is_error: true } : {}) }
     }))
     messages.push({ role: "user", content: results })
   }
-  return { text: text.trim(), toolSteps: steps.list, provider: "api", model }
+  return { text: text.trim(), toolSteps: steps.list, action: offered(), provider: "api", model }
 }
 
 // ---------- Claude Code (Agent SDK) ----------
 
 const MCP = "chat"
 
-/** The only tools Claude Code may use in the chat: the chat's read-only tools, by their MCP names. No built-in tool. */
-export const SDK_ALLOWED_TOOLS = CHAT_TOOLS.map((n) => `mcp__${MCP}__${n}`)
+/** The only tools Claude Code may use in the chat: the chat's read-only tools and propose_option, by their MCP names. No built-in tool. */
+export const SDK_ALLOWED_TOOLS = [...CHAT_TOOLS, PROPOSE_TOOL].map((n) => `mcp__${MCP}__${n}`)
 
 function transcript(input: AnswerInput): string {
   const turns = input.history.filter((m) => m.text.trim()).map((m) => `${m.role === "person" ? input.ctx.person.name : "You"}: ${m.text}`)
@@ -207,16 +228,24 @@ async function sdkAnswer(input: AnswerInput): Promise<AnswerResult> {
   const { createSdkMcpServer, query, tool } = await agentSdk()
   const model = chatModel()
   const steps = new Steps(input.ctx, input.emit)
+  const { offer, offered } = offerer(input)
+  const { z } = await import("zod")
   const server = createSdkMcpServer({
     name: MCP,
     version: "1.0.0",
     alwaysLoad: true,
-    tools: CHAT_TOOLS.map((name) =>
-      tool(name, CHAT_TOOL_DESCRIPTIONS[name], {}, async () => {
-        const r = await steps.call(name)
+    tools: [
+      ...CHAT_TOOLS.map((name) =>
+        tool(name, CHAT_TOOL_DESCRIPTIONS[name], {}, async () => {
+          const r = await steps.call(name)
+          return { content: [{ type: "text" as const, text: r.content }], ...(r.isError ? { isError: true } : {}) }
+        }),
+      ),
+      tool(PROPOSE_TOOL, PROPOSE_DESCRIPTION, { option_id: z.string(), summary: z.string() }, async (args) => {
+        const r = offer(args)
         return { content: [{ type: "text" as const, text: r.content }], ...(r.isError ? { isError: true } : {}) }
       }),
-    ),
+    ],
   })
   const abort = new AbortController()
   input.signal?.addEventListener("abort", () => abort.abort())
@@ -271,5 +300,5 @@ async function sdkAnswer(input: AnswerInput): Promise<AnswerResult> {
     text = final
     input.emit({ type: "delta", text })
   }
-  return { text: text.trim(), toolSteps: steps.list, provider: "claude-code", model }
+  return { text: text.trim(), toolSteps: steps.list, action: offered(), provider: "claude-code", model }
 }

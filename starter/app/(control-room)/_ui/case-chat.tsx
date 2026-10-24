@@ -1,17 +1,22 @@
 "use client"
 
+import { useRouter } from "next/navigation"
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react"
 import { readChatEvents } from "@/lib/control-room/chat-sse"
 import { gateWords, knowledgeWords } from "@/lib/control-room/chat-words"
-import { day, onDay } from "@/lib/control-room/format"
-import type { CaseKnowledge, ChatMessage, ChatThread, ChatToolStep } from "@/lib/control-room/types-chat"
+import { clock, day, onDay } from "@/lib/control-room/format"
+import type { CaseKnowledge, ChatAction, ChatMessage, ChatThread, ChatToolStep } from "@/lib/control-room/types-chat"
+import { decide } from "../actions"
 import { AgentMark } from "./agent-mark"
 import { Icon } from "./icons"
 import { VoiceButton, type SpeakInput } from "./voice-button"
 
 // "Talk it through": the conversation with the agent beside a decision. The agent
-// answers from the case (order, calls, messages, earlier cases); it never acts from
-// here. The decision button does that. Consumes GET/POST /api/cr/cases/:id/chat
+// answers from the case (order, calls, messages, earlier cases). Asked to do one of
+// the case's options, it offers it as one tap (an "action" event): the option's own
+// button plus "Not now". The tap is the person's decision and goes the same way as
+// the card's button (the decide action, POST /api/cr/decisions), with a short summary
+// of the conversation as the reason. Consumes GET/POST /api/cr/cases/:id/chat
 // (ChatThread, then a text/event-stream of ChatEvent per question).
 
 const chatUrl = (caseId: string) => `/api/cr/cases/${encodeURIComponent(caseId)}/chat`
@@ -37,10 +42,15 @@ export function useChatThread(caseId: string, personId: string) {
 
 type Live = { steps: ChatToolStep[]; text: string }
 
+/** The agent's offer under its answer: open until the person taps, then the line of what happened. */
+type Offer = { after: string; action: ChatAction; state: "open" | "saving" | "done" | "failed"; line?: string; at?: string }
+
 export function CaseChat({ thread, personId, now, focus }: { thread: ChatThread | null; personId: string; now: string; focus?: boolean }) {
   const [messages, setMessages] = useState<ChatMessage[]>(thread?.messages ?? [])
   const [live, setLive] = useState<Live | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [offer, setOffer] = useState<Offer | null>(null)
+  const router = useRouter()
   const [draft, setDraft] = useState("")
   // The answer to a spoken question is read aloud as it streams (one id per answer; a new id stops the old one).
   const [speak, setSpeak] = useState<SpeakInput | null>(null)
@@ -77,6 +87,8 @@ export function CaseChat({ thread, personId, now, focus }: { thread: ChatThread 
       pinned.current = true
       const mine: ChatMessage = { id: `local-${Date.now()}`, caseId: thread.caseId, role: "person", personId, text, via, at: new Date().toISOString() }
       setMessages((m) => [...m, mine])
+      // A new question sets an unanswered offer aside; a decided one keeps its line.
+      setOffer((o) => (o && (o.state === "open" || o.state === "failed") ? null : o))
       setLive({ steps: [], text: "" })
       const spoken = via === "voice"
       if (spoken) answerId.current = `answer-${Date.now()}`
@@ -91,8 +103,10 @@ export function CaseChat({ thread, personId, now, focus }: { thread: ChatThread 
         })
         if (!res.ok || !res.body) throw new Error(`POST chat ${res.status}`)
         let done = false
+        let action: ChatAction | undefined
         for await (const ev of readChatEvents(res.body)) {
           if (ev.type === "tool") setLive((l) => l && { ...l, steps: upsert(l.steps, ev.step) })
+          else if (ev.type === "action") action = ev.action
           else if (ev.type === "delta") {
             setLive((l) => l && { ...l, text: l.text + ev.text })
             if (spoken) setSpeak((sp) => ({ id: answerId.current, text: (sp?.id === answerId.current ? sp.text : "") + ev.text }))
@@ -101,6 +115,7 @@ export function CaseChat({ thread, personId, now, focus }: { thread: ChatThread 
             done = true
             setMessages((m) => [...m, ev.message])
             setLive(null)
+            if (action) setOffer({ after: ev.message.id, action, state: "open" })
             if (spoken) setSpeak({ id: answerId.current, text: ev.message.text, done: true })
           } else if (ev.type === "error") throw new Error(ev.message)
         }
@@ -113,6 +128,21 @@ export function CaseChat({ thread, personId, now, focus }: { thread: ChatThread 
     },
     [thread, live, personId],
   )
+
+  // The person's yes: the same decision path as the card's button, then the card shows it decided.
+  const confirm = useCallback(async () => {
+    if (!thread || !offer || offer.state === "saving" || offer.state === "done") return
+    const { action } = offer
+    setOffer({ ...offer, state: "saving" })
+    try {
+      const d = await decide({ id: `dec-${thread.caseId}-${Date.now().toString(36)}`, caseId: thread.caseId, optionId: action.optionId, why: action.summary })
+      const line = `${action.label}.${action.next ? ` ${action.next}` : ""}`
+      setOffer({ ...offer, state: "done", line, at: clock(d.at) })
+      router.refresh()
+    } catch {
+      setOffer({ ...offer, state: "failed" })
+    }
+  }, [thread, offer, router])
 
   return (
     <div className="chat">
@@ -131,7 +161,16 @@ export function CaseChat({ thread, personId, now, focus }: { thread: ChatThread 
           <>
             <AgentTurn message={thread.opener} />
             <Knowledge k={thread.knowledge} now={now} />
-            {messages.map((m) => (m.role === "agent" ? <AgentTurn key={m.id} message={m} /> : <PersonTurn key={m.id} message={m} />))}
+            {messages.map((m) =>
+              m.role === "agent" ? (
+                <div key={m.id} className="turn-group">
+                  <AgentTurn message={m} />
+                  {offer?.after === m.id && <OfferTurn offer={offer} onYes={confirm} onNo={() => setOffer(null)} />}
+                </div>
+              ) : (
+                <PersonTurn key={m.id} message={m} />
+              ),
+            )}
             {live && <LiveTurn live={live} />}
             {error && <p className="s now chat-error">{error}</p>}
           </>
@@ -259,6 +298,62 @@ function PersonTurn({ message }: { message: ChatMessage }) {
           </span>
         )}
       </p>
+    </div>
+  )
+}
+
+/** One tap to let the agent do it: the option's own button and "Not now"; after the yes, one line of what happened. */
+function OfferTurn({ offer, onYes, onNo }: { offer: Offer; onYes: () => void; onNo: () => void }) {
+  if (offer.state === "done")
+    return (
+      <div className="turn agent offer-done" role="status">
+        <p className="byline s">
+          <AgentMark />
+          <span>
+            <Icon name="check" size={14} /> Decided{offer.at ? ` at ${offer.at}` : ""}
+          </span>
+        </p>
+        <Words text={offer.line ?? ""} />
+      </div>
+    )
+  const saving = offer.state === "saving"
+  return (
+    <div className="chat-offer">
+      {offer.action.draft && <OfferDraft draft={offer.action.draft} />}
+      <div className="chat-offer-buttons">
+        <button type="button" className="btn btn-primary" disabled={saving} onClick={onYes}>
+          {offer.action.label}
+        </button>
+        <button type="button" className="btn btn-plain" disabled={saving} onClick={onNo}>
+          Not now
+        </button>
+      </div>
+      {offer.state === "failed" && <p className="s now chat-error">This was not saved. Nothing was sent or booked. Try again.</p>}
+    </div>
+  )
+}
+
+/** The message itself before the yes: who it goes to and the text, a few lines until "Read it all ›". */
+function OfferDraft({ draft }: { draft: NonNullable<ChatAction["draft"]> }) {
+  const [all, setAll] = useState(false)
+  const long = draft.text.length > 220 || draft.text.split("\n").length > 4
+  const translated = draft.translation && draft.language !== "en"
+  return (
+    <div className="chat-draft">
+      <p className="s">To {draft.to}</p>
+      <p className={`m draft-text${all || !long ? "" : " clamped"}`}>{draft.text}</p>
+      {all && translated && (
+        <>
+          <p className="s">In English</p>
+          <p className="m draft-text">{draft.translation}</p>
+        </>
+      )}
+      {!all && (long || translated) && (
+        <button type="button" className="s read-all" onClick={() => setAll(true)}>
+          Read it all
+          <Icon name="chevron-right" size={14} />
+        </button>
+      )}
     </div>
   )
 }

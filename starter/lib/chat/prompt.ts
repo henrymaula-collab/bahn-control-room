@@ -6,6 +6,7 @@ import type { CaseKnowledge, ChatMessage } from "@/lib/control-room/types-chat"
 import type { ChatCaseContext } from "./context"
 import { recordOf } from "./knowledge"
 import type { OpenerShape } from "./opener"
+import { buttonLabel } from "./tools"
 import { day, dayTime } from "./words"
 
 export const CHAT_SYSTEM_PROMPT = `You are the Readiness desk agent at Bahn, talking one decision through with a Bahn ops person. Bahn delivers used cars for car dealers: one freelance driver drives each car, in Finland, Denmark and Germany. You did the legwork on this case already; the person decides, and you help them decide well.
@@ -13,7 +14,8 @@ export const CHAT_SYSTEM_PROMPT = `You are the Readiness desk agent at Bahn, tal
 What you can do
 - You have the case below: the problem, the facts with who said them and when, your steps so far, the options, and what Bahn knows about this kind of case.
 - Start each answer by looking up what the question touches, with one or two of your tools (the order, the pickup place, the messages, the documents, the time windows, the calls, earlier cases of this kind, earlier cases at this pickup place, the trust rules). The records hold more than the summary below. Skip the lookup only for a plain yes or no about something already below.
-- You cannot act from here. You do not book, cancel, call or send anything. If the person asks you to, say that the decision button does it, and that the agent carries it out once they decide.
+- You can carry out the case's options for the person, after their yes. When they ask you to do one of the options below (send the email, keep the gig unpublished, in any language, typed or said), call propose_option with that option's id and a one-sentence summary of the conversation. The chat then shows them the option's button and "Not now"; their tap is the decision, and the agent carries it out the way the card's button does. Then answer in one or two short sentences: say you can do it and what happens when they tap. Never say it is done before they tap, and do not ask for the yes in words.
+- Offer only the options listed below, never a new action. If they ask for something that is not one of them, say so plainly and that "Other options" on the card is the way. If they only ask what an option would do, answer and do not offer it.
 
 How you answer
 - Short and plain: stay within the word budget given under "The person". One paragraph, no headings, no bullet lists, no bold, no emoji. One idea per sentence. Leave out what the person did not ask.
@@ -41,8 +43,8 @@ export function contextBlock(ctx: ChatCaseContext, k: CaseKnowledge, shape: Open
     `Why it needs a person: ${c.reasons.map((r) => r.replace(/_/g, " ")).join(", ") || "not stated"}.`,
     `Status: ${c.status.replace(/_/g, " ")}. It is now ${dayTime(ctx.now)} Helsinki time (dataset time).`,
     ``,
-    `# Options (the person picks one with the decision button)`,
-    list(options, (o) => `- ${o.id === c.suggestion.id ? "Suggestion" : "Alternative"}: ${o.label}. Effect: ${o.effect}${o.changes?.length ? ` Changes: ${o.changes.map((ch) => ch.detail).join("; ")}.` : ""}`),
+    `# Options (the person picks one with the decision button, or says yes to your offer in the chat)`,
+    list(options, (o) => `- ${o.id === c.suggestion.id ? "Suggestion" : "Alternative"} (id ${o.id}, button "${buttonLabel(o)}"): ${o.label}. Effect: ${o.effect}${o.changes?.length ? ` Changes: ${o.changes.map((ch) => ch.detail).join("; ")}.` : ""}`),
     ``,
     `# Facts (who said it, how, when)`,
     list(c.facts, (f) => `- ${f.statement} [${f.source.name ?? f.source.kind}, ${f.source.channel ?? "record"}, ${dayTime(f.source.at)}, ${f.strength}]`),

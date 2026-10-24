@@ -1,0 +1,138 @@
+/* History (track H): a Finder list view of the finished cases, in Your tasks' light theme.
+   Three sizes (title, body, small) and two tones (ink, grey); air instead of boxes; no pills.
+   Sizes follow the window (clamp on vw) so 1512 x 800 and 2560 x 1300 show the same page:
+   body 15 -> 18 px, small 13 -> 15 px, title 26 -> 36 px. */
+
+.main:has(.hist) .top { display: none; }
+
+.hist {
+  --h-l: clamp(26px, 1vw + 11px, 36px);
+  --h-m: clamp(15px, 0.3vw + 10.5px, 18px);
+  --h-s: clamp(13px, 0.16vw + 10.6px, 15px);
+  --h-pad: clamp(24px, 2.4vw - 6px, 56px);
+  --h-row: clamp(10px, 0.45vw + 3px, 15px);
+  --h-rec: clamp(380px, 26vw, 560px);
+  /* Car | Kind of case | Decision | Decided by | When */
+  --h-cols: minmax(0, 1.25fr) minmax(0, 1fr) minmax(0, 1.5fr) minmax(0, 0.55fr) minmax(0, 0.75fr);
+  position: absolute; inset: 0;
+  display: grid; grid-template-columns: minmax(0, 1fr);
+  font-size: var(--h-m); line-height: 1.45;
+}
+.hist.with-record { grid-template-columns: minmax(0, 1fr) var(--h-rec); }
+
+.hist-main { min-width: 0; overflow: auto; padding: 0 var(--h-pad) calc(var(--h-pad) * 1.5); }
+.hist-quiet, .hist-sub { color: var(--ink-2); }
+.hist-sub { display: block; font-size: var(--h-s); line-height: 1.35; }
+
+/* Title and search */
+.hist-head { display: flex; align-items: center; justify-content: space-between; gap: 24px; padding-top: calc(var(--h-pad) * 0.9); }
+.hist-title { font-size: var(--h-l); line-height: 1.15; letter-spacing: -0.02em; font-weight: 600; }
+.hist-search {
+  display: flex; align-items: center; gap: 8px; width: clamp(220px, 18vw, 360px);
+  padding: 0 14px; height: calc(var(--h-m) * 2.4); border-radius: 999px; background: var(--raise); color: var(--ink-2);
+}
+.hist-search:focus-within { box-shadow: 0 0 0 1.5px var(--ink); color: var(--ink); }
+.hist-search input { flex: 1; min-width: 0; border: 0; outline: none; background: none; font-size: var(--h-m); color: var(--ink); }
+.hist-search input::placeholder { color: var(--ink-2); }
+.hist-search input::-webkit-search-cancel-button { cursor: pointer; }
+
+/* Filters: the time range as plain words, the kind (and a lead's person) as quiet selects */
+.hist-filters { display: flex; align-items: center; flex-wrap: wrap; gap: 8px 20px; margin-top: calc(var(--h-pad) * 0.55); }
+.hist-range { display: flex; gap: 2px; margin-left: -10px; }
+.hist-range button {
+  padding: 5px 10px; border-radius: 999px; font-size: var(--h-m); color: var(--ink-2);
+  transition: background-color 150ms var(--ease), color 150ms var(--ease);
+}
+.hist-range button:hover { color: var(--ink); }
+.hist-range button[aria-pressed="true"] { background: var(--press); color: var(--ink); font-weight: 500; }
+.hist-select { position: relative; display: inline-flex; align-items: center; color: var(--ink-2); }
+.hist-select select {
+  appearance: none; -webkit-appearance: none; border: 0; background: none; cursor: pointer;
+  font: inherit; font-size: var(--h-m); color: var(--ink); padding: 5px 26px 5px 10px; border-radius: 999px;
+}
+.hist-select select:hover { background: var(--raise); }
+.hist-select svg { position: absolute; right: 8px; pointer-events: none; }
+.hist-total { margin-left: auto; font-size: var(--h-s); color: var(--ink-2); }
+
+/* The list */
+.hist-table { margin-top: calc(var(--h-pad) * 0.5); }
+.hist-cols, .hist-row { display: grid; grid-template-columns: var(--h-cols); column-gap: clamp(16px, 1.4vw, 32px); align-items: start; }
+.hist-cols {
+  position: sticky; top: 0; z-index: 2; background: var(--page);
+  padding: 10px 12px 8px; margin: 0 -12px; box-shadow: 0 1px 0 rgb(18 17 14 / 0.08);
+}
+.hist-col {
+  display: inline-flex; align-items: center; gap: 4px; justify-self: start;
+  font-size: var(--h-s); line-height: 1.35; color: var(--ink-2); font-weight: 500;
+}
+.hist-col:hover, .hist-col[aria-sort="ascending"], .hist-col[aria-sort="descending"] { color: var(--ink); }
+
+.hist-group { margin-top: calc(var(--h-row) * 1.6); }
+.hist-group-name { font-size: var(--h-m); line-height: 1.4; font-weight: 600; padding: 0 0 4px; }
+.hist-group-name .num { font-weight: 400; color: var(--ink-2); margin-left: 6px; }
+
+.hist-row {
+  width: calc(100% + 24px); margin: 0 -12px; padding: var(--h-row) 12px; border-radius: 12px;
+  text-align: left; transition: background-color 120ms var(--ease);
+}
+.hist-row:hover { background: rgb(18 17 14 / 0.035); }
+.hist-row[aria-selected="true"] { background: var(--press); }
+.hist-row:focus-visible { outline-offset: -2px; }
+.hist-row > span { min-width: 0; }
+.hist-car { display: block; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.col-car .hist-sub { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.col-decision { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.col-kind, .col-by, .col-when { overflow: hidden; text-overflow: ellipsis; }
+.col-when { white-space: nowrap; color: var(--ink-2); }
+.hist-empty { padding: 32px 0; color: var(--ink-2); }
+
+/* The record: Finder's preview pane, the list makes room */
+.hist-record {
+  min-width: 0; overflow: auto; padding: calc(var(--h-pad) * 0.9) var(--h-pad) var(--h-pad) calc(var(--h-pad) * 0.8);
+  background: var(--page); box-shadow: -1px 0 0 rgb(18 17 14 / 0.08);
+  animation: hist-in 200ms var(--ease-open);
+}
+@keyframes hist-in { from { opacity: 0; transform: translateX(16px); } to { opacity: 1; transform: none; } }
+.hist-record-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.hist-record-car { font-size: var(--h-l); line-height: 1.15; letter-spacing: -0.02em; font-weight: 600; }
+.hist-record-head .hist-sub { margin-top: 6px; }
+.hist-close {
+  flex: none; width: 36px; height: 36px; margin: -4px -10px 0 0; border-radius: 10px;
+  display: inline-flex; align-items: center; justify-content: center; color: var(--ink-2);
+}
+.hist-close:hover { background: var(--raise); color: var(--ink); }
+.hist-headline { margin-top: calc(var(--h-pad) * 0.5); text-wrap: pretty; }
+.hist-kv {
+  display: grid; grid-template-columns: minmax(110px, 36%) minmax(0, 1fr); column-gap: 16px; row-gap: calc(var(--h-row) * 0.9);
+  margin: calc(var(--h-pad) * 0.6) 0 0;
+}
+.hist-kv dt { color: var(--ink-2); }
+.hist-kv dd { margin: 0; text-wrap: pretty; }
+.hist-kv .strong { font-weight: 600; }
+.hist-chat { margin-top: calc(var(--h-pad) * 0.7); }
+.hist-chat-name { font-size: var(--h-m); font-weight: 600; }
+.hist-chat-name .hist-quiet { font-weight: 400; margin-left: 6px; }
+.hist-chat p { margin-top: 8px; }
+.hist-chat ul { margin-top: 10px; display: flex; flex-direction: column; gap: 10px; }
+.hist-chat li { display: grid; grid-template-columns: minmax(54px, 16%) minmax(0, 1fr); column-gap: 12px; }
+.hist-open {
+  display: inline-flex; align-items: center; gap: 4px; margin: calc(var(--h-pad) * 0.6) 0 0 -10px;
+  padding: 6px 10px; border-radius: 10px; font-weight: 500;
+}
+.hist-open:hover { background: var(--raise); }
+.hist-open svg { color: var(--ink-2); }
+
+.hist-none { padding: var(--h-pad); display: flex; flex-direction: column; gap: 8px; }
+
+/* Below about 1100 px the record floats over the list instead of pushing it. */
+@media (max-width: 1100px) {
+  .hist.with-record { grid-template-columns: minmax(0, 1fr); }
+  .hist-record { position: absolute; inset: 0 0 0 auto; width: min(100%, 440px); z-index: 5; box-shadow: -12px 0 32px rgb(18 17 14 / 0.08); }
+}
+@media (max-width: 860px) {
+  .hist { position: static; }
+  .hist-head { flex-wrap: wrap; }
+  .hist-search { width: 100%; }
+  .hist { --h-cols: minmax(0, 1fr) minmax(0, 0.7fr); }
+  .col-kind, .col-decision, .col-by { display: none; }
+}

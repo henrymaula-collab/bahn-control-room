@@ -30,8 +30,9 @@ export default async function OverviewPage({ searchParams }: { searchParams: Sea
           orderId: c.orderId,
           vehicle: c.vehicle,
           place: c.caseId || c.from === c.to ? c.from : `${c.from} to ${c.to}`,
-          time: c.nextAt ? when(c.nextAt, data.now) : undefined,
-          now: !!c.nextAt && !!c.caseId && minutesUntil(c.nextAt, data.now) <= NOW_WINDOW_MINUTES,
+          // Without a case there is no decide-by time; a bare clock would be read as one.
+          time: undefined as string | undefined,
+          now: false,
           mine: false,
         }
         red[c.orderId] = base

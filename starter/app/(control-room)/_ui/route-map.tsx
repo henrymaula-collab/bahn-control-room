@@ -37,6 +37,8 @@ export function RouteMap({ from, to }: { from: LatLng; to: LatLng }) {
         for (const id of ["label_town", "label_village"]) if (m.getLayer(id)) m.setLayoutProperty(id, "visibility", "none")
         box.current?.querySelector(".maplibregl-ctrl-attrib")?.classList.remove("maplibregl-compact-show")
         m.addSource("route", { type: "geojson", lineMetrics: true, data: { type: "Feature", properties: {}, geometry: { type: "LineString", coordinates: [a, b] } } })
+        // Under the labels, so a city name stays readable where the route crosses it.
+        const firstLabel = m.getStyle().layers.find((l) => l.type === "symbol")?.id
         m.addLayer({
           id: "route",
           type: "line",
@@ -46,7 +48,7 @@ export function RouteMap({ from, to }: { from: LatLng; to: LatLng }) {
             "line-width": 3,
             "line-gradient": ["interpolate", ["linear"], ["line-progress"], 0, "#fd6a31", 0.45, "#fd6a31", 0.55, "#12110e", 1, "#12110e"],
           },
-        })
+        }, firstLabel)
       })
       for (const [at, letter, colour] of [
         [a, "A", "#fd6a31"],

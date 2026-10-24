@@ -288,7 +288,8 @@ dialog.sheet[open] { animation: sheet-in 260ms var(--ease-open); }
 .pin.lift.compact, .pin.compact:hover { width: auto; height: 26px; padding: 0 10px 0 8px; border-radius: 999px; }
 .pin.lift.compact .label, .pin.compact:hover .label { display: inline; }
 
-/* The pin card: one question and the way to Work, on the map. */
+/* The pin card: one question and the way to Work, on the map, above every pin. */
+.maplibregl-popup.pin-card { z-index: 20; }
 .maplibregl-popup.pin-card .maplibregl-popup-content {
   width: 300px; padding: 16px 18px 12px; border-radius: 16px;
   background: var(--page); color: var(--ink); box-shadow: var(--shadow-float); font-family: var(--font);
@@ -403,6 +404,7 @@ dialog.sheet[open] { animation: sheet-in 260ms var(--ease-open); }
   .work { position: static; grid-template-columns: minmax(0, 1fr); }
   .detail { padding: 32px 16px; }
   .float { left: 8px; right: 8px; width: auto; }
+  .overview .maplibregl-ctrl-top-right { display: none; } /* pinch zooms; the panel spans the top */
   .panel { width: 100%; }
   .l { font-size: 24px; line-height: 30px; }
   .kv { grid-template-columns: minmax(0, 1fr); row-gap: 2px; }

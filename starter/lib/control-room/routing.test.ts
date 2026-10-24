@@ -1,7 +1,7 @@
 // Unit tests for routing. Run: npm run test:cr
 import assert from "node:assert/strict"
 import { test } from "node:test"
-import { type HistoryRow, bucket, nextShiftStart, routeCase } from "./routing"
+import { type HistoryRow, type RouteInput, bucket, nextShiftStart, routeCase } from "./routing"
 import type { OpsPerson } from "./types"
 
 const NOW = "2026-10-21T09:00:00.000Z" // Wed 12:00 Helsinki
@@ -95,6 +95,6 @@ test("next shift start skips the weekend and respects summer time", () => {
 })
 
 test("routing is deterministic", () => {
-  const input = { caseId: "case-ord-00516-facts_disagree", type: "readiness.facts_disagree", desk: "ops-readiness", people: [aino, jonas, emil], history: rows("p-aino", 3), now: NOW } as const
+  const input: RouteInput = { caseId: "case-ord-00516-facts_disagree", type: "readiness.facts_disagree", desk: "ops-readiness", people: [aino, jonas, emil], history: rows("p-aino", 3), now: NOW }
   assert.deepEqual(routeCase(input), routeCase(input))
 })

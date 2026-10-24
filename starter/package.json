@@ -11,7 +11,10 @@
     "db:seed": "tsx scripts/seed.ts",
     "attachments:seed": "tsx scripts/seed-attachments.ts",
     "attachments:smoke": "tsx scripts/smoke-attachments.ts",
-    "smoke": "tsx scripts/smoke.ts"
+    "smoke": "tsx scripts/smoke.ts",
+    "db:seed:cr": "tsx scripts/seed-control-room.ts",
+    "smoke:cr": "tsx scripts/smoke-control-room.ts",
+    "test:cr": "node --import tsx --test lib/control-room/*.test.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1155.0",

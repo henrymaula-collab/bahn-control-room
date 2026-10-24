@@ -43,8 +43,11 @@ export type OrderCheckResult = OrderCheck & {
   flags: Flag[]
   /** Which desk would own the decision, from the record's owner fields. */
   desk: string | null
-  /** For the scale toggle: made-up orders are marked. */
+  /** For the scale toggle: made-up orders are marked, with display fields. */
   synthetic?: boolean
+  syntheticCustomer?: string
+  syntheticFrom?: string
+  syntheticTo?: string
 }
 
 const LIVE = new Set(["ASSIGNED", "IN_PROGRESS"])
@@ -440,6 +443,9 @@ export function computeOrderChecks(world: World, cases: Case[] = []): OrderCheck
     if (linked) {
       if (linked.status === "waiting_for_person") state = "needs_person"
       else if (linked.status === "agent_working") state = state === "needs_person" ? state : "agent_working"
+      // A person decided, or a trust rule let the agent decide: the agent carries it out.
+      else if (linked.status === "decided" || linked.status === "handled_by_agent") state = "agent_working"
+      else if (linked.status === "done") state = "checked_quiet"
     }
     const checks: CheckRow[] = [
       ...flags.map((flag) => ({ label: flag.label, ok: false, source: flag.source, at: flag.at })),

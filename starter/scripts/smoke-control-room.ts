@@ -10,7 +10,7 @@ import { eq, inArray } from "drizzle-orm"
 import { countChecks } from "../lib/control-room/checks"
 import { closeCrDb, crDb } from "../lib/control-room/db"
 import { scaleChecks } from "../lib/control-room/scale"
-import { crCases, crDecisions, crLessons } from "../lib/control-room/schema"
+import { crCaseRecords, crCases, crDecisions, crLessons } from "../lib/control-room/schema"
 import { buildState, decide, getCaseDetail, getDesk, getLead, getOverview, getWork, refreshTrustRules, setTrustRule } from "../lib/control-room/service"
 import { inEurope } from "../lib/control-room/geo"
 import { listTrustRules, saveTrustRule } from "../lib/control-room/store"
@@ -55,7 +55,7 @@ async function main() {
   // 3. No order ids in engine code (reseed-safe)
   const dir = join(process.cwd(), "lib", "control-room")
   // The shape files (contract and view types) name the hero order in example comments; engine code must not.
-  const contract = new Set(["types.ts", "types-v3.ts", "views.ts"])
+  const contract = new Set(["types.ts", "types-v3.ts", "types-chat.ts", "types-loop.ts", "views.ts"])
   for (const file of readdirSync(dir).filter((name) => name.endsWith(".ts") && !name.includes(".test.") && !contract.has(name))) {
     const text = readFileSync(join(dir, file), "utf8")
     assert.ok(!/\bord-\d{5}\b|\bCD-4\d{5}\b/.test(text), `${file} must not name an order`)
@@ -84,7 +84,9 @@ async function main() {
       const after = await buildState()
       assert.equal(after.cases.find((c) => c.id === target.id)?.status, "decided")
       assert.notEqual(after.checks.find((check) => check.orderId === target.orderId)?.state, "needs_person")
+      assert.equal(result.record.caseId, target.id, "one case record for the decided case")
       await crDb.delete(crDecisions).where(eq(crDecisions.id, result.decision.id))
+      await crDb.delete(crCaseRecords).where(eq(crCaseRecords.caseId, target.id))
       await crDb.delete(crLessons).where(eq(crLessons.id, result.lesson.id))
       if (storedBefore) await crDb.update(crCases).set({ status: storedBefore.status, routedTo: storedBefore.routedTo, updatedAt: storedBefore.updatedAt, data: storedBefore.data }).where(eq(crCases.id, target.id))
       else await crDb.delete(crCases).where(eq(crCases.id, target.id))

@@ -1,0 +1,28 @@
+/* card 06: command bar. Today's two blocks; the answers carry their keys in a quieter tone, and
+   Other options opens one list of every action (Raycast's action panel), opening upward. */
+.lab-card-06 .c06-what { margin-top: 0.2em; }
+.lab-card-06 .c06-ask { margin-top: 1em; }
+.lab-card-06 .c06-bar { position: relative; display: flex; align-items: center; gap: 0.5em; margin-top: calc(24 / 17 * 1em); font-size: var(--size-m); }
+.lab-card-06 .c06-bar .btn { flex: none; min-height: max(44px, calc(2.6 * var(--size-m))); padding: 0 1.25em; font-size: var(--size-m); gap: 0.6em; }
+.lab-card-06 .c06-bar .btn-plain { padding: 0 0.92em; }
+.lab-card-06 .c06-keys { font-weight: 400; font-size: var(--size-s); letter-spacing: 0.02em; opacity: 0.55; font-variant-numeric: tabular-nums; }
+.lab-card-06 .btn-plain .c06-keys { color: var(--ink-2); opacity: 1; }
+.lab-card-06 .c06-panel {
+  position: absolute; z-index: 20; left: 0; top: calc(100% + 8px); width: min(100%, 28em);
+  padding: 6px; border-radius: 14px; background: var(--page); outline: none;
+  box-shadow: 0 0 0 1px rgb(18 17 14 / 0.07), 0 2px 4px rgb(18 17 14 / 0.04), 0 14px 36px rgb(18 17 14 / 0.14);
+  font-size: var(--size-s); line-height: var(--lh-subhead);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .lab-card-06 .c06-panel { animation: c06-in 150ms cubic-bezier(0.2, 0, 0, 1); }
+  @keyframes c06-in { from { opacity: 0; transform: translateY(-6px); } }
+}
+.lab-card-06 .c06-item { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 1em; padding: 0.55em 0.7em; border-radius: 9px; cursor: pointer; }
+.lab-card-06 .c06-item.on { background: var(--raise); }
+.lab-card-06 .c06-item.last-option { margin-bottom: 7px; position: relative; }
+.lab-card-06 .c06-item.last-option::after { content: ""; position: absolute; left: 0.7em; right: 0.7em; bottom: -4px; height: 1px; background: rgb(18 17 14 / 0.08); }
+.lab-card-06 .c06-text { display: grid; min-width: 0; }
+.lab-card-06 .c06-title { color: var(--ink); font-size: var(--size-m); line-height: var(--lh-body); }
+.lab-card-06 .c06-sub { color: var(--ink-2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.lab-card-06 .c06-right { color: var(--ink-2); font-variant-numeric: tabular-nums; min-width: 2em; text-align: right; }
+.lab-card-06 .c06-next { margin-top: 0.8em; }

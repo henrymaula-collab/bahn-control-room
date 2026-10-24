@@ -1,0 +1,17 @@
+/* card 05: legwork. One grey line with a tick under the situation: the most telling thing the
+   agent did, then how many more; it opens to every step with its time. */
+.lab-card-05 .c05-what { margin-top: 0.2em; }
+.lab-card-05 .c05-log { min-height: calc(var(--lh-subhead) * var(--size-s) + 0.9em); margin-top: 0.55em; font-size: var(--size-s); line-height: var(--lh-subhead); opacity: 0; }
+.lab-card-05 .c05-log.shown { opacity: 1; transition: opacity 200ms cubic-bezier(0.2, 0, 0, 1); }
+.lab-card-05 .c05-line { display: inline-flex; align-items: flex-start; gap: 0.45em; margin-left: -0.5em; padding: 0.4em 0.5em; border-radius: 10px; color: var(--ink-2); text-align: left; max-width: 40em; }
+.lab-card-05 .c05-line:hover { color: var(--ink); background: var(--raise); }
+.lab-card-05 .c05-line svg { flex: none; width: 1em; height: 1em; margin-top: 0.18em; }
+.lab-card-05 .c05-line svg:first-child { color: var(--green); }
+.lab-card-05 .c05-more { color: inherit; }
+.lab-card-05 .c05-steps { display: grid; gap: 0.35em; margin: 0.2em 0 0.4em; max-width: 40em; }
+.lab-card-05 .c05-steps li { display: grid; grid-template-columns: 1em minmax(0, 1fr) auto; column-gap: 0.45em; align-items: start; color: var(--ink-2); }
+.lab-card-05 .c05-steps li svg { width: 0.9em; height: 0.9em; margin-top: 0.22em; color: var(--green); }
+.lab-card-05 .c05-steps time { font-variant-numeric: tabular-nums; }
+.lab-card-05 .c05-ask { margin-top: 0.75em; }
+.lab-card-05 .c05-acts { margin-top: calc(24 / 17 * 1em); }
+.lab-card-05 .c05-next { margin-top: 0.8em; }

@@ -1,0 +1,16 @@
+/* card 12: review frame. Header (car Body semibold, reference in mono grey; the deadline at the
+   right), hairlines above and below the body, a footer bar: Other options leading, the default
+   trailing. The bar sticks to the foot of the column while the card scrolls. */
+.lab-card-12 { max-width: calc(var(--card-measure, 24) * var(--size-l)); }
+.lab-card-12 .c12-head { display: flex; align-items: baseline; justify-content: space-between; gap: 1em; padding-bottom: 0.7em; border-bottom: 1px solid var(--lc-hair); font-size: var(--size-m); }
+.lab-card-12 .c12-car { display: flex; align-items: baseline; gap: 0.6em; min-width: 0; }
+.lab-card-12 .c12-name { font-size: var(--size-m); line-height: var(--lh-body); font-weight: 600; white-space: nowrap; }
+.lab-card-12 .c12-ref { font-family: var(--font-mono); font-size: var(--size-s); color: var(--ink-2); white-space: nowrap; }
+.lab-card-12 .c12-head .lc-due { white-space: nowrap; }
+.lab-card-12 .c12-body { padding: 1em 0 1.3em; }
+.lab-card-12 .c12-ask { margin-top: 0.9em; }
+.lab-card-12 .c12-foot { position: sticky; bottom: 0; z-index: 2; padding: 0.8em 0 0.2em; border-top: 1px solid var(--lc-hair); background: var(--page); font-size: var(--size-m); }
+.lab-card-12 .c12-next { max-width: none; }
+.lab-card-12 .c12-bar { display: flex; align-items: center; justify-content: space-between; gap: 0.5em; margin-top: 0.8em; }
+.lab-card-12 .c12-bar .btn { flex: none; min-height: max(44px, calc(2.6 * var(--size-m))); padding: 0 1.25em; font-size: var(--size-m); }
+.lab-card-12 .c12-bar .btn-plain { margin-left: -0.92em; padding: 0 0.92em; }

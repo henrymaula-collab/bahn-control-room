@@ -1,0 +1,31 @@
+/* The card slot's shared look (builder C). Every rule starts with .lab-card, a class only the
+   card variants render, so today's pages never change. Sizes on the ramp the card already has in
+   Your tasks (tasks.css .work .detail): --size-l = Title 1 fitted to the card, --card-ask = Title 2,
+   --size-m = Body, --size-s = Subhead. Two weights, two greys and the deadline red. */
+
+.lab-card { --lc-ease: cubic-bezier(0.2, 0, 0, 1); --lc-hair: rgb(18 17 14 / 0.1); --lc-ask: var(--card-ask, var(--type-title2)); }
+
+.lab-card .lc-due { display: flex; align-items: center; gap: 0.5em; font-size: var(--size-s); line-height: var(--lh-subhead); font-weight: 600; color: var(--ink-2); font-variant-numeric: tabular-nums; }
+.lab-card .lc-due.now { color: var(--now); }
+.lab-card .lc-dot { flex: none; width: 0.5em; height: 0.5em; border-radius: 50%; background: var(--red); }
+
+.lab-card .lc-what { font-size: var(--size-l); line-height: var(--lh-title1); letter-spacing: var(--track-title1); font-weight: 600; max-width: calc(var(--card-measure, 24) * 1em); }
+.lab-card .lc-ask { font-size: var(--lc-ask); line-height: var(--lh-title2); letter-spacing: var(--track-title2); font-weight: 400; max-width: 32em; }
+
+.lab-card .lc-acts { display: flex; align-items: center; gap: 0.5em; flex-wrap: nowrap; }
+.lab-card .lc-acts .btn { flex: none; min-height: max(44px, calc(2.6 * var(--size-m))); padding: 0 1.25em; font-size: var(--size-m); }
+.lab-card .lc-acts .btn-plain { padding: 0 0.92em; }
+
+.lab-card .lc-next { font-size: var(--size-s); line-height: var(--lh-subhead); color: var(--ink-2); max-width: 40em; }
+.lab-card .lc-label { font-size: var(--size-s); line-height: var(--lh-subhead); color: var(--ink-2); font-weight: 400; }
+.lab-card .lc-error { margin-top: 12px; font-size: var(--size-m); color: var(--now); font-weight: 600; }
+
+.lab-card .lc-link { display: inline-flex; align-items: center; gap: 0.2em; color: var(--ink-2); border-radius: 8px; font-size: var(--size-s); line-height: var(--lh-subhead); }
+.lab-card .lc-link:hover { color: var(--ink); }
+.lab-card .lc-link svg { width: 1.1em; height: 1.1em; flex: none; }
+
+/* Hover and press on colour only, 150 ms (research/premium/visual/principles.md §1). */
+.lab-card button, .lab-card a { transition: background-color 150ms var(--lc-ease), color 150ms var(--lc-ease), border-color 150ms var(--lc-ease), box-shadow 150ms var(--lc-ease); }
+@media (prefers-reduced-motion: reduce) {
+  .lab-card *, .lab-card *::before, .lab-card *::after { transition: none !important; animation: none !important; }
+}

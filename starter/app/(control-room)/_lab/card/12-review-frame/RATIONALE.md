@@ -1,0 +1,6 @@
+# card 12: Review frame
+
+- References: Stripe Radar's review page (https://docs.stripe.com/radar/reviews, raw `research/premium/product/raw/pp/stripe-radar-reviews.md`): one payment per page with its identity on top and the closing actions together; Zendesk's footer with the submit at the right (`research/premium/product/shots/card-03-zendesk-auto-assist-approve.png`); the compact work-order card with the reference top left and actions bottom right (https://dribbble.com/shots/27221900, `research/premium/visual/shots/card-08-subwork-order-reject-approve.png`); Apple HIG Alerts: the default on the trailing side of a row.
+- Borrowed: three bands. A header that says which car and which order (Ferrari Roma, CD-420458 in mono) with the deadline on the same line at the right; the situation and question; a footer bar with the next line, Other options leading and the default trailing.
+- Why for ops: the card names its object before anything else, so a person moving between cases never answers the wrong car; the answer sits where the eye ends, and the bar stays put as the card grows.
+- Trade-off: the car's name is already in the side panel, so on a wide screen it is said twice; the hairlines add structure that today's card avoids with air.

@@ -1,0 +1,17 @@
+/* card 03: live deadline. A quiet platter above the card: "Decide by 13:00" and "1 h left" at
+   Headline weight, tabular figures, and a 3 px bar that drains through the last hour. */
+.lab-card-03 .c03-live { max-width: calc(var(--card-measure, 24) * var(--size-l)); padding: 0.75em 1em 0.85em; border-radius: 14px; background: var(--raise); font-size: var(--size-m); }
+.lab-card-03 .c03-row { display: flex; align-items: baseline; justify-content: space-between; gap: 1em; }
+.lab-card-03 .c03-by { display: flex; align-items: center; gap: 0.5em; font-size: var(--type-headline); line-height: var(--lh-headline); font-weight: 600; color: var(--ink); font-variant-numeric: tabular-nums; }
+.lab-card-03 .c03-live.now .c03-by { color: var(--now); }
+.lab-card-03 .c03-left { font-size: var(--type-headline); line-height: var(--lh-headline); font-weight: 400; color: var(--ink); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.lab-card-03 .c03-track { position: relative; height: 3px; margin-top: 0.6em; border-radius: 3px; background: rgb(18 17 14 / 0.08); overflow: hidden; }
+.lab-card-03 .c03-fill { position: absolute; inset: 0; border-radius: 3px; background: var(--red); transform-origin: left center; transition: transform 600ms linear; }
+@media (prefers-reduced-motion: no-preference) {
+  .lab-card-03 .c03-fill { animation: c03-drain 700ms cubic-bezier(0.2, 0, 0, 1) backwards; }
+  @keyframes c03-drain { from { transform: scaleX(1); } }
+}
+.lab-card-03 .c03-what { margin-top: 0.75em; }
+.lab-card-03 .c03-ask { margin-top: 1em; }
+.lab-card-03 .c03-acts { margin-top: calc(24 / 17 * 1em); }
+.lab-card-03 .c03-next { margin-top: 0.8em; }

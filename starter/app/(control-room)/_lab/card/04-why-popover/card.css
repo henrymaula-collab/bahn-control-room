@@ -1,0 +1,28 @@
+/* card 04: why popover. Today's card; a quiet "Why this" after the answers opens a popover with
+   two first-hand facts, the kind's record, the alternative and the answer again. */
+.lab-card-04 .c04-what { margin-top: 0.2em; }
+.lab-card-04 .c04-ask { margin-top: 1em; }
+.lab-card-04 .c04-anchor { position: relative; margin-top: calc(24 / 17 * 1em); font-size: var(--size-m); }
+.lab-card-04 .c04-why { display: inline-flex; align-items: center; gap: 0.25em; min-height: 44px; padding: 0 0.6em; border-radius: 999px; color: var(--ink-2); font-size: var(--size-m); }
+.lab-card-04 .c04-why:hover, .lab-card-04 .c04-why[aria-expanded="true"] { color: var(--ink); background: var(--raise); }
+.lab-card-04 .c04-pop {
+  position: absolute; z-index: 20; top: calc(100% + 8px); left: 0; width: min(100%, 26em);
+  padding: 1em 1.1em 1.1em; border-radius: 16px; background: var(--page);
+  box-shadow: 0 0 0 1px rgb(18 17 14 / 0.06), 0 2px 4px rgb(18 17 14 / 0.04), 0 12px 32px rgb(18 17 14 / 0.12);
+  font-size: var(--size-s); line-height: var(--lh-subhead);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .lab-card-04 .c04-pop { animation: c04-in 150ms cubic-bezier(0.2, 0, 0, 1); }
+  @keyframes c04-in { from { opacity: 0; transform: translateY(-6px); } }
+}
+.lab-card-04 .c04-pop-title { font-size: var(--size-m); line-height: var(--lh-headline); font-weight: 600; outline: none; }
+.lab-card-04 .c04-quiet { color: var(--ink-2); }
+.lab-card-04 .c04-facts { display: grid; gap: 0.7em; margin-top: 0.7em; }
+.lab-card-04 .c04-facts li { padding-left: 0.8em; border-left: 2px solid rgb(18 17 14 / 0.12); }
+.lab-card-04 .c04-record { margin-top: 0.8em; }
+.lab-card-04 .c04-alts { margin-top: 0.9em; padding-top: 0.8em; border-top: 1px solid rgb(18 17 14 / 0.08); }
+.lab-card-04 .c04-alt { display: flex; width: calc(100% + 1em); align-items: center; justify-content: space-between; gap: 0.6em; margin: 0.2em -0.5em 0; padding: 0.45em 0.5em; border-radius: 10px; text-align: left; color: var(--ink); }
+.lab-card-04 .c04-alt:hover { background: var(--raise); }
+.lab-card-04 .c04-alt svg { flex: none; color: var(--ink-2); }
+.lab-card-04 .c04-accept { width: 100%; margin-top: 0.9em; min-height: 40px; font-size: var(--size-s); }
+.lab-card-04 .c04-next { margin-top: 0.8em; }

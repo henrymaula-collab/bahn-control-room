@@ -1,0 +1,20 @@
+/* card 10: next steps. Under the answer, the steps on a 1 px line: a filled dot for you (now),
+   rings for what follows; who in grey Subhead, what in ink Subhead. No numbers. */
+.lab-card-10 .c10-what { margin-top: 0.2em; }
+.lab-card-10 .c10-ask { margin-top: 1em; }
+.lab-card-10 .c10-acts { margin-top: calc(24 / 17 * 1em); }
+.lab-card-10 .c10-steps { position: relative; display: grid; gap: 0.7em; max-width: 34em; margin-top: 1.25em; padding-left: 1.5em; font-size: var(--size-s); line-height: var(--lh-subhead); }
+.lab-card-10 .c10-steps::before { content: ""; position: absolute; left: calc(0.35em - 0.5px); top: 0.7em; bottom: 0.7em; width: 1px; background: rgb(18 17 14 / 0.16); }
+.lab-card-10 .c10-steps li { position: relative; }
+.lab-card-10 .c10-dot { position: absolute; left: -1.5em; top: 0.38em; width: 0.7em; height: 0.7em; border-radius: 50%; background: var(--page); box-shadow: inset 0 0 0 1.5px var(--ink-2); }
+.lab-card-10 .c10-steps li.first .c10-dot { background: var(--ink); box-shadow: none; }
+.lab-card-10 .c10-body { display: grid; }
+.lab-card-10 .c10-who { color: var(--ink-2); }
+.lab-card-10 .c10-text { color: var(--ink); }
+@media (prefers-reduced-motion: no-preference) {
+  .lab-card-10 .c10-steps li { animation: c10-in 250ms cubic-bezier(0.2, 0, 0, 1) backwards; }
+  .lab-card-10 .c10-steps li:nth-child(2) { animation-delay: 60ms; }
+  .lab-card-10 .c10-steps li:nth-child(3) { animation-delay: 120ms; }
+  .lab-card-10 .c10-steps li:nth-child(n + 4) { animation-delay: 180ms; }
+  @keyframes c10-in { from { opacity: 0; transform: translateY(4px); } }
+}

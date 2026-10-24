@@ -1,0 +1,9 @@
+/* card 02: consequences. Today's two blocks, then "If you send the email:" and one line per change. */
+.lab-card-02 .c02-what { margin-top: 0.2em; }
+.lab-card-02 .c02-ask { margin-top: 1em; }
+.lab-card-02 .c02-acts { margin-top: calc(24 / 17 * 1em); }
+.lab-card-02 .c02-if { margin-top: 1.1em; max-width: 36em; }
+.lab-card-02 .c02-if ul { margin-top: 0.35em; display: grid; gap: 0.3em; }
+.lab-card-02 .c02-if li { display: grid; grid-template-columns: 1.1em minmax(0, 1fr); column-gap: 0.45em; align-items: start; font-size: var(--size-s); line-height: var(--lh-subhead); color: var(--ink); }
+.lab-card-02 .c02-if li svg { width: 0.95em; height: 0.95em; margin-top: 0.22em; color: var(--ink-2); }
+.lab-card-02 .c02-was { color: var(--ink-2); }

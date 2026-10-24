@@ -1,0 +1,8 @@
+/* card 13: labelled. Three blocks, each under a small grey sentence-case label (Subhead, ink-2,
+   never capitals); air between the blocks, none inside them. "After that" in ink, not grey. */
+.lab-card-13 .c13-block { margin-top: 1.35em; font-size: var(--size-m); }
+.lab-card-13 .lc-due + .c13-block { margin-top: 0.9em; }
+.lab-card-13 .c13-what { margin-top: 0.15em; }
+.lab-card-13 .c13-ask { margin-top: 0.2em; }
+.lab-card-13 .c13-acts { margin-top: 1em; }
+.lab-card-13 .c13-next { margin-top: 0.2em; max-width: 34em; font-size: var(--size-s); line-height: var(--lh-subhead); color: var(--ink); }

@@ -1,0 +1,13 @@
+/* card 11: message first. The draft on a raised surface between the question and its answer: who
+   it goes to in grey, the first four lines of the text, "Show in English"; then Send, Edit, Other. */
+.lab-card-11 .c11-what { margin-top: 0.2em; }
+.lab-card-11 .c11-ask { margin-top: 1em; }
+.lab-card-11 .c11-draft { margin: 1em 0 0; max-width: 36em; padding: 0.85em 1em 0.6em; border-radius: 14px; background: var(--raise); font-size: var(--size-s); line-height: var(--lh-subhead); }
+.lab-card-11 .c11-to { color: var(--ink-2); }
+.lab-card-11 .c11-text { margin: 0.45em 0 0; color: var(--ink); white-space: pre-line; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 4; line-clamp: 4; overflow: hidden; }
+.lab-card-11 .c11-tools { display: flex; gap: 0.5em; min-height: 0.4em; margin: 0.35em 0 0 -0.5em; }
+.lab-card-11 .c11-tools .lc-link { padding: 0.3em 0.5em; }
+.lab-card-11 .c11-tools .lc-link:hover { background: rgb(18 17 14 / 0.05); }
+.lab-card-11 .c11-changes { display: grid; gap: 0.3em; max-width: 36em; margin-top: 1em; padding: 0.85em 1em; border-radius: 14px; background: var(--raise); font-size: var(--size-s); line-height: var(--lh-subhead); }
+.lab-card-11 .c11-acts { margin-top: 1.1em; }
+.lab-card-11 .c11-next { margin-top: 0.8em; }

@@ -1,0 +1,11 @@
+/* card 09: two answers. Two equal columns, each a full-width button and its first consequence
+   under it in grey; the suggestion filled, the other the soft secondary. */
+.lab-card-09 .c09-what { margin-top: 0.2em; }
+.lab-card-09 .c09-ask { margin-top: 1em; }
+.lab-card-09 .c09-pair { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.75em; max-width: 34em; margin-top: calc(24 / 17 * 1em); font-size: var(--size-m); }
+.lab-card-09 .c09-pair.one { grid-template-columns: minmax(0, 17em); }
+.lab-card-09 .c09-answer { display: grid; align-content: start; gap: 0.55em; min-width: 0; }
+.lab-card-09 .c09-answer .btn { width: 100%; min-height: max(44px, calc(2.6 * var(--size-m))); padding: 0 1em; font-size: var(--size-m); white-space: normal; text-align: center; line-height: 1.2; }
+.lab-card-09 .c09-what-then { padding: 0 0.25em; font-size: var(--size-s); line-height: var(--lh-subhead); color: var(--ink-2); }
+.lab-card-09 .c09-more { margin-top: 0.7em; margin-left: -0.5em; padding: 0.35em 0.5em; }
+.lab-card-09 .c09-more:hover { background: var(--raise); }

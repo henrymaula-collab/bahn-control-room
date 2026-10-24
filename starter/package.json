@@ -14,17 +14,24 @@
     "smoke": "tsx scripts/smoke.ts",
     "db:seed:cr": "tsx scripts/seed-control-room.ts",
     "smoke:cr": "tsx scripts/smoke-control-room.ts",
-    "test:cr": "node --import tsx --test lib/control-room/*.test.ts"
+    "test:cr": "node --import tsx --test lib/control-room/*.test.ts",
+    "agent": "tsx scripts/agent.ts",
+    "calls:render": "tsx scripts/render-calls.ts",
+    "test:agent": "node --import tsx --test lib/agent/*.test.ts"
   },
   "dependencies": {
+    "@anthropic-ai/claude-agent-sdk": "0.3.310",
+    "@anthropic-ai/sdk": "0.137.0",
     "@aws-sdk/client-s3": "^3.1155.0",
     "@aws-sdk/s3-request-presigner": "^3.1155.0",
+    "@modelcontextprotocol/sdk": "1.32.2",
     "dotenv": "^18.0.8",
     "drizzle-orm": "^0.45.4",
     "next": "^16.4.2",
     "postgres": "^3.4.9",
     "react": "19.2.7",
-    "react-dom": "19.2.7"
+    "react-dom": "19.2.7",
+    "zod": "4.6.7"
   },
   "devDependencies": {
     "@types/node": "^24.0.0",

@@ -70,6 +70,8 @@ export interface Option {
   label: string; // names the action: "Move pickup to Friday", never "Approve"
   effect: string; // what happens next, in one sentence
   changes: Change[];
+  draft?: { to: string; language: string; text: string; translation?: string }; // the message this option would send
+  whyChoices?: string[]; // likely reasons a person picks this option, for the one-tap "why"
 }
 
 export type CaseStatus =
@@ -96,6 +98,7 @@ export interface Case {
   placeId?: string; // pickup place, so lessons can attach to it
   customerId?: string;
   lessonIdsUsed?: string[]; // lessons the agent applied to build this case
+  handledUnderRuleId?: string; // set when an ON trust rule let the agent decide alone
   createdAt: string;
 }
 

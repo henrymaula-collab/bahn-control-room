@@ -16,6 +16,7 @@ import { answerFor } from "@/app/(control-room)/_ui/ask"
 import type { Option } from "@/lib/control-room/types"
 import type { ChatAction, ChatToolStep } from "@/lib/control-room/types-chat"
 import type { ChatCaseContext } from "./context"
+import { withDepth } from "./depth"
 import { answerWeight, earlierOfKind, recordOf } from "./knowledge"
 import { day, dayTime } from "./words"
 
@@ -36,7 +37,7 @@ export const CHAT_TOOL_DESCRIPTIONS: Record<ChatToolName, string> = {
   list_trust_rules: "List the trust rules for the Readiness desk: which kinds of case the agent may already handle alone.",
   get_precedents: "Earlier decisions on this kind of case: who decided, when, at which pickup place, what they chose, their reason, and how much each answer counts.",
   get_place_history: "Earlier cases and decisions at this pickup place, of any kind, and the lessons accepted for it.",
-  get_calls: "The agent's phone calls on this order: who said what, with English translations.",
+  get_calls: "The phone calls on this order (the agent's and the Readiness desk's) and the desk's internal notes: who said what, with English translations.",
 }
 
 /** Plain words for each step, while it runs and when it is done. */
@@ -61,11 +62,13 @@ export function stepLabels(name: ChatToolName, ctx: ChatCaseContext): { running:
     }
     case "get_place_history":
       return { running: `Looking up earlier cases at ${place}`, done: `Looked up earlier cases at ${place}` }
-    case "get_calls":
+    case "get_calls": {
+      const n = ctx.calls.length + (ctx.depth?.calls.length ?? 0)
       return {
-        running: ctx.calls.length === 1 ? `Reading the call with ${place}` : "Reading the calls on this order",
-        done: ctx.calls.length === 0 ? "Looked for calls on this order: none yet" : ctx.calls.length === 1 ? `Read the call with ${place}` : `Read ${ctx.calls.length} calls on this order`,
+        running: n === 1 ? `Reading the call with ${place}` : "Reading the calls on this order",
+        done: n === 0 ? "Looked for calls on this order: none yet" : n === 1 ? `Read the call with ${place}` : `Read ${n} calls on this order`,
       }
+    }
   }
 }
 
@@ -142,7 +145,7 @@ function placeHistory(ctx: ChatCaseContext) {
   return {
     pickup_place: ctx.order.pickup.name,
     earlier_decisions_here: rows.length,
-    decisions: rows.slice(0, 10).map((d) => ({ when: day(d.at), kind: d.kind.label, who: d.personName, chose: d.choice, why: d.why ?? null })),
+    decisions: rows.slice(0, 20).map((d) => ({ when: day(d.at), kind: d.kind.label, who: d.personName, chose: d.choice, why: d.why ?? null })),
     other_open_cases_here: ctx.placeCases.filter((c) => c.status === "waiting_for_person" || c.status === "agent_working").map((c) => ({ headline: c.headline, status: c.status.replace(/_/g, " ") })),
     lessons: ctx.lessons.map((l) => ({ text: l.text, status: l.status })),
   }
@@ -173,10 +176,10 @@ export async function executeChatTool(ctx: ChatCaseContext, name: string, getRun
   if (!isChatTool(name)) return { content: JSON.stringify({ error: `The chat cannot use ${name}. It only looks things up, and offers one of the case's options with propose_option.` }), isError: true }
   try {
     if (name === "get_precedents") return { content: JSON.stringify(precedents(ctx)), isError: false }
-    if (name === "get_place_history") return { content: JSON.stringify(placeHistory(ctx)), isError: false }
-    if (name === "get_calls") return { content: JSON.stringify(calls(ctx)), isError: false }
+    if (name === "get_place_history") return { content: withDepth(name, JSON.stringify(placeHistory(ctx)), ctx), isError: false }
+    if (name === "get_calls") return { content: withDepth(name, JSON.stringify(calls(ctx)), ctx), isError: false }
     const r = await executeTool(getRun(), name, { order: ctx.order.reference })
-    return { content: r.content, isError: r.isError }
+    return { content: r.isError ? r.content : withDepth(name, r.content, ctx), isError: r.isError }
   } catch (e) {
     return { content: JSON.stringify({ error: e instanceof Error ? e.message : String(e) }), isError: true }
   }

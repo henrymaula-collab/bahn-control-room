@@ -103,3 +103,30 @@ export function chosePhrase(choice: string): string {
 
 /** Words the chat must never say (Henry's rules and Bahn's vocabulary). */
 export const BANNED_WORDS = /\b(ticket|tickets|human|humans|escalate|escalated|escalation|AI|bot|chatbot|assistant)\b/
+
+/** The larger budget for an answer the person explicitly asked to be detailed. */
+export const DETAIL_WORDS = { text: 140, voice: 70 } as const
+
+/**
+ * The person explicitly asks for detail: the exact words, everything, a list, the contact.
+ * English, Swedish, Finnish, German and Danish, typed or said.
+ */
+const DETAIL = new RegExp(
+  [
+    // English
+    String.raw`\b(exact(ly)?|precise(ly)?|word for word|verbatim|in (full|detail)|full (text|story|details?|picture|thread|transcript)|all the details|every(thing| detail)|the whole (thread|email|message|call|story)|quote|read (me |it |out |back )?(the )?(email|message|mail|thread|call|transcript|it)|walk me through|tell me (more|everything|all)|give me (the )?(details|specifics|everything)|more detail|details?\b.*\?|what did (\w+ ){1,3}(write|say|send|reply|answer|tell)|what does (the|their|his|her) (email|message|mail|note) say|list (the|all|every|them)|which documents|who is the contact|contact (person|details|number)|phone number|how (do|can) (i|we) reach)`,
+    // Swedish
+    String.raw`\b(exakt|ordagrant|berätta (allt|mer)|alla detaljer|i detalj|läs upp|vad (skrev|sa) (de|han|hon)|vem är kontakt|kontaktperson|telefonnummer|lista (alla|dokumenten)|vilka dokument)`,
+    // Finnish
+    String.raw`(tarkalleen|tarkasti|sanasta sanaan|kerro kaikki|kaikki yksityiskohdat|yksityiskohtaisesti|lue (minulle|se|viesti)|mitä (he|hän|se|myyjä|asiakas) (kirjoitti|sanoi)|kuka on yhteyshenkilö|yhteyshenkilö|puhelinnumero|luettele|listaa|mitkä dokumentit|mitkä paperit)`,
+    // German
+    String.raw`\b(genau|wortwörtlich|wörtlich|alles erzählen|alle details|im detail|einzelheiten|vorlesen|lies (mir )?vor|was hat .{1,30} geschrieben|wer ist (der|die) ansprechpartner|ansprechpartner(in)?|telefonnummer|liste|auflisten|welche dokumente|welche unterlagen)`,
+    // Danish
+    String.raw`\b(præcis|ordret|fortæl (alt|mere)|alle detaljer|i detaljer|læs (det )?op|hvad skrev|hvem er kontakt|kontaktperson|telefonnummer|hvilke dokumenter)`,
+  ].join("|"),
+  "i",
+)
+
+export function asksForDetail(text: string): boolean {
+  return DETAIL.test(text)
+}

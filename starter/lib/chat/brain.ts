@@ -12,6 +12,7 @@ import type { ChatCaseContext } from "./context"
 import { mockAnswer, mockPlan } from "./mock"
 import type { OpenerShape } from "./opener"
 import { chatSystem } from "./prompt"
+import { asksForDetail, DETAIL_WORDS } from "./words"
 import { CHAT_TOOL_DESCRIPTIONS, CHAT_TOOLS, chatApiTools, chatRunContext, chatSummary, executeChatTool, isChatTool, PROPOSE_DESCRIPTION, PROPOSE_TOOL, proposeApiTool, proposeOption, stepId, toolStep, type ChatToolName, type ChatToolResult, type Proposal } from "./tools"
 
 export type ChatProvider = Exclude<Provider, "replay">
@@ -94,18 +95,29 @@ function offerer(input: AnswerInput) {
 }
 
 function userText(input: { text: string; via: "text" | "voice" }): string {
-  return input.via === "voice" ? `${input.text}\n\n(Said by voice: answer in at most 35 words, easy to listen to.)` : input.text
+  if (input.via !== "voice") return input.text
+  return asksForDetail(input.text)
+    ? `${input.text}\n\n(Said by voice, asking for detail: answer in at most ${DETAIL_WORDS.voice} words, easy to listen to, with the specific names, times and words from your lookups.)`
+    : `${input.text}\n\n(Said by voice: answer in at most 35 words, easy to listen to.)`
 }
 
-/** The newest question carries the word budget, where the model weighs it most. */
-export function wordBudget(input: Pick<AnswerInput, "via" | "shape">): number {
-  return input.via === "voice" ? 35 : input.shape.experienced ? 45 : 90
+/** The newest question carries the word budget, where the model weighs it most. An explicit ask for detail gets the larger one. */
+export function wordBudget(input: Pick<AnswerInput, "via" | "shape"> & { text?: string }): number {
+  const detail = !!input.text && asksForDetail(input.text)
+  if (input.via === "voice") return detail ? DETAIL_WORDS.voice : 35
+  return detail ? DETAIL_WORDS.text : input.shape.experienced ? 45 : 90
 }
+
+const DETAIL_HINT =
+  "The person asked for detail: look up what the question touches first, then give the specifics from the records. Names and roles, phone numbers, times, " +
+  "what each message or call said in the writer's own words with the English, what is on file and what is missing. No summary in place of the words; nothing the records do not hold."
 
 function lastUserText(input: AnswerInput): string {
   const n = wordBudget(input)
+  if (input.via === "voice") return userText(input)
+  if (n === DETAIL_WORDS.text && asksForDetail(input.text)) return `${input.text}\n\n(${DETAIL_HINT} One or two short paragraphs, at most ${n} words. This is a hard limit.)`
   const shape = n <= 45 ? "two or three short sentences" : "a short paragraph"
-  return input.via === "voice" ? userText(input) : `${input.text}\n\n(Answer in ${shape}, at most ${n} words. This is a hard limit.)`
+  return `${input.text}\n\n(Answer in ${shape}, at most ${n} words. This is a hard limit.)`
 }
 
 function apiMessages(input: AnswerInput): BetaMessageParam[] {

@@ -6,6 +6,7 @@
 import { site as datasetSite } from "@/lib/agent/data"
 import { registerPeople } from "@/lib/agent/people"
 import type { Call, Case, Decision, Lesson, OpsPerson, TrustRule } from "@/lib/control-room/types"
+import type { CaseDepth } from "@/lib/depth/types"
 import { kindOf, kindOfType, optionKey, storedKind, type Kind } from "./kind"
 import { firstName, type PastDecision } from "./knowledge"
 
@@ -34,6 +35,18 @@ export interface ChatCaseContext {
   placeCases: Case[]
   /** What the reused lib/agent read tools read (RunContext.snap). */
   snap: { lessons: Lesson[]; decisions: Decision[]; trustRules: TrustRule[]; cases: Case[] }
+  /** Baseline records beyond the dataset (lib/depth): thread, call, note, documents, people, hours, earlier pickups. Null for the demo orders. */
+  depth?: CaseDepth | null
+}
+
+/** The case's baseline depth (stored row or generated); never fails the chat. */
+async function depthOf(c: Case, now: string): Promise<CaseDepth | null> {
+  try {
+    const { depthForCase } = await import("@/lib/depth/store")
+    return await depthForCase({ id: c.id, orderId: c.orderId, type: c.type, createdAt: c.createdAt, facts: c.facts }, now)
+  } catch {
+    return null
+  }
 }
 
 export type ContextResult = { ok: true; ctx: ChatCaseContext } | { ok: false; status: 404; error: string }
@@ -115,7 +128,7 @@ export async function engineContext(caseId: string, personId: string): Promise<C
       synthetic: row.synthetic,
     }
   })
-  const calls = await listCalls({ caseId: c.id, orderId: c.orderId })
+  const [calls, depth] = await Promise.all([listCalls({ caseId: c.id, orderId: c.orderId }), depthOf(c, state.now)])
   const place = (p: { id: string; name: string; city: string; country: string; timezone: string | null } | undefined): ChatPlace =>
     p ? { id: p.id, name: p.name, city: p.city, country: p.country, timezone: p.timezone ?? "Europe/Helsinki" } : { name: "Unknown", city: "", country: "", timezone: "Europe/Helsinki" }
   return {
@@ -140,6 +153,7 @@ export async function engineContext(caseId: string, personId: string): Promise<C
       calls,
       placeCases: state.cases.filter((x) => !!c.placeId && x.placeId === c.placeId && x.orderId !== c.orderId),
       snap: { lessons: state.lessons, decisions: state.decisions.map((row) => row.data), trustRules: state.rules, cases: state.cases },
+      depth,
     },
   }
 }
@@ -211,6 +225,13 @@ export async function fixtureContext(caseId: string, personId: string): Promise<
     })
   }
   const lessons = live?.lessons ?? LESSONS
+  let depth: CaseDepth | null = null
+  try {
+    const { generateDepth } = await import("@/lib/depth/generate")
+    depth = generateDepth({ order: o?.reference ?? c.orderId, case: { id: c.id, type: c.type, createdAt: c.createdAt, facts: c.facts }, now: ROOM_NOW })
+  } catch {
+    depth = null
+  }
   const end = (e: (typeof ORDERS)[string]["pickup"] | undefined): ChatPlace =>
     e ? { id: e.placeId, name: e.placeName, city: e.city, country: e.country, timezone: e.timezone } : { name: "Unknown", city: "", country: "", timezone: "Europe/Helsinki" }
   void hel
@@ -229,6 +250,7 @@ export async function fixtureContext(caseId: string, personId: string): Promise<
       calls: CALLS.filter((call) => call.caseId === c.id || call.orderId === c.orderId),
       placeCases: cases.filter((x) => !!c.placeId && x.placeId === c.placeId && x.orderId !== c.orderId),
       snap: { lessons, decisions: live?.decisions ?? [], trustRules: live?.rules ?? TRUST_RULES, cases },
+      depth,
     },
   }
 }

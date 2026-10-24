@@ -8,8 +8,9 @@ Language, the full German text, "In English", Send / Edit / Cancel).
 Shared engine (`_shared/`, not a variant): a send window. Send does not post at once; it starts a
 10 s window (Polaris: a toast with an action stays 10 s; Gmail Undo Send 5 to 30 s), paused on hover
 and focus. Undo (button, Z or Cmd+Z) cancels and reopens the email; at 0 the window calls the card's
-own `onSend`, so the decision, the carry-out and History run exactly as today. Leaving the case
-inside the window sends at once (Gmail sends when you move on). Lab-only photo states, read from the
+own `onSend`, so the decision, the carry-out and History run exactly as today. The window lives
+outside React: it keeps counting when the person moves to another case and still sends (variant
+06 relies on it); closing the tab sends at once (best effort). Lab-only photo states, read from the
 URL by the variants: `send=wait` (inside the window, frozen, never posts) and `send=sent` (the window
 passed, the agent at work). `decided=1` is the moment after. After a real decision the Done parts read
 the case back (`/api/cr/cases/:id`, `/knowledge`) for the agent's new steps and the kind's count

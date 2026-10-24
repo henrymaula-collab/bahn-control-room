@@ -87,6 +87,9 @@ const CITY: Record<string, LatLng> = Object.fromEntries(CITIES.map((c) => [c.nam
 const CARS_TODAY = 286
 /** Orders the agent is on right now that have not become a case (calls, waiting for a reply). */
 const AGENT_ON_ORDERS = 12
+/** Red without a case: the order check needs a person but no case exists yet (as on the engine,
+ *  e.g. a sold-out ferry or a warning light). Their pins open the order, not Work. */
+const RED_WITHOUT_CASE = new Set([17, 88, 151, 230])
 
 function seeded(seed: number) {
   let a = seed >>> 0
@@ -146,7 +149,11 @@ function generatedCars(): MapCar[] {
       orderId: `ord-g${ref}`,
       reference: `CD-${ref}`,
       vehicle: VEHICLES[Math.floor(rnd() * VEHICLES.length)],
-      state: i % Math.floor(n / AGENT_ON_ORDERS) === 3 && cars.filter((c) => c.state === "agent_working").length < AGENT_ON_ORDERS ? "agent_working" : "on_plan",
+      state: RED_WITHOUT_CASE.has(i)
+        ? "needs_person"
+        : i % Math.floor(n / AGENT_ON_ORDERS) === 3 && cars.filter((c) => c.state === "agent_working").length < AGENT_ON_ORDERS
+          ? "agent_working"
+          : "on_plan",
       position,
       positionSource,
       from: from.name,

@@ -23,7 +23,7 @@ export function OverviewView({ data, red, look }: { data: Overview; red: Record<
         lift={lift}
         look={look}
         padLeft={300 + 16 + 56}
-        card={(caseId, close) => <PinCard caseId={caseId} info={red[caseId]} close={close} />}
+        card={(orderId, close) => <PinCard info={red[orderId]} close={close} />}
       />
       <section className="float" aria-label="Today">
         <h1 className="m total">{n(counts.carsToday)} cars today</h1>
@@ -54,15 +54,15 @@ export function OverviewView({ data, red, look }: { data: Overview; red: Record<
               </Link>
               <ul className="red-rows">
                 {data.needYou.map((r) => {
-                  const info = red[r.caseId]
+                  const info = red[r.orderId]
                   return (
                     <li key={r.caseId}>
                       <Link
                         href={`/work/${r.caseId}`}
-                        className={`red-row${lift === r.caseId ? " lift" : ""}`}
-                        onMouseEnter={() => setLift(r.caseId)}
+                        className={`red-row${lift === r.orderId ? " lift" : ""}`}
+                        onMouseEnter={() => setLift(r.orderId)}
                         onMouseLeave={() => setLift(null)}
-                        onFocus={() => setLift(r.caseId)}
+                        onFocus={() => setLift(r.orderId)}
                         onBlur={() => setLift(null)}
                       >
                         <span className="v">{r.vehicle}</span>
@@ -83,18 +83,18 @@ export function OverviewView({ data, red, look }: { data: Overview; red: Record<
   )
 }
 
-function PinCard({ caseId, info, close }: { caseId: string; info?: RedInfo; close: () => void }) {
+function PinCard({ info, close }: { info?: RedInfo; close: () => void }) {
   if (!info) return null
   return (
     <div>
       <div className="head">
         <p className="m strong v">{info.vehicle}</p>
-        <p className="s p">{info.mine ? info.place : `${info.place}, ${info.owner}'s case`}</p>
+        <p className="s p">{info.caseId && !info.mine && info.owner ? `${info.place}, ${info.owner}'s case` : info.place}</p>
         {info.time && <time className={`s${info.now ? " now" : ""}`}>{info.time}</time>}
       </div>
-      <p className="m q">{info.question}</p>
-      <Link href={`/work/${caseId}`} className="go m" onClick={close}>
-        Open in Work
+      {info.caseId && info.question && <p className="m q">{info.question}</p>}
+      <Link href={info.caseId ? `/work/${info.caseId}` : `/orders/${encodeURIComponent(info.orderId)}`} className="go m" onClick={close}>
+        {info.caseId ? "Open in Work" : "Open the order"}
         <Icon name="chevron-right" size={18} />
       </Link>
     </div>

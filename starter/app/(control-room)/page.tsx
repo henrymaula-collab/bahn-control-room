@@ -20,25 +20,35 @@ export default async function OverviewPage({ searchParams }: { searchParams: Sea
   // ?map=positron or ?map=liberty shows the raw OpenFreeMap styles, for comparing.
   const look: MapLook = sp.map === "positron" || sp.map === "liberty" ? sp.map : "bahn"
 
-  // Each red pin's card carries the case's one question. One read per red car.
+  // Each red pin's card: with a case, its one question (one read per case); without one, the order.
   const red: Record<string, RedInfo> = {}
   await Promise.all(
     data.cars
-      .filter((c) => c.state === "needs_person" && c.caseId)
+      .filter((c) => c.state === "needs_person")
       .map(async (c) => {
-        const detail = await getCase(c.caseId!, personId)
+        const base = {
+          orderId: c.orderId,
+          vehicle: c.vehicle,
+          place: c.caseId || c.from === c.to ? c.from : `${c.from} to ${c.to}`,
+          time: c.nextAt ? when(c.nextAt, data.now) : undefined,
+          now: !!c.nextAt && !!c.caseId && minutesUntil(c.nextAt, data.now) <= NOW_WINDOW_MINUTES,
+          mine: false,
+        }
+        red[c.orderId] = base
+        if (!c.caseId) return
+        const detail = await getCase(c.caseId, personId)
         if (!detail) return
         const k = detail.card.case
-        const owner = detail.people.find((p) => p.id === k.routedTo?.personId)
         const due = k.decideBy ?? c.nextAt
-        red[c.caseId!] = {
-          vehicle: detail.card.order.vehicle,
+        red[c.orderId] = {
+          ...base,
+          caseId: c.caseId,
           place: detail.card.order.pickup.placeName,
           time: due ? when(due, data.now) : undefined,
           now: !!due && minutesUntil(due, data.now) <= NOW_WINDOW_MINUTES,
           question: questionFor(k.suggestion),
           mine: k.routedTo?.personId === detail.person.id,
-          owner: owner?.name,
+          owner: detail.people.find((p) => p.id === k.routedTo?.personId)?.name,
         }
       }),
   )

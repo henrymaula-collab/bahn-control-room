@@ -82,7 +82,7 @@ function SituationPanel({ situation: s, open, now, onClose }: { situation: Situa
   }, [open])
 
   const facts: KeyFact[] = [
-    { label: "Driver", value: s.driver ?? "None booked" },
+    { label: "Driver", value: s.driver ?? "Not booked" },
     ...(s.waitingOn ? [s.waitingOn] : []),
     ...s.facts,
   ]

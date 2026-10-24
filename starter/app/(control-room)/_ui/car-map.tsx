@@ -7,16 +7,27 @@ import { createPortal } from "react-dom"
 import type { MapCar } from "@/lib/control-room/types-v3"
 import { WORKER_URL, loadStyle, type MapLook } from "./map-style"
 
-/** What a red pin's card says: the one question, whose case it is, when. */
-export type RedInfo = { vehicle: string; place: string; time?: string; now: boolean; question: string; mine: boolean; owner?: string }
+/** What a red pin's card says. With a case: its one question and the way to Work. Without one
+ *  (the order check is red but no case exists yet): the order, one tap away. Keyed by order id. */
+export type RedInfo = {
+  orderId: string
+  caseId?: string
+  vehicle: string
+  place: string
+  time?: string
+  now: boolean
+  question?: string
+  mine: boolean
+  owner?: string
+}
 
 interface Props {
   cars: MapCar[]
   red: Record<string, RedInfo>
-  lift?: string | null // a case id hovered in the panel
+  lift?: string | null // an order id hovered in the panel
   look: MapLook
   padLeft: number // room for the floating panel
-  card: (caseId: string, close: () => void) => React.ReactNode
+  card: (orderId: string, close: () => void) => React.ReactNode
 }
 
 /**
@@ -30,7 +41,7 @@ export function CarMap({ cars, red, lift, look, padLeft, card }: Props) {
   const map = useRef<MlMap | null>(null)
   const pins = useRef(new Map<string, { marker: Marker; el: HTMLButtonElement; width: number }>())
   const popup = useRef<Popup | null>(null)
-  const [open, setOpen] = useState<{ caseId: string; el: HTMLDivElement } | null>(null)
+  const [open, setOpen] = useState<{ orderId: string; el: HTMLDivElement } | null>(null)
 
   useEffect(() => {
     let gone = false
@@ -48,7 +59,11 @@ export function CarMap({ cars, red, lift, look, padLeft, card }: Props) {
         touchPitch: false,
         fadeDuration: 0,
         bounds: bounds(cars),
-        fitBoundsOptions: { padding: { top: 48, bottom: 48, left: padLeft, right: 72 }, maxZoom: 9 },
+        // The panel sits top left; on a phone it spans the top, so the cars go below it.
+        fitBoundsOptions: {
+          padding: box.current.clientWidth < 700 ? { top: 380, bottom: 24, left: 24, right: 24 } : { top: 48, bottom: 48, left: padLeft, right: 72 },
+          maxZoom: 9,
+        },
       })
       map.current = m
       m.touchZoomRotate.disableRotation()
@@ -90,8 +105,8 @@ export function CarMap({ cars, red, lift, look, padLeft, card }: Props) {
       }
 
       // The cars that need a person: labelled red pins.
-      for (const c of cars.filter((x) => x.state === "needs_person" && x.caseId)) {
-        const info = red[c.caseId!]
+      for (const c of cars.filter((x) => x.state === "needs_person")) {
+        const info = red[c.orderId]
         const el = document.createElement("button")
         el.type = "button"
         el.className = "pin"
@@ -100,10 +115,10 @@ export function CarMap({ cars, red, lift, look, padLeft, card }: Props) {
         el.querySelector(".label")!.textContent = info?.vehicle ?? c.vehicle
         el.addEventListener("click", (e) => {
           e.stopPropagation()
-          show(c.caseId!)
+          show(c.orderId)
         })
         const marker = new ml.Marker({ element: el }).setLngLat([c.position.lng, c.position.lat]).addTo(m)
-        pins.current.set(c.caseId!, { marker, el, width: 0 })
+        pins.current.set(c.orderId, { marker, el, width: 0 })
       }
       requestAnimationFrame(() => {
         for (const p of pins.current.values()) p.width = p.el.offsetWidth
@@ -112,8 +127,8 @@ export function CarMap({ cars, red, lift, look, padLeft, card }: Props) {
       m.on("moveend", declutter)
       m.on("click", () => hide())
 
-      function show(caseId: string) {
-        const p = pins.current.get(caseId)
+      function show(orderId: string) {
+        const p = pins.current.get(orderId)
         if (!p || !m) return
         popup.current?.remove()
         const holder = document.createElement("div")
@@ -121,8 +136,8 @@ export function CarMap({ cars, red, lift, look, padLeft, card }: Props) {
           .setLngLat(p.marker.getLngLat())
           .setDOMContent(holder)
           .addTo(m)
-        popup.current.on("close", () => setOpen((o) => (o?.caseId === caseId ? null : o)))
-        setOpen({ caseId, el: holder })
+        popup.current.on("close", () => setOpen((o) => (o?.orderId === orderId ? null : o)))
+        setOpen({ orderId, el: holder })
       }
     })()
 
@@ -154,6 +169,7 @@ export function CarMap({ cars, red, lift, look, padLeft, card }: Props) {
       const ra = red[a]
       const rb = red[b]
       if (ra?.mine !== rb?.mine) return ra?.mine ? -1 : 1
+      if (!!ra?.caseId !== !!rb?.caseId) return ra?.caseId ? -1 : 1
       return (ra?.time ?? "99").localeCompare(rb?.time ?? "99")
     })
     const kept: { x0: number; x1: number; y0: number; y1: number }[] = []
@@ -180,7 +196,7 @@ export function CarMap({ cars, red, lift, look, padLeft, card }: Props) {
   return (
     <>
       <div ref={box} className="map" role="region" aria-label="Map of the cars on the road today" />
-      {open && createPortal(card(open.caseId, hide), open.el)}
+      {open && createPortal(card(open.orderId, hide), open.el)}
     </>
   )
 }

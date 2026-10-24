@@ -279,12 +279,12 @@ dialog.sheet[open] { animation: sheet-in 260ms var(--ease-open); }
   height: 26px; padding: 0 10px 0 8px; border-radius: 999px;
   background: var(--page); color: var(--ink); box-shadow: 0 1px 3px rgb(18 17 14 / 0.18), 0 0 0 1px rgb(18 17 14 / 0.05);
   font-family: var(--font); font-size: var(--size-s); line-height: 18px; font-weight: 500; white-space: nowrap;
-  transition: background-color 150ms var(--ease), color 150ms var(--ease), transform 150ms var(--ease);
+  transition: background-color 150ms var(--ease), color 150ms var(--ease);
 }
 .pin .dot { width: 9px; height: 9px; }
 .pin.compact { width: 15px; height: 15px; padding: 0; justify-content: center; border-radius: 50%; }
 .pin.compact .label { display: none; }
-.pin:hover, .pin.lift { background: var(--ink); color: var(--page); transform: scale(1.06); z-index: 3; }
+.pin:hover, .pin.lift { background: var(--ink); color: var(--page); }
 .pin.lift.compact, .pin.compact:hover { width: auto; height: 26px; padding: 0 10px 0 8px; border-radius: 999px; }
 .pin.lift.compact .label, .pin.compact:hover .label { display: inline; }
 
@@ -346,7 +346,7 @@ dialog.sheet[open] { animation: sheet-in 260ms var(--ease-open); }
 .walk .pos { margin-right: 6px; }
 .walk button, .walk a { width: 28px; height: 28px; display: inline-flex; align-items: center; justify-content: center; border-radius: 8px; color: var(--ink); }
 .walk button:hover, .walk a:hover { background: var(--raise); }
-.walk [aria-disabled="true"] { color: var(--ink-2); opacity: .45; pointer-events: none; }
+.walk [aria-disabled="true"] { color: var(--ink-2); pointer-events: none; }
 .question .next { margin-top: 12px; }
 .work-rows { margin-top: 40px; }
 .state-line { display: flex; align-items: center; gap: 8px; color: var(--ink-2); font-weight: 500; }
@@ -369,7 +369,7 @@ dialog.sheet[open] { animation: sheet-in 260ms var(--ease-open); }
 .stop .mark {
   width: 20px; height: 20px; border-radius: 50%; margin-top: 2px;
   display: inline-flex; align-items: center; justify-content: center;
-  font-size: 11px; line-height: 1; font-weight: 600; color: var(--page);
+  font-size: var(--size-s); line-height: 1; font-weight: 600; color: var(--page);
 }
 .mark-a { background: var(--route-from); }
 .mark-b { background: var(--ink); }
@@ -380,7 +380,7 @@ dialog.sheet[open] { animation: sheet-in 260ms var(--ease-open); }
 .panel .open-order svg { color: var(--ink-2); }
 .route-pin {
   width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
-  font-family: var(--font); font-size: 11px; font-weight: 600; color: var(--page); box-shadow: 0 0 0 2px var(--page);
+  font-family: var(--font); font-size: var(--size-s); font-weight: 600; color: var(--page); box-shadow: 0 0 0 2px var(--page);
 }
 
 /* The empty list: one sentence, one way on. */

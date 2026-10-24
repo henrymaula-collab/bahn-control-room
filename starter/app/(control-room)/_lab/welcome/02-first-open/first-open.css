@@ -10,11 +10,8 @@
 .lab-welcome-02 > * { flex: none; }
 .lab-welcome-02 .calm { margin-top: calc(24 * var(--cr-u)); font-size: var(--type-body); line-height: var(--lh-body); color: var(--ink-2); }
 
-/* The open task: air and one raised surface, no box inside a box. */
-.lab-welcome-02 .open {
-  margin: calc(32 * var(--cr-u)) calc(-20 * var(--cr-u)) 0; padding: calc(22 * var(--cr-u)) calc(20 * var(--cr-u)) calc(20 * var(--cr-u));
-  border-radius: calc(24 * var(--cr-u)); background: var(--raise);
-}
+/* The open task: air only, no surface of its own (no box inside a box); the pill closes it. */
+.lab-welcome-02 .open { margin-top: calc(32 * var(--cr-u)); }
 .lab-welcome-02 .due { font-size: var(--type-subhead); line-height: var(--lh-subhead); font-weight: 600; color: var(--ink-2); }
 .lab-welcome-02 .due.now { color: var(--now); }
 .lab-welcome-02 .car { margin-top: calc(6 * var(--type-k)); font-size: var(--type-headline); line-height: var(--lh-headline); font-weight: 600; letter-spacing: var(--track-headline); }

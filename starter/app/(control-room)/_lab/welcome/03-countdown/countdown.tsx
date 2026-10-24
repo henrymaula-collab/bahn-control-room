@@ -9,7 +9,8 @@ import "./countdown.css"
 
 /** "30 min" as words, "1 h 20 min", "5 min late"; a day or more away falls back to the clock. */
 function left(ms: number): string | null {
-  const min = Math.floor(ms / 60_000)
+  // Rounded up while time is left (29:40 reads "30 min"), as the card's "30 min left" does (card/shared/kit.tsx).
+  const min = ms >= 0 ? Math.ceil(ms / 60_000) : Math.floor(ms / 60_000)
   if (min < 0) return `${-min} min late`
   if (min < 60) return `${min} min`
   if (min < 12 * 60) return `${Math.floor(min / 60)} h${min % 60 ? ` ${min % 60} min` : ""}`

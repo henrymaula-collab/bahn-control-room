@@ -1,7 +1,7 @@
 /* welcome 13: asphalt. Bahn's driver app and the website's stat strip: grey-950, birch type, a
    birch pill. Contrast on #1e1c17: birch 16.8:1, grey-400 #a09786 5.9:1, red-400 #fe6c7f 6.2:1. */
 .lab-welcome-13.lw-panel {
-  --a-surface: rgb(30 28 23 / 0.96); /* grey-950 at 96 % (the site's strip is 95 %) */
+  --a-surface: rgb(30 28 23); /* grey-950, solid: at the site strip's 95 % the map's labels showed through in Safari */
   --a-ink: var(--bx-color-birch);
   --a-ink-2: var(--bx-color-grey-400);
   --a-line: rgb(255 254 247 / 0.12);
@@ -13,7 +13,6 @@
   border-radius: calc(32 * var(--cr-u));
   display: flex; flex-direction: column;
   background: var(--a-surface); color: var(--a-ink);
-  -webkit-backdrop-filter: blur(18px); backdrop-filter: blur(18px);
   box-shadow: 0 0 0 1px rgb(18 17 14 / 0.4), 0 18px 44px rgb(18 17 14 / 0.28);
 }
 .lab-welcome-13 > * { flex: none; }

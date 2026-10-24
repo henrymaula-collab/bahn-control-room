@@ -1,13 +1,13 @@
 // Slot `welcome`: every variant, by number. Owned by this slot's builder (see ../CONTRACT.md).
 // Add a line per variant: "07": { slug: "triage-queue", title: "Triage queue", parts: { ... } }.
 // Shared helpers for every variant: ./shared.tsx and ./shared.css (copy them with a variant).
+// Re-shoot with the list (05 is cut but its folder stays): node research/scratch-lab/shots.mjs welcome 00 01 02 03 04 06 07 08 09 10 11 12 13 14 15
 import type { SlotRegistry } from "../context"
 import { WelcomePanel } from "../../_ui/overview-view"
 import { Briefing } from "./01-briefing/briefing"
 import { FirstOpen } from "./02-first-open/first-open"
 import { Countdown } from "./03-countdown/countdown"
 import { MapsCard } from "./04-maps-card/maps-card"
-import { Sheet } from "./05-sheet/sheet"
 import { ByTime } from "./06-by-time/by-time"
 import { ByPlace } from "./07-by-place/by-place"
 import { AgentOn } from "./08-agent-on/agent-on"
@@ -25,7 +25,7 @@ const variants: SlotRegistry = {
   "02": { slug: "first-open", title: "First task open", parts: { WelcomePanel: FirstOpen } },
   "03": { slug: "countdown", title: "Time left, counting down", parts: { WelcomePanel: Countdown } },
   "04": { slug: "maps-card", title: "A maps card and a legend on the map", parts: { WelcomePanel: MapsCard } },
-  "05": { slug: "sheet", title: "A full-height sheet", parts: { WelcomePanel: Sheet } },
+  // 05 sheet: cut by the reviewer (empty gap at 3 and 0 tasks, a half row at 12); the folder stays.
   "06": { slug: "by-time", title: "Grouped by when", parts: { WelcomePanel: ByTime } },
   "07": { slug: "by-place", title: "Grouped by pickup place", parts: { WelcomePanel: ByPlace } },
   "08": { slug: "agent-on", title: "The agent, right now", parts: { WelcomePanel: AgentOn } },

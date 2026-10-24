@@ -64,6 +64,12 @@
 .lab-welcome.lw-tether .start { fill: var(--ink); }
 .lab-welcome.lw-tether.strong path { stroke-opacity: .8; }
 
+/* With map 06 (the key on the map, as switches) the panel's key steps aside, as today's does
+   (map/06-key-on-map/key-on-map.css), so the key is never said twice. */
+.overview:has(> .lab-map-06) .lab-welcome .lw-key,
+.overview:has(> .lab-map-06) .lab-welcome-04-legend,
+.overview:has(> .lab-map-06) .lab-welcome-11-legend { display: none; }
+
 @media (prefers-reduced-motion: reduce) {
   .lab-welcome *, .lab-welcome.lw-tether { transition: none !important; animation: none !important; }
 }

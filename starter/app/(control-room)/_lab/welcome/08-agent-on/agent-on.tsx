@@ -4,7 +4,7 @@ import Link from "next/link"
 import { useEffect, useRef, useState } from "react"
 import type { WelcomePanelProps } from "../../../_ui/overview-view"
 import { Icon } from "../../../_ui/icons"
-import { isNow, liftOn, n, useAgentFeed, useBoth, useFit, useKeep, useMotionOk, when } from "../shared"
+import { isNow, Key, liftOn, n, useAgentFeed, useBoth, useFit, useKeep, useMotionOk, when } from "../shared"
 import "./agent-on.css"
 
 /** Her tasks, and under them what the agent is doing right now, one real case at a time. */
@@ -62,22 +62,21 @@ export function AgentOn({ panelRef, firstName, tasks, now, counts, lift, setLift
         </ul>
       )}
 
-      {/* The key, with the agent's line under "Agent working": Tembo's "Tasks that Tembo is currently working on". */}
-      <div className="lw-key key" aria-label="The map's colours">
-        <p className="lw-state"><span className="dot dot-green" /><span>On plan</span><span className="lw-n">{n(counts.onPlan)}</span></p>
-        <p className="lw-state"><span className="dot dot-agent" /><span>Agent working</span><span className="lw-n">{n(counts.agentWorking)}</span></p>
-        <div className="aline" aria-live="off" onMouseEnter={() => setHold(true)} onMouseLeave={() => setHold(false)} onFocus={() => setHold(true)} onBlur={() => setHold(false)}>
-          {item && (
-            <Link key={item.caseId} href={keep(`/tasks/${item.caseId}`)} className="aitem" {...liftOn(item.orderId, setLift)}>
-              <span className="acar">
-                {item.vehicle} <span>at {item.place}</span>
-              </span>
-              <span className="ahead">{item.headline}</span>
-            </Link>
-          )}
-        </div>
-        <p className="lw-state"><span className="dot dot-red" /><span>Needs a person</span><span className="lw-n">{n(counts.needsPerson)}</span></p>
+      {/* What the agent is doing right now (Tembo's "Tasks that Tembo is currently working on"): its own
+          line above the key, led by the agent's breathing dot, never inside the key. */}
+      <div className="aline" aria-live="off" onMouseEnter={() => setHold(true)} onMouseLeave={() => setHold(false)} onFocus={() => setHold(true)} onBlur={() => setHold(false)}>
+        {item && (
+          <Link key={item.caseId} href={keep(`/tasks/${item.caseId}`)} className="aitem" {...liftOn(item.orderId, setLift)}>
+            <span className="dot dot-agent" />
+            <span className="acar">
+              {item.vehicle} <span>at {item.place}</span>
+            </span>
+            <span className="ahead">{item.headline}</span>
+          </Link>
+        )}
       </div>
+
+      <Key counts={counts} className="lw08-key" />
     </section>
   )
 }

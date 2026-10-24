@@ -194,7 +194,13 @@ export function useFit(box: React.MutableRefObject<HTMLElement | null>, max: num
   useLayoutEffect(() => setLimit(max), [max])
   useLayoutEffect(() => {
     const el = box.current
-    if (el && el.scrollHeight > el.clientHeight + 1 && limit > floor) setLimit((l) => l - 1)
+    if (!el || limit <= floor) return
+    // The Safari engine leaves the bottom padding out of scrollHeight, so content could eat it unseen:
+    // also measure the last in-flow child's bottom plus the padding.
+    const kids = [...el.children].filter((k) => getComputedStyle(k).position !== "absolute") as HTMLElement[]
+    const last = kids[kids.length - 1]
+    const bottom = last ? last.offsetTop + last.offsetHeight + (parseFloat(getComputedStyle(el).paddingBottom) || 0) : 0
+    if (el.scrollHeight > el.clientHeight + 1 || bottom > el.clientHeight + 1) setLimit((l) => l - 1)
   })
   useEffect(() => {
     const room = box.current?.parentElement
@@ -208,8 +214,11 @@ export function useFit(box: React.MutableRefObject<HTMLElement | null>, max: num
       setLimit(max)
     })
     ro.observe(room)
-    document.fonts?.ready.then(() => setLimit(max)).catch(() => {})
-    return () => ro.disconnect()
+    // Measure again once the display face has loaded: a fallback font's taller lines must not leave rows cut.
+    const again = () => setLimit(max)
+    document.fonts?.ready.then(again).catch(() => {})
+    document.fonts?.addEventListener?.("loadingdone", again)
+    return () => (ro.disconnect(), document.fonts?.removeEventListener?.("loadingdone", again))
   }, [box, max])
   return Math.min(limit, max)
 }

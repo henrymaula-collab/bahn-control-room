@@ -8,7 +8,7 @@ import { isNow, liftOn, n, useBoth, useFit, useKeep, when } from "../shared"
 import "./arrival.css"
 
 const SETTLE = 1150 // ms: the greeting holds alone, then settles into the panel
-const COUNT_AT = 1500
+const COUNT_AT = 2000 // the key rises from about 2.1 s (arrival.css: rows wait for the greeting to land)
 const COUNT_MS = 900
 
 /** A number that counts up from zero once, from `at` ms after mount (the key arriving). */
@@ -64,7 +64,7 @@ export function Arrival({ panelRef, firstName, tasks, now, counts, lift, setLift
     g.style.setProperty("--dy", `${r.height * 0.44 - (a.top - r.top + a.height / 2)}px`)
     g.style.setProperty("--s", "1.3")
     setStage("run")
-    const id = window.setTimeout(() => setStage("done"), SETTLE + 1400)
+    const id = window.setTimeout(() => setStage("done"), SETTLE + 2000)
     return () => window.clearTimeout(id)
   }, [])
 

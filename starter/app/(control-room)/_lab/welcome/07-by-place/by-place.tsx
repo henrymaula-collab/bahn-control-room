@@ -10,11 +10,19 @@ import "./by-place.css"
 
 type Place = { place: string; rows: WorkRow[] }
 
-/** Her tasks by pickup place, the place with the earliest deadline first. */
+/** Not one place to call: a private address, a third party, the customer's own pickup. */
+const unnamed = (place: string) => /^(private|third-party|customer|pickup place)/i.test(place)
+
+/** Her tasks by pickup place, the place with the earliest deadline first; unnamed pickups stay single. */
 function byPlace(tasks: WorkRow[]): Place[] {
-  const m = new Map<string, WorkRow[]>()
-  for (const r of tasks) m.set(r.place, [...(m.get(r.place) ?? []), r])
-  return [...m.entries()].map(([place, rows]) => ({ place, rows })) // tasks arrive most urgent first
+  const m = new Map<string, Place>()
+  for (const r of tasks) {
+    const key = unnamed(r.place) ? `one:${r.caseId}` : r.place
+    const g = m.get(key) ?? { place: r.place, rows: [] }
+    g.rows.push(r)
+    m.set(key, g)
+  }
+  return [...m.values()] // tasks arrive most urgent first
 }
 
 /** One call covers several cars: the tasks grouped by pickup place, with a one-line briefing. */
@@ -26,13 +34,14 @@ export function ByPlace({ panelRef, firstName, tasks, now, counts, lift, setLift
   const fit = useFit(box, Math.min(places.length, 5), 1)
   const shown = places.slice(0, fit)
   const restCars = places.slice(fit).reduce((s, p) => s + p.rows.length, 0)
-  const top = [...places].sort((a, b) => b.rows.length - a.rows.length)[0]
+  const first = places[0]
+  // The sentence names the place the pill starts with, so the two never disagree; else the biggest group.
+  const top = first && first.rows.length > 1 ? first : [...places].sort((a, b) => b.rows.length - a.rows.length)[0]
   const brief = !tasks.length
     ? "Nothing needs you right now."
     : top && top.rows.length > 1
       ? `${word(top.rows.length)} of your ${word(tasks.length, true)} are at ${top.place}.`
       : `${word(tasks.length)} cars, ${word(places.length, true)} pickup places.`
-  const first = places[0]
 
   return (
     <section ref={ref} className="lab-welcome lab-welcome-07 lw-panel" aria-label="Today">

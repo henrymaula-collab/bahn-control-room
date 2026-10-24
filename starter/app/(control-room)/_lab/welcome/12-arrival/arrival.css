@@ -23,14 +23,15 @@
 .lab-welcome-12.pre > * { opacity: 0; animation: lw12-failsafe 0s 2.5s forwards; }
 
 /* Running: the surface fades in as the greeting arrives in it. */
-.lab-welcome-12.run { background: transparent; box-shadow: none; animation: lw12-surface 500ms var(--lw-ease) 1150ms forwards; }
+.lab-welcome-12.run { background: transparent; box-shadow: none; animation: lw12-surface 500ms var(--lw-ease) 1350ms forwards; } /* late enough that the empty card never stands alone for long */
 .lab-welcome-12.run .lw-display { opacity: 0; animation: lw12-show 0s 1900ms forwards; } /* own name: a renamed animation restarts */
 /* The stand-in greeting: over the veil, exactly where the real one ends, animated from the centre. */
 .lab-welcome-12-stage { position: absolute; inset: 0; z-index: 6; pointer-events: none; }
 .lab-welcome-12-stage .ghost { position: absolute; margin: 0; opacity: 0; transform-origin: center; }
 .lab-welcome-12-stage .ghost.run { animation: lw12-h1 1900ms both, lw12-out 0s 1900ms forwards; }
 @keyframes lw12-out { to { visibility: hidden; } }
-.lab-welcome-12.run .after { animation: lw12-rise 420ms var(--lw-ease-out) both; animation-delay: calc(1450ms + var(--i, 0) * 70ms); }
+/* The pill and rows wait until the greeting has all but landed (its glide ends at 1900 ms), so nothing crosses it. */
+.lab-welcome-12.run .after { animation: lw12-rise 420ms var(--lw-ease-out) both; animation-delay: calc(1780ms + var(--i, 0) * 70ms); }
 
 @keyframes lw12-h1 {
   0% { opacity: 0; transform: translate(var(--dx, 0), calc(var(--dy, 0) + 10px)) scale(var(--s, 1)); animation-timing-function: cubic-bezier(.2, 0, 0, 1); }

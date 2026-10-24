@@ -42,3 +42,10 @@
   .nav a { height: 40px; padding: 0 10px; }
   .nav a svg { width: 20px; height: 20px; }
 }
+
+/* The job title in italic, against the name in roman: Archivo's true italic (the lockup's
+   "room"), at normal width so "Operations Associate" fits beside the photo. */
+.person-name .s, .menu-person .s {
+  font-family: var(--font-archivo-italic), var(--font-archivo), var(--font);
+  font-style: italic; font-stretch: 100%; font-variation-settings: "wdth" 100; font-weight: 400;
+}

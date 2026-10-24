@@ -160,8 +160,8 @@ const ROUTINE: Record<string, string> = {
 }
 
 const QUIRKS = [
-  "The phone is busiest 08:00 to 09:30; written messages get an answer within about two hours.",
-  "Nobody is at the desk over lunch, roughly 12:00 to 12:45.",
+  "The phone is busiest 08:00 to 09:30 local time; written messages get an answer within about two hours.",
+  "Nobody is at the desk over lunch, roughly 12:00 to 12:45 local time.",
   "Driver parking is the visitor bays by the main entrance, 15 minutes at most.",
   "They want the order reference in the subject line of every email.",
   "Keys come out only after the driver has signed the handover sheet.",
@@ -301,7 +301,8 @@ export interface DepthInput {
 export function generateDepth(input: DepthInput): CaseDepth | null {
   const order = findOrder(input.order)
   if (!order || DEMO_ORDER_REFS.has(order.reference)) return null
-  const r = rng(hash(`${order.id}:depth:${DEPTH_VERSION}`))
+  // Seeded by the order alone, so a new generator version keeps the same people and numbers.
+  const r = rng(hash(`${order.id}:depth`))
   const c = input.case
   const kind = (c?.type ?? "readiness.other").split(".").pop() ?? "other"
   const anchor = c?.createdAt ?? input.now
@@ -414,7 +415,7 @@ export function generateDepth(input: DepthInput): CaseDepth | null {
     { name: "Handover protocol", status: "not started", detail: "The driver fills it in the Bahn app at pickup: photos of all four sides, the dashboard and the keys, signed by both sides." },
     { name: "Keys", status: "2 listed", detail: "Two keys listed on the order; the driver counts them at the handover." },
     ...(site && !requiresRelease && !forOrder("documents", order.id).some((x) => x.kind === "RELEASE_AUTHORITY")
-      ? [{ name: "Release document", status: "not needed here", detail: `${placeName} does not ask for a signed release document${site.release_document_rule ? `; its rule at handover: ${site.release_document_rule}` : ""}.` }]
+      ? [{ name: "Release document", status: "not needed here", detail: `${placeName} does not ask for a signed release document${site.release_document_rule ? `; its rule at handover: ${String(site.release_document_rule).replace(/\.+$/, "")}` : ""}.` }]
       : []),
     ...(crossBorder ? [{ name: "Export papers", status: "not needed", detail: `Pickup in ${country}, delivery in ${String(delivery?.country ?? "")}: both in the EU, so no export papers.` }] : []),
   ]
@@ -446,17 +447,27 @@ export function generateDepth(input: DepthInput): CaseDepth | null {
   // Earlier pickups at this place (routine ones; the decisions there come from the decision history).
   const vehicles = table("vehicles").map((x) => `${x.make} ${x.model}`).filter((x) => x !== car)
   const drivers = table("drivers").map((d) => String(d.display_name ?? "")).filter(Boolean)
-  const pr = rng(hash(`${site?.id ?? placeName}:pickups:${DEPTH_VERSION}`))
+  const pr = rng(hash(`${site?.id ?? placeName}:pickups`))
+  const shuffle = <T>(list: T[]): T[] => {
+    const out = [...list]
+    for (let i = out.length - 1; i > 0; i--) {
+      const j = Math.floor(pr() * (i + 1))
+      ;[out[i], out[j]] = [out[j]!, out[i]!]
+    }
+    return out
+  }
+  const cars = shuffle([...new Set(vehicles)])
+  const outcomes = shuffle(ROUTINE_PICKUPS)
   const earlierPickups: DepthPickup[] = [9, 23, 44].map((daysBack, i) => {
     const ms = Date.parse(anchor) - (daysBack + Math.floor(pr() * 6)) * 86_400_000
     let z = zoneParts(ms, tz)
     if (z.wd === "Sat" || z.wd === "Sun") z = zoneParts(ms - (z.wd === "Sat" ? 1 : 2) * 86_400_000, tz)
     const time = `${String(9 + Math.floor(pr() * 6)).padStart(2, "0")}:${pr() < 0.5 ? "00" : "30"}`
-    const outcome = i === 1 && HICCUP[kind] ? HICCUP[kind]! : pick(pr, ROUTINE_PICKUPS)
+    const outcome = i === 1 && HICCUP[kind] ? HICCUP[kind]! : outcomes[i]!
     return {
       reference: `CD-417${String(100 + (hash(`${site?.id ?? placeName}-${i}`) % 900)).padStart(3, "0")}`,
       when: localIso(z.y, z.m, z.d, time, tz),
-      car: vehicles.length ? pick(pr, vehicles) : "a car",
+      car: cars[i] ?? "a car",
       driver: drivers.length ? pick(pr, drivers) : "a Bahn driver",
       handedOverBy: i === 2 ? deputyName : contactName,
       outcome,

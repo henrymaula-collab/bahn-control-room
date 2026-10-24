@@ -19,6 +19,7 @@ export function depthCalls(d: CaseDepth) {
     started: when(c.startedAt),
     by: c.by,
     with: c.with,
+    number_called: d.place.phone,
     language: c.language,
     outcome: c.outcome.replace(/_/g, " "),
     minutes: c.minutes,

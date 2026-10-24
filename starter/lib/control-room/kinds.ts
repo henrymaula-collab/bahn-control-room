@@ -80,14 +80,14 @@ const POSTED_GIG = /\bgig\b[^.]{0,40}\b(published|posted)\b|\bpublished (gig|to 
 
 const firstHand = (fact: Fact) => fact.source.kind !== "agent" && fact.source.kind !== "person"
 
-export type KindInput = Pick<Case, "type" | "headline" | "facts" | "suggestion" | "alternatives">
+export type KindInput = Pick<Case, "type"> & Partial<Pick<Case, "headline" | "facts" | "suggestion" | "alternatives">>
 
 /** The kind of this case, read from its properties. */
 export function kindOf(c: KindInput): KindKey {
   const facts = c.facts ?? []
   if (SELLER_HOLD.test(c.headline ?? "") || facts.some((fact) => firstHand(fact) && SELLER_HOLD.test(fact.statement))) return "seller_hold"
   if (c.type === "readiness.facts_disagree") {
-    const options = [c.suggestion, ...(c.alternatives ?? [])].filter(Boolean)
+    const options = [c.suggestion, ...(c.alternatives ?? [])].filter((option): option is NonNullable<typeof option> => !!option)
     const posted = facts.some((fact) => POSTED_GIG.test(fact.statement))
       || options.some((option) => option.changes?.some((change) => change.kind === "booking" && POSTED_GIG.test(change.detail)))
     if (posted) return "facts_disagree_open_gig"

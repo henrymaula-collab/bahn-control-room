@@ -64,16 +64,20 @@ function revealHeldBack(stored: (Case & HeldBack)[], decisions: DecisionRecord[]
     if (!hold) { out.push(c); continue }
     const decided = latest.get(hold.caseId)
     if (!decided) continue
-    const shown: Case & HeldBack = { ...c, createdAt: decided.at > c.createdAt ? decided.at : c.createdAt, agentSteps: [...c.agentSteps] }
+    // Once a person acted on it, the stored case already is the shown one.
+    if (c.status !== "waiting_for_person") { out.push(c); continue }
+    // Times stay on the dataset clock the case was written for; only the order of steps changes.
+    const shown: Case & HeldBack = { ...c, agentSteps: [...c.agentSteps] }
     const name = people.find((person) => person.id === decided.personId)?.name ?? "a person"
     const kind = kindDef(kindOf(c))
     const same = [c.suggestion, ...c.alternatives].find((option) => option.id === decided.optionId)
-    if (hold.followPrecedent && same && same.id !== c.suggestion.id && shown.status === "waiting_for_person") {
+    const propose = shown.agentSteps.findIndex((step) => step.kind === "propose")
+    if (hold.followPrecedent && same && same.id !== c.suggestion.id) {
       shown.alternatives = [c.suggestion, ...c.alternatives.filter((option) => option.id !== same.id)]
       shown.suggestion = same
     }
-    const propose = shown.agentSteps.findIndex((step) => step.kind === "propose")
-    const step = { at: decided.at, kind: "lookup" as const, summary: `Looked up earlier ${kind.many}: decided once before, by ${name}.` }
+    const at = shown.agentSteps[propose >= 0 ? propose : shown.agentSteps.length - 1]?.at ?? c.createdAt
+    const step = { at, kind: "lookup" as const, summary: `Looked up earlier ${kind.many}: decided once before, by ${name}.` }
     if (propose >= 0) {
       shown.agentSteps.splice(propose, 1, step, { ...shown.agentSteps[propose]!, summary: `Stopped here and suggested: ${shown.suggestion.label.replace(/^./, (ch) => ch.toLowerCase())}.` })
     } else shown.agentSteps.push(step)

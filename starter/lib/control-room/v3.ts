@@ -12,6 +12,7 @@
 // A route is pickup -> ferry terminals (when a ferry is booked) -> delivery, in
 // straight legs. Places sit at a fixed offset from their city centre (geo.ts).
 
+import { kindOf } from "./kinds"
 import { chosenWindows, latestTracking, milestones } from "../present/attention"
 import { type Bundle, num, rows, str } from "../present/bundle"
 import type { OrderCheckResult } from "./checks"
@@ -276,6 +277,10 @@ const STOPPED: Record<string, string> = {
   "readiness.keys_or_access": "Key holder not named",
 }
 
+const STOPPED_BY_KIND: Record<string, string> = {
+  seller_hold: "Seller hold on the car",
+}
+
 const STOPPED_BY_REASON: Partial<Record<CaseReason, string>> = {
   papers_missing: "Release document missing",
   car_not_ready: "Car not ready",
@@ -322,7 +327,8 @@ function yoursValue(state: EngineState, c: Case): string | null {
 /** Stopped, Needs, Yours: at most three label-value rows, never a sentence. */
 export function keyFacts(c: Pick<Case, "type" | "reasons" | "status">, yours: string | null): KeyFact[] {
   const out: KeyFact[] = []
-  const stopped = STOPPED[c.type] ?? c.reasons.map((reason) => STOPPED_BY_REASON[reason]).find(Boolean)
+  // A kind read from the case's properties (v4) names the stop more exactly than its type.
+  const stopped = STOPPED_BY_KIND[kindOf(c)] ?? STOPPED[c.type] ?? c.reasons.map((reason) => STOPPED_BY_REASON[reason]).find(Boolean)
   if (stopped) out.push({ label: "Stopped", value: stopped })
   if (c.status !== "handled_by_agent") {
     const needs = NEEDS.find(([reason]) => c.reasons.includes(reason))?.[1] ?? (c.status === "waiting_for_person" ? "Your decision" : null)

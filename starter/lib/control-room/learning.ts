@@ -10,7 +10,7 @@
 // more than one person). Options that message a customer never become trust
 // rules: the agent never contacts a customer on its own.
 
-import { kindOf } from "./kinds"
+import { KINDS, kindOf } from "./kinds"
 import type { Case, CaseType, Decision, Lesson, Option, TrustRule } from "./types"
 import { caseTypeWords } from "./vocab"
 
@@ -44,7 +44,7 @@ export function whenText(type: CaseType, placeName?: string) {
 
 export type LessonInput = {
   decision: Decision
-  case: Pick<Case, "id" | "type" | "placeId" | "customerId" | "suggestion" | "alternatives" | "headline">
+  case: Pick<Case, "id" | "type" | "placeId" | "customerId" | "suggestion" | "alternatives" | "headline"> & Partial<Pick<Case, "facts">>
   personName: string
   placeName?: string
   country?: string
@@ -59,9 +59,12 @@ export const templateSummariser: LessonSummariser = async ({ decision, case: c, 
   const tookSuggestion = decision.optionId === c.suggestion.id
   const because = decision.why ? ` because ${decision.why.replace(/\.$/, "").replace(/^./, (ch) => ch.toLowerCase())}` : ""
   const edited = decision.editedDetail ? ` (changed: ${decision.editedDetail})` : ""
+  // The kind says the situation more exactly than the type ("the seller has put a hold on the car").
+  const kind = kindOf({ ...c, facts: c.facts ?? [] })
+  const when = KINDS[kind]?.when ?? WHEN_TEXT[c.type] ?? "this comes up"
   return tookSuggestion
-    ? `${place}: when ${WHEN_TEXT[c.type] ?? "this comes up"}, ${chose.replace(/^./, (ch) => ch.toLowerCase())}${edited}. ${personName} decided so.`
-    : `${place}: when ${WHEN_TEXT[c.type] ?? "this comes up"}, ${personName} did not take the suggestion and chose to ${chose.replace(/^./, (ch) => ch.toLowerCase())}${because}${edited}.`
+    ? `${place}: when ${when}, ${chose.replace(/^./, (ch) => ch.toLowerCase())}${edited}. ${personName} decided so.`
+    : `${place}: when ${when}, ${personName} did not take the suggestion and chose to ${chose.replace(/^./, (ch) => ch.toLowerCase())}${because}${edited}.`
 }
 
 let summariser: LessonSummariser = templateSummariser

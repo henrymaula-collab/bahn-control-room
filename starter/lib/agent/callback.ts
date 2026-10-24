@@ -14,6 +14,7 @@ import { runReadinessAgent, type RunResult } from "./loop"
 import { personName } from "./people"
 import type { CallbackBrief } from "./prompt"
 import { getStore } from "./store"
+import { appendTrace } from "./trace"
 
 export interface DecideInput {
   caseId: string
@@ -74,6 +75,7 @@ export async function decideAndCarryOut(input: DecideInput): Promise<DecideResul
   const text = await summariseLesson(c, decision, { provider: input.provider ?? agentProvider(), usage: emptyUsage() })
   const lesson = newLesson(c, decision, text, at)
   await store.saveLesson(lesson)
+  appendTrace(carriedOut.traceFile, [{ type: "decision", decision }, { type: "lesson", lesson }])
   return { decision, carriedOut, lesson }
 }
 

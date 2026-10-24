@@ -20,7 +20,7 @@ import { agentModel, effectiveProvider, type Provider } from "../lib/agent/confi
 import { findOrder, LANGUAGE_NAMES, site } from "../lib/agent/data"
 import { runReadinessAgent, replayTrace, type RunResult } from "../lib/agent/loop"
 import { closeStore, getStore, initStore, resetLocalStore, type StoredRun } from "../lib/agent/store"
-import { listTraces } from "../lib/agent/trace"
+import { appendTrace, listTraces } from "../lib/agent/trace"
 import type { TrustRule } from "../lib/agent/gate"
 
 const args = process.argv.slice(2)
@@ -214,6 +214,7 @@ async function main() {
       const res = await decide({ caseId, optionId, personId, why: flag("--why"), editedDetail: flag("--edit") })
       if ("error" in res) throw new Error(String(res.error))
       const carried = await carryOutDecision(res.case, res.decision, provider)
+      appendTrace(carried.traceFile, [{ type: "decision", decision: res.decision }, { type: "lesson", lesson: res.lesson }])
       for (const s of carried.run.steps) printStep(s)
       printResult(carried)
       console.log(`\n${bold("Lesson proposed")} ${res.lesson.id}: ${res.lesson.text}`)

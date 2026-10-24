@@ -2,9 +2,9 @@
 // runs it. The simulated phone call, the fact extraction after a call and
 // the lesson summaries use this. The agent loop itself lives in loop.ts.
 
-import { query } from "@anthropic-ai/claude-agent-sdk"
 import { claudeCodeEnv, paths, type Provider, type Usage } from "./config"
 import { jsonTurn, type Effort } from "./llm"
+import { agentSdk } from "./sdk"
 
 export interface StructuredParams {
   provider: Provider
@@ -20,6 +20,7 @@ export async function structured<T>(p: StructuredParams, usage?: Usage): Promise
     return jsonTurn<T>({ model: p.model, system: p.system, messages: [{ role: "user", content: p.prompt }], format: p.schema, effort: p.effort ?? "low" }, usage)
   }
   if (p.provider === "claude-code") {
+    const { query } = await agentSdk()
     const q = query({
       prompt: p.prompt,
       options: {

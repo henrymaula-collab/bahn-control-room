@@ -550,6 +550,7 @@ async function proposeCase(ctx: RunContext, a: z.infer<z.ZodObject<typeof TOOL_S
   await ctx.store.saveCase(theCase)
   for (const c of ctx.calls) await ctx.store.saveCall(c)
   ctx.trace.write({ type: "case", case: theCase })
+  for (const l of used) ctx.trace.write({ type: "lesson", lesson: l })
   const check: OrderCheck = { orderId: ctx.order.id, state: "needs_person", checkedAt: ctx.clock.now(), checks: [], caseId }
   await ctx.store.saveOrderCheck(check)
   ctx.outcome = { kind: "case_for_person", caseId, summary: a.headline }

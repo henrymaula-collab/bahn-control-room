@@ -4,9 +4,8 @@
 // allowed), and a deterministic mock. Every run is an AgentRun with a JSONL
 // trace; without a model, replay plays a recorded trace back.
 
-import { createSdkMcpServer, query, tool } from "@anthropic-ai/claude-agent-sdk"
 import { z } from "zod"
-import type { Case, Call } from "@/lib/control-room/types"
+import type { Case, Call, Decision, Lesson } from "@/lib/control-room/types"
 import { RunClock, worldNow } from "./clock"
 import { agentModel, callModel, claudeCodeEnv, effectiveProvider, emptyUsage, guards, paths, type Provider } from "./config"
 import { findOrder } from "./data"
@@ -17,6 +16,8 @@ import { firstMessage, SYSTEM_PROMPT, type CallbackBrief } from "./prompt"
 import { getStore, type StoredRun } from "./store"
 import { apiToolDefinitions, executeTool, TOOL_DESCRIPTIONS, TOOL_NAMES, TOOL_SHAPES, type RunContext } from "./tools"
 import { listTraces, readTrace, TraceWriter, type TraceLine } from "./trace"
+import { audioUrlFor } from "./voices"
+import { agentSdk } from "./sdk"
 import type { TrustRule } from "./gate"
 
 export interface RunOptions {
@@ -157,6 +158,7 @@ async function manualLoop(ctx: RunContext, prompt: string, model: string, provid
 }
 
 async function sdkLoop(ctx: RunContext, prompt: string, model: string): Promise<string> {
+  const { createSdkMcpServer, query, tool } = await agentSdk()
   const server = createSdkMcpServer({
     name: MCP_SERVER,
     version: "1.0.0",
@@ -223,16 +225,32 @@ export async function replayTrace(file: string, opts: { onStep?: RunOptions["onS
   if (!head || !end) throw new Error(`Trace ${file} is incomplete.`)
   const calls: Call[] = []
   let theCase: Case | undefined
+  const decisions: Decision[] = []
+  const lessons: Lesson[] = []
   for (const l of lines) {
     if (l.type === "step") {
       opts.onStep?.(l.step)
       if (opts.delayMs) await new Promise((r) => setTimeout(r, opts.delayMs))
     }
-    if (l.type === "call") calls.push(l.call)
+    if (l.type === "call") {
+      const audioUrl = audioUrlFor(l.call.id)
+      const i = calls.findIndex((c) => c.id === l.call.id)
+      const call = { ...l.call, ...(audioUrl ? { audioUrl } : {}) }
+      if (i >= 0) calls[i] = call
+      else calls.push(call)
+    }
     if (l.type === "case") theCase = l.case
+    if (l.type === "decision") decisions.push(l.decision)
+    if (l.type === "lesson") lessons.push(l.lesson)
   }
-  for (const c of calls) await store.saveCall(c)
+  if (theCase) {
+    const audioCalls = calls.map((c) => ({ ...c, caseId: c.caseId ?? theCase!.id }))
+    calls.splice(0, calls.length, ...audioCalls)
+  }
   if (theCase) await store.saveCase(theCase)
+  for (const c of calls) await store.saveCall(c)
+  for (const d of decisions) await store.saveDecision(d)
+  for (const l of lessons) await store.saveLesson(l)
   const run: StoredRun = { ...end.run, mode: "replay", replayOf: end.run.id }
   await store.saveRun(run)
   const lastMessage = [...end.run.steps].reverse().find((s) => s.type === "message" && !s.name)

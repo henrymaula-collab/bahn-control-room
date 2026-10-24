@@ -6,7 +6,7 @@
 
 import fs from "node:fs"
 import path from "node:path"
-import type { AgentRun, Call, Case, Fact, OrderCheck } from "@/lib/control-room/types"
+import type { AgentRun, Call, Case, Decision, Fact, Lesson, OrderCheck } from "@/lib/control-room/types"
 import { paths } from "./config"
 import type { Callback, StoredRun } from "./store"
 
@@ -18,6 +18,8 @@ export type TraceLine =
   | { type: "facts"; facts: Fact[] }
   | { type: "order_check"; check: OrderCheck }
   | { type: "callback"; callback: Callback }
+  | { type: "decision"; decision: Decision }
+  | { type: "lesson"; lesson: Lesson }
   | { type: "end"; run: StoredRun }
 
 const MAX_CONTENT = 8000
@@ -47,6 +49,11 @@ export class TraceWriter {
   steps(): AgentRun["steps"] {
     return this.lines.filter((l): l is Extract<TraceLine, { type: "step" }> => l.type === "step").map((l) => l.step)
   }
+}
+
+/** Add lines to a finished trace (the decision and the lesson that follow a carried-out case). */
+export function appendTrace(file: string, lines: TraceLine[]): void {
+  fs.appendFileSync(file, lines.map((l) => `${JSON.stringify(l)}\n`).join(""))
 }
 
 export function readTrace(file: string): TraceLine[] {
@@ -95,5 +102,7 @@ export function listTraces(): TraceSummary[] {
       // a half-written trace is skipped
     }
   }
-  return out.sort((a, b) => b.recordedAt - a.recordedAt)
+  // Newest first. The run id carries the wall-clock time it was recorded (file times are lost in a git clone).
+  const stamp = (t: TraceSummary) => /-(\d{8}-\d{6})-/.exec(t.runId)?.[1] ?? String(t.recordedAt)
+  return out.sort((a, b) => stamp(b).localeCompare(stamp(a)))
 }

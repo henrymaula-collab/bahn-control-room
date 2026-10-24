@@ -83,7 +83,7 @@ function bahn(style: StyleSpecification): StyleSpecification {
       out.push({ ...base, minzoom: 8 } as Layer)
     } else if (id === "label_city" || id === "label_city_capital") {
       const filter = (l as { filter?: unknown }).filter
-      out.push({ ...base, maxzoom: 7, filter: ["all", filter, ["in", NAME, ["literal", MARKET]]] } as Layer)
+      out.push({ ...base, maxzoom: 7, filter: ["all", filter, ["in", NAME, ["literal", MARKET]]] } as unknown as Layer)
       out.push({ ...base, id: `${id}_all`, minzoom: 7 } as Layer)
     } else out.push(base)
   }

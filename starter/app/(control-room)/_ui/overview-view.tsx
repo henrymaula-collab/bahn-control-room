@@ -88,8 +88,8 @@ function PinCard({ caseId, info, close }: { caseId: string; info?: RedInfo; clos
   return (
     <div>
       <div className="head">
-        <p className="m strong">{info.vehicle}</p>
-        <p className="s">{info.mine ? info.place : `${info.place}, ${info.owner}'s case`}</p>
+        <p className="m strong v">{info.vehicle}</p>
+        <p className="s p">{info.mine ? info.place : `${info.place}, ${info.owner}'s case`}</p>
         {info.time && <time className={`s${info.now ? " now" : ""}`}>{info.time}</time>}
       </div>
       <p className="m q">{info.question}</p>

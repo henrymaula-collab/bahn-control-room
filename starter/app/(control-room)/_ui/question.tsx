@@ -24,6 +24,7 @@ interface Props {
   personName: string
   nextHref?: string
   existing?: { optionId: string; personName: string; timeWords: string; why?: string }
+  next?: string // v3: one short line under the primary button, what the agent does next
   children?: React.ReactNode // the desk's one disclosure, rendered on the server
 }
 
@@ -79,8 +80,8 @@ export function Question(props: Props) {
           {done.why && option.id !== suggestion.id ? ` The reason goes to ${props.leadName} before the agent learns from it.` : ""}
         </p>
         <div className="answers">
-          <Link href={props.nextHref ?? "/"} className="btn btn-secondary">
-            {props.nextHref ? "Next case" : "Back to your desk"}
+          <Link href={props.nextHref ?? "/work"} className="btn btn-secondary">
+            {props.nextHref ? "Next case" : "Back to Work"}
           </Link>
         </div>
       </section>
@@ -104,6 +105,7 @@ export function Question(props: Props) {
           </button>
         )}
       </div>
+      {props.next && <p className="s next">{props.next}</p>}
       {error && <p className="m now" style={{ marginTop: 12 }}>{error}</p>}
       {props.children}
       <OptionsSheet

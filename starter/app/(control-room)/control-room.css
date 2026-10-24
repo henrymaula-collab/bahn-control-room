@@ -181,13 +181,13 @@ details > summary::-webkit-details-marker { display: none; }
 /* Row: full width, title and one grey line, chevron at the edge (Settings, Reminders) */
 .rows { display: flex; flex-direction: column; }
 .row > summary,
-a.row-link {
+.row-link {
   display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 16px;
   padding: 12px 16px; margin: 0 -16px; border-radius: 14px;
 }
-.row > summary:hover, a.row-link:hover { background: var(--raise); }
-.row > summary .title, a.row-link .title { font-weight: 500; }
-.row > summary .chev, a.row-link .chev { color: var(--ink-2); }
+.row > summary:hover, .row-link:hover { background: var(--raise); }
+.row > summary .title, .row-link .title { font-weight: 500; }
+.row > summary .chev, .row-link .chev { color: var(--ink-2); display: inline-flex; }
 .row[open] > summary .chev { transform: rotate(90deg); }
 .row > .body { padding: 8px 0 28px; }
 
@@ -295,8 +295,9 @@ dialog.sheet[open] { animation: sheet-in 260ms var(--ease-open); }
 }
 .maplibregl-popup.pin-card .maplibregl-popup-tip { display: none; }
 .pin-card .head { display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: 12px; }
-.pin-card .head .s { grid-column: 1; }
-.pin-card .head time { grid-row: 1; grid-column: 2; }
+.pin-card .head .v { grid-row: 1; grid-column: 1; }
+.pin-card .head .p { grid-row: 2; grid-column: 1; }
+.pin-card .head time { grid-row: 1; grid-column: 2; line-height: 24px; }
 .pin-card .q { margin-top: 10px; }
 .pin-card .go { margin: 8px 0 0 -8px; padding: 4px 8px; border-radius: 8px; font-weight: 500; display: inline-flex; align-items: center; gap: 2px; }
 .pin-card .go:hover { background: var(--raise); }
@@ -407,3 +408,5 @@ dialog.sheet[open] { animation: sheet-in 260ms var(--ease-open); }
   .kv { grid-template-columns: minmax(0, 1fr); row-gap: 2px; }
   .kv dd { margin-bottom: 8px; }
 }
+button.row-link { width: calc(100% + 32px); text-align: left; }
+.row-link[aria-expanded="true"] { background: var(--raise); }

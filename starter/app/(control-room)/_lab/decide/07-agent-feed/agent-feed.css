@@ -1,0 +1,52 @@
+/* decide 07: Agent feed. Every rule under .lab-decide-07. */
+.lab-decide-07.send-panel { display: flex; flex-direction: column; padding: 0; overflow: hidden; }
+.lab-decide-07 .send-head { flex: none; align-items: center; padding: max(12px, calc(16 * var(--cr-u, 1px))) max(20px, calc(28 * var(--cr-u, 1px))) 4px; }
+.lab-decide-07 .send-body { flex: 1; min-height: 0; overflow: hidden auto; overflow-wrap: break-word; padding: 12px max(20px, calc(28 * var(--cr-u, 1px))) 24px; }
+.lab-decide-07 .send-foot { flex: none; padding: 14px max(20px, calc(28 * var(--cr-u, 1px))) max(14px, calc(20 * var(--cr-u, 1px))); border-top: 1px solid rgb(18 17 14 / 0.08); }
+.lab-decide-07 .send-actions { display: flex; align-items: center; gap: 8px; }
+.lab-decide-07 .send-meta { font-size: var(--type-subhead); line-height: var(--lh-subhead); grid-template-columns: 5.3em minmax(0, 1fr); column-gap: 1em; row-gap: 0.4em; margin: 0 0 20px; padding-bottom: 16px; border-bottom: 1px solid rgb(18 17 14 / 0.08); }
+.lab-decide-07 .f7-mail { white-space: pre-wrap; }
+.lab-decide-07 .f7-en { margin-top: 8px; }
+.lab-decide-07 .f7-edit { width: 100%; min-height: min(470px, 55vh); padding: 12px 14px; border-radius: 12px; resize: vertical; }
+.lab-decide-07 .f7-english { margin-top: 20px; }
+.lab-decide-07 .f7-english .link { margin-left: -8px; padding: 4px 8px; }
+
+/* The log: a hairline down the left, a mark per line (ink tick done, breathing ring at work, grey ring to come). */
+.lab-decide-07 .f7-log { position: relative; display: flex; flex-direction: column; gap: 1.05em; margin-top: 0.4em; font-size: var(--type-subhead); line-height: var(--lh-subhead); }
+.lab-decide-07 .f7-row { position: relative; display: grid; grid-template-columns: 1.25em minmax(0, 1fr) auto; column-gap: 0.75em; align-items: start; }
+.lab-decide-07 .f7-row:not(:last-child)::before {
+  content: ""; position: absolute; left: calc(0.625em - 0.5px); top: 1.5em; bottom: -1.05em; width: 1px; background: rgb(18 17 14 / 0.12);
+}
+.lab-decide-07 .f7-mark {
+  width: 1.25em; height: 1.25em; margin-top: 0.04em; border-radius: 50%;
+  display: inline-flex; align-items: center; justify-content: center; position: relative;
+}
+.lab-decide-07 .is-done .f7-mark { background: var(--ink); color: var(--page); }
+.lab-decide-07 .is-live .f7-mark { box-shadow: inset 0 0 0 2px var(--ink); }
+.lab-decide-07 .is-live .f7-mark::after { content: ""; width: 0.45em; height: 0.45em; border-radius: 50%; background: var(--ink); }
+.lab-decide-07 .is-next .f7-mark { box-shadow: inset 0 0 0 1.5px rgb(18 17 14 / 0.22); }
+.lab-decide-07 .f7-words { display: flex; flex-direction: column; min-width: 0; }
+.lab-decide-07 .f7-text { color: var(--ink); }
+.lab-decide-07 .is-next .f7-text { color: var(--ink-2); }
+.lab-decide-07 .f7-sub { color: var(--ink-2); }
+.lab-decide-07 .f7-undo { min-height: 32px; padding: 0 14px; font-weight: 600; }
+
+/* In the card the log takes the card's body size. */
+.lab-decide-07 .f7-card-log { margin-top: 1.2em; max-width: 36em; }
+.lab-decide-07 .f7-card-log .f7-log { font-size: var(--size-m, var(--type-body)); line-height: var(--lh-body); gap: 0.9em; }
+.lab-decide-07 .f7-card-log .f7-sub { font-size: var(--type-subhead); line-height: var(--lh-subhead); }
+
+@media (prefers-reduced-motion: no-preference) {
+  .lab-decide-07 .is-live .f7-mark::before {
+    content: ""; position: absolute; inset: 0; border-radius: 50%; box-shadow: 0 0 0 2px var(--ink);
+    animation: lab-decide-07-breathe 2.4s cubic-bezier(0.2, 0, 0.2, 1) infinite;
+  }
+  @keyframes lab-decide-07-breathe { 0% { transform: scale(1); opacity: 0.35; } 70%, 100% { transform: scale(1.9); opacity: 0; } }
+  .lab-decide-07 .f7-row { animation: lab-decide-07-row 260ms cubic-bezier(0.2, 0, 0, 1) both; }
+  .lab-decide-07 .f7-row:nth-child(2) { animation-delay: 90ms; }
+  .lab-decide-07 .f7-row:nth-child(3) { animation-delay: 180ms; }
+  .lab-decide-07 .f7-row:nth-child(4) { animation-delay: 270ms; }
+  .lab-decide-07 .f7-row:nth-child(5) { animation-delay: 360ms; }
+  .lab-decide-07 .f7-row:nth-child(6) { animation-delay: 450ms; }
+  @keyframes lab-decide-07-row { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+}

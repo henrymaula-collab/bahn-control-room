@@ -1,0 +1,36 @@
+/* decide 08: Receipt panel. Every rule under .lab-decide-08. */
+.lab-decide-08.send-panel { display: flex; flex-direction: column; padding: 0; overflow: hidden; }
+.lab-decide-08 .send-head { flex: none; align-items: center; padding: max(12px, calc(16 * var(--cr-u, 1px))) max(20px, calc(28 * var(--cr-u, 1px))) 4px; }
+.lab-decide-08 .send-body { flex: 1; min-height: 0; overflow: hidden auto; overflow-wrap: break-word; padding: 12px max(20px, calc(28 * var(--cr-u, 1px))) 24px; }
+.lab-decide-08 .send-foot { flex: none; padding: 14px max(20px, calc(28 * var(--cr-u, 1px))) max(14px, calc(20 * var(--cr-u, 1px))); border-top: 1px solid rgb(18 17 14 / 0.08); }
+.lab-decide-08 .send-actions { display: flex; align-items: center; gap: 8px; }
+.lab-decide-08 .send-meta { font-size: var(--type-subhead); line-height: var(--lh-subhead); grid-template-columns: 5.3em minmax(0, 1fr); column-gap: 1em; row-gap: 0.4em; margin: 0 0 20px; padding-bottom: 16px; border-bottom: 1px solid rgb(18 17 14 / 0.08); }
+.lab-decide-08 .r8-text { white-space: pre-wrap; }
+.lab-decide-08 .r8-en { margin-top: 8px; }
+.lab-decide-08 .r8-edit { width: 100%; min-height: min(470px, 55vh); padding: 12px 14px; border-radius: 12px; resize: vertical; }
+.lab-decide-08 .r8-english { margin-top: 20px; }
+.lab-decide-08 .r8-english .link { margin-left: -8px; padding: 4px 8px; }
+
+/* The receipt: Lightspark's layout. The title sits a little above the middle, a hairline runs out of it to the panel's edge. */
+.lab-decide-08.is-receipt { background: var(--raise); }
+.lab-decide-08.r8-over { z-index: 11; }
+.lab-decide-08 .r8-head { justify-content: space-between; }
+.lab-decide-08 .r8-body { display: flex; flex-direction: column; justify-content: center; padding-bottom: 12vh; position: relative; }
+.lab-decide-08 .r8-rule { display: block; height: 1px; margin: 0 calc(-1 * max(20px, calc(28 * var(--cr-u, 1px)))) 1.2em 0; background: linear-gradient(90deg, var(--ink) 0, var(--ink) 2.2em, rgb(18 17 14 / 0.14) 2.2em); }
+.lab-decide-08 .r8-title { font-size: var(--type-title1); line-height: var(--lh-title1); letter-spacing: var(--track-title1); font-weight: 600; }
+.lab-decide-08 .r8-line { margin-top: 0.6em; color: var(--ink-2); font-size: var(--type-subhead); line-height: var(--lh-subhead); max-width: 26em; }
+.lab-decide-08 .r8-more { margin-top: 0.9em; color: var(--ink); font-size: var(--type-subhead); line-height: var(--lh-subhead); max-width: 26em; }
+.lab-decide-08 .r8-foot { border-top-color: rgb(18 17 14 / 0.06); }
+.lab-decide-08 .r8-actions { justify-content: flex-end; }
+.lab-decide-08 .r8-actions .btn-secondary { background: var(--page); box-shadow: 0 0 0 1px rgb(18 17 14 / 0.08); }
+.lab-decide-08 .r8-actions .btn-secondary:hover { background: var(--press); }
+.lab-decide-08 .r8-wait { min-height: 44px; display: flex; align-items: center; justify-content: flex-end; }
+
+@media (prefers-reduced-motion: no-preference) {
+  .lab-decide-08 .r8-title, .lab-decide-08 .r8-line, .lab-decide-08 .r8-more { animation: lab-decide-08-in 280ms cubic-bezier(0.2, 0, 0, 1) both; }
+  .lab-decide-08 .r8-line { animation-delay: 60ms; }
+  .lab-decide-08 .r8-more { animation-delay: 120ms; }
+  .lab-decide-08 .r8-rule { animation: lab-decide-08-rule 420ms cubic-bezier(0.2, 0, 0, 1) both; transform-origin: left; }
+  @keyframes lab-decide-08-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+  @keyframes lab-decide-08-rule { from { transform: scaleX(0); } to { transform: none; } }
+}

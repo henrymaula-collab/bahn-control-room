@@ -9,6 +9,8 @@ import { InlineDraftDone, InlineDraftPreview } from "./03-inline-draft/inline-dr
 import { ComposeSheetDone, ComposeSheetPreview } from "./04-compose-sheet/compose-sheet"
 import { SideBySideDone, SideBySidePreview } from "./05-side-by-side/side-by-side"
 import { SendAndNextDone, SendAndNextPreview } from "./06-send-and-next/send-and-next"
+import { AgentFeedDone, AgentFeedPreview } from "./07-agent-feed/agent-feed"
+import { ReceiptPanelDone, ReceiptPanelPreview } from "./08-receipt-panel/receipt-panel"
 
 const variants: SlotRegistry = {
   "00": { slug: "today", title: "Today", parts: { SendPreview, Done: DecisionDone } },
@@ -18,6 +20,8 @@ const variants: SlotRegistry = {
   "04": { slug: "compose-sheet", title: "Compose sheet", parts: { SendPreview: ComposeSheetPreview, Done: ComposeSheetDone } },
   "05": { slug: "side-by-side", title: "Side by side", parts: { SendPreview: SideBySidePreview, Done: SideBySideDone } },
   "06": { slug: "send-and-next", title: "Send and next", parts: { SendPreview: SendAndNextPreview, Done: SendAndNextDone } },
+  "07": { slug: "agent-feed", title: "Agent feed", parts: { SendPreview: AgentFeedPreview, Done: AgentFeedDone } },
+  "08": { slug: "receipt-panel", title: "Receipt panel", parts: { SendPreview: ReceiptPanelPreview, Done: ReceiptPanelDone } },
 }
 
 export default variants

@@ -60,3 +60,22 @@
   font-family: var(--font-archivo-italic), var(--font-archivo), var(--font);
   font-style: italic; font-stretch: 100%; font-variation-settings: "wdth" 100; font-weight: 400;
 }
+
+/* The person's tasks nested under Your tasks (Henry, 24 Oct 20:40), like mailboxes in Mail:
+   indented to the menu's labels, the car on the first line, the place under it in grey, the
+   decide-by time on the right (red within the hour, .now). The open case carries the
+   highlight; Your tasks then keeps only its word. Same unit as the menu, so it scales too. */
+.nav-sub { display: flex; flex-direction: column; gap: calc(2 * var(--cr-su)); margin: calc(2 * var(--cr-su)) 0 calc(6 * var(--cr-su)); }
+.nav .nav-task {
+  height: auto; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 0 calc(10 * var(--cr-su)); align-items: baseline;
+  padding: calc(7 * var(--cr-su)) calc(14 * var(--cr-su)) calc(8 * var(--cr-su)) calc(50 * var(--cr-su));
+  border-radius: calc(12 * var(--cr-su)); font-weight: 400;
+}
+.nav-task .v { grid-row: 1; grid-column: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: max(13px, calc(16 * var(--cr-su))); line-height: calc(21 * var(--cr-su)); }
+.nav-task .p { grid-row: 2; grid-column: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: max(12px, calc(14 * var(--cr-su))); line-height: calc(19 * var(--cr-su)); color: var(--ink-2); }
+.nav-task time { grid-row: 1; grid-column: 2; font-size: max(12px, calc(15 * var(--cr-su))); line-height: calc(21 * var(--cr-su)); color: var(--ink-2); }
+.nav-task time.now { color: var(--now); }
+.nav-more .p { grid-row: 1; }
+.nav a[aria-current="page"]:has(+ .nav-sub .nav-task[aria-current="page"]) { background: none; }
+
+@media (max-width: 860px) { .nav-sub { display: none; } }

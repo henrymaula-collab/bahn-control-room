@@ -271,21 +271,33 @@ const NEEDS: [CaseReason, string][] = [
   ["costs_extra_money", "A yes on extra cost"],
 ]
 
+/** Counts from a person's track record, most specific first. A count, never a score. */
+export type YoursCounts = { atPlace: number; placeBrand?: string; inCountry: number; country?: string; ofType: number }
+
+export function yoursText(n: YoursCounts): string {
+  const cases = (count: number) => (count === 1 ? "case" : "cases")
+  if (n.atPlace > 0) return `${n.atPlace} ${n.placeBrand ?? "pickup place"} ${cases(n.atPlace)} decided`
+  if (n.inCountry > 0 && n.country) return `${n.inCountry} ${cases(n.inCountry)} in ${COUNTRY_NAMES[n.country] ?? n.country} decided`
+  if (n.ofType > 0) return `${n.ofType} such ${cases(n.ofType)} decided`
+  return "First case of this kind"
+}
+
 function yoursValue(state: EngineState, c: Case): string | null {
   const personId = c.routedTo?.personId
   if (!personId) return null
   const place = c.placeId ? state.world.places.get(c.placeId) : undefined
   const mine = state.decisions.filter((row) => row.personId === personId && !row.laterChanged)
-  const atPlace = place ? mine.filter((row) => row.placeId === place.id).length : 0
-  if (place && atPlace > 0) return `${atPlace} ${place.site ? brand(place.name, place.city) : "pickup place"} ${atPlace === 1 ? "case" : "cases"} decided`
-  const inCountry = place?.country ? mine.filter((row) => row.country === place.country).length : 0
-  if (place?.country && inCountry > 0) return `${inCountry} ${inCountry === 1 ? "case" : "cases"} in ${COUNTRY_NAMES[place.country] ?? place.country} decided`
-  const ofType = mine.filter((row) => row.caseType === c.type).length
-  if (ofType > 0) return `${ofType} such ${ofType === 1 ? "case" : "cases"} decided`
-  return "First case of this kind"
+  return yoursText({
+    atPlace: place ? mine.filter((row) => row.placeId === place.id).length : 0,
+    placeBrand: place?.site ? brand(place.name, place.city) : undefined,
+    inCountry: place?.country ? mine.filter((row) => row.country === place.country).length : 0,
+    country: place?.country,
+    ofType: mine.filter((row) => row.caseType === c.type).length,
+  })
 }
 
-export function whyFacts(state: EngineState, c: Case): KeyFact[] {
+/** Stopped, Needs, Yours: at most three label-value rows, never a sentence. */
+export function keyFacts(c: Pick<Case, "type" | "reasons" | "status">, yours: string | null): KeyFact[] {
   const out: KeyFact[] = []
   const stopped = STOPPED[c.type] ?? c.reasons.map((reason) => STOPPED_BY_REASON[reason]).find(Boolean)
   if (stopped) out.push({ label: "Stopped", value: stopped })
@@ -293,9 +305,12 @@ export function whyFacts(state: EngineState, c: Case): KeyFact[] {
     const needs = NEEDS.find(([reason]) => c.reasons.includes(reason))?.[1] ?? (c.status === "waiting_for_person" ? "Your decision" : null)
     if (needs) out.push({ label: "Needs", value: needs })
   }
-  const yours = yoursValue(state, c)
   if (yours) out.push({ label: "Yours", value: yours })
   return out.slice(0, 3)
+}
+
+export function whyFacts(state: EngineState, c: Case): KeyFact[] {
+  return keyFacts(c, yoursValue(state, c))
 }
 
 // ---- The situation panel ----
@@ -315,7 +330,7 @@ function releaseState(order: OrderWorld): string | null {
   return order.pickup.site?.details.requires_signed_release === true ? "Missing" : null
 }
 
-const firstName = (name: string | null | undefined) => (name ?? "").trim().split(/\s+/)[0] || undefined
+export const firstName = (name: string | null | undefined) => (name ?? "").trim().split(/\s+/)[0] || undefined
 
 function driverOf(order: OrderWorld): { name?: string; fact: string } {
   const live = rows(order.bundle, "work_assignments").find((row) => ["ASSIGNED", "IN_PROGRESS"].includes(str(row.details.status) ?? ""))
@@ -342,7 +357,7 @@ function stop(place: Place, window: { start: string; end: string | null } | null
   }
 }
 
-const TYPE_FACT: Record<string, KeyFact> = {
+export const TYPE_FACT: Record<string, KeyFact> = {
   "readiness.car_not_ready": { label: "Car", value: "Not ready" },
   "readiness.no_answer": { label: "Pickup place", value: "Not answering" },
   "readiness.facts_disagree": { label: "Handover point", value: "Not agreed" },
@@ -350,18 +365,23 @@ const TYPE_FACT: Record<string, KeyFact> = {
   "readiness.fee_requested": { label: "Fee", value: "Asked by pickup place" },
 }
 
-function waitingOn(state: EngineState, c: Case, order: OrderWorld): KeyFact | undefined {
-  // A managed site has a name people say; a private or customer-given address does not.
-  const placeWords = order.pickup.site ? `${brand(order.pickup.name, order.pickup.city)}, the pickup place` : "The pickup place"
-  const customer = firstName(order.customer.name) ?? "The customer"
+/** Who the case waits for, as one label-value row. */
+export function waitingText(c: Pick<Case, "status" | "reasons">, words: { customer: string; pickupPlace: string; person?: string }): KeyFact | undefined {
   const pickupSide: CaseReason[] = ["pickup_place_not_answering", "car_not_ready", "facts_disagree", "papers_missing"]
   if (c.status === "done" || c.status === "handled_by_agent") return undefined
   if (c.status === "decided") return { label: "Waiting", value: "The agent, carrying it out" }
-  if (c.reasons.includes("needs_the_customer")) return { label: "Waiting", value: `${customer}, the customer` }
+  if (c.reasons.includes("needs_the_customer")) return { label: "Waiting", value: `${words.customer}, the customer` }
   if (c.reasons.includes("driver_safety")) return { label: "Waiting", value: "The driver" }
-  if (c.status === "agent_working" || c.reasons.some((reason) => pickupSide.includes(reason))) return { label: "Waiting", value: placeWords }
-  const person = state.people.find((p) => p.id === c.routedTo?.personId)
-  return person ? { label: "Waiting", value: person.name } : undefined
+  if (c.status === "agent_working" || c.reasons.some((reason) => pickupSide.includes(reason))) return { label: "Waiting", value: words.pickupPlace }
+  return words.person ? { label: "Waiting", value: words.person } : undefined
+}
+
+function waitingOn(state: EngineState, c: Case, order: OrderWorld): KeyFact | undefined {
+  // A managed site has a name people say; a private or customer-given address does not.
+  const pickupPlace = order.pickup.site ? `${brand(order.pickup.name, order.pickup.city)}, the pickup place` : "The pickup place"
+  const customer = firstName(order.customer.name) ?? "The customer"
+  const person = state.people.find((p) => p.id === c.routedTo?.personId)?.name
+  return waitingText(c, { customer, pickupPlace, person })
 }
 
 export function situation(state: EngineState, c: Case): Situation | null {

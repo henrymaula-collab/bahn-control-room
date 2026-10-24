@@ -24,8 +24,13 @@
      Body 17), 1.65 at 2560 x 1300 (the approved Overview). k follows --cr-u (shell.css), so the
      type scales with the frame and never goes under Apple's defaults. The side menu (chrome)
      grows more gently, 1 to 1.2, as macOS sizes its sidebar apart from the content. */
-  --type-k:  clamp(1px, calc(2.09 * var(--cr-u) - 0.44px), 1.65px);
-  --type-kc: clamp(1px, calc(0.643 * var(--cr-u) + 0.557px), 1.2px);
+  /* Below about 1280 x 680 (small windows, and Safari's page zoom, which makes the CSS viewport
+     smaller) k keeps falling, to 0.8 (Body 13.6) at about 900 x 450, instead of freezing at
+     Apple's sizes while the frame keeps shrinking around it. 1 from 1280 x 680 to 1512 x 800,
+     1.65 at 2560 x 1300 as before. --type-kf = k, never above 1: for floors that must not grow. */
+  --type-k:  clamp(0.8px, max(calc(2.09 * var(--cr-u) - 0.44px), min(1px, calc(1.5 * var(--cr-u) + 0.07px))), 1.65px);
+  --type-kc: clamp(0.88px, max(calc(0.643 * var(--cr-u) + 0.557px), min(1px, calc(var(--cr-u) + 0.38px))), 1.2px);
+  --type-kf: min(var(--type-k), 1px);
 
   --type-display:  calc(34 * var(--type-k));  --lh-display:  1.14;  --track-display:  -0.007em; /* Owners Wide: the approved Overview's own leading */
   --type-title1:   calc(28 * var(--type-k));  --lh-title1:   1.214; --track-title1:   -0.02em;

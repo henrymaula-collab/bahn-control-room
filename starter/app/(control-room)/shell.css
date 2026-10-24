@@ -8,8 +8,13 @@
    menu uses --cr-su, the same unit with a floor (0.74) so its type stays readable on a
    laptop. Sizes are written as "N * unit" where N is the pixel value at 2560. */
 :root {
-  --cr-u: clamp(0.6px, min(calc(0.0297vw + 0.24px), calc(0.0737vh + 0.189px)), 1px);
-  --cr-su: max(0.74px, var(--cr-u));
+  /* Floor 0.45 (was 0.6): Safari keeps a per-site page zoom, and at 125 to 150 % a 1330 x 680
+     window is a 1064 x 544 to 886 x 453 CSS viewport. With the old floor everything stopped
+     shrinking at about 1200 px and the card was squeezed between fixed-size neighbours. */
+  /* --cr-vw / --cr-vh: the viewport in CSS px, set by the layout's script (vw/vh until it runs);
+     WebKit sizes vw in font-size against the unzoomed window, px are safe everywhere. */
+  --cr-u: clamp(0.45px, min(calc(0.000297 * var(--cr-vw, 100vw) + 0.24px), calc(0.000737 * var(--cr-vh, 100vh) + 0.189px)), 1px);
+  --cr-su: max(calc(0.74 * var(--type-kc, 1px)), var(--cr-u));
   /* Never narrower than 236 px times the menu's type factor (--type-kc, control-room.css): the
      ramp's chrome steps (15/13 at 1512 x 800, design/TYPE_SCALE.md) need a little more room than
      the old 14/12, so "Operations Associate" fits beside the photo at every size. */

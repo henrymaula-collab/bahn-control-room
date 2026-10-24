@@ -247,37 +247,37 @@
 .overview { container-type: size; }
 .overview .float-me {
   top: calc(16 * var(--cr-u)); left: calc(16 * var(--cr-u)); right: auto; bottom: auto;
-  width: max(360px, min(calc(840 * var(--cr-u)), calc(100cqw - 176px)));
+  width: max(calc(360 * var(--type-kf)), min(calc(840 * var(--cr-u)), calc(100cqw - 176px)));
   padding: calc(48 * var(--cr-u)) calc(52 * var(--cr-u)) calc(28 * var(--cr-u));
   border-radius: calc(32 * var(--cr-u)); overflow: visible; container-type: inline-size;
 }
 .overview .float-me .welcome {
   font-family: "Owners Wide", var(--font-archivo), var(--font); font-stretch: 125%; font-variation-settings: "wdth" 125;
-  font-size: max(24px, min(var(--type-display), 7.6cqi)); line-height: var(--lh-display); font-weight: 600; letter-spacing: var(--track-display); text-wrap: balance;
+  font-size: max(min(24px, var(--type-display)), min(var(--type-display), 7.6cqi)); line-height: var(--lh-display); font-weight: 600; letter-spacing: var(--track-display); text-wrap: balance;
   overflow-wrap: break-word;
 }
 /* "Bahn Express" in Archivo's true italic, same weight, echoing the "Control room" lockup. */
 .overview .float-me .welcome em { font-family: "Owners Wide", var(--font-archivo-italic), var(--font-archivo), var(--font); font-style: italic; font-weight: inherit; }
-.overview .float-me .me-tasks { margin-top: clamp(18px, 5.4cqi, 40px); }
+.overview .float-me .me-tasks { margin-top: clamp(calc(18 * var(--type-kf)), 5.4cqi, 40px); }
 .overview .float-me .tasks-today {
   width: 100%; min-width: 0; justify-content: space-between; gap: calc(12 * var(--cr-u));
-  height: clamp(52px, 12.5cqi, 92px); padding: 0 clamp(18px, 4cqi, 32px) 0 clamp(20px, 5cqi, 40px);
-  font-family: var(--font); font-size: max(17px, min(var(--type-headline), 4.1cqi)); line-height: var(--lh-headline); letter-spacing: var(--track-headline);
+  height: clamp(calc(52 * var(--type-kf)), 12.5cqi, 92px); padding: 0 clamp(calc(18 * var(--type-kf)), 4cqi, 32px) 0 clamp(calc(20 * var(--type-kf)), 5cqi, 40px);
+  font-family: var(--font); font-size: max(min(17px, var(--type-headline)), min(var(--type-headline), 4.1cqi)); line-height: var(--lh-headline); letter-spacing: var(--track-headline);
 }
 .overview .float-me .tasks-today span { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
-.overview .float-me .tasks-today svg { width: clamp(18px, 4cqi, 32px); height: clamp(18px, 4cqi, 32px); flex: none; }
-.overview .float-me .red-rows { margin: clamp(8px, 2cqi, 16px) calc(-16 * var(--cr-u)) 0; }
-.overview .float-me .red-row { padding: clamp(6px, 1.7cqi, 14px) calc(16 * var(--cr-u)); border-radius: calc(16 * var(--cr-u)); column-gap: calc(24 * var(--cr-u)); }
+.overview .float-me .tasks-today svg { width: clamp(calc(18 * var(--type-kf)), 4cqi, 32px); height: clamp(calc(18 * var(--type-kf)), 4cqi, 32px); flex: none; }
+.overview .float-me .red-rows { margin: clamp(calc(8 * var(--type-kf)), 2cqi, 16px) calc(-16 * var(--cr-u)) 0; }
+.overview .float-me .red-row { padding: clamp(calc(6 * var(--type-kf)), 1.7cqi, 14px) calc(16 * var(--cr-u)); border-radius: calc(16 * var(--cr-u)); column-gap: calc(24 * var(--cr-u)); }
 /* Type on the ramp (design/TYPE_SCALE.md): display, body, subhead. Each is capped by the panel's
    own width (cqi, the values Henry approved at 2560 x 1300), so a narrow panel never overflows and
    2560 x 1300 looks exactly as approved; at 1512 x 800 and below the ramp's own sizes hold (34, 17,
    15: Apple's defaults are the floor). */
-.overview .float-me .red-row .v { font-size: max(17px, min(var(--type-body), 3.8cqi)); line-height: 1.28; }
-.overview .float-me .red-row .p { font-size: max(15px, min(var(--type-subhead), 3cqi)); line-height: 1.28; }
-.overview .float-me .red-row time { font-size: max(15px, min(var(--type-subhead), 3.26cqi)); line-height: 1.5; }
-.overview .float-me .key { margin-top: clamp(12px, 3cqi, 24px); padding-top: clamp(12px, 3cqi, 24px); gap: clamp(2px, 1cqi, 8px); border-top: 1px solid var(--press); }
-.overview .float-me .state { grid-template-columns: clamp(8px, 1.9cqi, 14px) minmax(0, 1fr) auto; column-gap: clamp(8px, 2cqi, 16px); font-size: max(15px, min(var(--type-subhead), 3cqi)); line-height: 1.45; }
-.overview .float-me .state .dot { width: clamp(8px, 1.9cqi, 14px); height: clamp(8px, 1.9cqi, 14px); }
+.overview .float-me .red-row .v { font-size: max(min(17px, var(--type-body)), min(var(--type-body), 3.8cqi)); line-height: 1.28; }
+.overview .float-me .red-row .p { font-size: max(min(15px, var(--type-subhead)), min(var(--type-subhead), 3cqi)); line-height: 1.28; }
+.overview .float-me .red-row time { font-size: max(min(15px, var(--type-subhead)), min(var(--type-subhead), 3.26cqi)); line-height: 1.5; }
+.overview .float-me .key { margin-top: clamp(calc(12 * var(--type-kf)), 3cqi, 24px); padding-top: clamp(calc(12 * var(--type-kf)), 3cqi, 24px); gap: clamp(calc(2 * var(--type-kf)), 1cqi, 8px); border-top: 1px solid var(--press); }
+.overview .float-me .state { grid-template-columns: clamp(calc(8 * var(--type-kf)), 1.9cqi, 14px) minmax(0, 1fr) auto; column-gap: clamp(calc(8 * var(--type-kf)), 2cqi, 16px); font-size: max(min(15px, var(--type-subhead)), min(var(--type-subhead), 3cqi)); line-height: 1.45; }
+.overview .float-me .state .dot { width: clamp(calc(8 * var(--type-kf)), 1.9cqi, 14px); height: clamp(calc(8 * var(--type-kf)), 1.9cqi, 14px); }
 
 /* Dots only on the map: a red pin is a red dot with a ring; its card names the car. */
 .pin.dot-only, .pin.dot-only:hover, .pin.dot-only.lift { width: 15px; height: 15px; padding: 0; border-radius: 50%; justify-content: center; }

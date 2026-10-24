@@ -13,8 +13,16 @@
 .work { overflow: clip; }
 
 .work {
-  --panel: max(360px, calc(600 * var(--cr-u, 1px)));
-  --list: max(220px, calc(320 * var(--cr-u, 1px)));
+  /* Floors follow the ramp (--type-k under 1 in small windows and under Safari's page zoom), so
+     the card is not left to take the whole squeeze between a fixed menu and a fixed panel. */
+  --panel: max(calc(360 * var(--type-k)), calc(600 * var(--cr-u, 1px)));
+  --list: max(calc(220 * var(--type-kf)), calc(320 * var(--cr-u, 1px)));
+  /* The card's side air, and the width its text has: the window less the menu, the frame's 8 px
+     edge and whatever the look puts beside the card. Viewport units, because WebKit does not take
+     Safari's page zoom out of container units used in font-size (StyleLengthResolution.cpp), so
+     100cqw alone made the card's type 1.25 to 1.5 times too large for its own column there. */
+  --card-pad: max(calc(28 * var(--type-kf)), calc(64 * var(--cr-u, 1px)));
+  --card-room: calc(var(--cr-vw, 100vw) - var(--side) - 8px);
   /* The list's rows on the ramp (design/TYPE_SCALE.md): the car at body, place and time at subhead. */
   --list-m: var(--type-body);
   --list-s: var(--type-subhead);
@@ -22,8 +30,10 @@
 .work.look-menu, .work.look-switcher { grid-template-columns: minmax(0, 1fr); }
 .work.look-column { grid-template-columns: var(--list) minmax(0, 1fr); }
 /* Three columns on a laptop: the list and the panel give a little so the card keeps its three lines. */
-.work.look-column { --list: max(200px, calc(320 * var(--cr-u, 1px))); --panel: max(340px, calc(600 * var(--cr-u, 1px))); }
-.work.has-panel { padding-right: var(--panel); }
+.work.look-column { --list: max(calc(200 * var(--type-kf)), calc(320 * var(--cr-u, 1px))); --panel: max(calc(340 * var(--type-k)), calc(600 * var(--cr-u, 1px))); --card-room: calc(var(--cr-vw, 100vw) - var(--side) - 8px - var(--list)); }
+.work.has-panel { padding-right: var(--panel); --card-pad: max(calc(24 * var(--type-kf)), calc(40 * var(--cr-u, 1px))); }
+.work.has-panel.look-column { --card-room: calc(var(--cr-vw, 100vw) - var(--side) - 8px - var(--list) - var(--panel)); }
+.work.has-panel:not(.look-column) { --card-room: calc(var(--cr-vw, 100vw) - var(--side) - 8px - var(--panel)); }
 
 /* The Needs you list (column, and the switcher's menu) */
 .work .list { padding: calc(16 * var(--cr-u, 1px)) 12px 24px; }
@@ -59,16 +69,15 @@
      --card-ask: Title 2, the same 22:28 step under it, regular weight, ink.
      The rest of the card: body (buttons, rows) and subhead (deadline, the line under the buttons). */
   --card-measure: 24;
-  --card-head: max(18px, min(var(--type-title1), calc(100cqw / var(--card-measure))));
-  --card-ask: calc(var(--card-head) * 22 / 28);
+  --card-head: max(calc(18 * var(--type-kf)), min(var(--type-title1), calc(100cqw / var(--card-measure)), calc((var(--card-room) - 2 * var(--card-pad)) / var(--card-measure))));
+  --card-ask: max(var(--type-body), calc(var(--card-head) * 22 / 28)); /* never under the buttons' body size */
   --size-l: var(--card-head);
   --size-m: var(--type-body);
   --size-s: var(--type-subhead);
   --column: calc(32 * var(--card-ask));
   overflow: hidden auto;
-  padding: max(28px, calc(56 * var(--cr-u, 1px))) max(28px, calc(64 * var(--cr-u, 1px)));
+  padding: max(calc(28 * var(--type-kf)), calc(56 * var(--cr-u, 1px))) var(--card-pad);
 }
-.work.has-panel .detail { padding-left: max(24px, calc(40 * var(--cr-u, 1px))); padding-right: max(24px, calc(40 * var(--cr-u, 1px))); }
 .work.look-switcher .detail { padding-top: max(16px, calc(28 * var(--cr-u, 1px))); }
 .work .detail-inner { font-size: var(--size-m); line-height: var(--lh-body); }
 .work .detail .l { line-height: var(--lh-title1); letter-spacing: var(--track-title1); }
@@ -90,13 +99,17 @@
   letter-spacing: var(--track-title2);
 }
 .work .question .context { margin-top: 0.667em; }
-.work .answers { margin-top: calc(24 / 17 * 1em); gap: 0.5em; }
+/* The answer and Other options always on one line (Henry, Safari 21:30: Other options fell under it). */
+.work .answers { margin-top: calc(24 / 17 * 1em); gap: 0.5em; flex-wrap: nowrap; }
+.work .answers .btn { flex: none; white-space: nowrap; }
 .work .answers .btn { min-height: max(44px, calc(2.6 * var(--size-m))); padding: 0 1.25em; font-size: var(--size-m); }
 .work .answers .btn-plain { padding: 0 0.92em; }
 .work .question .next { margin-top: 0.8em; max-width: 40em; }
 
 /* The rows under it */
 .work .work-rows { margin-top: 1.67em; }
+/* A row's title and its grey line stay one line each; a long one ends in an ellipsis. */
+.work .detail .row-link .title, .work .detail .row-link .sub, .work .detail .row > summary .title { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .work .detail .row > summary,
 .work .detail .row-link { gap: 0.83em; padding: 0.58em 0.83em; margin: 0 -0.83em; border-radius: 0.75em; }
 .work .detail button.row-link { width: calc(100% + 1.67em); }

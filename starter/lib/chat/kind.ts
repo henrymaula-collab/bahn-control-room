@@ -17,7 +17,7 @@ const RULES: Rule[] = [
   {
     key: "seller_hold",
     label: "Seller hold on the car",
-    test: (_c, t) => /seller\W{0,3}s?\s+hold|seller[^.]{0,60}\bhold\b|\bhold\b[^.]{0,40}\bseller\b|seller_hold/i.test(t),
+    test: (_c, t) => /seller\W{0,3}s?\s+hold|seller[^.]{0,60}\b(hold|withdr[ae]wn? (the )?permission|blocked)\b|\bhold\b[^.]{0,40}\bseller\b|seller_hold/i.test(t),
   },
   { key: "release_document_missing", label: "Release document missing", test: (c) => c.type === "readiness.release_document_missing" || c.reasons.includes("papers_missing") },
   { key: "fee_requested", label: "Pickup place asks a fee", test: (c) => c.type === "readiness.fee_requested" },

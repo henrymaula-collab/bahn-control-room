@@ -44,6 +44,15 @@ function suggestionLine(c: Case, tail = ""): string {
   return `My suggestion${tail}: ${lc(sentence(c.suggestion.label))}`
 }
 
+/** Less than 70 % agreeing: people answer this kind differently, and the opener says so. */
+const split = (k: CaseKnowledge) => k.decided > 0 && k.sameAsSuggestion / k.decided < 0.7
+
+function agreement(k: CaseKnowledge): string {
+  if (k.sameAsSuggestion === 0) return `${k.decided} earlier cases of this kind, where people chose otherwise`
+  if (split(k)) return `${k.sameAsSuggestion} of ${k.decided} earlier cases of this kind, though people answer this differently`
+  return `${k.sameAsSuggestion} of ${k.decided} earlier cases of this kind, where people chose the same`
+}
+
 function lastTime(p: Precedent): string {
   return `${p.decidedBy} decided it on ${day(p.at)} at ${p.place} and ${chosePhrase(p.choice)}.`
 }
@@ -63,17 +72,15 @@ export function openerText(ctx: ChatCaseContext, k: CaseKnowledge, shape: Opener
   switch (shape.variant) {
     case "known_experienced": {
       lines.push(`${suggestionLine(c)} ${problem}`)
-      const agree = k.sameAsSuggestion > 0
-        ? `${k.sameAsSuggestion} of ${k.decided} earlier cases of this kind, where people chose the same`
-        : `${k.decided} earlier cases of this kind, where people chose differently`
-      lines.push(`It rests on ${basis ? `${basis} and on ` : ""}${agree}. Your call.`)
+      const one = restsOn(c.facts, 1)
+      lines.push(`It rests on ${one ? `${one}, and on ` : ""}${agreement(k)}. Your call.`)
       break
     }
     case "known_newer": {
       lines.push(`Here is the problem: ${problem}`)
       if (needs) lines.push(needs)
       lines.push(optionsLine(c))
-      lines.push(`People at Bahn have decided this kind of case ${plural(k.decided, "time")}, and ${k.sameAsSuggestion} of them chose my suggestion.${last ? ` The last time, ${lastTime(last)}` : ""}`)
+      lines.push(`People at Bahn have decided this kind of case ${plural(k.decided, "time")}, and ${k.sameAsSuggestion} of them chose my suggestion${split(k) ? ", so people answer this differently" : ""}.${last ? ` The last time, ${lastTime(last)}` : ""}`)
       lines.push(`My suggestion rests on ${basis ?? "the facts below"}. Ask me anything about it. The decision is yours.`)
       break
     }

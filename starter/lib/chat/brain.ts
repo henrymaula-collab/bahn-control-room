@@ -182,6 +182,9 @@ async function apiAnswer(input: AnswerInput): Promise<AnswerResult> {
 
 const MCP = "chat"
 
+/** The only tools Claude Code may use in the chat: the chat's read-only tools, by their MCP names. No built-in tool. */
+export const SDK_ALLOWED_TOOLS = CHAT_TOOLS.map((n) => `mcp__${MCP}__${n}`)
+
 function transcript(input: AnswerInput): string {
   const turns = input.history.filter((m) => m.text.trim()).map((m) => `${m.role === "person" ? input.ctx.person.name : "You"}: ${m.text}`)
   const now = `${input.ctx.person.name}: ${userText(input)}`
@@ -218,7 +221,7 @@ async function sdkAnswer(input: AnswerInput): Promise<AnswerResult> {
         model,
         mcpServers: { [MCP]: server },
         tools: [],
-        allowedTools: CHAT_TOOLS.map((n) => `mcp__${MCP}__${n}`),
+        allowedTools: SDK_ALLOWED_TOOLS,
         settingSources: [],
         persistSession: false,
         permissionMode: "dontAsk",

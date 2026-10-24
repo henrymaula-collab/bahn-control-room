@@ -78,8 +78,8 @@ export function rankFacts(facts: Fact[]): Fact[] {
     .sort((a, b) => CHANNEL_RANK(a.source.channel) - CHANNEL_RANK(b.source.channel) || WHO_RANK[a.source.kind] - WHO_RANK[b.source.kind])
 }
 
-export function restsOn(facts: Fact[]): string | undefined {
-  const picked = rankFacts(facts).slice(0, 2)
+export function restsOn(facts: Fact[], max = 2): string | undefined {
+  const picked = rankFacts(facts).slice(0, max)
   const phrases = [...new Set(picked.map(sourcePhrase))]
   return phrases.length ? names(phrases) : undefined
 }

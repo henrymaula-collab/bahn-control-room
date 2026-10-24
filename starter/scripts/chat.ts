@@ -6,15 +6,15 @@ import "dotenv/config"
 
 async function main() {
   const args = process.argv.slice(2)
-  const flag = (name: string) => {
+  const flag = (name: string, takesValue = false) => {
     const i = args.indexOf(`--${name}`)
     if (i < 0) return undefined
-    const v = args[i + 1]
-    args.splice(i, v && !v.startsWith("--") ? 2 : 1)
-    return v && !v.startsWith("--") ? v : "true"
+    const v = takesValue ? args[i + 1] : "true"
+    args.splice(i, takesValue ? 2 : 1)
+    return v
   }
-  const person = flag("person") ?? "p-aino"
-  const provider = flag("provider")
+  const person = flag("person", true) ?? "p-aino"
+  const provider = flag("provider", true)
   const voice = flag("voice")
   const clear = flag("clear")
   const json = flag("json")

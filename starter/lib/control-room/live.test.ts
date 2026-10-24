@@ -151,3 +151,12 @@ test("engine: a decided case returns the person's decision; an open case returns
   assert.equal(detail.decision?.optionId, open.suggestion.id)
   assert.equal(detail.next, undefined, "a done case has no line under the button")
 })
+
+test("engine: no derived case waiting for a person was due before now", async (t) => {
+  if (!reachable) return t.skip("database not reachable")
+  const { buildState } = await import("./service")
+  const state = await buildState()
+  const waiting = state.cases.filter((c) => c.status === "waiting_for_person" && state.derivedIds.has(c.id) && c.decideBy)
+  assert.ok(waiting.length > 0)
+  for (const c of waiting) assert.ok(c.decideBy! > state.now, `${c.id} was due at ${c.decideBy}, before ${state.now}`)
+})

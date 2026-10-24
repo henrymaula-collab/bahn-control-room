@@ -16,8 +16,11 @@ docker compose up -d --wait
 npm run db:push
 npm run db:seed
 npm run attachments:seed
+npm run db:seed:cr   # control room: made-up ops team, made-up past decisions, lessons
 npm run dev
 ```
+
+The control room engine lives in `lib/control-room/` and answers under `/api/cr/*` (desk, cases, decisions, lead, orders/checks, people). `npm run test:cr` runs its unit tests and `npm run smoke:cr` checks it end to end. The ops team and its past decisions are made up; only the pickup places and customers they point at come from the (fictional) dataset.
 
 Open http://localhost:3000.
 

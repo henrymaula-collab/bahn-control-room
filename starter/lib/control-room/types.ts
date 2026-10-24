@@ -152,6 +152,7 @@ export interface Lesson {
 export interface TrustRule {
   id: string;
   caseType: CaseType;
+  optionId?: string; // the option people kept choosing; matched against a case's options
   scope: { placeId?: string; customerId?: string; country?: string };
   when: string; // "The pickup place asks for a storage fee up to 50 EUR"
   then: string; // "Accept the fee and confirm pickup"
@@ -164,6 +165,7 @@ export interface TrustRule {
 /** For every order, what was checked. "An order nobody checked is not fine." */
 export interface OrderCheck {
   orderId: string;
+  reference?: string; // Bahn's order reference, e.g. "CD-420593": show this, never the internal id
   state: "needs_person" | "checked_quiet" | "not_checked" | "agent_working";
   checkedAt?: string;
   checks: { label: string; ok: boolean; source: string; at?: string }[];

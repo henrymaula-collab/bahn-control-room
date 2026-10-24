@@ -53,8 +53,11 @@ export function CaseChat({ thread, personId, now, focus }: { thread: ChatThread 
     if (!draft && field.current) field.current.style.height = ""
   }, [draft])
   useEffect(() => () => abort.current?.abort(), [])
+  // The field takes focus when the person opens the panel, not when J/K brings in the next case with it open.
+  const wasOpen = useRef(focus)
   useEffect(() => {
-    if (focus) field.current?.focus({ preventScroll: true })
+    if (focus && !wasOpen.current) field.current?.focus({ preventScroll: true })
+    wasOpen.current = focus
   }, [focus])
 
   // Follow the answer as it grows, unless the person has scrolled up to read.
@@ -281,18 +284,22 @@ const dayWords = (iso: string, now: string) => {
 }
 
 function Knowledge({ k, now }: { k: CaseKnowledge; now: string }) {
-  const words = (
-    <>
-      <span className="kind">{k.kindLabel}</span>
-      <span>{knowledgeWords(k)}</span>
-    </>
-  )
-  if (!k.precedents.length) return <p className="knowledge s">{words}</p>
+  const kind = <span className="kind">{k.kindLabel}</span>
+  if (!k.precedents.length)
+    return (
+      <p className="knowledge s">
+        {kind}
+        <span className="state">{knowledgeWords(k)}</span>
+      </p>
+    )
   return (
     <details className="knowledge-more">
       <summary className="knowledge s">
-        {words}
-        <Icon name="chevron-right" size={14} />
+        {kind}
+        <span className="state">
+          {knowledgeWords(k)}
+          <Icon name="chevron-right" size={14} />
+        </span>
       </summary>
       <ul className="precedents">
         {k.precedents.map((p) => (

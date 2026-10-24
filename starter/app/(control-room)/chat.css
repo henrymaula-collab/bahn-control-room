@@ -66,13 +66,19 @@
 .said .via { display: inline-flex; margin-left: 8px; vertical-align: -2px; color: var(--ink-2); }
 
 /* What the agent knows about this kind: one quiet line under the opener */
-.knowledge { display: flex; flex-wrap: wrap; align-items: center; column-gap: 10px; row-gap: 2px; color: var(--ink-2); }
-.knowledge > span:nth-child(2) { color: var(--ink); font-weight: 500; }
-.turn.agent + .knowledge, .turn.agent + .knowledge-more { margin-top: -10px; }
-.knowledge-more > summary { width: fit-content; margin-left: -8px; padding: 4px 8px; border-radius: 10px; }
-.knowledge-more > summary:hover { background: var(--raise); }
-.knowledge-more > summary svg { color: var(--ink-2); margin-left: -6px; transition: transform 240ms var(--ease-open); }
+/* Two lines, always: the kind (grey), then where it stands (ink) */
+.knowledge { display: flex; flex-direction: column; align-items: flex-start; color: var(--ink-2); }
+.knowledge .state { display: inline-flex; align-items: center; gap: 2px; color: var(--ink); font-weight: 500; }
+.turn.agent + .knowledge, .turn.agent + .knowledge-more { margin-top: -8px; }
+.knowledge-more > summary { width: fit-content; margin: -4px 0 -4px -8px; padding: 4px 8px; border-radius: 10px; transition: background-color 150ms var(--ease); }
+.knowledge-more > summary:hover { background: rgb(18 17 14 / 0.035); }
+.knowledge-more > summary svg { color: var(--ink-2); transition: transform 240ms var(--ease-open); }
 .knowledge-more[open] > summary svg { transform: rotate(90deg); }
+
+/* The card's row: title and one grey line; the line steps aside while the panel says it */
+.row-link .row-text { display: flex; flex-direction: column; min-width: 0; }
+.row-link .row-text .sub { color: var(--ink-2); }
+.row-link[aria-expanded="true"] .row-text .sub { display: none; }
 .precedents { display: flex; flex-direction: column; gap: 16px; margin-top: 14px; }
 .precedents .m { margin-top: 2px; }
 .precedents .s + .s, .precedents .m + .s { margin-top: 2px; }
@@ -103,6 +109,14 @@
 .composer .voice:disabled { color: var(--ink-2); opacity: .55; cursor: default; }
 .composer .send { background: var(--ink); color: var(--page); }
 .composer .send:disabled { background: var(--press); color: var(--ink-2); cursor: default; }
+
+/* Phone: the conversation takes the screen, the field stays at the bottom */
+@media (max-width: 860px) {
+  .chat-panel { position: fixed; inset: 0; z-index: 50; width: 100%; }
+  .chat-log { padding: 8px 16px 24px; }
+  .chat-head { padding: 14px 16px 4px; }
+  .composer { margin: 0 8px max(8px, env(safe-area-inset-bottom)); }
+}
 
 @media (prefers-reduced-motion: reduce) {
   .amark.working::after, .spin, .step, .thinking, .step.running .step-label { animation: none; }

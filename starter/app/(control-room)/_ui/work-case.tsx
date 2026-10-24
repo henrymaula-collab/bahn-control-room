@@ -3,6 +3,7 @@
 import Link from "next/link"
 import { useEffect, useRef } from "react"
 import { createPortal } from "react-dom"
+import { knowledgeWords } from "@/lib/control-room/chat-words"
 import { range } from "@/lib/control-room/format"
 import type { ChatThread } from "@/lib/control-room/types-chat"
 import type { KeyFact, Situation, Stop } from "@/lib/control-room/types-v3"
@@ -47,7 +48,11 @@ export function CaseRows({
           aria-controls="chat"
           onClick={() => setOpen(open === "chat" ? null : "chat")}
         >
-          <span className="m title">Talk it through</span>
+          <span className="row-text">
+            <span className="m title">Talk it through</span>
+            {/* Where this kind of case stands, so a known kind can be decided without opening. Hidden while the panel says it. */}
+            <span className="s sub">{thread ? knowledgeWords(thread.knowledge) : "\u00a0"}</span>
+          </span>
           <span className="chev">
             <Icon name="chevron-right" size={18} />
           </span>

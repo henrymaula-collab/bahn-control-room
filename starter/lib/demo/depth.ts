@@ -43,15 +43,15 @@ export const DEMO_ORDER_IDS = Object.keys(DEMO_ORDERS) as DemoOrderId[]
 export const DEMO_PLACE_IDS = [...new Set(Object.values(DEMO_ORDERS).map((o) => o.placeId))]
 
 /**
- * When the agent last read each order's messages (the case's own step). Demo
- * messages on these orders must be newer, or the step's count would be wrong.
+ * When the agent read each order's messages, for the cases whose step says how
+ * many it read. Demo messages on these orders must be newer, or the count would
+ * be wrong. (CD-420442's made-up steps give no count.)
  */
-export const AGENT_READ_AT: Record<DemoOrderId, string> = {
+export const AGENT_READ_AT: Partial<Record<DemoOrderId, string>> = {
   "ord-00458": "2026-10-21T09:00:11.000Z", // recorded run: "Read 3 conversations (8 messages)."
   "ord-00516": "2026-10-21T09:00:11.000Z", // recorded run: "Read 3 conversations (8 messages)."
   "ord-00347": "2026-10-21T08:55:00.000Z", // derived: "Read 4 messages about the pickup."
   "ord-00593": "2026-10-21T08:55:00.000Z", // derived: "Read 6 messages about the pickup."
-  "ord-00442": "2026-10-21T08:44:00.000Z", // demo case: "Read the order and the profile of Orvendin Cars Stockholm." (no count)
 }
 
 // ---------- the pickup places ----------
@@ -212,6 +212,10 @@ function doc(id: string, orderId: DemoOrderId, kind: string, status: string, req
   return demo({ id, order_id: orderId, kind, status, required, file_count: files, signature_scope: "NONE", updated_at: at, ...extra })
 }
 
+function window(id: string, orderId: DemoOrderId, purpose: string, start: string, end: string, timezone: string, source: "OPS" | "CUSTOMER" | "SITE", statedAt: string): DemoRow {
+  return demo({ id, order_id: orderId, purpose, start_at: start, end_at: end, timezone, source, is_selected: false, stated_at: statedAt })
+}
+
 function contact(id: string, orderId: DemoOrderId, placeId: string, addressId: string, at: string, name: string, role: string, access?: string): DemoRow {
   return demo({
     id, order_id: orderId, boundary: "PICKUP", site_id: placeId, address_id: addressId,
@@ -250,6 +254,12 @@ const rows458: Partial<Record<string, DemoRow[]>> = {
     doc("demo-doc-458-zb1", "ord-00458", "REGISTRATION_CERTIFICATE_PART_I", "WITH_THE_CAR", true, 0, "2026-10-08T15:52:00Z"),
     doc("demo-doc-458-handover", "ord-00458", "SIGNED_HANDOVER", "PREPARED", true, 0, "2026-10-18T12:25:00Z", { medium: "DIGITAL" }),
     doc("demo-doc-458-photos", "ord-00458", "CONDITION_PHOTO", "REQUESTED", true, 0, "2026-10-18T12:25:00Z"),
+  ],
+  time_windows: [
+    // The agent's own draft asks for the release "by Fri 23 Oct so we can still book a driver".
+    window("demo-win-458-release-by", "ord-00458", "LATEST_DAY_FOR_THE_RELEASE_TO_BOOK_A_DRIVER_FOR_MONDAY", "2026-10-23T06:30:00Z", "2026-10-23T16:00:00Z", "Europe/Berlin", "OPS", "2026-10-21T09:01:56Z"),
+    // From the customer's order note: Kovellin hands the Ferrari to its own buyer the day after delivery.
+    window("demo-win-458-onward", "ord-00458", "CUSTOMER_HANDS_THE_CAR_TO_ITS_OWN_BUYER", "2026-10-27T09:00:00Z", "2026-10-27T11:00:00Z", "Europe/Berlin", "CUSTOMER", "2026-10-08T15:52:00Z"),
   ],
 }
 
@@ -295,6 +305,14 @@ const rows442: Partial<Record<string, DemoRow[]>> = {
     doc("demo-doc-442-regcert", "ord-00442", "REGISTRATION_CERTIFICATE_PART_2", "HELD_BY_SELLER", false, 0, "2026-10-18T09:40:00Z"),
     doc("demo-doc-442-plates", "ord-00442", "TEMPORARY_EXPORT_PLATES", "PREPARED", true, 1, "2026-10-20T13:10:00Z"),
     doc("demo-doc-442-photos", "ord-00442", "CONDITION_PHOTO", "VERIFIED", false, 12, "2026-10-19T14:02:00Z"),
+  ],
+  time_windows: [
+    window("demo-win-442-pay-1", "ord-00442", "SELLER_PAYMENT_CHECK_HOLD_CAN_BE_LIFTED", "2026-10-21T13:00:00Z", "2026-10-21T13:15:00Z", "Europe/Stockholm", "SITE", "2026-10-21T08:46:05Z"),
+    window("demo-win-442-pay-2", "ord-00442", "SELLER_PAYMENT_CHECK_HOLD_CAN_BE_LIFTED", "2026-10-22T08:00:00Z", "2026-10-22T08:15:00Z", "Europe/Stockholm", "SITE", "2026-10-21T08:46:05Z"),
+    window("demo-win-442-flight", "ord-00442", "DRIVER_FLIGHT_HELSINKI_TO_STOCKHOLM", "2026-10-21T15:45:00Z", "2026-10-21T17:00:00Z", "Europe/Helsinki", "OPS", "2026-10-20T16:27:00Z"),
+    window("demo-win-442-ferry", "ord-00442", "FERRY_CHECK_IN_CUTOFF_AND_DEPARTURE", "2026-10-22T15:30:00Z", "2026-10-22T17:00:00Z", "Europe/Stockholm", "OPS", "2026-10-19T11:39:00Z"),
+    // Orvendin closes Fri 17:00 and is shut at weekends; a Friday ferry still makes Monday in Tampere.
+    window("demo-win-442-latest", "ord-00442", "LATEST_PICKUP_THAT_KEEPS_THE_DELIVERY_PROMISE", "2026-10-23T07:00:00Z", "2026-10-23T15:00:00Z", "Europe/Stockholm", "OPS", "2026-10-21T08:49:00Z"),
   ],
 }
 

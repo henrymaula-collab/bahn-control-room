@@ -1,9 +1,8 @@
-# Optional Control Room starter
+# The control room app
 
-This is a small read-only starting point for the Car Delivery Control Room challenge. It uses Next.js with TypeScript, Postgres, Drizzle and Next.js API routes. The database comes from the fictional dataset in `../dataset/data`. No live Bahn system is connected.
+This folder is the app. How to run it without keys, the demo path and the real providers are in the [README one level up](../README.md); other ports, every setting and the checks are in [docs/running.md](../docs/running.md).
 
-The lanes are one familiar view, not a proposed answer. Each card opens a separate order record. Teams can keep, change or replace the interface and data model.
-Every vehicle model in this dataset has a generated illustration on its record page. Orders with the same model share an image. An illustration is not evidence about the specific vehicle. Single-colour make marks are in `public/car-logos/` for teams that want them.
+The app grew out of Bahn's optional starter for the challenge: Next.js with TypeScript, Postgres, Drizzle and Next.js API routes, loading the made-up dataset in `../dataset/data`. No live Bahn system is connected. `/` is now the control room; the starter's board of lanes opens at `/board`. From "The starter underneath" on, this file is the starter's own documentation, kept because its reading layer and APIs are still in use.
 
 ## Start
 
@@ -16,15 +15,21 @@ docker compose up -d --wait
 npm run db:push
 npm run db:seed
 npm run attachments:seed
-npm run db:seed:cr   # control room: made-up ops team, made-up past decisions, lessons
+npm run db:seed:cr   # control room: made-up ops team, past decisions, case records, lessons
+npm run demo:reset   # the demo's starting point
 npm run dev
 ```
 
-The control room engine lives in `lib/control-room/` and answers under `/api/cr/*` (desk, cases, decisions, lead, orders/checks, people). `npm run test:cr` runs its unit tests and `npm run smoke:cr` checks it end to end. The ops team and its past decisions are made up; only the pickup places and customers they point at come from the (fictional) dataset.
-
 Open http://localhost:3000.
 
-The Compose file uses three ports on this computer: 5438 for Postgres, 9009 and 9010 for the attachment store. If one of them is already in use, change it in `compose.yaml` and update `DATABASE_URL` or `S3_ENDPOINT` in `.env` to match.
+The control room engine lives in `lib/control-room/` and answers under `/api/cr/*` (desk, cases, decisions, chat, voice, history, kinds, trust rules, people). `npm run test:cr` runs its unit tests and `npm run smoke:cr` checks it end to end. The ops team and its past decisions are made up; only the pickup places and customers they point at come from the (fictional) dataset.
+
+The Compose file uses three ports on this computer: 5438 for Postgres, 9009 and 9010 for the attachment store. If one of them is already in use, [docs/running.md](../docs/running.md) shows how to move them without editing `compose.yaml`.
+
+## The starter underneath
+
+The lanes are one familiar view, not a proposed answer. Each card opens a separate order record. Teams can keep, change or replace the interface and data model.
+Every vehicle model in this dataset has a generated illustration on its record page. Orders with the same model share an image. An illustration is not evidence about the specific vehicle. Single-colour make marks are in `public/car-logos/` for teams that want them.
 
 The seed command **replaces** data in the local challenge database after checking every manifest count. It makes the replacement in one transaction. Run it again after updating the JSONL files.
 If you add your own tables with foreign keys to the starter data, reseeding stops instead of deleting those tables. Keep participant work in separate tables or migrate it deliberately before replacing the snapshot.
@@ -43,7 +48,7 @@ The same Compose file starts a local S3-compatible attachment store. `attachment
 - `GET /api/reference-data`: shared fictional terminals, road estimate ranges and operations actors that are not tied to a single order.
 - `GET /api/orders/:id/attachments`: metadata for the order's fictional PDFs and photos, with short-lived read-only URLs from the local attachment store.
 
-The board shows every order in its lane. Within a lane, orders that need a person come first, then the date that decides the next step: the requested pickup for new orders, the selected pickup slot while a driver is found or booked, the delivery promise while the car moves, and the recorded delivery or cancellation after that. Each card shows the car, reference, customer, route, that date and up to three short work lines: open alerts, owned work, waiting conversations, agent proposals and the assigned driver or live offer. "Needs a person" filters the board to orders with any of those. Search by reference, plate, customer, vehicle or city. Click a card to open its full record at `/orders/:id`.
+The board shows every order in its lane. Within a lane, orders that need a person come first, then the date that decides the next step: the requested pickup for new orders, the selected pickup slot while a driver is found or booked, the delivery promise while the car moves, and the recorded delivery or cancellation after that. Each card shows the car, reference, customer, route, that date and up to three short work lines: open alerts, owned work, waiting conversations, agent proposals and the assigned driver or live offer. "Needs a person" filters the board to orders with any of those. Search by reference, plate, customer, vehicle or city. Click a card to open its full record at `/board/:id`.
 The attention signal is derived from open alerts, unresolved incidents, open work items, open conversations, pending or failed agent proposals, unresolved endpoint claims, custody follow-ups, support inbox threads that name the order, and a moving car whose driver has started the leg while the app has sent no position and the delivery promise is still open. A conversation filed on one order and related to another counts for both, on the board and on the record. A quiet card means those records are empty, not that the order is verified safe. `display_lane` and the derived signal are reading aids for this starter, not operational truth.
 The order record is deliberately short. It opens with the model illustration, the car, a few facts as chips, one sentence of context and one headline about the situation ("Cole Mervalen collects it tomorrow.", "Running late to Hamburg.", "Still being prepared."). When the attention list holds a danger or warn item, the detail line ends with the first of them as "Open: ...". A danger item also gives the headline that tone. Then "Needs a person", four tiles (pickup, delivery, driver, fee or ETA), the route as stops with a leg between them, conversations with the last message, evidence as chips and a strip of sample files, prior agent work and the latest activity. When nothing is waiting, the panel says "Nothing in the records is waiting on a person." and names which records were checked and which were not. "Prior agent work" lists proposals already on the order with their recorded review. A team's own agent and the human decision on its proposals belong there. Everything else is folded under "Everything on this order": route details, alerts and work, drivers, the driver market, travel, costs, proofs and documents, prior agent work with room activity, and the full history. The page shows the shape of the data; the API and those folds hold the depth. Names of customers, drivers and sites link to their own pages, and order references link to the order. "Not supplied" is an unknown input, not a failed pickup. Labels come from `lib/present/labels.ts`; the raw codes stay in the API.
 Open, acknowledged, resolved and dismissed alerts remain distinct in the order view. An acknowledged alert still appears on the board with its owner; it is not treated as resolved. A dismissed alert retains the stale or invalid source and the evidence for dismissing it.

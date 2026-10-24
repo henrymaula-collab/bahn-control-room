@@ -33,6 +33,8 @@ export interface PastDecision {
   caseType: string
   placeId?: string
   placeName: string
+  /** The car on that order ("Bentley Continental GT"); absent for the made-up history, which has no order. */
+  car?: string
   optionId: string
   choice: string // the option label that was chosen
   why?: string

@@ -18,7 +18,7 @@ import type { ChatAction, ChatToolStep } from "@/lib/control-room/types-chat"
 import type { ChatCaseContext } from "./context"
 import { withDepth } from "./depth"
 import { answerWeight, earlierOfKind, recordOf } from "./knowledge"
-import { day, dayTime } from "./words"
+import { day, inPersonZone, stamp } from "./words"
 
 /** lib/agent read tools the chat may use. Everything else in lib/agent (calls, messages, proposing, resolving, callbacks) stays out. */
 export const REUSED_READ_TOOLS = ["get_order", "get_pickup_place", "get_conversations", "get_documents", "get_time_windows", "list_trust_rules"] as const
@@ -128,6 +128,7 @@ function precedents(ctx: ChatCaseContext) {
     decisions: rows.slice(0, 20).map((d) => ({
       when: day(d.at),
       who: d.personName,
+      car: d.car ?? null,
       pickup_place: d.placeName,
       order: d.reference || null,
       chose: d.choice,
@@ -145,7 +146,7 @@ function placeHistory(ctx: ChatCaseContext) {
   return {
     pickup_place: ctx.order.pickup.name,
     earlier_decisions_here: rows.length,
-    decisions: rows.slice(0, 20).map((d) => ({ when: day(d.at), kind: d.kind.label, who: d.personName, chose: d.choice, why: d.why ?? null })),
+    decisions: rows.slice(0, 20).map((d) => ({ when: day(d.at), kind: d.kind.label, who: d.personName, car: d.car ?? null, order: d.reference || null, chose: d.choice, why: d.why ?? null })),
     other_open_cases_here: ctx.placeCases.filter((c) => c.status === "waiting_for_person" || c.status === "agent_working").map((c) => ({ headline: c.headline, status: c.status.replace(/_/g, " ") })),
     lessons: ctx.lessons.map((l) => ({ text: l.text, status: l.status })),
   }
@@ -154,11 +155,20 @@ function placeHistory(ctx: ChatCaseContext) {
 function calls(ctx: ChatCaseContext) {
   return {
     calls: ctx.calls.map((c) => ({
-      started: dayTime(c.startedAt),
+      started: stamp(c.startedAt),
       language: c.language,
       outcome: c.outcome.replace(/_/g, " "),
       turns: c.turns.map((t) => ({ speaker: t.speaker === "agent" ? "Bahn agent" : ctx.order.pickup.name, text: t.text, ...(t.translation ? { english: t.translation } : {}) })),
     })),
+  }
+}
+
+/** One time zone in every answer (words.ts inPersonZone). */
+function zoned(content: string): string {
+  try {
+    return JSON.stringify(inPersonZone(JSON.parse(content)))
+  } catch {
+    return content
   }
 }
 
@@ -175,11 +185,11 @@ export interface ChatToolResult {
 export async function executeChatTool(ctx: ChatCaseContext, name: string, getRun: () => RunContext): Promise<ChatToolResult> {
   if (!isChatTool(name)) return { content: JSON.stringify({ error: `The chat cannot use ${name}. It only looks things up, and offers one of the case's options with propose_option.` }), isError: true }
   try {
-    if (name === "get_precedents") return { content: JSON.stringify(precedents(ctx)), isError: false }
-    if (name === "get_place_history") return { content: withDepth(name, JSON.stringify(placeHistory(ctx)), ctx), isError: false }
-    if (name === "get_calls") return { content: withDepth(name, JSON.stringify(calls(ctx)), ctx), isError: false }
+    if (name === "get_precedents") return { content: zoned(JSON.stringify(precedents(ctx))), isError: false }
+    if (name === "get_place_history") return { content: zoned(withDepth(name, JSON.stringify(placeHistory(ctx)), ctx)), isError: false }
+    if (name === "get_calls") return { content: zoned(withDepth(name, JSON.stringify(calls(ctx)), ctx)), isError: false }
     const r = await executeTool(getRun(), name, { order: ctx.order.reference })
-    return { content: r.isError ? r.content : withDepth(name, r.content, ctx), isError: r.isError }
+    return { content: r.isError ? r.content : zoned(withDepth(name, r.content, ctx)), isError: r.isError }
   } catch (e) {
     return { content: JSON.stringify({ error: e instanceof Error ? e.message : String(e) }), isError: true }
   }

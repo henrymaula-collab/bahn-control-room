@@ -143,6 +143,7 @@ export async function engineContext(caseId: string, personId: string): Promise<C
       caseType: row.caseType,
       placeId: row.placeId ?? undefined,
       placeName: placeName(row.placeId),
+      ...(stored && state.world.byId.get(stored.orderId) ? { car: vehicleName(state.world.byId.get(stored.orderId)) } : {}),
       optionId: row.optionId,
       choice: optionLabel(stored, row.optionId, row.data.editedDetail),
       ...(row.data.why ? { why: row.data.why } : {}),

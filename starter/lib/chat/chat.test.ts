@@ -294,6 +294,17 @@ test("the chat's tools carry the baseline in full", async () => {
   assert.ok(place.phone && (place.contacts as unknown[]).length >= 2 && place.opening_hours)
   assert.equal(((await read("get_place_history")).earlier_pickups_here as unknown[]).length, 3)
   assert.ok((await read("get_order")).customer_contact)
+  const iso = /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/
+  for (const name of ["get_order", "get_conversations", "get_time_windows", "get_calls", "get_documents", "get_pickup_place"]) {
+    const text = (await executeChatTool(ctx, name, () => run)).content
+    assert.ok(!iso.test(text), `${name}: every time is in Helsinki time, none in UTC`)
+  }
+  assert.match(JSON.stringify(conv), /Helsinki time/)
+  // A precedent names its car and pickup place, so the agent can say "the Bentley at Orvendin Cars".
+  const withCar = { ...ctx, kind: kindOfType("readiness.car_not_ready"), history: past(1, { personId: "p-aino", kind: kindOfType("readiness.car_not_ready"), placeName: "Orvendin Cars Stockholm", car: "Bentley Continental GT" }) }
+  const prec = JSON.parse((await executeChatTool(withCar, "get_precedents", () => run)).content) as { decisions: { car: string; pickup_place: string }[] }
+  assert.equal(prec.decisions[0]?.car, "Bentley Continental GT")
+  assert.equal(prec.decisions[0]?.pickup_place, "Orvendin Cars Stockholm")
 })
 
 // ---------- the route, in fixture mode (no database, no keys) ----------

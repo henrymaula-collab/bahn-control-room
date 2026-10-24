@@ -8,7 +8,7 @@ import { depthLine } from "./depth"
 import { recordOf } from "./knowledge"
 import type { OpenerShape } from "./opener"
 import { buttonLabel } from "./tools"
-import { DETAIL_WORDS, day, dayTime } from "./words"
+import { DETAIL_WORDS, day, dayTime, stamp } from "./words"
 
 export const CHAT_SYSTEM_PROMPT = `You are the Readiness desk agent at Bahn, talking one decision through with a Bahn ops person. Bahn delivers used cars for car dealers: one freelance driver drives each car, in Finland, Denmark and Germany. You did the legwork on this case already; the person decides, and you help them decide well.
 
@@ -28,7 +28,8 @@ How you answer
 - Never give a number about a named colleague (how many cases they decided, how often, their weight or record), and never rank people ("most often", "the most experienced"). Say who decided which earlier case and why; totals for the whole team are fine, and so are the person's own numbers. Only a shift lead may hear per-person counts.
 - Fit the person: if they know this kind well, give the core in one or two sentences. If they are new to it, explain how this kind of problem works and what each option leads to.
 - When the question came by voice, answer in at most 35 words (70 when they asked for detail) that read well aloud: no symbols, no lists, no references in brackets, times said plainly ("Friday at ten").
-- Always end with the decision left to the person, in a few plain words, and vary them ("Your call.", "The decision is yours.", "Up to you.").`
+- Leave the decision to the person in words at most once in a conversation; your opener already did. Say it again only when they ask what to do or lean toward an option, in a few plain words ("Your call."). A factual answer (who, what, when, which documents, what someone wrote) ends with the fact.
+- Times in your tools are all Helsinki time and say so; give them as they are, never convert.`
 
 function list<T>(items: T[], fn: (x: T) => string, empty = "none"): string {
   return items.length ? items.map(fn).join("\n") : empty
@@ -62,7 +63,7 @@ export function contextBlock(ctx: ChatCaseContext, k: CaseKnowledge, shape: Open
     k.novelty === "new"
       ? "It has not happened before: nobody at Bahn has decided a case of this kind."
       : `Decided ${k.decided} times before by ${k.peopleCount} ${k.peopleCount === 1 ? "person" : "people"}; ${k.sameAsSuggestion} chose what you suggest now. The agent may propose to handle this kind alone only after ${k.needed} agreeing answers from more than one person.`,
-    list(k.precedents, (p) => `- ${day(p.at)}, ${p.decidedBy} at ${p.place}${p.reference ? ` (${p.reference})` : ""}: ${p.choice}.${p.why ? ` Why: "${p.why}"` : ""}`, ""),
+    list(k.precedents, (p) => `- ${day(p.at)}, ${p.decidedBy}, ${carOf(ctx, p.caseId) ? `the ${carOf(ctx, p.caseId)} ` : ""}at ${p.place}${p.reference ? ` (${p.reference})` : ""}: ${p.choice}.${p.why ? ` Why: "${p.why}"` : ""}`, ""),
     calls(ctx),
     depthLine(ctx),
     ``,
@@ -77,9 +78,11 @@ export function contextBlock(ctx: ChatCaseContext, k: CaseKnowledge, shape: Open
   return lines.filter((l, i, all) => !(l === "" && all[i - 1] === "")).join("\n")
 }
 
+const carOf = (ctx: ChatCaseContext, caseId: string) => ctx.history.find((d) => d.caseId === caseId)?.car
+
 function calls(ctx: ChatCaseContext): string {
   if (!ctx.calls.length) return ""
-  return `\n# Calls on this order\n${ctx.calls.length} call(s); the latest started ${dayTime(ctx.calls[ctx.calls.length - 1].startedAt)}. Use get_calls for the transcript.`
+  return `\n# Calls on this order\n${ctx.calls.length} call(s); the latest started ${stamp(ctx.calls[ctx.calls.length - 1].startedAt)}. Use get_calls for the transcript.`
 }
 
 export function chatSystem(ctx: ChatCaseContext, k: CaseKnowledge, shape: OpenerShape, opener: ChatMessage): string {

@@ -6,9 +6,9 @@
 
 import type { CaseDepth } from "@/lib/depth/types"
 import type { ChatCaseContext } from "./context"
-import { day, dayTime } from "./words"
+import { day, stamp } from "./words"
 
-const when = (iso: string) => `${dayTime(iso)} Helsinki time`
+const when = stamp
 
 const notesOut = (d: CaseDepth) => d.notes.map((n) => ({ when: when(n.at), by: n.by, text: n.text }))
 

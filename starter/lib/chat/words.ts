@@ -10,6 +10,23 @@ export const day = (iso: string) => DAY.format(new Date(iso)).replace(",", "")
 /** "Sat 24 Oct 14:05" (Helsinki). */
 export const dayTime = (iso: string) => `${day(iso)} ${TIME.format(new Date(iso))}`
 
+/**
+ * The control room's one time zone for the chat: the people sit in Helsinki. Every tool answer gives
+ * times this way, labelled the same, so the model never converts (a UTC 08:58 once came out as 10:58).
+ */
+export const PERSON_ZONE_LABEL = "Helsinki time"
+export const stamp = (iso: string) => `${dayTime(iso)} ${PERSON_ZONE_LABEL}`
+
+const ISO_TIME = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2}(\.\d+)?)?(Z|[+-]\d{2}:?\d{2})$/
+
+/** Every timestamp in a tool's JSON answer, in the person's zone with its label. A place's own "local" range keeps its zone, renamed so it reads as local. */
+export function inPersonZone(v: unknown): unknown {
+  if (typeof v === "string") return ISO_TIME.test(v) && !Number.isNaN(Date.parse(v)) ? stamp(v) : v
+  if (Array.isArray(v)) return v.map(inPersonZone)
+  if (v && typeof v === "object") return Object.fromEntries(Object.entries(v).map(([k, x]) => [k === "local" ? "local_time_at_the_place" : k, inPersonZone(x)]))
+  return v
+}
+
 /** Sentence starters that may go lower case mid-sentence; anything else (a place, a person, a dealer) keeps its capital. */
 const COMMON = new Set(
   ("the a an ask move keep pause go hold release accept call wait send book cancel tell check let write pay follow confirm find get take use try " +

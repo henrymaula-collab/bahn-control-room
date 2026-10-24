@@ -40,10 +40,10 @@
 :where(.lab-chat-base) .lc-shimmer {
   background: linear-gradient(90deg, var(--ink-2) 0%, var(--ink-2) 38%, var(--ink) 50%, var(--ink-2) 62%, var(--ink-2) 100%);
   background-size: 250% 100%; -webkit-background-clip: text; background-clip: text; color: transparent;
-  animation: lc-shimmer 2.2s linear infinite;
+  animation: labchat-shimmer 2.2s linear infinite;
 }
-@keyframes lc-shimmer { from { background-position: 100% 0; } to { background-position: 0% 0; } }
-@keyframes lc-in { from { opacity: 0; transform: translateY(3px); } to { opacity: 1; transform: none; } }
+@keyframes labchat-shimmer { from { background-position: 100% 0; } to { background-position: 0% 0; } }
+@keyframes labchat-in { from { opacity: 0; transform: translateY(3px); } to { opacity: 1; transform: none; } }
 
 /* The kind of case and where it stands */
 :where(.lab-chat-base) .lc-kind { display: flex; flex-direction: column; align-items: flex-start; font-size: var(--type-subhead); line-height: var(--lh-subhead); color: var(--ink-2); }
@@ -92,3 +92,6 @@
   :where(.lab-chat-base) .lc-shimmer { animation: none; color: var(--ink-2); background: none; }
   :where(.lab-chat-base) * { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; }
 }
+
+/* Keyboard: every control in a variant shows where focus is */
+:where(.lab-chat-base) button:focus-visible, :where(.lab-chat-base) summary:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }

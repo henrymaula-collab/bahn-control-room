@@ -12,7 +12,7 @@
 .lab-chat-10 .lc-msg-body .lc-words { margin-top: 0; gap: 0.5em; }
 .lab-chat-10 .lc-msg-body .lc-kind { margin-top: 0.3em; }
 .lab-chat-10 .lc-msg.is-done strong { font-weight: 600; }
-.lab-chat-10 .lc-msg.is-done, .lab-chat-10 .lc-person + .lc-msg { animation: lc-in 220ms var(--ease) both; }
+.lab-chat-10 .lc-msg.is-done, .lab-chat-10 .lc-person + .lc-msg { animation: labchat-in 220ms var(--ease) both; }
 
 /* What the agent read: one grey line, the list on a tap */
 .lab-chat-10 .lc-how { align-self: flex-start; margin: -2px 0 0 -6px; padding: 2px 6px; border-radius: 8px; text-align: left; font-size: var(--type-subhead); line-height: var(--lh-subhead); color: var(--ink-2); transition: background-color 120ms var(--ease), color 120ms var(--ease); }

@@ -8,10 +8,10 @@
   height: clamp(240px, calc(var(--cr-vh, 100vh) * 0.48), 440px); scroll-margin: 12px 0 14px;
   border-radius: 16px; background: var(--page);
   box-shadow: 0 0 0 1px rgb(18 17 14 / 0.08), 0 4px 18px rgb(60 50 30 / 0.06);
-  animation: lc09-open 250ms cubic-bezier(0.2, 0, 0, 1) both; transform-origin: top center;
+  animation: labchat-09-open 250ms cubic-bezier(0.2, 0, 0, 1) both; transform-origin: top center;
   overflow: hidden;
 }
-@keyframes lc09-open { from { opacity: 0; transform: translateY(-6px) scale(0.985); } to { opacity: 1; transform: none; } }
+@keyframes labchat-09-open { from { opacity: 0; transform: translateY(-6px) scale(0.985); } to { opacity: 1; transform: none; } }
 .lab-chat-09 .lc-log { padding: 14px var(--lc-x) 14px; gap: calc(1 * var(--type-body)); }
 .lab-chat-09 .lc-by > span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .lab-chat-09 .lc-words { gap: 0.5em; }
@@ -23,7 +23,7 @@
   transition: background-color 120ms var(--ease), color 120ms var(--ease);
 }
 .lab-chat-09 .lc-earlier-btn:hover { background: var(--raise); color: var(--ink); }
-.lab-chat-09 .lc-earlier-list { display: flex; flex-direction: column; gap: calc(0.9 * var(--type-body)); margin-top: 0.8em; padding-bottom: 0.9em; border-bottom: 1px solid rgb(18 17 14 / 0.07); color: var(--ink-2); animation: lc-in 180ms var(--ease) both; }
+.lab-chat-09 .lc-earlier-list { display: flex; flex-direction: column; gap: calc(0.9 * var(--type-body)); margin-top: 0.8em; padding-bottom: 0.9em; border-bottom: 1px solid rgb(18 17 14 / 0.07); color: var(--ink-2); animation: labchat-in 180ms var(--ease) both; }
 
 /* The field at the box's foot, and the fold-away control beside it */
 .lab-chat-09 .lc-foot { flex: none; display: flex; align-items: flex-end; gap: 4px; padding: 0 8px 8px; }

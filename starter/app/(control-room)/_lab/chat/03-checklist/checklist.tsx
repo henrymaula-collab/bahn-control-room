@@ -7,7 +7,7 @@
 
 import { useState } from "react"
 import type { ChatMessage, ChatThread, ChatToolStep } from "@/lib/control-room/types-chat"
-import { newsOf, runningWords, useChatCore, useFollow, type Offer } from "../core"
+import { runningWords, shortOpener, useChatCore, useFollow, type Offer } from "../core"
 import { AgentMark, Composer, Icon, KindLine, Paras, PanelFrame } from "../parts"
 import "./checklist.css"
 
@@ -70,10 +70,15 @@ export function ChecklistChat({ thread, personId, open, now, onClose }: Props) {
       <div className="lc-log" ref={follow.ref} onScroll={follow.onScroll} role="log" aria-live="polite" aria-busy={!!core.live || !thread}>
         {thread ? (
           <>
-            <div className="lc-agent">
-              <Folded steps={thread.opener.toolSteps ?? []} />
+            <div className="lc-agent lc-opener">
+              {/* Before the first question the opener shows its own steps, ticked: what it read to get here. */}
+              {core.messages.length === 0 ? (
+                <Rail rows={(thread.opener.toolSteps ?? []).map((s) => ({ id: s.id, text: s.label, state: "done" as const }))} />
+              ) : (
+                <Folded steps={thread.opener.toolSteps ?? []} />
+              )}
               <div className="lc-words">
-                {newsOf(thread.opener.text).map((s) => (
+                {shortOpener(thread.opener.text).lead.map((s) => (
                   <p key={s}>{s}</p>
                 ))}
               </div>

@@ -7,7 +7,7 @@
 .lab-chat-01 .lc-rest-body {
   display: flex; flex-direction: column; gap: 0.5em; margin-top: 0.8em; padding-left: 0.9em;
   border-left: 2px solid var(--press); font-size: var(--type-subhead); line-height: var(--lh-subhead);
-  animation: lc-in 200ms var(--ease) both;
+  animation: labchat-in 200ms var(--ease) both;
 }
 .lab-chat-01 .lc-rest-body .lc-kind { margin-top: 0.4em; }
 .lab-chat-01 .lc-more {
@@ -33,7 +33,7 @@
 .lab-chat-01 .lc-starters li:has(+ li button:hover), .lab-chat-01 .lc-starters li:has(button:hover) + li { border-color: transparent; }
 
 /* After the yes: one line of what happened, under the answer */
-.lab-chat-01 .lc-done { margin-top: 0.9em; display: flex; flex-direction: column; gap: 0.3em; animation: lc-in 200ms var(--ease) both; }
+.lab-chat-01 .lc-done { margin-top: 0.9em; display: flex; flex-direction: column; gap: 0.3em; animation: labchat-in 200ms var(--ease) both; }
 .lab-chat-01 .lc-done .lc-by { color: var(--ink); font-weight: 600; }
 .lab-chat-01 .lc-done-line { color: var(--ink-2); font-size: var(--type-subhead); line-height: var(--lh-subhead); }
-.lab-chat-01 .lc-live .lc-words { animation: lc-in 200ms var(--ease) both; }
+.lab-chat-01 .lc-live .lc-words { animation: labchat-in 200ms var(--ease) both; }

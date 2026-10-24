@@ -42,13 +42,13 @@
 .lab-chat-04 .lc-bars i { display: block; width: 3px; height: 4px; border-radius: 2px; background: var(--ink); }
 .lab-chat-04 .lc-dock[data-state="listening"] .lc-bars, .lab-chat-04 .lc-dock[data-state="speaking"] .lc-bars { opacity: 1; }
 .lab-chat-04 .lc-dock[data-state="speaking"] .lc-bars i { background: var(--green); }
-.lab-chat-04 .lc-dock[data-state="listening"] .lc-bars i, .lab-chat-04 .lc-dock[data-state="speaking"] .lc-bars i { animation: lc-bar 900ms var(--ease) infinite alternate; }
+.lab-chat-04 .lc-dock[data-state="listening"] .lc-bars i, .lab-chat-04 .lc-dock[data-state="speaking"] .lc-bars i { animation: labchat-bar 900ms var(--ease) infinite alternate; }
 .lab-chat-04 .lc-bars i:nth-child(1) { --h: 9px; animation-delay: -120ms !important; }
 .lab-chat-04 .lc-bars i:nth-child(2) { --h: 18px; animation-delay: -480ms !important; }
 .lab-chat-04 .lc-bars i:nth-child(3) { --h: 13px; animation-delay: -260ms !important; }
 .lab-chat-04 .lc-bars i:nth-child(4) { --h: 20px; animation-delay: -640ms !important; }
 .lab-chat-04 .lc-bars i:nth-child(5) { --h: 8px; animation-delay: -60ms !important; }
-@keyframes lc-bar { from { height: 4px; } to { height: var(--h); } }
+@keyframes labchat-bar { from { height: 4px; } to { height: var(--h); } }
 
 /* Typing instead: the field, and the way back to talking */
 .lab-chat-04 .lc-typing { flex: none; display: flex; align-items: flex-end; }

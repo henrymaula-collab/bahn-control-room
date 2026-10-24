@@ -72,14 +72,20 @@ function InlineBox({ thread, personId, onClose }: { thread: ChatThread | null; p
   const follow = useFollow([core.messages.length, core.live?.text, core.live?.steps.length, core.offer?.state])
   const [earlier, setEarlier] = useState(false)
 
-  // Bring the whole box into view once, without moving the card more than needed.
+  // Bring the whole box into view, without moving the card more than needed. Checked again while the
+  // card above settles (fonts, the thread arriving), never after the person starts reading.
   useEffect(() => {
-    const el = box.current
-    const sc = el?.closest<HTMLElement>(".detail")
-    if (!el || !sc) return
-    const over = el.getBoundingClientRect().bottom + 14 - sc.getBoundingClientRect().bottom
-    if (over > 0) sc.scrollTop += over
-  }, [])
+    const show = () => {
+      const el = box.current
+      const sc = el?.closest<HTMLElement>(".detail")
+      if (!el || !sc) return
+      const over = el.getBoundingClientRect().bottom + 14 - sc.getBoundingClientRect().bottom
+      if (over > 0) sc.scrollTop += over
+    }
+    show()
+    const timers = [120, 400, 1000, 2000].map((ms) => setTimeout(show, ms))
+    return () => timers.forEach(clearTimeout)
+  }, [thread])
   // Escape (outside the field) folds the conversation away.
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {

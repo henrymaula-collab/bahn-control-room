@@ -7,7 +7,7 @@
 
 import { useEffect, useRef } from "react"
 import type { ChatMessage, ChatThread, ChatToolStep } from "@/lib/control-room/types-chat"
-import { newsOf, runningWords, stepSentence, useChatCore, useFollow, type Offer } from "../core"
+import { runningWords, shortOpener, stepSentence, useChatCore, useFollow, type Offer } from "../core"
 import { AgentMark, Composer, Icon, KindLine, Paras, PanelFrame } from "../parts"
 import "./approve.css"
 
@@ -37,7 +37,7 @@ export function ApproveChat({ thread, personId, open, now, onClose }: Props) {
             <div className="lc-agent">
               <Byline steps={thread.opener.toolSteps ?? []} />
               <div className="lc-words">
-                {newsOf(thread.opener.text).map((s) => (
+                {shortOpener(thread.opener.text).lead.map((s) => (
                   <p key={s}>{s}</p>
                 ))}
               </div>

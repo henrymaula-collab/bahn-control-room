@@ -31,7 +31,7 @@
 .lab-chat-05 .lc-link svg { color: var(--ink-2); }
 .lab-chat-05 .lc-link:hover { background: var(--raise); }
 .lab-chat-05 .lc-link:focus-visible { outline: 2px solid var(--ink); outline-offset: 1px; }
-.lab-chat-05 .lc-src { display: flex; flex-direction: column; gap: 0.3em; margin: 0.1em 0 0; padding-left: 0.9em; border-left: 2px solid var(--press); font-size: var(--type-subhead); line-height: var(--lh-subhead); color: var(--ink-2); list-style: none; animation: lc-in 180ms var(--ease) both; }
+.lab-chat-05 .lc-src { display: flex; flex-direction: column; gap: 0.3em; margin: 0.1em 0 0; padding-left: 0.9em; border-left: 2px solid var(--press); font-size: var(--type-subhead); line-height: var(--lh-subhead); color: var(--ink-2); list-style: none; animation: labchat-in 180ms var(--ease) both; }
 
 /* The answer on its way */
 .lab-chat-05 .lc-doing { display: flex; align-items: center; gap: 0.5em; font-size: var(--type-subhead); line-height: var(--lh-subhead); color: var(--ink-2); }
@@ -40,4 +40,4 @@
 
 /* The offer under the answer; after the yes, the same shape: the line in ink, the rest in grey */
 .lab-chat-05 .lc-offer { margin-top: 0.5em; }
-.lab-chat-05 .lc-decided { margin-top: 0.9em; padding-top: 0.9em; border-top: 1px solid rgb(18 17 14 / 0.07); animation: lc-in 200ms var(--ease) both; }
+.lab-chat-05 .lc-decided { margin-top: 0.9em; padding-top: 0.9em; border-top: 1px solid rgb(18 17 14 / 0.07); animation: labchat-in 200ms var(--ease) both; }

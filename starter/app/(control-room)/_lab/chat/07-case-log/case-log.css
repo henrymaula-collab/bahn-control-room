@@ -22,14 +22,14 @@
 .lab-chat-07 .lc-event-icon { flex: none; width: 1.3em; height: calc(var(--lh-subhead) * 1em); display: inline-flex; align-items: center; justify-content: center; color: var(--ink-2); }
 .lab-chat-07 .lc-event-text { min-width: 0; }
 .lab-chat-07 .lc-event time { padding-left: 8px; }
-.lab-chat-07 .lc-spin { width: 11px; height: 11px; border-radius: 50%; border: 1.5px solid rgb(18 17 14 / 0.16); border-top-color: var(--ink-2); animation: lc-spin7 900ms linear infinite; }
-@keyframes lc-spin7 { to { transform: rotate(360deg); } }
-.lab-chat-07 .lc-turn > .lc-event { animation: lc-in 200ms var(--ease) both; }
+.lab-chat-07 .lc-spin { width: 11px; height: 11px; border-radius: 50%; border: 1.5px solid rgb(18 17 14 / 0.16); border-top-color: var(--ink-2); animation: labchat-spin7 900ms linear infinite; }
+@keyframes labchat-spin7 { to { transform: rotate(360deg); } }
+.lab-chat-07 .lc-turn > .lc-event { animation: labchat-in 200ms var(--ease) both; }
 
 /* The offer, then the decision as the record's last event */
 .lab-chat-07 .lc-offer { margin: 0; padding-left: calc(1.8 * var(--type-subhead)); }
 .lab-chat-07 .lc-offer-note { font-size: var(--type-subhead); line-height: var(--lh-subhead); color: var(--ink-2); }
-.lab-chat-07 .lc-decision { display: flex; flex-direction: column; gap: 0.3em; padding: 0.75em 0.85em; border-radius: 12px; background: var(--raise); animation: lc-in 200ms var(--ease) both; }
+.lab-chat-07 .lc-decision { display: flex; flex-direction: column; gap: 0.3em; padding: 0.75em 0.85em; border-radius: 12px; background: var(--raise); animation: labchat-in 200ms var(--ease) both; }
 .lab-chat-07 .lc-decision-head { display: flex; align-items: center; gap: 0.5em; font-size: var(--type-body); line-height: var(--lh-body); font-weight: 600; }
 .lab-chat-07 .lc-decision-head .lc-event-icon { color: var(--ink); height: auto; }
 .lab-chat-07 .lc-decision-head time { font-size: var(--type-subhead); }

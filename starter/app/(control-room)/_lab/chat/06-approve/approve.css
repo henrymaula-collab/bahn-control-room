@@ -10,9 +10,9 @@
   flex: none; display: flex; flex-direction: column; gap: 6px;
   margin: 0 max(12px, calc(16 * var(--cr-u, 1px))) max(12px, calc(16 * var(--cr-u, 1px)));
   padding: 14px; border-radius: 18px; background: var(--raise);
-  animation: lc-dock-in 250ms cubic-bezier(0.2, 0, 0, 1) both;
+  animation: labchat-dock-in 250ms cubic-bezier(0.2, 0, 0, 1) both;
 }
-@keyframes lc-dock-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+@keyframes labchat-dock-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
 .lab-chat-06 .lc-approve-title { display: flex; align-items: center; gap: 0.5em; font-size: var(--type-headline); line-height: var(--lh-headline); letter-spacing: var(--track-headline); font-weight: 600; }
 .lab-chat-06 .lc-approve-title .amark { width: 1.25em !important; height: 1.25em !important; }
 .lab-chat-06 .lc-approve-title .amark svg { width: 62%; height: 62%; }
@@ -34,7 +34,7 @@
 .lab-chat-06 .lc-approve-limit { margin-top: 4px; font-size: var(--type-subhead); line-height: var(--lh-subhead); color: var(--ink-2); }
 
 /* After the yes: one line in the conversation, the field back */
-.lab-chat-06 .lc-decided { display: flex; align-items: flex-start; gap: 8px; margin-top: 0.9em; padding: 0.7em 0.85em; border-radius: 12px; background: var(--raise); font-size: var(--type-subhead); line-height: var(--lh-subhead); color: var(--ink-2); animation: lc-in 200ms var(--ease) both; }
+.lab-chat-06 .lc-decided { display: flex; align-items: flex-start; gap: 8px; margin-top: 0.9em; padding: 0.7em 0.85em; border-radius: 12px; background: var(--raise); font-size: var(--type-subhead); line-height: var(--lh-subhead); color: var(--ink-2); animation: labchat-in 200ms var(--ease) both; }
 .lab-chat-06 .lc-decided svg { flex: none; margin-top: 0.15em; color: var(--ink); }
 .lab-chat-06 .lc-decided strong { color: var(--ink); font-weight: 600; }
 

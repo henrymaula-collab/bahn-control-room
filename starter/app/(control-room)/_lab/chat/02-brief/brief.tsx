@@ -142,7 +142,6 @@ function OfferCard({ offer, onYes, onNo }: { offer: Offer; onYes: () => void; on
           <p className="lc-card-title">{a.label}</p>
           {a.next && <p className="lc-card-body">Then {a.next.replace(/^The agent/, "the agent")}</p>}
           <div className="lc-card-foot">
-            <span className="lc-card-note">Nothing happens before you tap.</span>
             <button type="button" className="btn btn-plain" disabled={offer.state === "saving"} onClick={onNo}>
               Not now
             </button>

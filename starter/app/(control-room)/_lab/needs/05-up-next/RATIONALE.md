@@ -1,0 +1,7 @@
+# needs 05: The next case peeks under this one
+
+Borrows from Superhuman (https://help.superhuman.com/hc/en-us/articles/46005833597709-Achieve-Inbox-Zero: "as soon as you action an email, you'll immediately move to the next conversation") and Linear's inbox, where the next item is always beside the open one (https://nicelydone.club/examples/screens/28becab1-031e-404d-93e2-3395cd77c4af, `research/premium/visual/shots/needs-01-linear-inbox.png`).
+What it takes: the next item is never more than one move away and is read before you get there; the queue's size is shown by depth, not by a list.
+Here: under the rows, pinned to the bottom edge, the next case rises like the next card in a stack: "Next, Volvo V60", its decide-by, and its own headline from the engine; one or two card edges behind it when more wait. Hover, focus or a tap lifts it to show its question. After a decision the decided case shrinks to one receipt line ("Ferrari Roma decided by Aino at 12:04") and the next case's situation and question take the card's place, with "Open Volvo V60".
+Why for an ops person under time pressure: you see what the next decision is about while finishing this one, so the switch costs no reading time and nothing surprises.
+Trade-off: the peek takes about three lines at the bottom of the column; on a small window it covers the end of the rows until you scroll. Padding rows (red orders without a case) have no headline and say the car and place instead.

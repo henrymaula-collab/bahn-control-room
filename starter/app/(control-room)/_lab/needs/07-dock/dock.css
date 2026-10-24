@@ -1,0 +1,76 @@
+/* needs 07: a dock that stays while cases change. Every rule under .lab-needs-07. */
+
+/* The wrapper adds nothing to the layout: the card column stays the frame's grid item. */
+.lab-needs-07 { display: contents; }
+/* Room under the card so its last row is never under the dock. */
+.lab-needs-07 > .detail.detail { padding-bottom: calc(max(calc(28 * var(--type-kf)), calc(56 * var(--cr-u, 1px))) + 64px); }
+
+/* The bay: the bottom of the card column (the panel's room kept free), the dock centred in it. */
+.lab-needs-07 .lab-needs-07-bay {
+  position: absolute; left: 0; right: 0; bottom: max(14px, calc(24 * var(--cr-u, 1px))); z-index: 12;
+  display: flex; justify-content: center; padding: 0 16px; pointer-events: none;
+  transition: right 200ms cubic-bezier(0.2, 0, 0, 1);
+}
+.lab-needs-07.beside .lab-needs-07-bay { right: var(--panel); }
+.lab-needs-07 .lab-needs-07-dock {
+  position: relative; pointer-events: auto; max-width: 100%;
+  font-size: var(--type-body); line-height: var(--lh-body);
+}
+.lab-needs-07 .lab-needs-07-bar {
+  display: flex; align-items: center; gap: 2px; min-height: 48px; padding: 4px; border-radius: 999px;
+  background: var(--page); color: var(--ink);
+  box-shadow: 0 0 0 1px rgb(18 17 14 / 0.07), 0 1px 2px rgb(18 17 14 / 0.05), 0 10px 30px rgb(18 17 14 / 0.12);
+  transition: background-color 200ms cubic-bezier(0.2, 0, 0, 1), color 200ms cubic-bezier(0.2, 0, 0, 1);
+}
+.lab-needs-07 .lab-needs-07-step, .lab-needs-07 .lab-needs-07-where, .lab-needs-07 .lab-needs-07-next, .lab-needs-07 .lab-needs-07-open {
+  display: inline-flex; align-items: center; gap: 0.35em; min-height: 40px; border-radius: 999px;
+  transition: background-color 100ms cubic-bezier(0.2, 0, 0, 1);
+}
+.lab-needs-07 .lab-needs-07-step { justify-content: center; width: 40px; color: var(--ink); }
+.lab-needs-07 .lab-needs-07-step.off { color: var(--press); }
+.lab-needs-07 .lab-needs-07-where { padding: 0 0.6em 0 0.75em; color: var(--ink-2); font-size: var(--type-subhead); white-space: nowrap; }
+.lab-needs-07 .lab-needs-07-where svg { width: 0.9em; height: 0.9em; }
+.lab-needs-07 .lab-needs-07-next { min-width: 0; padding: 0 0.6em 0 0.95em; }
+.lab-needs-07 .lab-needs-07-next.off { color: var(--ink-2); font-size: var(--type-subhead); padding-right: 1.1em; }
+.lab-needs-07 .lab-needs-07-next svg, .lab-needs-07 .lab-needs-07-open svg { flex: none; width: 1em; height: 1em; }
+.lab-needs-07 .lab-needs-07-next svg { color: var(--ink-2); }
+.lab-needs-07 .lab-needs-07-car { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 16em; }
+.lab-needs-07 .lab-needs-07-next time { flex: none; font-size: var(--type-subhead); font-weight: 600; color: var(--ink-2); }
+.lab-needs-07 .lab-needs-07-next time.now { color: var(--now); }
+.lab-needs-07 .lab-needs-07-step:not(.off):hover, .lab-needs-07 .lab-needs-07-where:hover, .lab-needs-07 .lab-needs-07-where[aria-expanded="true"], .lab-needs-07 .lab-needs-07-next:not(.off):hover { background: var(--raise); }
+.lab-needs-07 .lab-needs-07-dock a:focus-visible, .lab-needs-07 .lab-needs-07-dock button:focus-visible { outline: 2px solid var(--ink); outline-offset: -2px; }
+
+/* After a decision the dock turns dark and speaks: what was done, what opens next. */
+.lab-needs-07 .lab-needs-07-dock.told .lab-needs-07-bar { background: var(--ink); color: var(--page); padding-left: 1em; gap: 0.6em; }
+.lab-needs-07 .lab-needs-07-dock.told .lab-needs-07-bar > svg { flex: none; width: 1.05em; height: 1.05em; }
+.lab-needs-07 .lab-needs-07-said { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.lab-needs-07 .lab-needs-07-open { padding: 0 0.7em 0 1em; background: rgb(255 254 247 / 0.14); color: var(--page); font-weight: 600; white-space: nowrap; }
+.lab-needs-07 .lab-needs-07-open:hover { background: rgb(255 254 247 / 0.24); }
+.lab-needs-07 .lab-needs-07-dock.told a:focus-visible { outline-color: var(--page); }
+
+/* Up next, opening upward from the dock: the order of the rest, the car, its place, its time. */
+.lab-needs-07 .lab-needs-07-queue {
+  position: absolute; left: 50%; bottom: calc(100% + 8px); width: min(22em, calc(100vw - 32px)); transform: translateX(-50%);
+  padding: 0.45em; border-radius: 16px; background: var(--page);
+  box-shadow: 0 0 0 1px rgb(18 17 14 / 0.07), 0 12px 36px rgb(18 17 14 / 0.14);
+}
+.lab-needs-07 .lab-needs-07-label { padding: 0.35em 0.6em 0.25em; color: var(--ink-2); font-size: var(--type-subhead); line-height: var(--lh-subhead); }
+.lab-needs-07 .lab-needs-07-row {
+  display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: 0.8em; padding: 0.4em 0.6em; border-radius: 0.6em;
+  transition: background-color 100ms cubic-bezier(0.2, 0, 0, 1);
+}
+.lab-needs-07 .lab-needs-07-row:hover { background: var(--raise); }
+.lab-needs-07 .lab-needs-07-row .lab-needs-07-car { max-width: none; }
+.lab-needs-07 .lab-needs-07-place { grid-column: 1; color: var(--ink-2); font-size: var(--type-subhead); line-height: var(--lh-subhead); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.lab-needs-07 .lab-needs-07-row time { grid-row: 1; grid-column: 2; font-size: var(--type-subhead); line-height: calc(var(--lh-body) * var(--type-body)); font-weight: 600; color: var(--ink-2); }
+.lab-needs-07 .lab-needs-07-row time.now { color: var(--now); }
+.lab-needs-07 .lab-needs-07-more { padding: 0.35em 0.6em 0.2em; color: var(--ink-2); font-size: var(--type-subhead); line-height: var(--lh-subhead); }
+
+@media (prefers-reduced-motion: no-preference) {
+  .lab-needs-07 .lab-needs-07-queue { animation: lab-needs-07-up 150ms cubic-bezier(0.2, 0, 0, 1); }
+  .lab-needs-07 .lab-needs-07-bar { animation: lab-needs-07-in 200ms cubic-bezier(0.2, 0, 0, 1); }
+  .lab-needs-07 .lab-needs-07-next .lab-needs-07-car { animation: lab-needs-07-fade 200ms cubic-bezier(0.2, 0, 0, 1); }
+}
+@keyframes lab-needs-07-up { from { opacity: 0; transform: translate(-50%, 8px); } to { opacity: 1; transform: translate(-50%, 0); } }
+@keyframes lab-needs-07-in { from { opacity: 0.4; transform: translateY(6px) scale(0.98); } to { opacity: 1; transform: none; } }
+@keyframes lab-needs-07-fade { from { opacity: 0; transform: translateX(6px); } to { opacity: 1; transform: none; } }

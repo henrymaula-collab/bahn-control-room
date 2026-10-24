@@ -1,0 +1,47 @@
+/* needs 08: guided, Skip with a reason. Every rule under .lab-needs-08 (the lab bundles all variants). */
+
+.lab-needs-08 { margin-bottom: max(12px, calc(24 * var(--cr-u, 1px))); font-size: var(--size-m); line-height: var(--lh-body); }
+/* The line above the card: where you are on the left, Skip for now on the right, a hairline under it. */
+.lab-needs-08 .lab-needs-08-line {
+  display: flex; align-items: center; justify-content: space-between; gap: 1em;
+  padding-bottom: 0.5em; box-shadow: 0 1px 0 rgb(18 17 14 / 0.08);
+}
+.lab-needs-08 .lab-needs-08-where { color: var(--ink-2); font-size: var(--size-s); line-height: var(--lh-subhead); font-variant-numeric: tabular-nums; }
+.lab-needs-08 .lab-needs-08-skip {
+  display: inline-flex; align-items: center; gap: 0.3em; min-height: 36px; margin-right: -0.7em; padding: 0 0.7em; border-radius: 999px;
+  font-size: var(--size-s); line-height: var(--lh-subhead); color: var(--ink);
+  transition: background-color 100ms cubic-bezier(0.2, 0, 0, 1);
+}
+.lab-needs-08 .lab-needs-08-skip svg { width: 1.05em; height: 1.05em; color: var(--ink-2); }
+.lab-needs-08 .lab-needs-08-skip:hover, .lab-needs-08 .lab-needs-08-skip[aria-expanded="true"] { background: var(--raise); }
+.lab-needs-08 .lab-needs-08-skip:focus-visible, .lab-needs-08 .lab-needs-08-reason:focus-visible, .lab-needs-08 .lab-needs-08-undo:focus-visible { outline: 2px solid var(--ink); outline-offset: 1px; }
+
+/* The reasons, in place under the line: one tap each, the way the card's Other options asks why. */
+.lab-needs-08 .lab-needs-08-why { padding: 1em 0 1.1em; box-shadow: 0 1px 0 rgb(18 17 14 / 0.08); }
+@media (prefers-reduced-motion: no-preference) {
+  .lab-needs-08 .lab-needs-08-why { animation: lab-needs-08-in 200ms cubic-bezier(0.2, 0, 0, 1); }
+  .lab-needs-08 .lab-needs-08-note { animation: lab-needs-08-in 200ms cubic-bezier(0.2, 0, 0, 1); }
+}
+@keyframes lab-needs-08-in { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
+.lab-needs-08 .lab-needs-08-ask { font-weight: 600; letter-spacing: var(--track-headline); }
+.lab-needs-08 .lab-needs-08-says { margin-top: 0.15em; color: var(--ink-2); font-size: var(--size-s); line-height: var(--lh-subhead); max-width: 34em; }
+.lab-needs-08 .lab-needs-08-reasons { display: flex; flex-direction: column; gap: 0.35em; margin-top: 0.8em; max-width: 30em; }
+.lab-needs-08 .lab-needs-08-reason {
+  width: 100%; padding: 0.55em 0.95em; border-radius: 0.8em; background: var(--raise); text-align: left;
+  font-size: var(--size-s); line-height: var(--lh-subhead);
+  transition: background-color 100ms cubic-bezier(0.2, 0, 0, 1);
+}
+.lab-needs-08 .lab-needs-08-reason:hover { background: var(--press); }
+.lab-needs-08 .lab-needs-08-reason.other { width: auto; align-self: flex-start; background: none; color: var(--ink-2); }
+.lab-needs-08 .lab-needs-08-reason.other:hover { background: var(--raise); color: var(--ink); }
+.lab-needs-08 .lab-needs-08-own { display: flex; gap: 0.5em; width: 100%; margin-top: 0.2em; }
+.lab-needs-08 .lab-needs-08-own .text-input { flex: 1; min-width: 0; font-size: max(16px, var(--size-s)); }
+
+/* On the case you land on: what was skipped and who sees why, with Undo. */
+.lab-needs-08 .lab-needs-08-note {
+  display: flex; align-items: center; gap: 0.6em; margin-bottom: 0.9em; padding: 0.55em 0.5em 0.55em 0.9em;
+  border-radius: 0.75em; background: var(--raise); font-size: var(--size-s); line-height: var(--lh-subhead);
+}
+.lab-needs-08 .lab-needs-08-note p { flex: 1; min-width: 0; }
+.lab-needs-08 .lab-needs-08-undo { padding: 0.3em 0.7em; border-radius: 999px; font-weight: 600; }
+.lab-needs-08 .lab-needs-08-undo:hover { background: var(--press); }

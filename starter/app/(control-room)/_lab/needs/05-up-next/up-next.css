@@ -1,0 +1,50 @@
+/* needs 05: the next case peeks under this one. Every rule under .lab-needs-05. */
+
+/* The peek: the next case as a card rising from the bottom edge of the card column. It sits under the
+   rows and, while the card scrolls, stays pinned to the bottom edge with only its top lines showing. */
+.lab-needs-05 {
+  --lab05-pad: max(calc(28 * var(--type-kf)), calc(56 * var(--cr-u, 1px)));
+  position: sticky; bottom: calc(-1 * var(--lab05-pad)); z-index: 2;
+  margin: 1.4em -0.83em 0; padding-top: 10px;
+  max-height: calc(5.2 * var(--size-m)); overflow: hidden;
+  transition: max-height 250ms cubic-bezier(0.2, 0, 0, 1);
+}
+.lab-needs-05.lifted, .lab-needs-05:hover, .lab-needs-05:focus-within { max-height: calc(16 * var(--size-m)); }
+.lab-needs-05 .lab-needs-05-card {
+  position: relative; display: flex; flex-direction: column; gap: 0.3em;
+  min-height: 100%; padding: 0.85em 0.83em calc(var(--lab05-pad) + 0.6em);
+  border-radius: 16px 16px 0 0; background: var(--page);
+  box-shadow: 0 0 0 1px rgb(18 17 14 / 0.07), 0 -6px 22px rgb(18 17 14 / 0.07);
+  color: var(--ink);
+}
+/* More cases behind it: one or two card edges above, the way a stack shows its depth. */
+.lab-needs-05.stack::before, .lab-needs-05.deep::after {
+  content: ""; position: absolute; left: 14px; right: 14px; top: 5px; height: 12px;
+  border-radius: 14px 14px 0 0; background: var(--raise); box-shadow: 0 0 0 1px rgb(18 17 14 / 0.05);
+}
+.lab-needs-05.deep::after { left: 28px; right: 28px; top: 0; background: var(--press); z-index: -1; }
+.lab-needs-05 .lab-needs-05-card:hover { box-shadow: 0 0 0 1px rgb(18 17 14 / 0.10), 0 -8px 26px rgb(18 17 14 / 0.09); }
+.lab-needs-05 .lab-needs-05-card:focus-visible { outline: 2px solid var(--ink); outline-offset: -2px; }
+.lab-needs-05 .lab-needs-05-top { display: flex; align-items: baseline; justify-content: space-between; gap: 0.83em; font-size: var(--size-s); line-height: var(--lh-subhead); color: var(--ink-2); }
+.lab-needs-05 .lab-needs-05-label { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.lab-needs-05 .lab-needs-05-top time { flex: none; font-weight: 600; }
+.lab-needs-05 .lab-needs-05-top time.now { color: var(--now); }
+.lab-needs-05 .lab-needs-05-head { font-size: var(--size-m); line-height: var(--lh-body); font-weight: 600; letter-spacing: var(--track-headline); max-width: 34em; }
+.lab-needs-05 .lab-needs-05-ask { font-size: var(--size-m); line-height: var(--lh-body); max-width: 34em; }
+.lab-needs-05 .lab-needs-05-more { display: inline-flex; align-items: center; gap: 0.2em; margin-top: 0.35em; color: var(--ink-2); font-size: var(--size-s); line-height: var(--lh-subhead); }
+.lab-needs-05 .lab-needs-05-more svg { width: 1em; height: 1em; }
+@media (prefers-reduced-motion: reduce) {
+  .lab-needs-05 { transition: none; }
+}
+
+/* After a decision: one receipt line, then the next case in the card's place. */
+.lab-needs-05-done .lab-needs-05-receipt { display: flex; align-items: flex-start; gap: 0.6em; max-width: 40em; padding-bottom: 1.1em; margin-bottom: 1.4em; box-shadow: 0 1px 0 rgb(18 17 14 / 0.08); }
+.lab-needs-05-done .lab-needs-05-tick { flex: none; display: inline-flex; align-items: center; justify-content: center; width: 1.5em; height: 1.5em; margin-top: 0.05em; border-radius: 50%; background: var(--ink); color: var(--page); }
+.lab-needs-05-done .lab-needs-05-tick svg { width: 0.95em; height: 0.95em; }
+.lab-needs-05-done .lab-needs-05-receipt p { display: flex; flex-direction: column; min-width: 0; font-size: var(--size-s); line-height: var(--lh-subhead); }
+.lab-needs-05-done .lab-needs-05-strong { font-weight: 600; color: var(--ink); }
+.lab-needs-05-done .lab-needs-05-was { color: var(--ink-2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+@media (prefers-reduced-motion: no-preference) {
+  .lab-needs-05-done .lab-needs-05-risen { animation: lab-needs-05-rise 260ms cubic-bezier(0.2, 0, 0, 1); }
+}
+@keyframes lab-needs-05-rise { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: none; } }

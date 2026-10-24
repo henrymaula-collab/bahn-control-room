@@ -170,14 +170,17 @@ export async function fixtureContext(caseId: string, personId: string): Promise<
   registerPeople(PEOPLE)
   const o = ORDERS[c.orderId]
   const byId = new Map(cases.map((x) => [x.id, x]))
-  const suggestionFor = new Map<string, string>()
-  for (const x of CASES) if (!suggestionFor.has(x.type)) suggestionFor.set(x.type, x.suggestion.id)
+  // The made-up history borrows the option and the pickup place from the fixture case of the same type.
+  const sample = new Map<string, Case>()
+  for (const x of CASES) if (!sample.has(x.type)) sample.set(x.type, x)
 
   // The fixtures keep a track record as counts; spread each count into dated, made-up decisions.
   const history: PastDecision[] = []
   TRACK_RECORDS.forEach((r, ri) => {
     for (let i = 0; i < r.decided; i++) {
-      const optionId = suggestionFor.get(r.caseType) ?? "other"
+      const like = sample.get(r.caseType)
+      const optionId = like?.suggestion.id ?? "other"
+      const placeId = r.placeId ?? like?.placeId
       history.push({
         id: `fx-hist-${ri}-${i}`,
         caseId: `fx-hist-case-${ri}-${i}`,
@@ -186,10 +189,10 @@ export async function fixtureContext(caseId: string, personId: string): Promise<
         personName: firstName(PEOPLE, r.personId),
         kind: kindOfType(r.caseType),
         caseType: r.caseType,
-        placeId: r.placeId,
-        placeName: r.placeId ? datasetSite(r.placeId)?.name ?? "a pickup place" : "a pickup place",
+        placeId,
+        placeName: (like && ORDERS[like.orderId]?.pickup.placeName) || (placeId ? datasetSite(placeId)?.name : undefined) || "a pickup place",
         optionId,
-        choice: optionLabel(undefined, optionId),
+        choice: optionLabel(like, optionId),
         at: new Date(Date.parse(ROOM_NOW) - (3 + ri * 2 + i * 5) * 86_400_000).toISOString(),
         laterChanged: i < r.laterChanged,
         onTime: i < r.onTime,

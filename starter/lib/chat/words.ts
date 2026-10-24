@@ -10,7 +10,17 @@ export const day = (iso: string) => DAY.format(new Date(iso)).replace(",", "")
 /** "Sat 24 Oct 14:05" (Helsinki). */
 export const dayTime = (iso: string) => `${day(iso)} ${TIME.format(new Date(iso))}`
 
-export const lc = (s: string) => (/^[A-Z][a-z]/.test(s) ? s.charAt(0).toLowerCase() + s.slice(1) : s)
+/** Sentence starters that may go lower case mid-sentence; anything else (a place, a person, a dealer) keeps its capital. */
+const COMMON = new Set(
+  ("the a an ask move keep pause go hold release accept call wait send book cancel tell check let write pay follow confirm find get take use try " +
+    "you it its this that these those nobody nothing no not only if when there we they our driver drivers customer pickup delivery order gig seller car " +
+    "mark rebook offer give put leave stop agree change choose decide email message drafts draft agent people someone everyone").split(" "),
+)
+
+export const lc = (s: string) => {
+  const first = /^[A-Z][a-z]*/.exec(s)?.[0]
+  return first && COMMON.has(first.toLowerCase()) ? s.charAt(0).toLowerCase() + s.slice(1) : s
+}
 export const sentence = (s: string) => {
   const t = s.trim()
   return /[.!?]$/.test(t) ? t : `${t}.`
@@ -50,7 +60,7 @@ const WHO: Record<Fact["source"]["kind"], string> = {
 
 /** Where a fact comes from, in a phrase: "what Calverona Hamburg said on the call on Wed 21 Oct". */
 export function sourcePhrase(f: Fact): string {
-  const raw = f.source.name?.trim()
+  const raw = f.source.name?.split(",")[0]?.trim()
   const who = raw && !/^[a-z_ ]+$/.test(raw) ? raw : WHO[f.source.kind]
   const when = f.source.at ? ` on ${day(f.source.at)}` : ""
   switch (f.source.channel) {

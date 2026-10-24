@@ -65,7 +65,7 @@ export function mockAnswer(input: {
         out.push("One case is not a rule yet.")
       } else {
         const people = new Set(earlier.map((d) => d.personName)).size
-        out.push(`${plural(earlier.length, "time")} before, by ${plural(people, "person", "people")}, and ${k.sameAsSuggestion} of them chose ${lc(s.label)}.`)
+        out.push(`${plural(earlier.length, "time")} before, by ${plural(people, "person", "people")}, and ${k.sameAsSuggestion} of them ${chosePhrase(s.label)}.`)
         out.push(`The last time, ${last.personName} ${chosePhrase(last.choice)} at ${last.placeName} on ${day(last.at)}${last.why ? `, because "${last.why}"` : ""}.`)
       }
       break
@@ -109,7 +109,7 @@ export function mockAnswer(input: {
       break
     }
     case "why": {
-      out.push(`I suggest you ${lc(s.label)}, because ${lc(c.headline.replace(/\.$/, ""))}.`)
+      out.push(`I suggest you ${lc(s.label)}. ${sentence(c.headline)}`)
       out.push(`It rests on ${basis ?? "the facts on the case"}${k.decided ? ` and on ${k.sameAsSuggestion} of ${k.decided} earlier cases of this kind` : ", not on earlier cases"}.`)
       const alt = c.alternatives[0]
       if (alt) out.push(`If you ${lc(alt.label)} instead: ${lc(alt.effect)}`)

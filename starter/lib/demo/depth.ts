@@ -11,10 +11,12 @@
 // Everything here is MADE UP for the demo and marked so: ids start with
 // "demo-", rows carry data_origin "DEMO_DEPTH" (the packet marks its own
 // fixtures "SYNTHETIC_FIXTURE"). The rows use the packet's own shapes
-// (conversations, messages, order_notes, documents, order_endpoint_details), so
-// the chat's read tools return them unchanged; lib/demo/overlay.ts adds them to
-// the agent's table cache in memory. The packet files are never edited, and the
-// engine (cards, derived cases, routing, counts) never sees these rows.
+// (conversations, messages, order_notes, documents, order_endpoint_details,
+// time_windows), so the chat's read tools return them unchanged;
+// lib/demo/overlay.ts adds them to the agent's table cache in memory. The
+// place notes (DEMO_PLACES) reach get_pickup_place and get_place_history
+// through placeNotes(). The packet files are never edited, and the engine
+// (cards, derived cases, routing, counts) never sees any of this.
 //
 // Consistency rules the rows keep (lib/demo/depth.test.ts checks them):
 // - A recorded or derived case says how many messages the agent read and when.
@@ -153,23 +155,7 @@ export const DEMO_PLACES: Record<string, PlaceDepth> = {
   },
 }
 
-/** The place's notes as one paragraph, the way Bahn keeps them on the pickup place's profile. */
-export function placeNoteText(placeId: string): string {
-  const p = DEMO_PLACES[placeId]
-  if (!p) return ""
-  const who = p.contacts.map((c) => `${c.name}, ${c.role}, ${c.phone}, ${c.email}`).join("; ")
-  const earlier = p.earlier.map((e) => `${e.day} (${e.reference}, ${e.who}): ${e.what}; ${e.howItWent}.`).join(" ")
-  return `Bahn's notes on ${p.name} (made-up demo history): ${p.routine} Who to call: ${who}. ${p.quirks.join(" ")} Earlier pickups here: ${earlier}`
-}
-
-/**
- * The pickup place's profile, enriched: the packet's access note followed by
- * Bahn's notes (the "note on the place"). The overlay puts this row in place of
- * the packet's row in memory; every other field is the packet's own.
- */
-export const DEMO_SITE_NOTES: Record<string, string> = Object.fromEntries(DEMO_PLACE_IDS.map((id) => [id, placeNoteText(id)]))
-
-/** For a chat tool (get_place_history / get_pickup_place): the place's notes, structured. */
+/** Bahn's notes on a demo pickup place, for the chat's get_pickup_place and get_place_history (lib/chat/depth.ts adds them as place_notes). */
 export function placeNotes(placeId: string | null | undefined) {
   const p = placeId ? DEMO_PLACES[placeId] : undefined
   if (!p) return null

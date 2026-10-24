@@ -8,7 +8,7 @@ import { RunClock } from "@/lib/agent/clock"
 import { FactRegistry } from "@/lib/agent/facts"
 import { executeTool, type RunContext } from "@/lib/agent/tools"
 import { AGENT_READ_AT, DEMO_CALLS, DEMO_ORDERS, DEMO_ORIGIN, DEMO_PLACES, DEMO_ROWS, type DemoOrderId } from "./depth"
-import { installDemoDepth } from "./overlay"
+import { installDemoDepth, placeNotes } from "./overlay"
 
 const allText = JSON.stringify({ DEMO_ROWS, DEMO_CALLS, DEMO_PLACES })
 
@@ -71,15 +71,15 @@ function run(reference: string): RunContext {
 }
 
 test("installed, the chat's read tools return the depth; installing twice changes nothing", async () => {
-  const packetNote = table("sites").find((s) => s.id === "site-042")?.pickup_access_note
+  const packetSite = table("sites").find((s) => s.id === "site-042")
   assert.ok(installDemoDepth() > 0)
   assert.equal(installDemoDepth(), 0)
   const conv = await executeTool(run("CD-420442"), "get_conversations", { order: "CD-420442" })
   assert.match(conv.content, /utlämningsfullmakt/)
   assert.match(conv.content, /Huomenta Kasper/)
-  const place = await executeTool(run("CD-420458"), "get_pickup_place", { order: "CD-420458" })
-  assert.match(place.content, /Lukas Brandt/)
-  assert.ok(place.content.includes(String(packetNote)), "the packet's own access note comes first")
+  assert.equal(table("sites").find((s) => s.id === "site-042"), packetSite, "the packet's own place rows are untouched")
+  assert.match(JSON.stringify(placeNotes("site-042")), /Lukas Brandt.*\+49 40 555 0142/)
+  assert.equal(placeNotes("site-999"), null)
   const docs = JSON.parse((await executeTool(run("CD-420458"), "get_documents", { order: "CD-420458" })).content) as { documents: unknown[] }
   assert.equal(docs.documents.length, 5)
   const order = await executeTool(run("CD-420516"), "get_order", { order: "CD-420516" })

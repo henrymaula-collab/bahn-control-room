@@ -162,7 +162,7 @@ export function mockTurn(messages: BetaMessageParam[]): BetaMessage {
     const rule = ruleFor("accept_fee", "readiness.fee_requested")
     if (rule) {
       return message([toolUse("resolve_without_person", {
-        order, type: "readiness.fee_requested", summary: `The pickup place asks for a ${amount} EUR fee; the ON trust rule covers fees of this size.`,
+        order, type: "readiness.fee_requested", summary: `The pickup place asks for a ${amount} EUR fee; the trust rule that is on covers fees of this size.`,
         checks: [{ label: "Car located and ready for the slot", ok: true, fact_ids: cf.map((f) => f.id) }],
         changes: [{ kind: "cost", detail: `Accept the ${amount} EUR fee at the pickup place`, amount_eur: amount }], option_key: "accept_fee", trust_rule_id: rule.trust_rule_id,
       })], "tool_use")
@@ -205,7 +205,7 @@ export function mockTurn(messages: BetaMessageParam[]): BetaMessage {
     const rule = ruleFor("pause_gig", "readiness.facts_disagree") ?? ruleFor("pause_gig", "readiness.keys_or_access")
     if (rule) {
       return message([toolUse("resolve_without_person", {
-        order, type: rule.case_type, summary: "The pickup place still cannot say where the car and keys are; the gig is paused under the ON trust rule until they confirm.",
+        order, type: rule.case_type, summary: "The pickup place still cannot say where the car and keys are; the gig is paused under the trust rule until they confirm.",
         checks: [{ label: "Pickup place asked today", ok: true, fact_ids: cf.map((f) => f.id) }],
         changes: [{ kind: "booking", detail: "Pause the gig until the pickup place confirms the collection point", amount_eur: null }], option_key: "pause_gig", trust_rule_id: rule.trust_rule_id,
       })], "tool_use")

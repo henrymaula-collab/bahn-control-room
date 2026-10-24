@@ -103,7 +103,7 @@ export const TOOL_SHAPES = {
   get_documents: { order: orderArg },
   get_time_windows: { order: orderArg },
   list_trust_rules: {},
-  message_driver: { order: orderArg, text: z.string().describe("A question for the driver. Asking needs no yes; never agree to a cost, date or booking.") },
+  message_driver: { order: orderArg, text: z.string().describe("The message for the driver, in the language of the driver's chat. Asking needs no yes; never agree to a cost, date or booking.") },
   message_pickup_place: { order: orderArg, text: z.string().describe("A written question to the pickup place. Asking needs no yes; never agree to a cost, date or booking.") },
   call_pickup_place: {
     order: orderArg,
@@ -132,7 +132,7 @@ export const TOOL_SHAPES = {
     checks: z.array(z.object({ label: z.string(), ok: z.boolean(), fact_ids: z.array(z.string()) })),
     changes: z.array(changeShape).describe("Empty when nothing changes"),
     option_key: z.enum(OPTION_KEYS).describe("The option you take, from Bahn's list ('other' when nothing changes)"),
-    trust_rule_id: z.string().describe("The ON trust rule that covers this option and these changes, or empty"),
+    trust_rule_id: z.string().describe("The trust rule (switched on) that covers this option and these changes, or empty"),
   },
   schedule_callback: {
     order: orderArg,
@@ -149,12 +149,12 @@ export const TOOL_DESCRIPTIONS: Record<ToolName, string> = {
   get_conversations: "Read every conversation about the order (customer, pickup place, driver, Bahn people) with time and channel. Registers each message as a fact.",
   get_documents: "Check the documents on the order (release document, CMR) and whether the pickup place needs a signed release document.",
   get_time_windows: "Check the pickup slot, availability and delivery promise, who set each one, and how many hours are left.",
-  list_trust_rules: "List the trust rules for the Readiness desk. Only an ON rule lets you make a change without a person.",
+  list_trust_rules: "List the trust rules for the Readiness desk. Only a rule that is on lets you make a change without a person.",
   message_driver: "Send the booked driver a question in the driver app (simulated reply). Asking needs no yes.",
   message_pickup_place: "Write to the pickup place (simulated reply). Asking needs no yes.",
   call_pickup_place: "Phone the pickup place in its language (simulated phone, real conversation). Returns the transcript with English translations and the facts the call produced. You never wait for a person during a call.",
   propose_case: "Bring a person ONE clear decision. Use only registered fact ids. The suggestion names the action and says what happens next. Ends your work on this order.",
-  resolve_without_person: "Finish without a person: either nothing needs to change, or an ON trust rule covers exactly these changes. The gate refuses anything else with 'needs a person'. Ends your work on this order.",
+  resolve_without_person: "Finish without a person: either nothing needs to change, or a trust rule that is on covers exactly these changes. The gate refuses anything else with 'needs a person'. Ends your work on this order.",
   schedule_callback: "Promise a follow-up (call again when nobody answered, or after a person decides).",
 }
 
@@ -443,7 +443,7 @@ function getTimeWindows(ctx: RunContext): ToolResult {
 
 function listTrustRules(ctx: RunContext): ToolResult {
   const rules = ctx.snap.trustRules.filter((t) => t.caseType.startsWith("readiness") && t.status !== "off")
-  step(ctx, "lookup", rules.some((t) => t.status === "on") ? "Checked the trust rules." : "Checked the trust rules: none is ON.")
+  step(ctx, "lookup", rules.some((t) => t.status === "on") ? "Checked the trust rules." : "Checked the trust rules: none is on.")
   return ok({
     rules: rules.map((t) => ({ trust_rule_id: t.id, status: t.status, case_type: t.caseType, scope: { ...t.scope, ...(t.scope.placeId ? { pickup_place: byId("sites", t.scope.placeId)?.name ?? t.scope.placeId } : {}) }, this_order_matches_scope: !t.scope.placeId || t.scope.placeId === ctx.order.pickup_site_id, option_key: t.optionId ?? null, when: t.when, then: t.then, evidence: `${t.evidence.matched} of ${t.evidence.total}` })),
     note: "Only a rule with status 'on' lets you change something without a person. 'suggested' rules do not.",
@@ -598,7 +598,7 @@ async function resolve(ctx: RunContext, a: z.infer<z.ZodObject<typeof TOOL_SHAPE
   if (gate.rule) {
     const { site } = siteFor(ctx)
     caseId = agentCaseId(ctx)
-    const ruleFact = ctx.registry.add(`Handled by the agent under trust rule ${gate.rule.id} (ON${gate.rule.changedBy ? `, turned on by ${personName(gate.rule.changedBy)}` : ""}): "${gate.rule.when}" -> "${gate.rule.then}". Evidence: the agent would have decided like people did in ${gate.rule.evidence.matched} of ${gate.rule.evidence.total} cases.`, { kind: "agent", name: "Readiness agent", channel: "record", recordRef: `trust_rules:${gate.rule.id}`, at: now }, "confirmed")
+    const ruleFact = ctx.registry.add(`Handled by the agent under trust rule ${gate.rule.id} (${gate.rule.changedBy ? `turned on by ${personName(gate.rule.changedBy)}` : "on"}): "${gate.rule.when}" -> "${gate.rule.then}". Evidence: the agent would have decided like people did in ${gate.rule.evidence.matched} of ${gate.rule.evidence.total} cases.`, { kind: "agent", name: "Readiness agent", channel: "record", recordRef: `trust_rules:${gate.rule.id}`, at: now }, "confirmed")
     const factIds = [...new Set([...a.checks.flatMap((c) => c.fact_ids), ...ctx.calls.flatMap((c) => c.factIds)])]
     const facts = [...factIds.map((id) => ctx.registry.get(id)!).filter(Boolean), ruleFact]
     const label = realChanges.map((c) => c.detail).join("; ") || gate.rule.then

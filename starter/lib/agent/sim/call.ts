@@ -110,7 +110,7 @@ function callerSystem(req: CallRequest, persona: PlacePersona, lang: string): st
     `Your goal for this call: ${req.goal}`,
     req.decision ? `A Bahn person has decided: ${req.decision}. Tell the pickup place what this means for them and confirm the next step.` : "",
     `What Bahn already learned about this pickup place:\n${lessons}`,
-    `Rules: say at the start that you are Bahn's digital assistant. Ask, listen, and repeat back what matters. Never agree to a cost, a new date, a booking or any change to the order on this call: if the pickup place asks for money or a change, say that a colleague decides and that Bahn will get back to them within the hour. Never share the customer's details. Do not offer to hold the line or wait: if they need to check something, ask them to send it to Bahn and end the call. End politely as soon as you have what you need, or when they cannot help.`,
+    `Rules: say at the start that you are Bahn's digital assistant. Ask, listen, and repeat back what matters. Never agree to a cost, a new date, a booking or any change to the order on this call: if the pickup place asks for money or a change, say that a colleague decides and that Bahn will get back to them within the hour. Never share the customer's details. Do not offer to hold the line or wait: if they need to check something, ask them to send it to Bahn and end the call. End politely as soon as you have what you need, or when they cannot help. Do not list what you may or may not agree to unless they ask for it.`,
     `Return JSON: text (what you say, in ${LANGUAGE_NAMES[lang] ?? lang}), translation (English), end_call.`,
   ].filter(Boolean).join("\n\n")
 }

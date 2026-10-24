@@ -84,13 +84,13 @@ export function checkChanges(changes: Change[], ctx: GateContext, rules: TrustRu
     .filter((r) => !r.optionId || !optionKey || r.optionId === optionKey)
   for (const rule of candidates) {
     if (real.every((c) => ruleCovers(rule, c))) {
-      return { allowed: true, rule, note: `Covered by trust rule ${rule.id} (ON): "${rule.when}" -> "${rule.then}".` }
+      return { allowed: true, rule, note: `Covered by trust rule ${rule.id} (on): "${rule.when}" -> "${rule.then}".` }
     }
   }
   const kinds = real.map((c) => (c.kind === "cost" && c.amountEur !== undefined ? `cost ${c.amountEur} EUR` : c.kind)).join(", ") || optionKey || "this option"
   const why = trustRuleId
-    ? `trust rule ${trustRuleId} is not ON for ${ctx.caseType} here, or it does not cover: ${kinds}`
-    : `no ON trust rule covers ${ctx.caseType} with: ${kinds}`
+    ? `trust rule ${trustRuleId} is not on for ${ctx.caseType} here, or it does not cover: ${kinds}`
+    : `no trust rule that is on covers ${ctx.caseType} with: ${kinds}`
   return { allowed: false, needsPerson: true, reason: `Needs a person: ${why}. A person says yes before any change. Bring a person this decision with propose_case.` }
 }
 

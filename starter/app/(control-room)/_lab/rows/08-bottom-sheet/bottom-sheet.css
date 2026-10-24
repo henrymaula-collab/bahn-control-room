@@ -37,9 +37,10 @@
 .lab-rows-08 .r08-draft p { margin-top: 0.5em; white-space: pre-wrap; }
 .lab-rows-08 .r08-ask { margin-top: 1em; font-weight: 600; }
 .lab-rows-08 .r08-ask .r08-sub { font-weight: 400; margin-left: 0.3em; }
-.lab-rows-08 .r08-reasons { display: flex; flex-wrap: wrap; gap: 0.45em; margin-top: 0.7em; }
+/* RV7: one full-width row per reason, as today's sheet; wrapped bubbles of mixed width read as chips. */
+.lab-rows-08 .r08-reasons { display: flex; flex-direction: column; gap: 0.45em; margin-top: 0.7em; }
 .lab-rows-08 .r08-reason {
-  padding: 0.6em 0.95em; border-radius: 0.9em; background: var(--raise); text-align: left;
+  width: 100%; padding: 0.6em 0.95em; border-radius: 0.9em; background: var(--raise); text-align: left;
   transition: background-color 100ms cubic-bezier(0.2, 0, 0, 1);
 }
 .lab-rows-08 .r08-reason:hover { background: var(--press); }

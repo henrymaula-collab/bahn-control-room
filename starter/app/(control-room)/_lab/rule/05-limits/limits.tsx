@@ -30,11 +30,9 @@ export function RuleLimits({ proposal: p, personName, status, changed, pending, 
           <dt>It will</dt>
           <dd>{p.then}. Nothing else.</dd>
           <dt>A person still</dt>
-          <dd>Gets every other kind of case, and anything this one does not cover.</dd>
-          <dt>It stops</dt>
-          <dd>By itself, if people start answering this kind differently.</dd>
+          <dd>Decides every other kind of case, and any of these where the agent would do something else or write to the customer.</dd>
           <dt>Take it back</dt>
-          <dd>Turn it off here at any time.</dd>
+          <dd>Turn it off here at any time, and these come to people again.</dd>
         </dl>
 
         <div className="answers">

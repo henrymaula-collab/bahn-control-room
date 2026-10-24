@@ -109,9 +109,9 @@ export function RuleThirty({ proposal: p, personName, status, changed, pending, 
         <p className="s next">
           {on
             ? agentNext
-              ? `${d.waiting[0].person ? `It left ${d.waiting[0].person}'s tasks, and the` : "The"} next ones go the same way. If people start answering differently, it asks a person again.`
-              : `${afterWords(p, d.waiting, handled)} If people start answering differently, it asks a person again.`
-            : `It will ${lower(p.then)} each time, without asking a person. If people start answering differently, it asks a person again.`}
+              ? `${d.waiting[0].person ? `It left ${d.waiting[0].person}'s tasks, and the` : "The"} next ones go the same way until you turn it off.`
+              : `${afterWords(p, d.waiting, handled)} You can turn it off here at any time.`
+            : `It will ${lower(p.then)} each time, without asking a person. You can turn it off here at any time.`}
         </p>
         {error && <p className="m now rk-err">{error}</p>}
         <Link href={historyHref(p)} className="rk-link r03-all">

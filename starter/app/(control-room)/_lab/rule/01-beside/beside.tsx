@@ -39,10 +39,10 @@ export function RuleBeside({ proposal: p, personName, status, changed, pending, 
         </div>
         <p className="s next">
           {on
-            ? `${afterWords(p, d.waiting, handled)} If people start answering this differently, it asks a person again.`
+            ? `${afterWords(p, d.waiting, handled)} The next ones go the same way until you turn it off.`
             : first.length
-              ? `${names(first)} answered ${p.agreeing} of ${p.decided} the same way. If people start answering differently, the agent asks a person again. You can turn it off here at any time.`
-              : `If people start answering differently, the agent asks a person again. You can turn it off here at any time.`}
+              ? `${names(first)} answered ${p.agreeing} of ${p.decided} the same way. You can turn it off here at any time, and these come to people again.`
+              : `You can turn it off here at any time, and these come to people again.`}
         </p>
         {error && <p className="m now rk-err">{error}</p>}
       </section>

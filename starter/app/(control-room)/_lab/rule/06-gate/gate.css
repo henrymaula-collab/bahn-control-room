@@ -11,10 +11,9 @@
 .lab-rule-06 .r06-checks > li + li { border-top: 1px solid rgb(18 17 14 / 0.08); }
 .lab-rule-06 .r06-tick {
   grid-row: 1 / span 2; width: 1.5em; height: 1.5em; border-radius: 50%; margin-top: 0.05em;
-  display: inline-flex; align-items: center; justify-content: center; color: var(--green);
-  box-shadow: inset 0 0 0 1.5px var(--green);
+  display: inline-flex; align-items: center; justify-content: center; color: var(--ink);
 }
-.lab-rule-06 .r06-tick svg { width: 0.9em; height: 0.9em; }
+.lab-rule-06 .r06-tick svg { width: 1.1em; height: 1.1em; }
 .lab-rule-06 .r06-what { grid-column: 2; font-weight: 600; justify-self: start; }
 .lab-rule-06 .r06-more { display: inline-flex; align-items: center; gap: 0.2em; margin: -0.15em -0.4em; padding: 0.15em 0.4em; border-radius: 0.5em; }
 .lab-rule-06 .r06-more svg { color: var(--ink-2); width: 1em; height: 1em; }

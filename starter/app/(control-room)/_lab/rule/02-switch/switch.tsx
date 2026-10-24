@@ -58,8 +58,8 @@ export function RuleSwitch({ proposal: p, personName, status, changed, pending, 
 
         <p className="s r02-foot">
           {on
-            ? `${afterWords(p, d.waiting, handled)} If people start answering this differently, the agent asks a person again. Turn the switch off to give it back to people.`
-            : `${d.people.length ? `${names(d.people.map((x) => x.name))} answered ${p.agreeing} of ${p.decided} the same way since ${day(d.first)}. ` : ""}If people start answering differently, the agent asks a person again. You can turn it off here at any time.`}
+            ? `${afterWords(p, d.waiting, handled)} Turn the switch off to give these back to people.`
+            : `${d.people.length ? `${names(d.people.map((x) => x.name))} answered ${p.agreeing} of ${p.decided} the same way since ${day(d.first)}. ` : ""}You can turn it off here at any time.`}
         </p>
         {error && <p className="m now rk-err">{error}</p>}
       </section>

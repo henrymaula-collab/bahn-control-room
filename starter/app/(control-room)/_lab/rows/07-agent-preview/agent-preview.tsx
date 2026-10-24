@@ -14,6 +14,9 @@ import "./agent-preview.css"
 
 export function AgentPreviewRows({ thread, missing, why, whyTitle, chatOpen, onTalk, talkRef }: CaseRowsListProps) {
   const lab = useLab()
+  const quote = thread ? openerLine(thread.opener.text) : ""
+  // RV7: when the quote already says the kind is new, the kind line ("New kind of case") would say it twice.
+  const saysNew = /^(This has not happened|Nobody)/.test(quote)
   return (
     <div className="rows work-rows lab-rows-07">
       {!missing && (
@@ -24,9 +27,9 @@ export function AgentPreviewRows({ thread, missing, why, whyTitle, chatOpen, onT
           <span className="r07-text">
             <span className="r07-head">
               <span className="m title">Talk it through</span>
-              <span className="s r07-kind">{thread ? knowledgeWords(thread.knowledge) : ""}</span>
+              {!saysNew && <span className="s r07-kind">{thread ? knowledgeWords(thread.knowledge) : ""}</span>}
             </span>
-            <span className="r07-quote">{thread ? `“${openerLine(thread.opener.text)}”` : " "}</span>
+            <span className="r07-quote">{quote ? `“${quote}”` : " "}</span>
           </span>
           <span className="chev">
             <Icon name="chevron-right" size={18} />

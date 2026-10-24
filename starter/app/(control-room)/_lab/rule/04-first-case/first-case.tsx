@@ -43,7 +43,7 @@ export function RuleFirstCase({ proposal: p, personName, status, changed, pendin
                 </div>
                 <div>
                   <p className="r04-h">With the rule</p>
-                  <p>At once, the agent will {lower(p.then)}. It leaves {w.person}&rsquo;s tasks.</p>
+                  <p>At once, the agent will {lower(p.then)}. It leaves {w.person}'s tasks.</p>
                 </div>
               </div>
             )}
@@ -63,8 +63,8 @@ export function RuleFirstCase({ proposal: p, personName, status, changed, pendin
         </div>
         <p className="s next">
           {on
-            ? "The next ones go the same way. If people start answering this differently, the agent asks a person again."
-            : "If people start answering differently, the agent asks a person again. You can turn it off here at any time."}
+            ? "The next ones go the same way until you turn it off."
+            : "You can turn it off here at any time, and these come to people again."}
         </p>
         {error && <p className="m now rk-err">{error}</p>}
       </section>

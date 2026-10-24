@@ -75,9 +75,11 @@ export function PanelRows({ thread, missing, why, whyTitle, chatOpen, onTalk, ta
   }
 
   return (
-    <div className="rows work-rows lab-rows-05">
+    // A click on the other tasks row (today's, or a needs variant's such as needs 11, whose list
+    // panel sits in the same place) closes this variant's panels, so the list is never hidden under one.
+    <div className="rows work-rows lab-rows-05" onClickCapture={(e) => !(e.target as HTMLElement).closest("[data-r05-own]") && announce("rows")}>
       {!missing && (
-        <button ref={talkRef} type="button" className="row-link" aria-expanded={chatOpen} aria-controls="chat" onClick={() => (announce("chat"), onTalk())}>
+        <button ref={talkRef} data-r05-own="" type="button" className="row-link" aria-expanded={chatOpen} aria-controls="chat" onClick={() => (announce("chat"), onTalk())}>
           <span className="row-text">
             <span className="m title">Talk it through</span>
             <span className="s sub">{thread ? knowledgeWords(thread.knowledge) : " "}</span>
@@ -88,7 +90,7 @@ export function PanelRows({ thread, missing, why, whyTitle, chatOpen, onTalk, ta
         </button>
       )}
       {whyTitle && why.length > 0 && (
-        <button ref={whyRef} type="button" className="row-link" aria-expanded={open} onClick={toggleWhy}>
+        <button ref={whyRef} data-r05-own="" type="button" className="row-link" aria-expanded={open} onClick={toggleWhy}>
           <span className="row-text">
             <span className="m title">{whyTitle}</span>
           </span>

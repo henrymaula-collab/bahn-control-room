@@ -62,6 +62,8 @@ export function RuleGate({ proposal: p, personName, status, changed, pending, er
               </span>
               {open && (
                 <div className="r06-detail">
+                  {/* RV7: the gate weighs each answer by its person's record on this kind (trust-gate.ts personWeight: answers that held, on time and not changed later), never by title. */}
+                  <p>Each answer counts by how that person&rsquo;s answers on this kind have held up (on time, not changed later), never by title.</p>
                   {d.differ[0] && (
                     <p>
                       One differed: {d.differ[0].by.name}, {dayW(d.differ[0].at)}, chose to {lower(d.differ[0].decision)}. <span className="rk-quiet">&ldquo;{d.differ[0].reason}&rdquo;</span>
@@ -90,7 +92,7 @@ export function RuleGate({ proposal: p, personName, status, changed, pending, er
                 Turn it on
               </button>
             )}
-            <p className="s">{on ? afterWords(p, d.waiting, handled) : "If people start answering differently, the agent asks a person again. You can turn it off here at any time."}</p>
+            <p className="s">{on ? afterWords(p, d.waiting, handled) : "You can turn it off here at any time, and these come to people again."}</p>
           </div>
         </div>
         {error && <p className="m now rk-err">{error}</p>}

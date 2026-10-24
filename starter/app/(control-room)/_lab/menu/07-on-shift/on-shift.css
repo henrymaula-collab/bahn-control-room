@@ -6,6 +6,6 @@
 .lab-menu-07 .lm07-l { font-size: var(--type-menu-sub); line-height: var(--lh-menu-sub); color: var(--ink-2); }
 .lab-menu-07 .lm07-row { display: flex; align-items: center; justify-content: space-between; color: var(--ink-2); }
 .lab-menu-07 .lm07-faces { display: flex; align-items: center; }
-.lab-menu-07 .lm07-face { width: calc(32 * var(--cr-su)); height: calc(32 * var(--cr-su)); box-shadow: 0 0 0 2px var(--raise); }
+.lab-menu-07 .lm07-face { width: max(28px, calc(38 * var(--cr-su))); height: max(28px, calc(38 * var(--cr-su))); box-shadow: 0 0 0 2px var(--raise); }
 .lab-menu-07 .lm07-face + .lm07-face { margin-left: calc(-8 * var(--cr-su)); }
 .lab-menu-07 .lm07-more { margin-left: calc(8 * var(--cr-su)); font-size: var(--type-menu-sub); line-height: var(--lh-menu-sub); color: var(--ink-2); }

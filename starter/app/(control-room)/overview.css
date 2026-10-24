@@ -239,38 +239,40 @@
 .main:has(.overview) .top { display: none; }
 /* Two classes on purpose: in dev, Next can re-insert control-room.css after this file on a
    client-side navigation, and its one-class .float { width: 300px } must never win here.
-   The panel is 840 px where there is room and narrows with the page (at least 160 px of map
-   stays visible); its type follows the panel's own width (container units), so it scales
-   down instead of wrapping or overflowing. No scroll box. */
+   The panel is 840 x --cr-u wide (840 px at 2560 x 1300, 580 at 1512 x 800, 520 at
+   1280 x 720, see shell.css), so the map keeps about half the frame at every size; in very
+   narrow windows at least 176 px of map stays visible. Its type follows the panel's own
+   width (container units), so the whole panel scales as one instead of wrapping or
+   overflowing. No scroll box. */
 .overview { container-type: size; }
 .overview .float-me {
-  top: 16px; left: 16px; right: auto; bottom: auto;
-  width: clamp(360px, calc(100cqw - 176px), 840px);
-  padding: clamp(24px, 5.6cqw, 48px) clamp(24px, 6cqw, 52px) clamp(14px, 2.4cqw, 28px);
-  border-radius: 32px; overflow: visible; container-type: inline-size;
+  top: calc(16 * var(--cr-u)); left: calc(16 * var(--cr-u)); right: auto; bottom: auto;
+  width: max(360px, min(calc(840 * var(--cr-u)), calc(100cqw - 176px)));
+  padding: calc(48 * var(--cr-u)) calc(52 * var(--cr-u)) calc(28 * var(--cr-u));
+  border-radius: calc(32 * var(--cr-u)); overflow: visible; container-type: inline-size;
 }
 .overview .float-me .welcome {
   font-family: "Owners Wide", var(--font-archivo), var(--font); font-stretch: 125%; font-variation-settings: "wdth" 125;
-  font-size: clamp(24px, 7.6cqi, 56px); line-height: 1.14; font-weight: 600; letter-spacing: -0.4px; text-wrap: balance;
+  font-size: clamp(24px, 7.6cqi, 56px); line-height: 1.14; font-weight: 600; letter-spacing: calc(-0.4 * var(--cr-u)); text-wrap: balance;
   overflow-wrap: break-word;
 }
 /* "Bahn Express" in Archivo's true italic, same weight, echoing the "Control room" lockup. */
 .overview .float-me .welcome em { font-family: "Owners Wide", var(--font-archivo-italic), var(--font-archivo), var(--font); font-style: italic; font-weight: inherit; }
 .overview .float-me .me-tasks { margin-top: clamp(18px, 5.4cqi, 40px); }
 .overview .float-me .tasks-today {
-  width: 100%; min-width: 0; justify-content: space-between; gap: 12px;
+  width: 100%; min-width: 0; justify-content: space-between; gap: calc(12 * var(--cr-u));
   height: clamp(52px, 12.5cqi, 92px); padding: 0 clamp(18px, 4cqi, 32px) 0 clamp(20px, 5cqi, 40px);
   font-family: var(--font); font-size: clamp(16px, 4.1cqi, 30px); line-height: 1.3;
 }
 .overview .float-me .tasks-today span { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
 .overview .float-me .tasks-today svg { width: clamp(18px, 4cqi, 32px); height: clamp(18px, 4cqi, 32px); flex: none; }
-.overview .float-me .red-rows { margin: clamp(8px, 2cqi, 16px) -16px 0; }
-.overview .float-me .red-row { padding: clamp(8px, 1.7cqi, 14px) 16px; border-radius: 16px; column-gap: 24px; }
+.overview .float-me .red-rows { margin: clamp(8px, 2cqi, 16px) calc(-16 * var(--cr-u)) 0; }
+.overview .float-me .red-row { padding: clamp(6px, 1.7cqi, 14px) calc(16 * var(--cr-u)); border-radius: calc(16 * var(--cr-u)); column-gap: calc(24 * var(--cr-u)); }
 .overview .float-me .red-row .v { font-size: clamp(16px, 3.8cqi, 28px); line-height: 1.28; }
 .overview .float-me .red-row .p { font-size: clamp(13px, 3cqi, 22px); line-height: 1.28; }
 .overview .float-me .red-row time { font-size: clamp(13px, 3.26cqi, 24px); line-height: 1.5; }
 .overview .float-me .key { margin-top: clamp(12px, 3cqi, 24px); padding-top: clamp(12px, 3cqi, 24px); gap: clamp(2px, 1cqi, 8px); border-top: 1px solid var(--press); }
-.overview .float-me .state { grid-template-columns: clamp(8px, 1.9cqi, 14px) minmax(0, 1fr) auto; column-gap: clamp(10px, 2cqi, 16px); font-size: clamp(13px, 3cqi, 22px); line-height: 1.45; }
+.overview .float-me .state { grid-template-columns: clamp(8px, 1.9cqi, 14px) minmax(0, 1fr) auto; column-gap: clamp(8px, 2cqi, 16px); font-size: clamp(13px, 3cqi, 22px); line-height: 1.45; }
 .overview .float-me .state .dot { width: clamp(8px, 1.9cqi, 14px); height: clamp(8px, 1.9cqi, 14px); }
 
 /* Dots only on the map: a red pin is a red dot with a ring; its card names the car. */

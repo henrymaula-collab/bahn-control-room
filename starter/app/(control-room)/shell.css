@@ -1,39 +1,50 @@
 /* The side menu, about 1.4 times larger (Henry, 24 Oct: "the side menu feels small; the
    sidebar has plenty of room"). Overrides control-room.css; loaded after it by the layout.
    Applies on every page. Phones keep the compact top strip. */
-:root { --side: 300px; }
-.side { padding: 20px 16px 16px; }
+/* Fluid sizing (Henry, 24 Oct 20:26: "it must be more responsive"). --cr-u is one pixel of
+   the approved 2560 x 1300 design and shrinks with the window, so the whole composition
+   scales down instead of keeping its pixel sizes: 1px from about 2400 wide (and 1100 tall),
+   0.85 at 1920 x 1000, 0.69 at 1512 x 800, 0.62 at 1280 x 720, never under 0.6. The side
+   menu uses --cr-su, the same unit with a floor (0.74) so its type stays readable on a
+   laptop. Sizes are written as "N * unit" where N is the pixel value at 2560. */
+:root {
+  --cr-u: clamp(0.6px, min(calc(0.0297vw + 0.24px), calc(0.0737vh + 0.189px)), 1px);
+  --cr-su: max(0.74px, var(--cr-u));
+  --side: calc(300 * var(--cr-su));
+}
+.side { padding: calc(20 * var(--cr-su)) calc(16 * var(--cr-su)) calc(16 * var(--cr-su)); }
 /* The lockup, after Aalto's "Aalto / Founder Sprint": line 2 starts under the end of the
    wordmark (about 76% of its width) and runs past it, at the wordmark's size (its cap
    height matches the wordmark's letter bodies), tight leading. "Control" bold, a touch
    lighter than the wordmark; "room" light italic. Bahn's display face: Owners Wide, here
    Archivo at width 125. */
-.brand { display: grid; justify-items: start; row-gap: 3px; padding: 10px 12px; margin-bottom: 26px; border-radius: 12px; }
-.brand svg { height: 26px; }
+.brand { display: grid; justify-items: start; row-gap: calc(3 * var(--cr-su)); padding: calc(10 * var(--cr-su)) calc(12 * var(--cr-su)); margin-bottom: calc(26 * var(--cr-su)); border-radius: calc(12 * var(--cr-su)); }
+.brand svg { height: calc(26 * var(--cr-su)); }
 .brand .brand-sub, .brand .brand-sub span {
   padding: 0; font-family: "Owners Wide", var(--font-archivo), var(--font);
   font-stretch: 125%; font-variation-settings: "wdth" 125;
-  font-size: 21px; line-height: 22px; letter-spacing: -0.2px; color: var(--ink); white-space: nowrap;
+  font-size: calc(21 * var(--cr-su)); line-height: calc(22 * var(--cr-su)); letter-spacing: calc(-0.2 * var(--cr-su)); color: var(--ink); white-space: nowrap;
 }
-.brand .brand-sub { margin-left: calc(26px * 106.57 / 24 * 0.76); }
+.brand .brand-sub { margin-left: calc(26 * var(--cr-su) * 106.57 / 24 * 0.76); }
 .brand .brand-sub .brand-sub-1 { font-weight: 700; }
 .brand .brand-sub .brand-sub-2 { font-family: "Owners Wide", var(--font-archivo-italic), var(--font-archivo), var(--font); font-style: italic; font-weight: 300; }
-.nav { gap: 4px; }
-.nav a { height: 46px; gap: 14px; padding: 0 14px; border-radius: 12px; font-size: 18px; line-height: 24px; }
-.nav a svg { width: 22px; height: 22px; }
-.nav .count { font-size: 17px; }
-.person-button { padding: 10px 12px; border-radius: 12px; justify-content: flex-start; gap: 12px; }
+.nav { gap: calc(4 * var(--cr-su)); }
+.nav a { height: calc(46 * var(--cr-su)); gap: calc(14 * var(--cr-su)); padding: 0 calc(14 * var(--cr-su)); border-radius: calc(12 * var(--cr-su)); font-size: max(14px, calc(18 * var(--cr-su))); line-height: calc(24 * var(--cr-su)); }
+.nav a svg { width: calc(22 * var(--cr-su)); height: calc(22 * var(--cr-su)); }
+.nav .count { font-size: max(13px, calc(17 * var(--cr-su))); }
+.person-button { padding: calc(10 * var(--cr-su)) calc(12 * var(--cr-su)); border-radius: calc(12 * var(--cr-su)); justify-content: flex-start; gap: calc(12 * var(--cr-su)); }
 .person-button > svg { margin-left: auto; }
 /* The signed-in person's photo, round, as in Bahn's portal account menu. */
-.avatar { flex: none; width: 40px; height: 40px; border-radius: 50%; object-fit: cover; background: var(--press); box-shadow: 0 0 0 1px rgb(18 17 14 / 0.06); }
-.avatar-s { width: 28px; height: 28px; }
+.avatar { flex: none; width: calc(40 * var(--cr-su)); height: calc(40 * var(--cr-su)); border-radius: 50%; object-fit: cover; background: var(--press); box-shadow: 0 0 0 1px rgb(18 17 14 / 0.06); }
+.avatar-s { width: calc(28 * var(--cr-su)); height: calc(28 * var(--cr-su)); }
 .menu-person { display: flex; align-items: center; gap: 10px; }
 .menu-person .s { display: block; margin-left: 0; }
-.person-button svg { width: 22px; height: 22px; }
-.person-name { font-size: 18px; line-height: 24px; }
-.person-name .s { font-size: 15px; line-height: 20px; }
-.menu { padding: 8px; border-radius: 16px; }
-.menu-item { padding: 10px 14px; border-radius: 10px; font-size: 16px; line-height: 22px; }
+.person-button svg { flex: none; width: calc(22 * var(--cr-su)); height: calc(22 * var(--cr-su)); }
+.person-name { min-width: 0; font-size: max(14px, calc(18 * var(--cr-su))); line-height: calc(24 * var(--cr-su)); }
+.person-name .s { font-size: max(12px, calc(15 * var(--cr-su))); line-height: calc(20 * var(--cr-su)); }
+.person-name > span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.menu { padding: calc(8 * var(--cr-su)); border-radius: calc(16 * var(--cr-su)); }
+.menu-item { padding: calc(10 * var(--cr-su)) calc(14 * var(--cr-su)); border-radius: calc(10 * var(--cr-su)); font-size: max(14px, calc(16 * var(--cr-su))); line-height: calc(22 * var(--cr-su)); }
 
 @media (max-width: 860px) {
   .side { padding: 8px 16px; }

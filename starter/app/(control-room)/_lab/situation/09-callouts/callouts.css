@@ -1,0 +1,7 @@
+/* situation 09: callouts. A taller map that carries the stops; the callouts keep the subhead size. */
+.lab-situation-09 .p9-map { margin-top: 1em; height: max(224px, calc(16 * var(--type-subhead))); }
+.lab-situation-09 .p9-map .s-callout { max-width: 8.6em; }
+.lab-situation-09 .p9-map .maplibregl-ctrl-group { border-radius: 10px !important; }
+.lab-situation-09 .p9-map .maplibregl-ctrl-group button { width: 30px !important; height: 30px !important; }
+.lab-situation-09 .p9-kv { margin-top: 1.4em; }
+.lab-situation-09 .p9-order { margin-top: 1.2em; }

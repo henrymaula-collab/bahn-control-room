@@ -1,0 +1,23 @@
+/* situation 03: blocker first. One red dot (the map's needs-a-person red, a dot only, as the Overview
+   draws it), the blocker at headline weight, the rest quieter beneath. */
+.lab-situation-03 .p3-car { display: flex; align-items: baseline; justify-content: space-between; gap: 1em; }
+.lab-situation-03 .p3-name { font-weight: 600; }
+.lab-situation-03 .p3-block { display: grid; grid-template-columns: auto minmax(0, 1fr); column-gap: 0.65em; margin-top: 1.1em; }
+.lab-situation-03 .p3-dot {
+  width: 0.6em; height: 0.6em; border-radius: 50%; background: var(--red);
+  margin-top: calc((var(--lh-headline) * var(--type-headline) - 0.6 * var(--type-subhead)) / 2);
+  box-shadow: 0 0 0 3px rgb(253 74 97 / 0.16);
+}
+.lab-situation-03 .p3-what { font-size: var(--type-headline); line-height: var(--lh-headline); letter-spacing: var(--track-headline); font-weight: 600; }
+.lab-situation-03 .p3-block .s-grey { margin-top: 0.1em; }
+
+.lab-situation-03 .p3-map { margin-top: 1.2em; height: max(132px, calc(8.6 * var(--type-subhead))); }
+
+/* The two ends as two tight lines: letter, place, time on the right */
+.lab-situation-03 .p3-ends { list-style: none; margin: 1em 0 0; padding: 0; display: flex; flex-direction: column; gap: 0.5em; }
+.lab-situation-03 .p3-ends li { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; column-gap: 0.65em; align-items: center; }
+.lab-situation-03 .p3-place { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.lab-situation-03 .p3-time { font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+.lab-situation-03 .p3-kv { margin-top: 1.3em; padding-top: 1.1em; border-top: 1px solid rgb(18 17 14 / 0.08); }
+.lab-situation-03 .p3-order { margin-top: 1.2em; }

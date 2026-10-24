@@ -1,0 +1,20 @@
+/* situation 10: grouped. The panel takes the frame's grey (raise), the groups are birch with a
+   12 px corner, rows inside on inset hairlines; values right-aligned in grey, the blocker in ink 600. */
+.lab-situation-10.panel.situation-panel { background: var(--raise); padding-inline: max(14px, calc(20 * var(--cr-u, 1px))); }
+.lab-situation-10 .p10-head { padding: 0 max(6px, calc(8 * var(--cr-u, 1px))); }
+.lab-situation-10 .p10-group { margin-top: 1em; border-radius: 12px; background: var(--page); overflow: hidden; }
+.lab-situation-10 .p10-head + .p10-group { margin-top: 1.1em; }
+.lab-situation-10 .p10-map { height: max(128px, calc(8.5 * var(--type-subhead))); border-radius: 0; }
+.lab-situation-10 .p10-rows { list-style: none; margin: 0; padding: 0 0 0 0.9em; }
+.lab-situation-10 .p10-rows li { display: grid; grid-template-columns: auto minmax(0, 1fr); column-gap: 0.7em; align-items: start; padding: 0.6em 0.9em 0.6em 0; }
+.lab-situation-10 .p10-rows li + li { border-top: 1px solid rgb(18 17 14 / 0.08); }
+.lab-situation-10 .p10-rows .s-mark { margin-top: calc((var(--lh-subhead) - 1.4) / 2 * 1em); }
+.lab-situation-10 .p10-kv { padding-left: 0.9em; }
+.lab-situation-10 .p10-kv > div { display: flex; justify-content: space-between; gap: 1em; padding: 0.55em 0.9em 0.55em 0; }
+.lab-situation-10 .p10-kv > div + div { border-top: 1px solid rgb(18 17 14 / 0.08); }
+.lab-situation-10 .p10-kv dt { color: var(--ink); flex: none; }
+.lab-situation-10 .p10-kv dd { color: var(--ink-2); text-align: right; min-width: 0; }
+.lab-situation-10 .p10-kv .is-block dd { color: var(--ink); font-weight: 600; }
+.lab-situation-10 .p10-order { display: flex; width: 100%; margin: 0; padding: 0.6em 0.9em; gap: 0.6em; border-radius: 0; }
+.lab-situation-10 .p10-order .s-order-label { flex: 1; }
+.lab-situation-10 .p10-order:hover { background: rgb(18 17 14 / 0.035); }

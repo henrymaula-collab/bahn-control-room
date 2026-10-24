@@ -1,0 +1,15 @@
+/* situation 07: two ends. The arc is dotted and the map muted; the two ends are two columns joined
+   by one hairline frame, the way Fletes sets "Punto de salida" beside "Punto de entrega". */
+.lab-situation-07 .p7-map { margin-top: 1em; height: max(150px, calc(10.5 * var(--type-subhead))); border-radius: 14px 14px 0 0; }
+.lab-situation-07 .p7-ends {
+  display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  border: 1px solid rgb(18 17 14 / 0.08); border-radius: 0 0 14px 14px;
+}
+.lab-situation-07 .p7-map:not(:has(+ .p7-ends)) { border-radius: 14px; }
+.lab-situation-07 .p7-end { min-width: 0; padding: 0.75em 0.9em 0.85em; }
+.lab-situation-07 .p7-end + .p7-end { border-left: 1px solid rgb(18 17 14 / 0.08); }
+.lab-situation-07 .p7-label { display: flex; align-items: center; gap: 0.45em; }
+.lab-situation-07 .p7-label .s-mark { width: calc(1.15 * var(--type-subhead)); height: calc(1.15 * var(--type-subhead)); font-size: calc(0.8 * var(--type-subhead)); }
+.lab-situation-07 .p7-place { margin-top: 0.35em; font-weight: 600; overflow-wrap: anywhere; }
+.lab-situation-07 .p7-kv { margin-top: 1.5em; }
+.lab-situation-07 .p7-order { margin-top: 1.3em; }

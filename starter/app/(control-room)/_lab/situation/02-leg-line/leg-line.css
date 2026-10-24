@@ -1,0 +1,38 @@
+/* situation 02: leg line. A -- 0.3 km -- B across the panel, the ends under their letters. */
+.lab-situation-02 .p2-leg { margin-top: 1.5em; }
+.lab-situation-02 .p2-track { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; column-gap: 0.5em; }
+/* The leg in Bahn's route colours: orange from A, ink into B, as the portal and the map draw it. */
+.lab-situation-02 .p2-line {
+  position: relative; height: 2px; border-radius: 2px;
+  background: linear-gradient(90deg, var(--route-from) 0 45%, var(--ink) 55% 100%);
+}
+.lab-situation-02 .p2-km {
+  position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
+  padding: 0 0.5em; background: var(--page); color: var(--ink-2); font-variant-numeric: tabular-nums; white-space: nowrap;
+}
+.lab-situation-02 .p2-ends { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); column-gap: 1.2em; margin-top: 0.55em; }
+.lab-situation-02 .p2-end-b { text-align: right; }
+.lab-situation-02 .p2-place { font-weight: 600; }
+
+.lab-situation-02 .p2-kv { margin-top: 1.6em; }
+
+/* "Show on the map": a quiet row, the map opens under it */
+.lab-situation-02 .p2-maprow {
+  display: flex; align-items: center; gap: 0.6em; width: calc(100% + 16px); margin: 1.4em -8px 0; padding: 0.55em 8px;
+  border-radius: 8px; text-align: left; font: inherit; color: var(--ink); background: none; border: 0; cursor: pointer;
+}
+.lab-situation-02 .p2-maprow:hover { background: var(--raise); }
+.lab-situation-02 .p2-maprow:focus-visible { outline: 2px solid var(--ink); outline-offset: 1px; }
+.lab-situation-02 .p2-maprow-icon, .lab-situation-02 .p2-chev { display: inline-flex; color: var(--ink-2); }
+.lab-situation-02 .p2-maprow-icon svg, .lab-situation-02 .p2-chev svg { width: 1.2em; height: 1.2em; }
+.lab-situation-02 .p2-maprow-label { flex: 1; }
+.lab-situation-02 .p2-maprow[aria-expanded="true"] .p2-chev { transform: rotate(90deg); }
+.lab-situation-02 .p2-map { margin-top: 0.5em; }
+.lab-situation-02 .p2-order { margin-top: 0.6em; }
+
+@media (prefers-reduced-motion: no-preference) {
+  .lab-situation-02 .p2-maprow { transition: background-color 150ms var(--s-ease); }
+  .lab-situation-02 .p2-chev { transition: transform 200ms var(--s-ease); }
+  .lab-situation-02 .p2-map { animation: lab-s2-in 250ms var(--s-ease) both; }
+  @keyframes lab-s2-in { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
+}

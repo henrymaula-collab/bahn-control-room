@@ -1,0 +1,27 @@
+/* situation 05: map sheet. The map fills the panel; a birch sheet with a hairline lift overlaps its
+   foot (HIG: keep the place visible while its card is open). */
+.lab-situation-05.panel.situation-panel { padding: 0; display: flex; flex-direction: column; overflow: hidden; }
+.lab-situation-05 .p5-map { flex: 1 1 auto; min-height: 120px; height: auto; border-radius: 0; }
+.lab-situation-05 .p5-sheet {
+  position: relative; z-index: 2; flex: none; max-height: 78%; overflow: auto;
+  margin: -28px 10px 10px; padding: 6px max(16px, calc(22 * var(--cr-u, 1px))) max(14px, calc(18 * var(--cr-u, 1px)));
+  border-radius: 16px; background: var(--page);
+  box-shadow: 0 0 0 1px rgb(18 17 14 / 0.05), 0 6px 24px rgb(18 17 14 / 0.10);
+}
+.lab-situation-05 .p5-grab { display: flex; justify-content: center; width: 100%; padding: 4px 0 8px; background: none; border: 0; cursor: pointer; border-radius: 8px; }
+.lab-situation-05 .p5-grab span { width: 36px; height: 5px; border-radius: 3px; background: var(--press); }
+.lab-situation-05 .p5-grab:hover span { background: var(--bx-color-grey-300); }
+.lab-situation-05 .p5-grab:focus-visible { outline: 2px solid var(--ink); outline-offset: -2px; }
+.lab-situation-05 .p5-title { display: flex; align-items: baseline; justify-content: space-between; gap: 1em; }
+.lab-situation-05 .p5-one { margin-top: 0.2em; }
+.lab-situation-05 .p5-ends { list-style: none; margin: 0.9em 0 0; padding: 0; display: flex; flex-direction: column; gap: 0.7em; }
+.lab-situation-05 .p5-ends li { display: grid; grid-template-columns: auto minmax(0, 1fr); column-gap: 0.7em; align-items: start; }
+.lab-situation-05 .p5-ends .s-mark { margin-top: calc((var(--lh-subhead) - 1.4) / 2 * 1em); }
+.lab-situation-05 .p5-kv { margin-top: 1em; }
+.lab-situation-05 .p5-order { display: flex; width: calc(100% + 16px); margin: 0.9em -8px 0; padding: 0.6em 8px; gap: 0.6em; border-top: 1px solid rgb(18 17 14 / 0.08); }
+.lab-situation-05 .p5-order:hover { border-top-color: transparent; }
+.lab-situation-05 .p5-order .s-order-label { flex: 1; }
+
+@media (prefers-reduced-motion: no-preference) {
+  .lab-situation-05 .p5-grab span { transition: background-color 150ms var(--s-ease); }
+}

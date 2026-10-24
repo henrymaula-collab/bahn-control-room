@@ -1,0 +1,35 @@
+/* situation 06: inspector. Rows on hairlines, not cards (Linear); small grey section names in
+   sentence case; numbers right-aligned in tabular figures. */
+.lab-situation-06 .p6-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.lab-situation-06 .p6-id { min-width: 0; }
+.lab-situation-06 .p6-ref { display: inline-flex; align-items: center; gap: 2px; margin: 0 0 0 -6px; padding: 1px 6px; border-radius: 6px; color: var(--ink-2); text-decoration: none; }
+.lab-situation-06 .p6-ref svg { width: 1.05em; height: 1.05em; }
+.lab-situation-06 .p6-ref:hover { background: var(--raise); color: var(--ink); }
+.lab-situation-06 .p6-ref:hover .s-ref { color: var(--ink); }
+.lab-situation-06 .p6-ref:focus-visible { outline: 2px solid var(--ink); outline-offset: 1px; }
+.lab-situation-06 .p6-tool {
+  flex: none; display: inline-flex; align-items: center; justify-content: center;
+  width: max(32px, calc(1.9 * var(--type-headline))); height: max(32px, calc(1.9 * var(--type-headline))); margin: -4px -8px 0 0;
+  border: 0; border-radius: 8px; background: none; color: var(--ink-2); cursor: pointer;
+}
+.lab-situation-06 .p6-tool svg { width: 1.2em; height: 1.2em; }
+.lab-situation-06 .p6-tool:hover { background: var(--raise); color: var(--ink); }
+.lab-situation-06 .p6-tool.is-on { background: var(--raise); color: var(--ink); }
+.lab-situation-06 .p6-tool:focus-visible { outline: 2px solid var(--ink); outline-offset: 1px; }
+
+.lab-situation-06 .p6-sec { margin: 1.4em 0 0.3em; font-size: var(--type-subhead); line-height: var(--lh-subhead); font-weight: 400; color: var(--ink-2); }
+.lab-situation-06 .p6-map { height: max(120px, calc(8 * var(--type-subhead))); margin: 0.2em 0 0.4em; }
+.lab-situation-06 .p6-rows { list-style: none; margin: 0; padding: 0; }
+.lab-situation-06 .p6-rows li {
+  display: grid; grid-template-columns: calc(1.4 * var(--type-subhead)) minmax(0, 1fr) auto; column-gap: 0.65em; align-items: center;
+  padding: 0.5em 0; border-bottom: 1px solid rgb(18 17 14 / 0.07);
+}
+.lab-situation-06 .p6-place { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.lab-situation-06 .p6-time { white-space: nowrap; font-variant-numeric: tabular-nums; color: var(--ink-2); }
+.lab-situation-06 .p6-kv > div { display: grid; grid-template-columns: max(96px, calc(150 * var(--cr-u, 1px))) minmax(0, 1fr); column-gap: 0.9em; padding: 0.5em 0; border-bottom: 1px solid rgb(18 17 14 / 0.07); }
+.lab-situation-06 .p6-kv dt { color: var(--ink-2); }
+.lab-situation-06 .p6-kv .is-block dd { font-weight: 600; }
+
+@media (prefers-reduced-motion: no-preference) {
+  .lab-situation-06 .p6-tool, .lab-situation-06 .p6-ref { transition: background-color 150ms var(--s-ease), color 150ms var(--s-ease); }
+}

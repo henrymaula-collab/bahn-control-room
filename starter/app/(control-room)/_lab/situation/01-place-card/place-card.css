@@ -1,0 +1,27 @@
+/* situation 01: place card. The map runs to the panel's edges; the rest sits on the panel's air. */
+.lab-situation-01.panel.situation-panel { padding: 0 0 24px; }
+.lab-situation-01 .p1-map { height: max(168px, calc(13 * var(--type-subhead))); border-radius: 0; }
+.lab-situation-01 .p1-body { padding: max(14px, calc(20 * var(--cr-u, 1px))) var(--s-x) 0; }
+.lab-situation-01 .p1-sub { display: flex; flex-direction: column; margin-top: 2px; }
+.lab-situation-01 .p1-wait { margin-top: 0.15em; }
+
+/* Apple's place-card strip, in sentence case: label grey above, value ink, hairlines between. */
+.lab-situation-01 .p1-strip {
+  display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr);
+  margin-top: 1.1em; padding: 0.75em 0; border-block: 1px solid rgb(18 17 14 / 0.08);
+}
+.lab-situation-01 .p1-cell { min-width: 0; padding: 0 0.8em; }
+.lab-situation-01 .p1-cell:first-child { padding-left: 0; }
+.lab-situation-01 .p1-cell + .p1-cell { border-left: 1px solid rgb(18 17 14 / 0.08); }
+.lab-situation-01 .p1-cell dt { color: var(--ink-2); }
+.lab-situation-01 .p1-cell dd { overflow-wrap: anywhere; }
+.lab-situation-01 .p1-cell.is-block dd { font-weight: 600; }
+
+.lab-situation-01 .p1-ends { list-style: none; margin: 1.1em 0 0; padding: 0; display: flex; flex-direction: column; gap: 0.85em; }
+.lab-situation-01 .p1-ends li { display: grid; grid-template-columns: auto minmax(0, 1fr); column-gap: 0.7em; align-items: start; }
+.lab-situation-01 .p1-ends .s-mark { margin-top: calc((var(--lh-subhead) - 1.4) / 2 * 1em); }
+
+/* The order as Apple's "Open in Apple Maps" row: full width, icon, chevron at the end. */
+.lab-situation-01 .p1-order { display: flex; width: calc(100% + 16px); margin: 1.2em -8px 0; padding: 0.7em 8px; gap: 0.6em; border-top: 1px solid rgb(18 17 14 / 0.08); border-radius: 0 0 8px 8px; }
+.lab-situation-01 .p1-order:hover { border-radius: 8px; border-top-color: transparent; }
+.lab-situation-01 .p1-order .s-order-label { flex: 1; }

@@ -1,0 +1,49 @@
+/* situation 08: stays. The open panel is calm; the strip only exists while the chat or the email has
+   the panel, and only then (the :has() rules match nothing on any other page or variant) moves that
+   panel down by the strip's height. */
+.lab-situation-08 .p8-map { margin-top: 1em; height: max(128px, calc(8.4 * var(--type-subhead))); }
+.lab-situation-08 .p8-leg {
+  display: flex; align-items: center; gap: 0.6em; width: calc(100% + 16px); margin: 0.9em -8px 0; padding: 0.5em 8px;
+  border: 0; border-radius: 8px; background: none; font: inherit; color: var(--ink); text-align: left; cursor: pointer;
+}
+.lab-situation-08 .p8-leg:hover { background: var(--raise); }
+.lab-situation-08 .p8-leg:focus-visible { outline: 2px solid var(--ink); outline-offset: 1px; }
+.lab-situation-08 .p8-leg-text { flex: 1; min-width: 0; display: flex; gap: 0.6em; font-weight: 600; }
+.lab-situation-08 .p8-leg-text .s-grey { font-weight: 400; font-variant-numeric: tabular-nums; }
+.lab-situation-08 .p8-chev { display: inline-flex; color: var(--ink-2); }
+.lab-situation-08 .p8-chev svg { width: 1.2em; height: 1.2em; }
+.lab-situation-08 .p8-leg[aria-expanded="true"] .p8-chev { transform: rotate(180deg); }
+.lab-situation-08 .p8-stops { list-style: none; margin: 0.5em 0 0; padding: 0; display: flex; flex-direction: column; gap: 0.7em; }
+.lab-situation-08 .p8-stops li { display: grid; grid-template-columns: auto minmax(0, 1fr); column-gap: 0.7em; align-items: start; }
+.lab-situation-08 .p8-stops .s-mark { margin-top: calc((var(--lh-subhead) - 1.4) / 2 * 1em); }
+.lab-situation-08 .p8-kv { margin-top: 1.3em; }
+.lab-situation-08 .p8-order { margin-top: 1.2em; }
+
+/* The strip: the panel's own column, its top edge, the car and the blocker in one line. */
+.lab-situation-08.s8-strip {
+  position: absolute; top: 0; right: 0; z-index: 12; width: var(--panel); height: var(--s8-h, 52px);
+  display: flex; align-items: center; gap: 0.75em; padding: 0 max(20px, calc(28 * var(--cr-u, 1px)));
+  border: 0; border-bottom: 1px solid rgb(18 17 14 / 0.08); background: var(--page); color: var(--ink);
+  box-shadow: -1px 0 0 rgb(18 17 14 / 0.06), -12px 0 32px rgb(18 17 14 / 0.06);
+  font: inherit; font-size: var(--type-subhead); line-height: var(--lh-subhead); text-align: left; cursor: pointer;
+}
+.lab-situation-08.s8-strip:hover { background: var(--raise); }
+.lab-situation-08.s8-strip:focus-visible { outline: 2px solid var(--ink); outline-offset: -3px; }
+.lab-situation-08 .s8-marks { display: inline-flex; }
+.lab-situation-08 .s8-marks .s-mark { width: calc(1.2 * var(--type-subhead)); height: calc(1.2 * var(--type-subhead)); font-size: calc(0.78 * var(--type-subhead)); box-shadow: 0 0 0 2px var(--page); }
+.lab-situation-08 .s8-marks .s-mark + .s-mark { margin-left: -0.3em; }
+.lab-situation-08 .s8-text { flex: 1; min-width: 0; display: flex; gap: 0.6em; overflow: hidden; white-space: nowrap; }
+.lab-situation-08 .s8-car { font-weight: 600; }
+.lab-situation-08 .s8-block { color: var(--ink-2); overflow: hidden; text-overflow: ellipsis; }
+.lab-situation-08 .s8-chev { display: inline-flex; color: var(--ink-2); }
+.lab-situation-08 .s8-chev svg { width: 1.2em; height: 1.2em; }
+
+.work:has(.lab-situation-08.s8-strip) { --s8-h: max(48px, calc(3.2 * var(--type-subhead))); }
+.work:has(.lab-situation-08.s8-strip) .panel.open:not(.lab-situation-08) { top: var(--s8-h); }
+
+@media (prefers-reduced-motion: no-preference) {
+  .lab-situation-08 .p8-leg, .lab-situation-08.s8-strip { transition: background-color 150ms var(--s-ease); }
+  .lab-situation-08 .p8-chev { transition: transform 200ms var(--s-ease); }
+  .lab-situation-08.s8-strip { animation: lab-s8-in 250ms var(--s-ease) both; }
+  @keyframes lab-s8-in { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
+}

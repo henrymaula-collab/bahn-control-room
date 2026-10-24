@@ -1,0 +1,87 @@
+/* The situation variants' shared base (kit.tsx Panel adds .lab-situation-base next to
+   .lab-situation-NN). Every rule sits under :where(.lab-situation-base) so it weighs nothing and a
+   variant rule (.lab-situation-NN ...) wins without !important. Nothing here reaches today's page:
+   .lab-situation-base is only ever on a variant's panel. The map pins are appended by MapLibre
+   inside the panel, so they are covered too. Discipline as today's panel: headline for the car,
+   subhead for everything else, ink and ink-2, the orange A and the ink B, no pills, no dots. */
+
+:where(.lab-situation-base) {
+  --s-x: max(20px, calc(28 * var(--cr-u, 1px)));
+  --s-ease: cubic-bezier(0.2, 0, 0, 1);
+  font-size: var(--type-subhead);
+  line-height: var(--lh-subhead);
+}
+:where(.lab-situation-base) p, :where(.lab-situation-base) h2, :where(.lab-situation-base) h3, :where(.lab-situation-base) dl, :where(.lab-situation-base) dd { margin: 0; }
+
+/* Head: the car at headline, the reference in mono grey under it */
+:where(.lab-situation-base) .s-car { font-size: var(--type-headline); line-height: var(--lh-headline); letter-spacing: var(--track-headline); font-weight: 600; }
+:where(.lab-situation-base) .s-ref { font-family: var(--font-mono); color: var(--ink-2); font-size: var(--type-subhead); line-height: var(--lh-subhead); }
+:where(.lab-situation-base) .s-grey { color: var(--ink-2); }
+
+/* The map */
+:where(.lab-situation-base) .s-map { position: relative; height: max(150px, calc(10 * var(--type-subhead))); border-radius: 14px; overflow: hidden; background: #f4f2ec; }
+:where(.lab-situation-base) .s-map .maplibregl-ctrl-attrib { font-size: var(--type-caption2); }
+:where(.lab-situation-base) .s-pin {
+  position: relative;
+  width: calc(1.47 * var(--type-subhead)); height: calc(1.47 * var(--type-subhead)); border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font); font-size: var(--type-subhead); line-height: 1; font-weight: 600;
+  box-shadow: 0 0 0 2px var(--page);
+}
+/* Both ends at one spot: one capsule, A and B side by side (HIG: one pin for close points). */
+:where(.lab-situation-base) .s-pin-pair { width: auto; height: auto; border-radius: 999px; overflow: visible; box-shadow: none; display: flex; gap: 0; }
+:where(.lab-situation-base) .s-pin-pair > span:not(.s-callout) {
+  width: calc(1.47 * var(--type-subhead)); height: calc(1.47 * var(--type-subhead));
+  display: inline-flex; align-items: center; justify-content: center;
+  font-size: var(--type-subhead); font-weight: 600; box-shadow: 0 0 0 2px var(--page);
+}
+:where(.lab-situation-base) .s-pin-pair > span:first-child { border-radius: 999px 0 0 999px; }
+:where(.lab-situation-base) .s-pin-pair > span:nth-child(2) { border-radius: 0 999px 999px 0; }
+
+/* Callouts: the place and its time beside its pin, on a birch label with a hairline lift */
+:where(.lab-situation-base) .s-callout {
+  position: absolute; top: 50%; transform: translateY(-50%);
+  display: flex; flex-direction: column; gap: 0;
+  width: max-content; max-width: 11.5em; padding: 0.35em 0.6em; border-radius: 8px;
+  background: var(--page); color: var(--ink);
+  box-shadow: 0 0 0 1px rgb(18 17 14 / 0.06), 0 2px 8px rgb(18 17 14 / 0.08);
+  font-size: var(--type-subhead); line-height: 1.25; font-weight: 400; text-align: left; white-space: normal;
+}
+:where(.lab-situation-base) .s-callout b { font-weight: 600; }
+:where(.lab-situation-base) .s-callout i { font-style: normal; color: var(--ink-2); }
+:where(.lab-situation-base) .s-callout-right { left: calc(100% + 8px); }
+:where(.lab-situation-base) .s-callout-left { right: calc(100% + 8px); text-align: right; }
+:where(.lab-situation-base) .s-callout-below { top: calc(100% + 8px); left: 50%; transform: translateX(-50%); text-align: center; }
+
+/* A and B letters outside the map */
+:where(.lab-situation-base) .s-mark {
+  flex: none; width: calc(1.4 * var(--type-subhead)); height: calc(1.4 * var(--type-subhead)); border-radius: 50%;
+  display: inline-flex; align-items: center; justify-content: center;
+  font-size: var(--type-subhead); line-height: 1; font-weight: 600;
+}
+:where(.lab-situation-base) .s-mark-a { background: var(--route-from); color: var(--ink); }
+:where(.lab-situation-base) .s-mark-b { background: var(--ink); color: var(--page); }
+
+/* Label and value */
+:where(.lab-situation-base) .s-kv { display: grid; grid-template-columns: max(96px, calc(150 * var(--cr-u, 1px))) minmax(0, 1fr); column-gap: 0.9em; row-gap: 0.55em; }
+:where(.lab-situation-base) .s-kv-row { display: contents; }
+:where(.lab-situation-base) .s-kv dt { color: var(--ink-2); }
+:where(.lab-situation-base) .s-kv .is-strong dd { font-weight: 600; }
+
+/* Open the order */
+:where(.lab-situation-base) .s-order {
+  display: inline-flex; align-items: center; gap: 2px; margin-left: -8px; padding: 6px 8px; border-radius: 8px;
+  color: var(--ink); font-weight: 400; text-decoration: none;
+}
+:where(.lab-situation-base) .s-order:hover { background: var(--raise); }
+:where(.lab-situation-base) .s-order:focus-visible { outline: 2px solid var(--ink); outline-offset: 1px; }
+:where(.lab-situation-base) .s-order-chev { display: inline-flex; color: var(--ink-2); }
+:where(.lab-situation-base) .s-order-chev svg, :where(.lab-situation-base) .s-order-icon svg { width: 1.2em; height: 1.2em; }
+:where(.lab-situation-base) .s-order-icon { display: inline-flex; color: var(--ink-2); }
+
+@media (prefers-reduced-motion: no-preference) {
+  :where(.lab-situation-base) .s-order { transition: background-color 150ms var(--s-ease); }
+}
+:where(.lab-situation-base) .s-callout-above { top: auto; bottom: calc(100% + 8px); left: 50%; transform: translateX(-50%); text-align: center; }
+/* Above or below a pin (an east-west leg) the callout may run wider: two lines, not four. */
+:where(.lab-situation-base) .s-callout-above, :where(.lab-situation-base) .s-callout-below { max-width: 12em !important; }

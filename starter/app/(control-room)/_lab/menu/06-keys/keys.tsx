@@ -7,9 +7,9 @@
 // enhancement, never the only way).
 import "./keys.css"
 import { useRouter } from "next/navigation"
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { PersonSwitcher } from "../../../_ui/person-switcher"
-import { Frame, Lockup, NavRow, NeedsMenu, SECTIONS, useHere, type ShellProps } from "../kit/kit"
+import { Frame, Lockup, NavRow, NeedsMenu, SECTIONS, useHere, useKeep, type ShellProps } from "../kit/kit"
 
 const KEYS: Record<string, string> = { "/": "O", "/tasks": "T", "/history": "H", "/orders": "R", "/agents": "A", "/know-how": "K", "/team": "M" }
 
@@ -21,6 +21,9 @@ const typing = (t: EventTarget | null) => {
 export function KeysShell({ person, people, needYou, children }: ShellProps) {
   const { here } = useHere()
   const router = useRouter()
+  const keep = useKeep()
+  const keepRef = useRef(keep)
+  keepRef.current = keep
   const [armed, setArmed] = useState(false)
   useEffect(() => {
     let timer: number | undefined
@@ -41,14 +44,16 @@ export function KeysShell({ person, people, needYou, children }: ShellProps) {
       const href = Object.keys(KEYS).find((h) => KEYS[h] === k)
       arm(false)
       if (href) {
+        // Capture phase + stop: G then K is Know-how, not also Your tasks' K (the previous task, work-frame).
         e.preventDefault()
-        router.push(href)
+        e.stopPropagation()
+        router.push(keepRef.current(href))
       }
     }
-    window.addEventListener("keydown", onKey)
+    window.addEventListener("keydown", onKey, true)
     return () => {
       window.clearTimeout(timer)
-      window.removeEventListener("keydown", onKey)
+      window.removeEventListener("keydown", onKey, true)
     }
   }, [router])
   return (

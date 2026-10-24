@@ -7,12 +7,13 @@ import "./on-shift.css"
 import Link from "next/link"
 import { Icon } from "../../../_ui/icons"
 import { PersonSwitcher } from "../../../_ui/person-switcher"
-import { Frame, Lockup, NavRow, NeedsMenu, SECTIONS, useHere, type ShellProps } from "../kit/kit"
+import { Frame, Lockup, NavRow, NeedsMenu, SECTIONS, useHere, useKeep, type ShellProps } from "../kit/kit"
 
 const FACES = 5
 
 export function OnShiftShell({ person, people, needYou, children }: ShellProps) {
   const { here } = useHere()
+  const keep = useKeep()
   const others = people.filter((p) => p.id !== person.id)
   const names = others.map((p) => p.name.split(" ")[0])
   return (
@@ -30,7 +31,7 @@ export function OnShiftShell({ person, people, needYou, children }: ShellProps) 
           <NeedsMenu />
           <div className="side-foot">
             {others.length > 0 && (
-              <Link href="/team" className="lm07-shift" aria-label={`On shift with you: ${names.join(", ")}. Open Team.`}>
+              <Link href={keep("/team")} className="lm07-shift" aria-label={`On shift with you: ${names.join(", ")}. Open Team.`}>
                 <span className="lm07-l">On shift with you</span>
                 <span className="lm07-row">
                   <span className="lm07-faces">

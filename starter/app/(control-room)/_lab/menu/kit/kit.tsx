@@ -12,9 +12,24 @@ import { Icon } from "../../../_ui/icons"
 import { BahnLogo } from "../../../_ui/logo"
 import { archivoItalic } from "../../../_ui/shell-fonts"
 import { HistoryIcon, NeedsMenu, SECTIONS, sectionOf, type ShellProps } from "../../../_ui/shell"
+import { useLab } from "../../context"
 
 export type Section = (typeof SECTIONS)[number]
 export { NeedsMenu, SECTIONS, type ShellProps }
+
+/** A link that keeps the lab's own params (?v=, many, rule), so a menu variant survives its own clicks
+ *  (RV6: the rows dropped ?v=, and one click in the menu put today's menu back). Built from useLab(), so
+ *  the frame needs no useSearchParams and no Suspense boundary. */
+export function useKeep() {
+  const lab = useLab()
+  const q = new URLSearchParams()
+  const v = Object.entries(lab.v).map(([slot, nn]) => `${slot}:${nn}`).join(",")
+  if (v) q.set("v", v)
+  if (lab.many) q.set("many", String(lab.many))
+  if (lab.rule && !lab.v.rule) q.set("rule", "1")
+  const s = q.toString().replace(/%3A/g, ":").replace(/%2C/g, ",")
+  return (path: string) => (s ? `${path}?${s}` : path)
+}
 
 export function useHere() {
   const path = usePathname() ?? "/"
@@ -23,8 +38,9 @@ export function useHere() {
 
 /** Today's lockup: the Bahn wordmark, "Control room" set in under its end. */
 export function Lockup({ children }: { children?: React.ReactNode }) {
+  const keep = useKeep()
   return (
-    <Link href="/" className="brand" aria-label="Bahn control room, overview">
+    <Link href={keep("/")} className="brand" aria-label="Bahn control room, overview">
       <BahnLogo />
       <span className="brand-sub">
         <span className="brand-sub-1">Control</span> <span className="brand-sub-2">room</span>
@@ -49,8 +65,9 @@ export function SectionIcon({ s }: { s: Section }) {
 
 /** One menu row, as today: icon, name, and the count on Your tasks. */
 export function NavRow({ s, here, needYou, after, title }: { s: Section; here: Section; needYou: number; after?: React.ReactNode; title?: string }) {
+  const keep = useKeep()
   return (
-    <Link href={s.href} aria-current={s === here ? "page" : undefined} data-label={s.label} title={title}>
+    <Link href={keep(s.href)} aria-current={s === here ? "page" : undefined} data-label={s.label} title={title}>
       <SectionIcon s={s} />
       <span className="lm-l">{s.label}</span>
       {s.href === "/tasks" && needYou > 0 && (

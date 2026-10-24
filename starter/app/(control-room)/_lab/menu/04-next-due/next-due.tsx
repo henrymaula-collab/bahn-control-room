@@ -7,10 +7,11 @@ import "./next-due.css"
 import Link from "next/link"
 import { PersonSwitcher } from "../../../_ui/person-switcher"
 import { useMenuNeeds } from "../../context"
-import { Frame, Lockup, NavRow, NeedsMenu, SECTIONS, SectionIcon, useHere, type ShellProps } from "../kit/kit"
+import { Frame, Lockup, NavRow, NeedsMenu, SECTIONS, SectionIcon, useHere, useKeep, type ShellProps } from "../kit/kit"
 
 export function NextDueShell({ person, people, needYou, children }: ShellProps) {
   const { here } = useHere()
+  const keep = useKeep()
   const { rows, times } = useMenuNeeds()
   const next = rows.find((r) => times[r.caseId]) ?? rows[0]
   const t = next ? times[next.caseId] : undefined
@@ -24,7 +25,7 @@ export function NextDueShell({ person, people, needYou, children }: ShellProps) 
           <nav className="nav">
             {SECTIONS.map((s) =>
               s.href === "/tasks" && next ? (
-                <Link key={s.href} href={s.href} aria-current={s === here ? "page" : undefined} className="lm04-tasks">
+                <Link key={s.href} href={keep(s.href)} aria-current={s === here ? "page" : undefined} className="lm04-tasks">
                   <SectionIcon s={s} />
                   <span className="lm04-two">
                     <span className="lm-l">{s.label}</span>

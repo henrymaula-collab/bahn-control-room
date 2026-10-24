@@ -9,3 +9,8 @@
 .lab-menu-07 .lm07-face { width: max(28px, calc(38 * var(--cr-su))); height: max(28px, calc(38 * var(--cr-su))); box-shadow: 0 0 0 2px var(--raise); }
 .lab-menu-07 .lm07-face + .lm07-face { margin-left: calc(-8 * var(--cr-su)); }
 .lab-menu-07 .lm07-more { margin-left: calc(8 * var(--cr-su)); font-size: var(--type-menu-sub); line-height: var(--lh-menu-sub); color: var(--ink-2); }
+/* With needs 12's counted lines in the menu, a short window (Henry's Safari, 544 px tall) has no room
+   for the faces too: the person block would be pushed out of the window, so the faces step aside (RV6). */
+@media (max-height: 640px) {
+  .lab-menu-07 .side:has(.lab-needs-12.n12) .lm07-shift { display: none; }
+}

@@ -10,12 +10,13 @@ import { Icon } from "../../../_ui/icons"
 import { PersonSwitcher } from "../../../_ui/person-switcher"
 import { useMenuNeeds } from "../../context"
 import { PAD_ORDER_PREFIX } from "../../slots"
-import { Frame, Lockup, NavRow, NeedsMenu, SECTIONS, useHere, type ShellProps } from "../kit/kit"
+import { Frame, Lockup, NavRow, NeedsMenu, SECTIONS, useHere, useKeep, type ShellProps } from "../kit/kit"
 
 const SHOW = 7
 
 export function FlyoutShell({ person, people, needYou, children }: ShellProps) {
   const { here, path } = useHere()
+  const keep = useKeep()
   const { rows, times } = useMenuNeeds()
   const [open, setOpen] = useState(false)
   const timer = useRef<number | undefined>(undefined)
@@ -71,7 +72,7 @@ export function FlyoutShell({ person, people, needYou, children }: ShellProps) {
                           const href = r.caseId.startsWith(PAD_ORDER_PREFIX) ? `/orders/${encodeURIComponent(r.orderId)}` : `/tasks/${r.caseId}`
                           return (
                             <li key={r.caseId}>
-                              <Link href={href} className="lm05-row" aria-current={path === `/tasks/${r.caseId}` ? "page" : undefined}>
+                              <Link href={keep(href)} className="lm05-row" aria-current={path === `/tasks/${r.caseId}` ? "page" : undefined}>
                                 <span className="lm05-v">{r.vehicle}</span>
                                 <span className="lm05-p">{r.place}</span>
                                 {t && <time className={`lm05-t num${t.now ? " now" : ""}`}>{t.text}</time>}
@@ -81,7 +82,7 @@ export function FlyoutShell({ person, people, needYou, children }: ShellProps) {
                         })}
                       </ul>
                       {rows.length > SHOW && (
-                        <Link href="/tasks" className="lm05-all">
+                        <Link href={keep("/tasks")} className="lm05-all">
                           <span>All {rows.length} tasks</span>
                           <Icon name="chevron-right" size={16} />
                         </Link>

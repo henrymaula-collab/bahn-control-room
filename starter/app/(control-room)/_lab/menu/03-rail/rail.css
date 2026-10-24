@@ -1,7 +1,9 @@
-/* menu 03: the rail. Bahn's mark, the icons, the count as a small ink number on Your tasks, the
+/* menu 03: the rail. Bahn's mark, the icons, the count as plain grey type beside the Your tasks icon
+   (RV6: it was a filled black badge, a numbered circle, the one in the app), the
    names as a tooltip on hover or focus, the person as their photo. Rail when pinned (any width above
    phones) or, by default, under 1200 px, so Henry's Safari window at 125% gets the room back. The
-   rules below are the same block twice (generated), once per case. */
+   rules below are the same block twice (generated), once per case. needs 12's counted lines need
+   the full menu's width: in the rail they step aside (the toggle brings them back). */
 .lab-menu-03 { --lm03-rail: max(64px, calc(84 * var(--cr-su))); }
 .lab-menu-03 .lm03-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 4px; margin-bottom: calc(26 * var(--cr-su)); }
 .lab-menu-03 .lm03-top .brand { margin-bottom: 0; }
@@ -22,11 +24,9 @@
   .lab-menu-03[data-pin="rail"] .nav { align-items: center; align-self: stretch; }
   .lab-menu-03[data-pin="rail"] .nav a { position: relative; width: calc(50 * var(--cr-su)); height: calc(46 * var(--cr-su)); padding: 0; gap: 0; justify-content: center; }
   .lab-menu-03[data-pin="rail"] .nav a .lm-l { display: none; }
-  .lab-menu-03[data-pin="rail"] .nav a .count {
-    position: absolute; top: 2px; right: -5px; margin: 0;
-    min-width: 16px; height: 16px; padding: 0 4px; border-radius: 8px; background: var(--ink); color: var(--page);
-    font-size: 10.5px; line-height: 16px; font-weight: 600; text-align: center; box-shadow: 0 0 0 2px var(--raise);
-  }
+  .lab-menu-03[data-pin="rail"] .nav a:has(.count) { gap: calc(5 * var(--cr-su)); width: auto; min-width: calc(50 * var(--cr-su)); padding: 0 calc(9 * var(--cr-su)); }
+  .lab-menu-03[data-pin="rail"] .nav a .count { margin: 0; font-size: var(--type-menu-sub); line-height: 1; }
+  .lab-menu-03[data-pin="rail"] .lab-needs-12.n12 { display: none; }
   .lab-menu-03[data-pin="rail"] .nav a:hover::after, .lab-menu-03[data-pin="rail"] .nav a:focus-visible::after {
     content: attr(data-label); position: absolute; left: calc(100% + 10px); top: 50%; transform: translateY(-50%); z-index: 60;
     padding: 5px 10px 6px; border-radius: 8px; background: var(--ink); color: var(--page); pointer-events: none; white-space: nowrap;
@@ -49,11 +49,9 @@
   .lab-menu-03[data-pin="auto"] .nav { align-items: center; align-self: stretch; }
   .lab-menu-03[data-pin="auto"] .nav a { position: relative; width: calc(50 * var(--cr-su)); height: calc(46 * var(--cr-su)); padding: 0; gap: 0; justify-content: center; }
   .lab-menu-03[data-pin="auto"] .nav a .lm-l { display: none; }
-  .lab-menu-03[data-pin="auto"] .nav a .count {
-    position: absolute; top: 2px; right: -5px; margin: 0;
-    min-width: 16px; height: 16px; padding: 0 4px; border-radius: 8px; background: var(--ink); color: var(--page);
-    font-size: 10.5px; line-height: 16px; font-weight: 600; text-align: center; box-shadow: 0 0 0 2px var(--raise);
-  }
+  .lab-menu-03[data-pin="auto"] .nav a:has(.count) { gap: calc(5 * var(--cr-su)); width: auto; min-width: calc(50 * var(--cr-su)); padding: 0 calc(9 * var(--cr-su)); }
+  .lab-menu-03[data-pin="auto"] .nav a .count { margin: 0; font-size: var(--type-menu-sub); line-height: 1; }
+  .lab-menu-03[data-pin="auto"] .lab-needs-12.n12 { display: none; }
   .lab-menu-03[data-pin="auto"] .nav a:hover::after, .lab-menu-03[data-pin="auto"] .nav a:focus-visible::after {
     content: attr(data-label); position: absolute; left: calc(100% + 10px); top: 50%; transform: translateY(-50%); z-index: 60;
     padding: 5px 10px 6px; border-radius: 8px; background: var(--ink); color: var(--page); pointer-events: none; white-space: nowrap;

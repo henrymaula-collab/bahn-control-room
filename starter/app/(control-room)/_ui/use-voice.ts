@@ -69,6 +69,8 @@ function micError(e: unknown): string {
   const name = e instanceof DOMException ? e.name : ""
   if (name === "NotAllowedError" || name === "SecurityError") return "The microphone is blocked. Allow it for this page in Chrome's address bar."
   if (name === "NotFoundError" || name === "OverconstrainedError") return "No microphone found."
+  if (name === "NotReadableError") return "The microphone is in use by another app."
+  if (typeof navigator !== "undefined" && !navigator.mediaDevices) return "Voice needs the page on localhost or https."
   return "The microphone could not start."
 }
 

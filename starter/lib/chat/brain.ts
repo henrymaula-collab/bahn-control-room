@@ -76,14 +76,25 @@ class Steps {
 }
 
 function userText(input: { text: string; via: "text" | "voice" }): string {
-  return input.via === "voice" ? `${input.text}\n\n(Said by voice: answer in one to three short sentences.)` : input.text
+  return input.via === "voice" ? `${input.text}\n\n(Said by voice: answer in at most 35 words, easy to listen to.)` : input.text
+}
+
+/** The newest question carries the word budget, where the model weighs it most. */
+export function wordBudget(input: Pick<AnswerInput, "via" | "shape">): number {
+  return input.via === "voice" ? 35 : input.shape.experienced ? 45 : 90
+}
+
+function lastUserText(input: AnswerInput): string {
+  const n = wordBudget(input)
+  const shape = n <= 45 ? "two or three short sentences" : "a short paragraph"
+  return input.via === "voice" ? userText(input) : `${input.text}\n\n(Answer in ${shape}, at most ${n} words. This is a hard limit.)`
 }
 
 function apiMessages(input: AnswerInput): BetaMessageParam[] {
   const turns = input.history.filter((m) => m.text.trim())
   while (turns.length && turns[0].role === "agent") turns.shift()
   const messages: BetaMessageParam[] = turns.map((m) => ({ role: m.role === "person" ? ("user" as const) : ("assistant" as const), content: m.role === "person" ? userText(m) : m.text }))
-  messages.push({ role: "user", content: userText(input) })
+  messages.push({ role: "user", content: lastUserText(input) })
   return messages
 }
 
@@ -187,7 +198,7 @@ export const SDK_ALLOWED_TOOLS = CHAT_TOOLS.map((n) => `mcp__${MCP}__${n}`)
 
 function transcript(input: AnswerInput): string {
   const turns = input.history.filter((m) => m.text.trim()).map((m) => `${m.role === "person" ? input.ctx.person.name : "You"}: ${m.text}`)
-  const now = `${input.ctx.person.name}: ${userText(input)}`
+  const now = `${input.ctx.person.name}: ${lastUserText(input)}`
   return turns.length ? `The conversation so far:\n${turns.join("\n\n")}\n\nNow:\n${now}` : now
 }
 

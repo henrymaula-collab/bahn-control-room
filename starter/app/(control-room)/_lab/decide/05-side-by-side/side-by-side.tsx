@@ -12,7 +12,7 @@ import { Keep } from "../../../_ui/text"
 import { usePanel } from "../../../_ui/work-frame"
 import { agentPlan, type DoneProps, pairs, type PreviewProps, recipient, useCaseId, useDefaultKey } from "../_shared/helpers"
 import { pauseSend, startSend, undoSend, useFrozen, useSendView, type SendState, useSendError } from "../_shared/send-window"
-import { useDraft } from "../_shared/use-draft"
+import { useColumn, useDraft } from "../_shared/use-draft"
 
 /**
  * decide 05: Side by side. The email in the side panel; In English widens the panel and sets the
@@ -123,7 +123,7 @@ export function SideBySidePreview({ draft, subject, verb, pending, error, onSend
             {error && <p className="s now">{error}</p>}
             <div className="send-actions">
               <button type="button" className="btn btn-primary" disabled={pending || !d.text.trim() || !!win} onClick={send}>
-                {verb.replace(/\s+the\s+(email|message)$/i, "") || "Send"}
+                {"Send"}
               </button>
               <button type="button" className="btn btn-plain" disabled={pending} onClick={() => (d.setEditing(!d.editing), d.setEnglish(false))}>
                 {d.editing ? "Done" : "Edit"}
@@ -142,10 +142,11 @@ export function SideBySidePreview({ draft, subject, verb, pending, error, onSend
 }
 
 function TopToast({ win, noun }: { win: SendState; noun: string }) {
-  if (typeof document === "undefined") return null
+  const rect = useColumn()
+  if (typeof document === "undefined" || !rect) return null
   const waiting = win.phase === "wait"
   return createPortal(
-    <div className="lab-decide-05 s5-toast" role="status" aria-live="polite">
+    <div className="lab-decide-05 s5-toast" style={{ left: rect.left + rect.width / 2 }} role="status" aria-live="polite">
       <span>
         {waiting ? `Sending the ${noun} to ${win.to}` : `${noun === "email" ? "Email" : "Message"} sent to ${win.to}`}
       </span>

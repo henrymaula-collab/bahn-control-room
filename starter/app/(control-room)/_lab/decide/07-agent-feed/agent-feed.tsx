@@ -11,7 +11,7 @@ import { Keep } from "../../../_ui/text"
 import { usePanel } from "../../../_ui/work-frame"
 import { agentPlan, type DoneProps, type PreviewProps, recipient, useCaseBack, useCaseId, useDefaultKey } from "../_shared/helpers"
 import { pauseSend, startSend, undoSend, useFrozen, useSendView, useSendError } from "../_shared/send-window"
-import { useDraft } from "../_shared/use-draft"
+import { useDraft, useReveal } from "../_shared/use-draft"
 
 type Row = { state: "done" | "live" | "next"; text: string; sub?: string; undo?: boolean }
 
@@ -61,6 +61,7 @@ export function AgentFeedPreview({ draft, subject, verb, pending, error, onSend,
   const shown = open === "email"
   const close = useRef<HTMLButtonElement>(null)
   const d = useDraft(draft, shown)
+  const enRef = useReveal<HTMLParagraphElement>(d.english)
   const win = useSendView(caseId, d.who)
   const back = useCaseBack(caseId)
 
@@ -132,7 +133,7 @@ export function AgentFeedPreview({ draft, subject, verb, pending, error, onSend,
                   <Icon name={d.english ? "chevron-down" : "chevron-right"} size={16} />
                 </button>
                 {d.english && (
-                  <p className="m quiet f7-mail f7-en" lang="en">
+                  <p ref={enRef} className="m quiet f7-mail f7-en" lang="en">
                     {d.edited ? "The English is of the agent's text, before your change. " : ""}
                     {draft.translation}
                   </p>
@@ -144,7 +145,7 @@ export function AgentFeedPreview({ draft, subject, verb, pending, error, onSend,
             {error && <p className="s now">{error}</p>}
             <div className="send-actions">
               <button type="button" className="btn btn-primary" disabled={pending || !d.text.trim()} onClick={send}>
-                {verb.replace(/\s+the\s+(email|message)$/i, "") || "Send"}
+                {"Send"}
               </button>
               <button type="button" className="btn btn-plain" disabled={pending} onClick={() => d.setEditing(!d.editing)}>
                 {d.editing ? "Done" : "Edit"}

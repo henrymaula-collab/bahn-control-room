@@ -29,9 +29,11 @@
 .lab-decide-05 .s5-pair:hover { background: linear-gradient(var(--raise), var(--raise)) padding-box; border-radius: 10px; }
 .lab-decide-05 .s5-note { margin-top: 0.8em; }
 
-/* Undo at the top, as today's receipt toast sits. */
+/* Undo at the top of the card, as today's receipt toast sits; the card steps down under it while it
+   shows (the :has() rule only matches while this variant's toast is on the page). */
+body:has(> .lab-decide-05.s5-toast) .work .detail { padding-top: calc(max(calc(28 * var(--type-kf)), calc(56 * var(--cr-u, 1px))) + 52px); transition: padding-top 200ms cubic-bezier(0.2, 0, 0, 1); }
 .lab-decide-05.s5-toast {
-  position: fixed; left: 50%; top: 20px; transform: translateX(-50%); z-index: 40;
+  position: fixed; top: 18px; transform: translateX(-50%); z-index: 40;
   display: flex; align-items: center; gap: 14px; width: max-content; max-width: min(720px, calc(100vw - 32px));
   padding: 8px 8px 8px 22px; border-radius: 999px; background: var(--ink); color: var(--page);
   font-size: var(--type-body); line-height: var(--lh-body);

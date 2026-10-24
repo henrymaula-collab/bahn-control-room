@@ -11,7 +11,7 @@ import { Keep } from "../../../_ui/text"
 import { usePanel } from "../../../_ui/work-frame"
 import { agentPlan, type DoneProps, type PreviewProps, recipient, useCaseBack, useCaseId, useDefaultKey } from "../_shared/helpers"
 import { pauseSend, startSend, undoSend, useFrozen, useSendView, useSendWindow, type SendState, useSendError } from "../_shared/send-window"
-import { useColumn, useDraft } from "../_shared/use-draft"
+import { useColumn, useDraft, useReveal } from "../_shared/use-draft"
 
 /**
  * decide 01: Undo pill. The email in the side panel, as today but set like Mail's compose header.
@@ -26,6 +26,7 @@ export function UndoPillPreview({ draft, subject, verb, pending, error, onSend, 
   const shown = open === "email" && !frozen
   const close = useRef<HTMLButtonElement>(null)
   const d = useDraft(draft, shown)
+  const enRef = useReveal<HTMLParagraphElement>(d.english)
   const win = useSendView(caseId, d.who)
 
   useEffect(() => {
@@ -90,7 +91,7 @@ export function UndoPillPreview({ draft, subject, verb, pending, error, onSend, 
                   <Icon name={d.english ? "chevron-down" : "chevron-right"} size={16} />
                 </button>
                 {d.english && (
-                  <p className="m u1-text u1-en" lang="en">
+                  <p ref={enRef} className="m u1-text u1-en" lang="en">
                     {d.edited ? "The English is of the agent's text, before your change. " : ""}
                     {draft.translation}
                   </p>
@@ -102,7 +103,7 @@ export function UndoPillPreview({ draft, subject, verb, pending, error, onSend, 
             {error && <p className="s now">{error}</p>}
             <div className="send-actions">
               <button type="button" className="btn btn-primary" disabled={pending || !d.text.trim() || !!win} onClick={send}>
-                {verb.replace(/\s+the\s+(email|message)$/i, "") || "Send"}
+                {"Send"}
               </button>
               <button type="button" className="btn btn-plain" disabled={pending} onClick={() => d.setEditing(!d.editing)}>
                 {d.editing ? "Done" : "Edit"}

@@ -44,7 +44,7 @@ export function InterlinearPreview({ draft, subject, verb, pending, error, onSen
     setOpen(null)
     returnFocus()
   }
-  const label = verb.replace(/\s+the\s+(email|message)$/i, "") || "Send"
+  const label = "Send"
 
   return (
     <>

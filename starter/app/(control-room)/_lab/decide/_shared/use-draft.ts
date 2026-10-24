@@ -4,7 +4,7 @@
 // the edit, the edited text) and the rect of the card's column for things that float over it.
 
 import { useSearchParams } from "next/navigation"
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import type { Draft } from "@/lib/control-room/views"
 import { recipient } from "./helpers"
 
@@ -59,4 +59,18 @@ export function useColumn(on = true) {
     return () => (ro.disconnect(), window.removeEventListener("resize", measure), clearInterval(t))
   }, [on])
   return rect
+}
+
+/** When the English opens under a long German text, bring it into view (it would sit below the fold). */
+export function useReveal<T extends HTMLElement>(on: boolean) {
+  const ref = useRef<T>(null)
+  useEffect(() => {
+    if (!on) return
+    const id = requestAnimationFrame(() => {
+      const calm = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches
+      ref.current?.scrollIntoView({ block: "start", behavior: calm ? "auto" : "smooth" })
+    })
+    return () => cancelAnimationFrame(id)
+  }, [on])
+  return ref
 }

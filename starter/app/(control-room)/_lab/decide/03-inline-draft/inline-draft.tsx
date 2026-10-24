@@ -32,14 +32,14 @@ export function InlineDraftPreview({ draft, subject, verb, pending, error, onSen
   useEffect(() => {
     if (open !== "email") return
     setOpen(null)
-    if (!frozen) {
-      setExpanded(true)
-      requestAnimationFrame(() => {
-        box.current?.scrollIntoView({ block: "nearest", behavior: "smooth" })
-        sendBtn.current?.focus({ preventScroll: true })
-      })
-    }
+    if (!frozen) setExpanded(true)
   }, [open, setOpen, frozen])
+  // Once open, bring the draft's buttons into view (the headline may scroll away on a laptop).
+  useEffect(() => {
+    if (!expanded) return
+    const id = requestAnimationFrame(() => sendBtn.current?.scrollIntoView({ block: "nearest" }))
+    return () => cancelAnimationFrame(id)
+  }, [expanded])
 
   const cancel = () => (setExpanded(false), returnFocus())
   const send = () => {
@@ -54,7 +54,7 @@ export function InlineDraftPreview({ draft, subject, verb, pending, error, onSen
       <div className="lab-decide-03 is-open i3-receipt" role="status" aria-live="polite">
         <Icon name={waiting ? "arrow-up" : "check"} size={18} />
         <span className="i3-line">
-          {waiting ? `Sending the ${d.noun} to ${d.who.name}` : `Sent to ${d.who.name} at ${win.at}`}
+          {waiting ? `Sending to ${d.who.name}` : `Sent to ${d.who.name} at ${win.at}`}
           {waiting ? "" : pending ? "" : "."}
         </span>
         {waiting && (
@@ -116,7 +116,7 @@ export function InlineDraftPreview({ draft, subject, verb, pending, error, onSen
       {error && <p className="s now">{error}</p>}
       <div className="i3-actions">
         <button ref={sendBtn} type="button" className="btn btn-primary" disabled={pending || !d.text.trim()} onClick={send}>
-          {verb.replace(/\s+the\s+(email|message)$/i, "") || "Send"}
+          {"Send"}
         </button>
         <button type="button" className="btn btn-plain" disabled={pending} onClick={() => (d.setEnglish(false), d.setEditing(!d.editing))}>
           {d.editing ? "Done" : "Edit"}

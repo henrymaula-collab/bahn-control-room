@@ -68,7 +68,7 @@ export function FullFocusPreview({ draft, subject, verb, pending, error, onSend,
     setLeaving(true)
     setTimeout(() => (setShown(false), setLeaving(false)), 260)
   }
-  const label = verb.replace(/\s+the\s+(email|message)$/i, "") || "Send"
+  const label = "Send"
 
   return (
     <>

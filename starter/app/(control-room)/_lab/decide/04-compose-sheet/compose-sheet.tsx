@@ -50,7 +50,7 @@ export function ComposeSheetPreview({ draft, subject, verb, pending, error, onSe
     startSend({ caseId, ...d.who }, () => onSend(d.out), () => setShown(true))
     setShown(false)
   }
-  const label = verb.replace(/\s+the\s+(email|message)$/i, "") || "Send"
+  const label = "Send"
 
   return (
     <>

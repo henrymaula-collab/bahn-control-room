@@ -13,7 +13,7 @@ import { useNeedsYou, usePanel } from "../../../_ui/work-frame"
 import { useLab } from "../../context"
 import { agentPlan, type DoneProps, type PreviewProps, recipient, useCaseId } from "../_shared/helpers"
 import { pauseSend, startSend, undoSend, useSendWindow, WINDOW_S, type SendState, useSendError } from "../_shared/send-window"
-import { useDraft } from "../_shared/use-draft"
+import { useDraft, useReveal } from "../_shared/use-draft"
 
 const PREF = "lab-decide-06-after-send"
 const readPref = (): "next" | "stay" => {
@@ -46,6 +46,7 @@ export function SendAndNextPreview({ draft, subject, verb, pending, error, onSen
   const shown = open === "email"
   const close = useRef<HTMLButtonElement>(null)
   const d = useDraft(draft, shown)
+  const enRef = useReveal<HTMLParagraphElement>(d.english)
   const [menu, setMenu] = useState(false)
   const [pref, setPref] = useState<"next" | "stay">("next")
   const next = needs.rows.find((r, i) => i > needs.index && r.caseId !== caseId) ?? needs.rows.find((r) => r.caseId !== caseId)
@@ -72,7 +73,7 @@ export function SendAndNextPreview({ draft, subject, verb, pending, error, onSen
     if (moving) router.push(needs.href(next.caseId))
     else returnFocus()
   }
-  const label = verb.replace(/\s+the\s+(email|message)$/i, "") || "Send"
+  const label = "Send"
 
   return createPortal(
     <aside id="email" className={`panel send-panel lab-decide-06${shown ? " open" : ""}`} aria-label={`The ${d.noun}`} aria-hidden={!shown} inert={!shown}>
@@ -116,7 +117,7 @@ export function SendAndNextPreview({ draft, subject, verb, pending, error, onSen
               <Icon name={d.english ? "chevron-down" : "chevron-right"} size={16} />
             </button>
             {d.english && (
-              <p className="m quiet n6-text n6-en" lang="en">
+              <p ref={enRef} className="m quiet n6-text n6-en" lang="en">
                 {d.edited ? "The English is of the agent's text, before your change. " : ""}
                 {draft.translation}
               </p>

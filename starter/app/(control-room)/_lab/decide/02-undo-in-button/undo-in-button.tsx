@@ -13,7 +13,7 @@ import { usePanel } from "../../../_ui/work-frame"
 import { useLab } from "../../context"
 import { type DoneProps, type PreviewProps, recipient, useCaseBack, useCaseId, useDefaultKey } from "../_shared/helpers"
 import { pauseSend, startSend, undoSend, useFrozen, useSendView, useSendWindow, type SendState, useSendError } from "../_shared/send-window"
-import { useDraft } from "../_shared/use-draft"
+import { useDraft, useReveal } from "../_shared/use-draft"
 
 /** A ring that empties as the window runs out (drawn in the button's own colour). */
 function Ring({ win }: { win: SendState }) {
@@ -41,6 +41,7 @@ export function UndoInButtonPreview({ draft, subject, verb, pending, error, onSe
   const close = useRef<HTMLButtonElement>(null)
   const undo = useRef<HTMLButtonElement>(null)
   const d = useDraft(draft, shown)
+  const enRef = useReveal<HTMLParagraphElement>(d.english)
   const win = useSendView(caseId, d.who)
   const waiting = win?.phase === "wait"
   const sent = win?.phase === "sent"
@@ -105,7 +106,7 @@ export function UndoInButtonPreview({ draft, subject, verb, pending, error, onSe
               <Icon name={d.english ? "chevron-down" : "chevron-right"} size={16} />
             </button>
             {d.english && (
-              <p className="m quiet u2-text u2-en" lang="en">
+              <p ref={enRef} className="m quiet u2-text u2-en" lang="en">
                 {d.edited ? "The English is of the agent's text, before your change. " : ""}
                 {draft.translation}
               </p>
@@ -146,7 +147,7 @@ export function UndoInButtonPreview({ draft, subject, verb, pending, error, onSe
         ) : (
           <div className="send-actions">
             <button type="button" className="btn btn-primary" disabled={pending || !d.text.trim()} onClick={send}>
-              {verb.replace(/\s+the\s+(email|message)$/i, "") || "Send"}
+              {"Send"}
             </button>
             <button type="button" className="btn btn-plain" disabled={pending} onClick={() => d.setEditing(!d.editing)}>
               {d.editing ? "Done" : "Edit"}

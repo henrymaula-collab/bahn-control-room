@@ -23,7 +23,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
     <html lang="en" className={`${geist.variable} ${geistMono.variable} ${archivo.variable}`}>
       <body>
         {children}
-        {process.env.NODE_ENV === "development" && <Agentation />}
+        {process.env.NODE_ENV === "development" && <Agentation className="agentation-aside" />}
       </body>
     </html>
   )

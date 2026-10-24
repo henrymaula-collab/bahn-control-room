@@ -141,3 +141,7 @@
 .chat-draft .draft-text.clamped { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 4; line-clamp: 4; overflow: hidden; }
 .chat-draft .read-all { align-self: flex-start; display: inline-flex; align-items: center; gap: 2px; margin: 0 -6px; padding: 2px 6px; border-radius: 999px; color: var(--ink); font-weight: 500; }
 .chat-draft .read-all:hover { background: var(--press); }
+
+/* The dev-only feedback tool (app/layout.tsx, development only) waits at the top right, clear of
+   the send button, the voice button and the panels' close button. Its own default is bottom right. */
+agentation-toolbar.agentation-aside { top: 16px; right: 76px; bottom: auto; }

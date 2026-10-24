@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react"
 import { readChatEvents } from "@/lib/control-room/chat-sse"
+import { gateWords, knowledgeWords } from "@/lib/control-room/chat-words"
 import { day, onDay } from "@/lib/control-room/format"
 import type { CaseKnowledge, ChatMessage, ChatThread, ChatToolStep } from "@/lib/control-room/types-chat"
 import { AgentMark } from "./agent-mark"
@@ -189,10 +190,12 @@ function Words({ text }: { text: string }) {
 /** "3 steps ›": what the agent looked at, one tap deep. */
 function Steps({ steps, working }: { steps: ChatToolStep[]; working?: boolean }) {
   const n = steps.length
-  if (!n)
+  // One step needs no disclosure: its own words are shorter than "1 step ›".
+  if (n <= 1)
     return (
       <p className="byline s">
         <AgentMark working={working} />
+        {n === 1 && <span>{steps[0].label}</span>}
       </p>
     )
   return (
@@ -271,23 +274,6 @@ function LiveTurn({ live }: { live: Live }) {
 }
 
 // ---------- What the agent knows about this kind of case ----------
-
-const person = (n: number) => (n === 1 ? "1 person" : `${n} people`)
-
-/** One quiet line: the kind, and where it stands. "Decided once, by Mikko", "14 of 16 agree, 3 people". */
-export function knowledgeWords(k: CaseKnowledge): string {
-  if (k.novelty === "new" || k.decided === 0) return "New kind of case"
-  if (k.decided === 1) return `Decided once, by ${k.precedents[0]?.decidedBy ?? "one person"}`
-  return `${k.sameAsSuggestion} of ${k.needed} agree, ${person(k.peopleCount)}`
-}
-
-/** How far the kind is from the agent offering to handle it alone. */
-export function gateWords(k: CaseKnowledge): string {
-  const more = Math.max(0, k.needed - k.sameAsSuggestion)
-  if (more === 0 && k.peopleCount > 1) return "Enough people agree: the agent may offer to handle this kind alone."
-  const others = k.peopleCount < 2 ? ", from more than one person," : ""
-  return `${more || 1} more agreeing ${more === 1 ? "answer" : "answers"}${others} and the agent may offer to handle this kind alone.`
-}
 
 const dayWords = (iso: string, now: string) => {
   const d = onDay(iso, now)

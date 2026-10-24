@@ -63,7 +63,7 @@ const SCRIPTS: Record<string, CaseScript> = {
           { tool: "get_pickup_place", label: "Read Calverona Hamburg's pickup rules" },
           { tool: "get_conversations", label: "Read the call with Calverona Hamburg" },
         ],
-        text: "The desk would send the driver away. On the call at 11:38 they said they refuse the handover until the seller clears the hold and sends a signed release, even if the old collection note is still visible. A driver booked now would most likely be an empty pickup.\n\nIt is your call.",
+        text: "The desk would send the driver away. On the call at 11:38 they said they refuse the handover until the seller clears the hold and sends a signed release, even if the old collection note is still visible. Booking now most likely means an empty pickup, but the call is yours.",
       },
       {
         match: /\b(wednesday|wed|28|move|later|push)\b/i,
@@ -71,7 +71,7 @@ const SCRIPTS: Record<string, CaseScript> = {
           { tool: "get_time_windows", label: "Checked the pickup and delivery times" },
           { tool: "get_conversations", label: "Read the emails with Kovellin" },
         ],
-        text: "Moving to Wed 28 Oct only helps if the seller clears the hold by then, and nobody has said they will. Kovellin would also have to agree to a later delivery.\n\nEmailing Kovellin now keeps Monday possible, and you can still move the date if the release has not come by Friday. It is your call.",
+        text: "Moving to Wed 28 Oct only helps if the seller clears the hold by then, and nobody has said they will. Kovellin would also have to agree to a later delivery.\n\nEmailing Kovellin now keeps Monday open, and you can still move the date on Friday if the release has not come. Which way is up to you.",
       },
       {
         match: /\b(how long|when|soon|wait|release|invoice|paid)\b/i,
@@ -79,12 +79,12 @@ const SCRIPTS: Record<string, CaseScript> = {
           { tool: "get_conversations", label: "Read the emails with Kovellin" },
           { tool: "get_documents", label: "Checked the documents" },
         ],
-        text: "Nobody can say yet. On Mon 19 Oct Kovellin asked the seller, and heard the release might come that afternoon, but no signed release is on the order two days later.\n\nThe customer can hand over from Mon 26 Oct, so there is time if it comes this week. It is your call.",
+        text: "Nobody can say yet. On Mon 19 Oct Kovellin asked the seller and heard the release might come that afternoon, but two days later no signed release is on the order. The customer can hand over from Mon 26 Oct, so there is still time if it comes this week. How long to wait is your call.",
       },
     ],
     fallback: {
       steps: [{ tool: "get_order", label: "Read the order again" }],
-      text: "I can answer from this order, its calls and messages, and earlier cases. Here the seller's hold is what stops the pickup, and only Kovellin can get it lifted.\n\nIt is your call.",
+      text: "I can answer from this order, its calls and messages, and earlier cases. Here the seller's hold is what stops the pickup, and only Kovellin can get it lifted. What to do about it is up to you.",
     },
   },
 
@@ -128,17 +128,17 @@ const SCRIPTS: Record<string, CaseScript> = {
       {
         match: /\b(mikko|last time|before|earlier|why)\b/i,
         steps: [{ tool: "find_precedents", label: "Opened Mikko's case at Tervavio Tampere" }],
-        text: "Mikko kept the pickup and told the customer we were still calling. His reason: the customer could not reach the branch either, so a new date would only move the problem. The branch named the person the next morning.\n\nIt has happened once, so it is your call.",
+        text: "Mikko kept the pickup and told the customer we were still calling. His reason: the customer could not reach the branch either, so a new date would only move the problem. The branch named the person the next morning. It has happened once, so it is your call.",
       },
       {
         match: /\b(friday|fri|23|move|later)\b/i,
         steps: [{ tool: "get_time_windows", label: "Checked the pickup and delivery times" }],
-        text: "Moving to Fri 23 Oct gives the branch a day, but Suvellio has to agree to a later delivery, and Mervikko Espoo has not answered anyone yet, us or the customer.\n\nIt is your call.",
+        text: "Moving to Fri 23 Oct gives the branch a day, but Suvellio has to agree to a later delivery, and Mervikko Espoo has not answered anyone yet, us or the customer. Your call.",
       },
     ],
     fallback: {
       steps: [{ tool: "get_order", label: "Read the order again" }],
-      text: "The branch has not answered twice today, and the release contact on the order has never been confirmed. The customer is waiting to hear from us.\n\nIt is your call.",
+      text: "The branch has not answered twice today, and the release contact on the order has never been confirmed. The customer is waiting to hear from us; what we tell them is up to you.",
     },
   },
 
@@ -180,12 +180,12 @@ const SCRIPTS: Record<string, CaseScript> = {
       {
         match: /\b(anyone|ever|different|differently|other way|wait)\b/i,
         steps: [{ tool: "find_precedents", label: "Checked 15 earlier key cases" }],
-        text: "Once. On Fri 2 Oct Jonas waited for stock control at Velantora, because the customer could not be reached that afternoon. The other 14 asked the customer to name the key holder.\n\nIt is your call.",
+        text: "Once. On Fri 2 Oct Jonas waited for stock control at Velantora, because the customer could not be reached that afternoon. The other 14 asked the customer to name the key holder. Your call.",
       },
     ],
     fallback: {
       steps: [{ tool: "get_conversations", label: "Read the call with Velantora Helsinki" }],
-      text: "Reception has no keys and stock control gave no time. The customer is the quickest way to a name.\n\nIt is your call.",
+      text: "Reception has no keys and stock control gave no time, so the customer is the quickest way to a name. Up to you.",
     },
   },
 
@@ -220,7 +220,7 @@ const SCRIPTS: Record<string, CaseScript> = {
     replies: [],
     fallback: {
       steps: [{ tool: "get_conversations", label: "Read the call with Arvelano Hamburg" }],
-      text: "Stock control will call back by 15:00, 14:00 in Hamburg. Until then nobody knows which gate the car is behind.\n\nIt is your call.",
+      text: "Stock control will call back by 15:00, 14:00 in Hamburg. Until then nobody knows which gate the car is behind. Your call.",
     },
   },
   "case-420593": {
@@ -253,7 +253,7 @@ const SCRIPTS: Record<string, CaseScript> = {
     replies: [],
     fallback: {
       steps: [{ tool: "get_conversations", label: "Read the chat with Yara" }],
-      text: "Yara said she could wait 30 more minutes, and that ran out at 11:27. Nobody has written to her since.\n\nIt is your call.",
+      text: "Yara said she could wait 30 more minutes, and that ran out at 11:27. Nobody has written to her since. Whether she waits longer is up to you.",
     },
   },
 }

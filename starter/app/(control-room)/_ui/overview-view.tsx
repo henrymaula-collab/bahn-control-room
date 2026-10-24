@@ -22,7 +22,8 @@ export function OverviewView({ data, red, look }: { data: Overview; red: Record<
         red={red}
         lift={lift}
         look={look}
-        padLeft={300 + 16 + 56}
+        pad={{ top: 48, bottom: 48, left: 300 + 16 + 56, right: 72 }}
+        padPhone={{ top: 380, bottom: 24, left: 24, right: 24 }}
         card={(orderId, close) => <PinCard info={red[orderId]} close={close} />}
       />
       <section className="float" aria-label="Today">
@@ -83,7 +84,7 @@ export function OverviewView({ data, red, look }: { data: Overview; red: Record<
   )
 }
 
-function PinCard({ info, close }: { info?: RedInfo; close: () => void }) {
+export function PinCard({ info, close }: { info?: RedInfo; close: () => void }) {
   if (!info) return null
   return (
     <div>

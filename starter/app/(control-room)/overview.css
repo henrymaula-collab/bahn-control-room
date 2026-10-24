@@ -1,0 +1,234 @@
+/* Overview in the look of Bahn's website (bahnexpress.com), Track 7. Every value below
+   comes from the site's computed styles (design/DESIGN-SYSTEM.md, 24 Oct study):
+   display = Owners Wide 900 uppercase, -0.3 px (stand-in: Archivo at width 125);
+   body = Duplet Open 300, captions and buttons 600 (stand-in: Figtree); the hero =
+   blurred light trails + 256 px grain at 30% overlay + a warm wash (lighten); the
+   strip = grey-950 at 95%, radius 24, grey-400 label, birch line; pills = 999 px.
+   Scoped under .ovx: Your tasks keeps the plain portal look. */
+
+/* The website look owns the top of the card in a and b, so the shell's header row steps
+   aside there; the page name moves into the hero's own top row, same place, same size. */
+.main:has(.ovx-a, .ovx-b) .top { display: none; }
+
+.ovx {
+  --bx-font-display: "Owners Wide", var(--font-archivo), system-ui, sans-serif;
+  --bx-font-body: "Duplet Open", var(--font-figtree), system-ui, sans-serif;
+  --ovx-ink: var(--bx-color-asphalt);
+  --ovx-strip: rgb(30 28 23 / 0.95); /* grey-950 at 95% */
+  --ovx-strip-line: rgb(255 254 247 / 0.12);
+  --ovx-gutter: 40px;
+  container-type: inline-size;
+  color: var(--ovx-ink);
+  font-family: var(--bx-font-body);
+}
+
+/* The wide face. Width 125 is set twice: font-stretch for the @font-face range, the
+   variation axis for engines that ignore it. */
+.ovx-display, .ovx-stat, .ovx-big, .ovx-h, .ovx-quote blockquote, .ovx-quote-mark {
+  font-family: var(--bx-font-display);
+  font-stretch: 125%;
+  font-variation-settings: "wdth" 125;
+}
+
+
+/* ---------- The backdrop: their recipe, our own art (scripts/overview-backdrop.py) ---------- */
+.ovx-backdrop { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
+.ovx-backdrop-media {
+  position: absolute; inset: -6%;
+  background-size: cover; background-position: center;
+  animation: ovx-drift 28s ease-in-out infinite alternate; /* the site's hero is a slow video */
+}
+.ovx-backdrop-grain { position: absolute; inset: 0; background-size: 256px 256px; opacity: 0.3; mix-blend-mode: overlay; }
+.ovx-backdrop-wash { position: absolute; inset: 0; background: rgb(122 109 96 / 0.3); mix-blend-mode: lighten; }
+@keyframes ovx-drift {
+  from { transform: scale(1) translate3d(-1.5%, 0, 0); }
+  to { transform: scale(1.06) translate3d(1.5%, -1.5%, 0); }
+}
+
+
+/* ---------- The hero's top row: the page name and the pill switch ---------- */
+.ovx-top { position: relative; z-index: 4; display: flex; align-items: center; gap: 20px; height: 64px; padding: 8px 12px 0 20px; }
+.ovx-title { font-family: var(--font); font-size: var(--size-s); line-height: 18px; font-weight: 500; color: var(--ovx-ink); }
+
+/* Bahn's segmented pill: the active option is a birch pill that slides. */
+.ovx-seg { position: relative; display: inline-flex; border-radius: 999px; }
+.ovx-seg button {
+  position: relative; z-index: 1; height: 48px; padding: 0 22px; border-radius: 999px;
+  font-family: var(--bx-font-body); font-size: 18px; line-height: 24px; font-weight: 600; color: var(--ovx-ink);
+  white-space: nowrap; transition: background-color 150ms var(--ease);
+}
+.ovx-seg button:hover:not([aria-pressed="true"]) { background: rgb(255 254 247 / 0.32); }
+.ovx-seg-on {
+  position: absolute; top: 0; left: 0; height: 48px; border-radius: 999px; background: var(--bx-color-birch);
+  transition: transform 320ms var(--ease-open), width 320ms var(--ease-open);
+}
+
+
+/* ---------- The display line: "286 CARS / ON THE ROAD / across Europe today" ---------- */
+.ovx-display {
+  display: flex; flex-direction: column; align-items: center; text-align: center;
+  font-weight: 900; text-transform: uppercase; letter-spacing: -0.3px; color: var(--ovx-ink);
+}
+.ovx-d1 { font-size: clamp(40px, 7.2cqw, 88px); line-height: 1; }
+.ovx-d2 { font-size: clamp(44px, 8.6cqw, 104px); line-height: 1; margin-top: 0.12em; }
+.ovx-d3 { margin-top: 0.28em; font-size: clamp(22px, 3.9cqw, 48px); line-height: 1.17; font-weight: 600; text-transform: none; letter-spacing: 0.3px; }
+
+
+/* ---------- The black pill: the person's tasks today (TasksTodayCta) ---------- */
+.tasks-today {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  border-radius: 999px; background: var(--bx-color-asphalt); color: var(--bx-color-birch);
+  font-family: var(--bx-font-body, var(--font)); font-weight: 600; white-space: nowrap;
+  transition: background-color 150ms var(--ease), transform 150ms var(--ease);
+}
+.tasks-today:hover { background: var(--bx-color-grey-900); }
+.tasks-today:active { transform: scale(0.98); }
+.tasks-today svg { opacity: 0.75; margin-right: -4px; }
+.tasks-today-l { height: 72px; padding: 0 30px 0 34px; font-size: 24px; line-height: 32px; }
+.tasks-today-m { height: 56px; padding: 0 22px 0 26px; font-size: 20px; line-height: 28px; }
+.tasks-today-none { background: var(--bx-color-grey-100); color: var(--bx-color-asphalt); }
+.tasks-today-none:hover { background: var(--bx-color-grey-200-sand); }
+
+
+/* ---------- The dark strip: a grey label, a big line, one line under it ---------- */
+.ovx-strip {
+  display: grid; grid-template-columns: repeat(3, minmax(0, 1fr));
+  border-radius: 24px; background: var(--ovx-strip); color: var(--bx-color-birch);
+}
+.ovx-cell { min-width: 0; padding: 40px 40px 44px; }
+.ovx-cell + .ovx-cell { box-shadow: inset 1px 0 0 var(--ovx-strip-line); }
+.ovx-label { display: flex; align-items: center; gap: 10px; font-size: 18px; line-height: 24px; font-weight: 600; color: var(--bx-color-grey-400); }
+.ovx-big { margin-top: 20px; font-size: 32px; line-height: 36px; font-weight: 600; letter-spacing: 0.3px; color: var(--bx-color-birch); }
+.ovx-fact { margin-top: 10px; font-size: 18px; line-height: 26px; font-weight: 300; color: var(--bx-color-grey-100); }
+.ovx-strip .dot { width: 9px; height: 9px; }
+
+
+/* ---------- a: the website ---------- */
+.ovx-a { position: relative; }
+.ovx-a-hero { position: relative; overflow: hidden; padding: 0 var(--ovx-gutter) var(--ovx-gutter); }
+.ovx-a-hero .ovx-top { margin: 0 calc(-1 * var(--ovx-gutter)); }
+.ovx-a-lead { position: relative; z-index: 2; display: flex; flex-direction: column; align-items: center; gap: 40px; padding: 52px 0 64px; }
+.ovx-a-strip { position: relative; z-index: 2; }
+.ovx-a-body { display: flex; flex-direction: column; gap: 24px; padding: var(--ovx-gutter); background: var(--bx-color-grey-50); }
+.ovx-a-map { position: relative; height: min(680px, 80vh); border-radius: 24px; overflow: hidden; background: #f4f2ec; }
+
+/* The cream card: heading and a quote side by side, one proof line under a hairline. */
+.ovx-cream {
+  display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); column-gap: 64px;
+  padding: 64px; border-radius: 24px; background: var(--bx-color-birch);
+}
+.ovx-eyebrow { font-size: 20px; line-height: 24px; font-weight: 600; color: var(--bx-color-grey-500); }
+.ovx-h { margin-top: 24px; font-size: 32px; line-height: 36px; font-weight: 600; letter-spacing: 0.3px; }
+.ovx-lede { margin-top: 16px; max-width: 30em; font-size: 20px; line-height: 28px; font-weight: 300; color: var(--bx-color-grey-900); }
+.ovx-more {
+  margin-top: 28px; display: inline-flex; align-items: center; gap: 4px; height: 48px; padding: 0 18px 0 22px;
+  border-radius: 999px; background: var(--bx-color-grey-100); font-size: 18px; font-weight: 600;
+  transition: background-color 150ms var(--ease);
+}
+.ovx-more:hover { background: var(--bx-color-grey-200-sand); }
+.ovx-quote { align-self: start; padding: 24px 24px 28px; border-radius: 20px; background: var(--bx-color-grey-50); }
+.ovx-quote-mark { display: block; height: 30px; font-size: 64px; line-height: 64px; font-weight: 900; color: var(--bx-color-grey-500); }
+.ovx-quote blockquote { margin: 6px 0 0; font-size: 24px; line-height: 28px; font-weight: 700; letter-spacing: -0.3px; text-wrap: pretty; }
+.ovx-quote figcaption { margin-top: 24px; display: flex; flex-direction: column; font-size: 16px; line-height: 22px; font-weight: 300; }
+.ovx-who { font-weight: 600; }
+.ovx-proof {
+  grid-column: 1 / -1; margin-top: 56px; padding-top: 40px; border-top: 1px solid var(--bx-color-grey-200-sand);
+  font-size: 20px; line-height: 24px; font-weight: 600;
+}
+
+
+/* ---------- b: the map as the hero ---------- */
+.ovx-b { position: absolute; inset: 0; overflow: hidden; }
+.ovx-b-sky {
+  inset: 0 0 auto 0; height: 56%;
+  -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 48%, transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 0%, #000 48%, transparent 100%);
+}
+.ovx-b .ovx-top { position: absolute; top: 0; left: 0; right: 0; }
+.ovx-b-lead {
+  position: absolute; top: 76px; left: 0; right: 0; z-index: 3;
+  display: flex; flex-direction: column; align-items: center; gap: 24px; pointer-events: none;
+}
+.ovx-b-lead .tasks-today { pointer-events: auto; }
+.ovx-b .ovx-d1 { font-size: clamp(34px, 4.7cqw, 56px); }
+.ovx-b .ovx-d2 { font-size: clamp(38px, 6cqw, 72px); }
+.ovx-b .ovx-d3 { font-size: clamp(20px, 2.5cqw, 30px); }
+.ovx-b-strip { position: absolute; left: 20px; right: 20px; bottom: 20px; z-index: 3; }
+.ovx-b-strip .ovx-cell { padding: 24px 32px 26px; }
+.ovx-b-strip .ovx-big { margin-top: 10px; font-size: 28px; line-height: 32px; }
+.ovx-b-strip .ovx-fact { margin-top: 6px; }
+
+
+/* ---------- c: the map edge to edge, the panel as a small website hero ---------- */
+.ovx-c { position: absolute; inset: 0; }
+.ovx-c-panel { position: absolute; top: 16px; left: 16px; bottom: 16px; z-index: 5; width: 392px; display: flex; flex-direction: column; gap: 4px; }
+.ovx-c-hero {
+  position: relative; flex: 1; min-height: 0; overflow: hidden; border-radius: 24px;
+  display: flex; flex-direction: column; justify-content: flex-end; align-items: flex-start; gap: 28px; padding: 32px;
+}
+.ovx-stat { position: relative; z-index: 1; display: flex; flex-direction: column; color: var(--ovx-ink); }
+.ovx-s1 { font-family: var(--bx-font-display); font-size: 112px; line-height: 0.9; font-weight: 900; letter-spacing: -1px; }
+.ovx-s2 { margin-top: 14px; font-size: 26px; line-height: 30px; font-weight: 900; text-transform: uppercase; letter-spacing: -0.3px; }
+.ovx-s3 { margin-top: 6px; font-size: 22px; line-height: 28px; font-weight: 600; letter-spacing: 0.3px; }
+.ovx-c-hero .tasks-today { position: relative; z-index: 1; }
+.ovx-c-strip { grid-template-columns: minmax(0, 1fr); }
+.ovx-c-strip .ovx-cell { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; column-gap: 12px; padding: 18px 24px 20px; }
+.ovx-c-strip .ovx-cell + .ovx-cell { box-shadow: inset 0 1px 0 var(--ovx-strip-line); }
+.ovx-c-strip .ovx-label { grid-column: 1; }
+.ovx-c-strip .ovx-big { grid-column: 2; grid-row: 1 / span 2; margin: 0; font-size: 28px; line-height: 32px; }
+.ovx-c-strip .ovx-fact { grid-column: 1; margin-top: 2px; font-size: 16px; line-height: 22px; }
+.ovx-c-switch { position: absolute; top: 16px; left: calc(16px + 392px + 16px); z-index: 5; }
+.ovx-c-switch .ovx-seg { padding: 4px; background: rgb(226 222 212 / 0.82); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); box-shadow: var(--shadow-float); }
+.ovx-c-switch .ovx-seg button { height: 40px; padding: 0 18px; font-size: 16px; }
+.ovx-c-switch .ovx-seg-on { top: 4px; height: 40px; }
+.ovx-c .maplibregl-ctrl-top-right { top: 6px; right: 6px; }
+
+
+@media (prefers-reduced-motion: reduce) {
+  .ovx-backdrop-media { animation: none; }
+}
+
+
+/* ---------- Phones: 16 px gutter, one column ---------- */
+@media (max-width: 860px) {
+  .ovx { --ovx-gutter: 16px; }
+  .ovx-top { flex-wrap: wrap; height: auto; gap: 8px 12px; padding: 12px 16px 0; }
+  .ovx-title { width: 100%; }
+  .ovx-seg { max-width: 100%; overflow-x: auto; scrollbar-width: none; }
+  .ovx-seg button, .ovx-c-switch .ovx-seg button { height: 38px; padding: 0 13px; font-size: 15px; }
+  .ovx-seg-on, .ovx-c-switch .ovx-seg-on { height: 38px; }
+  .tasks-today-l { height: 56px; padding: 0 20px 0 24px; font-size: 19px; }
+  .ovx-strip { grid-template-columns: minmax(0, 1fr); }
+  .ovx-cell { padding: 22px 24px 24px; }
+  .ovx-cell + .ovx-cell { box-shadow: inset 0 1px 0 var(--ovx-strip-line); }
+  .ovx-big { margin-top: 8px; font-size: 26px; line-height: 30px; }
+
+  .ovx-a-lead { gap: 28px; padding: 36px 0 40px; }
+  .ovx-a-map { height: 440px; }
+  .ovx-cream { grid-template-columns: minmax(0, 1fr); padding: 28px 24px; row-gap: 28px; }
+  .ovx-h { font-size: 26px; line-height: 30px; }
+  .ovx-quote blockquote { font-size: 20px; line-height: 24px; }
+  .ovx-proof { margin-top: 0; padding-top: 24px; font-size: 18px; }
+
+  .ovx-b-sky { height: 62%; }
+  .ovx-b-lead { top: 112px; gap: 20px; }
+  .ovx-b-strip { left: 8px; right: 8px; bottom: 8px; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .ovx-b-strip .ovx-cell { padding: 14px 14px 16px; }
+  .ovx-b-strip .ovx-cell + .ovx-cell { box-shadow: inset 1px 0 0 var(--ovx-strip-line); }
+  .ovx-b-strip .ovx-label { font-size: 13px; line-height: 18px; gap: 6px; }
+  .ovx-b-strip .ovx-big { margin-top: 4px; font-size: 20px; line-height: 24px; }
+  .ovx-b-strip .ovx-fact { display: none; }
+
+  .ovx-c-panel { top: 8px; left: 8px; right: 8px; bottom: auto; width: auto; }
+  .ovx-c-hero { flex: none; padding: 20px; gap: 16px; }
+  .ovx-s1 { font-size: 64px; }
+  .ovx-s2 { margin-top: 8px; font-size: 20px; line-height: 24px; }
+  .ovx-s3 { font-size: 17px; line-height: 22px; }
+  .ovx-c-strip { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .ovx-c-strip .ovx-cell { display: block; padding: 12px 14px 14px; }
+  .ovx-c-strip .ovx-cell + .ovx-cell { box-shadow: inset 1px 0 0 var(--ovx-strip-line); }
+  .ovx-c-strip .ovx-label { font-size: 13px; line-height: 18px; gap: 6px; }
+  .ovx-c-strip .ovx-big { margin-top: 4px; font-size: 20px; line-height: 24px; }
+  .ovx-c-strip .ovx-fact { display: none; }
+  .ovx-c-switch { top: auto; bottom: 12px; left: 8px; right: 8px; }
+}

@@ -380,8 +380,15 @@ textarea.text-input { resize: vertical; min-height: 88px; }
   .case-layout { grid-template-columns: minmax(0, 1fr) 360px; gap: 40px; }
 }
 @media (max-width: 900px) {
-  .topbar { grid-template-columns: 1fr auto; height: auto; padding: 16px; row-gap: 8px; }
-  .topbar-center { grid-column: 1 / -1; grid-row: 2; }
+  .topbar {
+    grid-template-columns: 1fr auto; grid-template-areas: "logo person" "title title" "nav nav";
+    height: auto; padding: 16px; row-gap: 12px;
+  }
+  .topbar-left { display: contents; }
+  .topbar-left .logo { grid-area: logo; }
+  .topbar-left .segmented { grid-area: nav; justify-self: start; }
+  .topbar-center { grid-area: title; }
+  .topbar-right { grid-area: person; }
   .page-title { text-align: left; font-size: 22px; }
   .room-clock { display: none; }
   .page { padding: 8px 16px 96px; }

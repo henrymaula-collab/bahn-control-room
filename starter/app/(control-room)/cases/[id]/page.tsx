@@ -10,6 +10,7 @@ import { DecisionControls } from "../../_ui/decision"
 import { Frame } from "../../_ui/frame"
 import { Icon } from "../../_ui/icons"
 import { DecideBy, FactLine, StepLine } from "../../_ui/lines"
+import { QueueKeys } from "../../_ui/queue-keys"
 import { currentPersonId } from "../../_ui/session"
 
 type Params = Promise<{ id: string }>
@@ -42,7 +43,11 @@ export default async function CasePage({ params }: { params: Params }) {
               Your desk
             </Link>
             {detail.queue && detail.queue.total > 1 && (
-              <div className="case-nav-right">
+              <div className="case-nav-right" title="J and K also move through your queue">
+                <QueueKeys
+                  prevHref={detail.queue.prevId ? `/cases/${detail.queue.prevId}` : undefined}
+                  nextHref={detail.queue.nextId ? `/cases/${detail.queue.nextId}` : undefined}
+                />
                 <span className="num">
                   {detail.queue.index} of {detail.queue.total}
                 </span>

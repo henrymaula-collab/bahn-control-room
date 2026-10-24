@@ -310,7 +310,10 @@ export async function replayTrace(file: string, opts: { onStep?: RunOptions["onS
 /** The newest recorded run for this order; real-model traces before mock ones. */
 export async function replayLatest(orderRef: string, opts: RunOptions = {}): Promise<RunResult> {
   const traces = listTraces().filter((t) => t.orderRef.toUpperCase() === orderRef.toUpperCase() && t.outcome !== "unfinished" && t.outcome !== "error")
-  const pick = traces.find((t) => t.provider === "api") ?? traces.find((t) => t.provider === "claude-code") ?? traces[0]
+  // Carrying out a decision replays a recorded call-back run; a first look replays a first run.
+  const kind = traces.filter((t) => (opts.callback ? t.runId.includes("-cb-") : !t.runId.includes("-cb-")))
+  const pool = kind.length ? kind : traces
+  const pick = pool.find((t) => t.provider === "api") ?? pool.find((t) => t.provider === "claude-code") ?? pool[0]
   if (!pick) throw new Error(`No recorded run for ${orderRef}. Set CR_AGENT_PROVIDER=claude-code, api or mock to run the agent.`)
   return replayTrace(pick.file, { onStep: opts.onStep })
 }

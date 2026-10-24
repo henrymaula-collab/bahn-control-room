@@ -1,6 +1,7 @@
 // Settings for the Readiness desk agent. Everything comes from env so the master
 // can swap models or paths without touching code. Never log a key.
 
+import fs from "node:fs"
 import path from "node:path"
 
 /**
@@ -52,7 +53,12 @@ export function callModel(): string {
 }
 
 export function hasAnthropicKey(): boolean {
-  return Boolean(process.env.ANTHROPIC_API_KEY?.trim())
+  if (process.env.ANTHROPIC_API_KEY?.trim()) return true
+  try {
+    return /^ANTHROPIC_API_KEY=\S+/m.test(fs.readFileSync(path.join(paths.starter(), ".env.local"), "utf8"))
+  } catch {
+    return false
+  }
 }
 
 /** The api provider without a key cannot run: fall back to replay so a fresh clone still demos. */

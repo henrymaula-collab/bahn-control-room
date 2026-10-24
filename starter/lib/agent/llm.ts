@@ -4,13 +4,31 @@
 // effort, top-level prompt caching, and the server-side refusal fallback on
 // models that support it.
 
+import fs from "node:fs"
+import path from "node:path"
 import Anthropic from "@anthropic-ai/sdk"
-import { addUsage, supportsDefaultFallback, type Usage } from "./config"
+import dotenv from "dotenv"
+import { addUsage, paths, supportsDefaultFallback, type Usage } from "./config"
 
 let client: Anthropic | undefined
 
+/**
+ * The project's key from starter/.env.local wins over the shell's: Henry's shell
+ * exports an older, invalid ANTHROPIC_API_KEY, and Next.js does not let .env
+ * files override variables that are already set.
+ */
+function projectKey(): string | undefined {
+  try {
+    const file = path.join(paths.starter(), ".env.local")
+    if (fs.existsSync(file)) return dotenv.parse(fs.readFileSync(file)).ANTHROPIC_API_KEY?.trim() || undefined
+  } catch {
+    // fall back to the environment
+  }
+  return undefined
+}
+
 export function anthropic(): Anthropic {
-  if (!client) client = new Anthropic({ maxRetries: 3, timeout: 120_000 })
+  if (!client) client = new Anthropic({ apiKey: projectKey() ?? process.env.ANTHROPIC_API_KEY, maxRetries: 3, timeout: 120_000 })
   return client
 }
 

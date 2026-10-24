@@ -13,7 +13,11 @@
 //   npm run agent -- --purge-agent                   remove the agent's rows from the control room tables
 
 import { config } from "dotenv"
+// .env.local wins over the shell (the shell's ANTHROPIC_API_KEY is not this project's), except for the
+// database: a DATABASE_URL exported in the shell stays, so a run on a test database never writes to the live one.
+const shellDatabase = process.env.DATABASE_URL
 config({ path: ".env.local", override: true, quiet: true })
+if (shellDatabase) process.env.DATABASE_URL = shellDatabase
 
 import type { Call, Case, Fact } from "../lib/control-room/types"
 import { carryOutDecision, decideAndCarryOut, reviewLesson } from "../lib/agent/callback"

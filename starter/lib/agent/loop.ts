@@ -17,6 +17,7 @@ import { getStore, type StoredRun } from "./store"
 import { apiToolDefinitions, executeTool, TOOL_DESCRIPTIONS, TOOL_NAMES, TOOL_SHAPES, type RunContext } from "./tools"
 import { listTraces, readTrace, TraceWriter, type TraceLine } from "./trace"
 import { audioUrlFor } from "./voices"
+import { plainWordsDeep } from "./wording"
 import { agentSdk } from "./sdk"
 import type { TrustRule } from "./gate"
 
@@ -47,6 +48,7 @@ export async function runReadinessAgent(orderRef: string, opts: RunOptions = {})
   if (!order) throw new Error(`No order ${orderRef} in the dataset.`)
   const provider = effectiveProvider(opts.provider)
   if (provider === "replay") return replayLatest(order.reference, opts)
+  await installDemoDepthIfPresent()
 
   const store = getStore()
   const runId = runIdFor(order.reference, opts.callback)
@@ -102,6 +104,20 @@ export async function runReadinessAgent(orderRef: string, opts: RunOptions = {})
   await store.saveRun(finished)
   const theCase = ctx.outcome?.caseId ? await store.getCase(ctx.outcome.caseId) : undefined
   return { run: finished, case: theCase, calls: ctx.calls, traceFile: trace.file, handover: handover || ctx.outcome?.summary || error || "" }
+}
+
+/**
+ * The demo orders' hand-made records (lib/demo/overlay.ts) in the read tools' table cache, as the
+ * chat sees them, so a live run on a demo order reads the same threads, documents and contacts.
+ * Optional: a build without lib/demo runs on the packet alone.
+ */
+async function installDemoDepthIfPresent(): Promise<void> {
+  try {
+    const { installDemoDepth } = await import("@/lib/demo/overlay")
+    installDemoDepth()
+  } catch {
+    // no demo overlay in this build
+  }
 }
 
 /**
@@ -259,8 +275,39 @@ async function sdkLoop(ctx: RunContext, prompt: string, model: string): Promise<
 
 // ---------- replay ----------
 
-export async function replayTrace(file: string, opts: { onStep?: RunOptions["onStep"]; delayMs?: number } = {}): Promise<RunResult> {
-  const lines = readTrace(file)
+export interface ReplayOptions {
+  onStep?: RunOptions["onStep"]
+  delayMs?: number
+  /**
+   * Carrying out a decision a person just made (POST /api/cr/agent/carry-out):
+   * the recorded call-back is put onto the case as it is now. The case keeps
+   * its live suggestion, routing and the person's "decided" step; the recorded
+   * run adds its own steps, facts and calls and marks the case done. The live
+   * decision already saved the decision, the case record and the lesson, so
+   * the recorded ones are left out.
+   */
+  ontoLive?: boolean
+}
+
+const decidedStep = (s: Case["agentSteps"][number]) => s.kind === "propose" && / decided: /.test(s.summary)
+
+/** The recorded call-back's work on top of the live case (see ReplayOptions.ontoLive). */
+export function ontoLiveCase(live: Case, recorded: Case, startedAt: string): Case {
+  const key = (s: Case["agentSteps"][number]) => `${s.at}|${s.kind}|${s.summary}`
+  const have = new Set(live.agentSteps.map(key))
+  // The run's own steps start at its start time; earlier ones are the case as it was when recorded.
+  const added = recorded.agentSteps.filter((s) => s.at >= startedAt && !decidedStep(s) && !have.has(key(s)))
+  return {
+    ...live,
+    status: recorded.status,
+    facts: [...live.facts, ...recorded.facts.filter((f) => !live.facts.some((e) => e.id === f.id))],
+    agentSteps: [...live.agentSteps, ...added],
+  }
+}
+
+export async function replayTrace(file: string, opts: ReplayOptions = {}): Promise<RunResult> {
+  // Recordings stay verbatim on disk; what reaches the control room is in today's wording (wording.ts).
+  const lines = readTrace(file).map((l) => plainWordsDeep(l))
   const store = getStore()
   const head = lines.find((l): l is Extract<TraceLine, { type: "run" }> => l.type === "run")
   const end = lines.find((l): l is Extract<TraceLine, { type: "end" }> => l.type === "end")
@@ -291,8 +338,18 @@ export async function replayTrace(file: string, opts: { onStep?: RunOptions["onS
     const audioCalls = calls.map((c) => ({ ...c, caseId: c.caseId ?? theCase!.id }))
     calls.splice(0, calls.length, ...audioCalls)
   }
+  let liveDecision = false
+  if (theCase && opts.ontoLive) {
+    const live = await store.getCase(theCase.id)
+    liveDecision = (await store.listDecisions()).some((d) => d.caseId === theCase!.id)
+    if (live) theCase = ontoLiveCase(live, theCase, head.run.startedAt)
+  }
   if (theCase) await store.saveCase(theCase)
   for (const c of calls) await store.saveCall(c)
+  if (liveDecision) {
+    decisions.splice(0)
+    lessons.splice(0)
+  }
   for (const d of decisions) await store.saveDecision(d)
   // Never take a lesson back from accepted to proposed by replaying an older line.
   const existingLessons = lessons.length ? await store.listLessons() : []
@@ -316,12 +373,14 @@ export async function replayTrace(file: string, opts: { onStep?: RunOptions["onS
 /** The newest recorded run for this order; real-model traces before mock ones. */
 export async function replayLatest(orderRef: string, opts: RunOptions = {}): Promise<RunResult> {
   const traces = listTraces().filter((t) => t.orderRef.toUpperCase() === orderRef.toUpperCase() && t.outcome !== "unfinished" && t.outcome !== "error")
-  // Carrying out a decision replays a recorded call-back run; a first look replays a first run.
+  // Carrying out a decision replays a recorded call-back run, for the option the person chose
+  // when one was recorded; a first look replays a first run.
   const kind = traces.filter((t) => (opts.callback ? t.runId.includes("-cb-") : !t.runId.includes("-cb-")))
-  const pool = kind.length ? kind : traces
+  const sameOption = opts.callback ? kind.filter((t) => t.optionKey === opts.callback!.optionKey) : kind
+  const pool = sameOption.length ? sameOption : kind.length ? kind : traces
   const pick = pool.find((t) => t.provider === "api") ?? pool.find((t) => t.provider === "claude-code") ?? pool[0]
   if (!pick) throw new Error(`No recorded run for ${orderRef}. Set CR_AGENT_PROVIDER=claude-code, api or mock to run the agent.`)
-  return replayTrace(pick.file, { onStep: opts.onStep })
+  return replayTrace(pick.file, { onStep: opts.onStep, ontoLive: Boolean(opts.callback) })
 }
 
 /** Replay every recorded run (or one order's), oldest first, into the store. */

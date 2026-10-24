@@ -27,12 +27,25 @@ export const DEMO = {
     caseId: "case-ord-00458-agent",
     personId: "p-aino",
     trace: "run-cd-420458-20261024-104612-g5n",
+    /** Recorded call-backs, one per option: after Aino's decision, carry-out replays the one she chose. */
+    callbacks: {
+      ask_customer_for_release: "run-cd-420458-cb-20261024-104722-ivw",
+      pause_gig: "run-cd-420458-cb-20261024-184922-2ah",
+    },
   },
   round2: {
     reference: "CD-420442",
     orderId: "ord-00442",
     caseId: "case-ord-00442-demo",
     personId: "p-sofie",
+    /**
+     * Recorded call-backs (api provider, the agent's Swedish call to Orvendin's collection desk and its
+     * message to the driver), one per option: after Sofie's decision, carry-out replays the one she chose.
+     */
+    callbacks: {
+      pause_gig: "run-cd-420442-cb-20261024-184701-bj9",
+      ask_customer_for_release: "run-cd-420442-cb-20261024-184809-pi9",
+    },
   },
   fastForward: {
     reference: "CD-420347",
@@ -49,7 +62,10 @@ export const DEMO = {
   ],
   /** Recorded runs left out of the demo state, and why. */
   skipped: {
-    "run-cd-420458-cb-20261024-104722-ivw": "the call back after Aino's decision: it happens live in round 1 (carry-out replays it)",
+    "run-cd-420458-cb-20261024-104722-ivw": "the call back after Aino's decision (ask the customer): it happens live in round 1 (carry-out replays it)",
+    "run-cd-420458-cb-20261024-184922-2ah": "the call back after Aino's decision (keep the gig unpublished): it happens live in round 1 (carry-out replays it)",
+    "run-cd-420442-cb-20261024-184701-bj9": "the call back after Sofie's decision (hold the driver): it happens live in round 2 (carry-out replays it)",
+    "run-cd-420442-cb-20261024-184809-pi9": "the call back after Sofie's decision (ask the customer): it happens live in round 2 (carry-out replays it)",
     "run-cd-420578-20261024-104904-o7d": "it applies the lesson from Aino's decision on 458, which in v4 is made live in round 1",
     "run-cd-420347-20261024-104951-kva": "handled under an ON rule: that is the fast-forward's end state, not its start",
   } as Record<string, string>,
@@ -90,7 +106,7 @@ export function round2Case(world: World, now: string, routedTo: Routing): Case &
       source: { kind: "record" as const, name: "Order", channel: "record" as const, recordRef: `time_windows:${slot.id}`, at: bundle.order.createdAt }, strength: "confirmed" as const,
     }] : []),
     ...(assignment ? [{
-      id: "f-driver", statement: `Driver booked: ${driverName}, gig fee EUR ${fee}. The driver sets off tomorrow morning.`,
+      id: "f-driver", statement: `Driver booked: ${driverName}, gig fee EUR ${fee}. The driver flies to ${place.city} this evening for the pickup slot.`,
       source: { kind: "record" as const, name: "Driver marketplace", channel: "record" as const, recordRef: `work_assignments:${assignment.id}`, at: String(assignment.details.accepted_at ?? bundle.order.createdAt) }, strength: "confirmed" as const,
     }] : []),
     ...(promise ? [{
@@ -111,7 +127,7 @@ export function round2Case(world: World, now: string, routedTo: Routing): Case &
   const holdDriver: Option = {
     id: "pause_gig",
     label: "Hold the driver until the seller lifts the hold",
-    effect: "The driver is asked not to set off tomorrow; the agent checks with the collection desk and brings the answer back to you.",
+    effect: "The driver is asked to wait for the collection desk's word before he travels; the agent checks with the collection desk and brings the answer back to you.",
     changes: [{ kind: "driver_message", detail: "The driver is asked not to set off until the seller lifts the hold" }],
   }
 

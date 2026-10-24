@@ -127,6 +127,64 @@
       "answers": false,
       "noAnswerNote": "The branch line rang out. Nobody picked up.",
       "truths": []
+    },
+    "site-083": {
+      "contact": {
+        "name": "Uma Aldermere",
+        "role": "collection desk",
+        "roleLocal": {
+          "sv": "utlämningen"
+        }
+      },
+      "answers": true,
+      "truths": [
+        {
+          "id": "release_to_desk",
+          "kind": "release_procedure",
+          "en": "We hand a car over only against the buyer's signed release (utlämningsfullmakt) naming Bahn as carrier, sent to utlamning@orvendin.example. The desk matches the VIN on it.",
+          "sv": "Vi lämnar bara ut en bil mot köparens undertecknade utlämningsfullmakt med Bahn som transportör, skickad till utlamning@orvendin.example. Vi stämmer av chassinumret mot fullmakten."
+        },
+        {
+          "id": "payment_checks",
+          "kind": "hold",
+          "en": "Accounts, Johan Ekwall (+46 8 555 0179), checks incoming payments at 10:00 and 15:00 Stockholm time and lifts a hold only after one of those checks. If the payment and the release show at the 15:00 check today, the driver can collect the car tomorrow at 10:00 as planned. If they come later, the next check is tomorrow at 10:00 and the car can leave at 11:00 at the earliest.",
+          "sv": "Ekonomi, Johan Ekwall (+46 8 555 0179), kontrollerar inbetalningar klockan 10 och klockan 15 och häver en spärr bara efter en av de kontrollerna. Syns betalningen och fullmakten vid kontrollen klockan 15 i dag kan föraren hämta bilen i morgon klockan 10 som planerat. Kommer de senare är nästa kontroll i morgon klockan 10, och då kan bilen lämnas ut tidigast klockan 11."
+        },
+        {
+          "id": "tell_after_check",
+          "kind": "hold",
+          "en": "After the 15:00 check the collection desk e-mails Bahn whether the hold is lifted. Do not send a driver before you have heard from us.",
+          "sv": "Efter kontrollen klockan 15 mejlar utlämningen Bahn om spärren är hävd. Skicka ingen förare innan ni har hört från oss."
+        },
+        {
+          "id": "keys_plates",
+          "kind": "keys",
+          "en": "Both keys, the service book and the temporary export plates are handed out together at the collection desk, against the driver's ID and the order number.",
+          "sv": "Båda nycklarna, serviceboken och de tillfälliga exportskyltarna lämnas ut tillsammans i utlämningen, mot förarens legitimation och ordernumret."
+        },
+        {
+          "id": "lunch",
+          "kind": "hours",
+          "en": "The collection desk is unstaffed 12:00 to 12:45 for lunch.",
+          "sv": "Utlämningen är obemannad 12.00 till 12.45 under lunchen."
+        }
+      ],
+      "vehicles": {
+        "Bentley Continental GT": [
+          {
+            "id": "seller_hold",
+            "kind": "hold",
+            "en": "The Bentley is ready, but as the seller we have put a hold on it: the buyer's invoice OV-2026-3318 of 6 October is still unpaid (it was due on 20 October). We will not hand it over until accounts has lifted the hold and the buyer's signed release is here.",
+            "sv": "Bentleyn står klar, men vi som säljare har lagt en spärr på den: köparens faktura OV-2026-3318 från den 6 oktober är fortfarande obetald (förfallodag 20 oktober). Vi lämnar inte ut den förrän ekonomi har hävt spärren och köparens undertecknade fullmakt finns här."
+          },
+          {
+            "id": "no_change_yet",
+            "kind": "papers_missing",
+            "en": "Since this morning's call nothing has changed: the payment has not shown and no signed release has reached us.",
+            "sv": "Sedan samtalet i morse har inget ändrats: betalningen syns inte och ingen undertecknad fullmakt har kommit till oss."
+          }
+        ]
+      }
     }
   }
 }

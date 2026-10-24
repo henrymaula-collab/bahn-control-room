@@ -15,7 +15,12 @@ export class FoundationStore implements AgentStore {
   async getCase(id: string) { return (await fs.getStoredCase(id)) ?? undefined }
   async listCases() { return fs.listStoredCases() }
   async saveCase(c: Case) {
-    // Leave routedTo empty: the engine routes the case on its next read.
+    // An open case leaves routedTo empty: the engine routes it on its next read.
+    // A case a person decided keeps who it was sent to (a carried-out call-back).
+    if (c.status === "decided" || c.status === "done") {
+      await fs.saveCase(c, "agent")
+      return
+    }
     const { routedTo: _routed, ...rest } = c
     void _routed
     await fs.saveCase(rest as Case, "agent")

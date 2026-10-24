@@ -75,6 +75,8 @@ export interface TraceSummary {
   outcome: AgentRun["outcome"] | "unfinished"
   startedAt: string
   recordedAt: number
+  /** For a call-back run: the option the person chose (the brief's "Option:" line). */
+  optionKey?: string
 }
 
 export function listTraces(): TraceSummary[] {
@@ -88,6 +90,8 @@ export function listTraces(): TraceSummary[] {
       const head = lines.find((l): l is Extract<TraceLine, { type: "run" }> => l.type === "run")
       const end = lines.find((l): l is Extract<TraceLine, { type: "end" }> => l.type === "end")
       if (!head) continue
+      const brief = lines.find((l): l is Extract<TraceLine, { type: "step" }> => l.type === "step" && l.step.name === "brief")
+      const optionKey = brief ? /^Option: (\S+)$/m.exec(brief.step.content)?.[1] : undefined
       out.push({
         runId: head.run.id,
         file,
@@ -98,6 +102,7 @@ export function listTraces(): TraceSummary[] {
         outcome: end?.run.outcome ?? "unfinished",
         startedAt: head.run.startedAt,
         recordedAt: fs.statSync(file).mtimeMs,
+        ...(optionKey ? { optionKey } : {}),
       })
     } catch {
       // a half-written trace is skipped

@@ -39,7 +39,9 @@ export function MenuCounts() {
   const params = useSearchParams()
   const keep = keepQuery(params)
   const current = path.startsWith("/tasks/") ? decodeURIComponent(path.split("/")[2] ?? "") : ""
-  const lines = useMemo(() => linesOf(rows, times), [rows, times])
+  // Right after a decision the decided case leaves the counts, as it leaves the queue.
+  const live = useMemo(() => (lab.decided ? rows.filter((r) => r.caseId !== current) : rows), [rows, lab.decided, current])
+  const lines = useMemo(() => linesOf(live, times), [live, times])
   const [open, setOpen] = useState<string | null>(null)
   const [at, setAt] = useState<{ left: number; top: number; maxH: number } | null>(null)
   const box = useRef<HTMLDivElement>(null)

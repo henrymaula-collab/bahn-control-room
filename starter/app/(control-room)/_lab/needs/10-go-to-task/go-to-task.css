@@ -5,10 +5,11 @@
 .lab-needs-10 .n10-count { color: var(--ink-2); font-variant-numeric: tabular-nums; }
 .lab-needs-10 .n10-key { min-width: 2.2em; text-align: right; font-size: var(--type-subhead); line-height: var(--lh-subhead); color: var(--ink-2); letter-spacing: 0.02em; }
 
-/* The palette: upper third, about 640 px, a hairline ring and one soft drop, the page dimmed lightly. */
+/* The palette: upper third, a hairline ring and one soft drop, the page dimmed lightly. */
 .lab-needs-10.n10-palette {
-  width: min(640px, calc(100vw - 32px)); max-width: none;
-  max-height: min(600px, calc(var(--cr-vh, 100vh) * 0.76));
+  /* About 640 px on a laptop; it grows with the type on a large screen. */
+  width: min(calc(37 * var(--type-body)), calc(100vw - 32px)); max-width: none;
+  max-height: min(calc(36 * var(--type-body)), calc(var(--cr-vh, 100vh) * 0.76));
   margin: calc(var(--cr-vh, 100vh) * 0.12) auto auto; padding: 0; border: 0; border-radius: 16px;
   background: var(--page); color: var(--ink);
   box-shadow: 0 0 0 1px rgb(18 17 14 / 0.06), 0 2px 6px rgb(18 17 14 / 0.04), 0 18px 48px rgb(18 17 14 / 0.16);

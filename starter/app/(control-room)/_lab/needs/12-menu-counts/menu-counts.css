@@ -23,7 +23,7 @@
 
 /* The popover: beside the menu, a hairline ring and a soft drop, never over the menu itself. */
 .lab-needs-12.n12-pop {
-  position: fixed; z-index: 60; width: min(360px, calc(100vw - 32px)); overflow: hidden auto; overscroll-behavior: contain;
+  position: fixed; z-index: 60; width: min(calc(21 * var(--type-body)), calc(100vw - 32px)); overflow: hidden auto; overscroll-behavior: contain;
   padding: 6px 6px 8px; border-radius: 16px; background: var(--page); color: var(--ink);
   box-shadow: 0 0 0 1px rgb(18 17 14 / 0.06), 0 2px 6px rgb(18 17 14 / 0.04), 0 14px 40px rgb(18 17 14 / 0.14);
   font-family: var(--font); font-size: var(--type-body); line-height: var(--lh-body);

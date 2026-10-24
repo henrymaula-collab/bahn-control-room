@@ -294,7 +294,13 @@ export async function replayTrace(file: string, opts: { onStep?: RunOptions["onS
   if (theCase) await store.saveCase(theCase)
   for (const c of calls) await store.saveCall(c)
   for (const d of decisions) await store.saveDecision(d)
-  for (const l of lessons) await store.saveLesson(l)
+  // Never take a lesson back from accepted to proposed by replaying an older line.
+  const existingLessons = lessons.length ? await store.listLessons() : []
+  for (const l of lessons) {
+    const existing = existingLessons.find((x) => x.id === l.id)
+    if (existing?.status === "accepted" && l.status === "proposed") continue
+    await store.saveLesson(l)
+  }
   // A run that acted under a trust rule restores that rule as it was (ON, who turned it on).
   const existingRules = rules.length ? await store.listTrustRules() : []
   for (const r of rules) {

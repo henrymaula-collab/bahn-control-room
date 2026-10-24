@@ -21,6 +21,8 @@
 }
 .work.look-menu, .work.look-switcher { grid-template-columns: minmax(0, 1fr); }
 .work.look-column { grid-template-columns: var(--list) minmax(0, 1fr); }
+/* Three columns on a laptop: the list and the panel give a little so the card keeps its three lines. */
+.work.look-column { --list: max(200px, calc(320 * var(--cr-u, 1px))); --panel: max(340px, calc(600 * var(--cr-u, 1px))); }
 .work.has-panel { padding-right: var(--panel); }
 
 /* The Needs you list (column, and the switcher's menu) */
@@ -55,8 +57,8 @@
      (the 2560 x 1300 size).
      --card-ask: the question, one step smaller, regular weight, ink. */
   --card-measure: 25.5;
-  --card-head: clamp(20px, min(calc(100cqw / var(--card-measure)), calc(54 * var(--cr-u, 1px))), 54px);
-  --card-ask: calc(var(--card-head) * 0.8);
+  --card-head: clamp(18px, min(calc(100cqw / var(--card-measure)), calc(54 * var(--cr-u, 1px))), 54px);
+  --card-ask: max(17px, calc(var(--card-head) * 0.8));
   --size-l: var(--card-head);
   --size-m: clamp(17px, calc(24 * var(--cr-u, 1px)), 24px);
   --size-s: clamp(15px, calc(18 * var(--cr-u, 1px)), 18px);
@@ -134,17 +136,17 @@
 
 /* The message before it goes: To and Subject, the whole text, Send at the bottom. */
 .send-panel { display: flex; flex-direction: column; padding: 0; overflow: hidden; }
-.send-head { flex: none; align-items: center; padding: 16px 28px 4px; }
+.send-head { flex: none; align-items: center; padding: max(12px, calc(16 * var(--cr-u, 1px))) max(20px, calc(28 * var(--cr-u, 1px))) 4px; }
 .send-head .close { margin: 0 -8px 0 0; }
-.send-body { flex: 1; min-height: 0; overflow: auto; padding: 12px 28px 24px; }
+.send-body { flex: 1; min-height: 0; overflow: hidden auto; overflow-wrap: break-word; padding: 12px max(20px, calc(28 * var(--cr-u, 1px))) 24px; }
 .panel .send-meta { grid-template-columns: 80px minmax(0, 1fr); column-gap: 16px; row-gap: 6px; margin: 0 0 20px; padding-bottom: 16px; border-bottom: 1px solid rgb(18 17 14 / 0.08); }
 .send-meta .quiet { color: var(--ink-2); }
 .send-text { white-space: pre-wrap; }
-.send-edit { width: 100%; min-height: 470px; padding: 12px 14px; border-radius: 12px; resize: vertical; white-space: pre-wrap; }
+.send-edit { width: 100%; min-height: min(470px, 55vh); padding: 12px 14px; border-radius: 12px; resize: vertical; white-space: pre-wrap; }
 .send-english { margin-top: 20px; }
 .send-english .link { margin-left: -8px; padding: 4px 8px; }
 .send-english .send-text { margin-top: 8px; }
-.send-foot { flex: none; padding: 14px 28px 20px; border-top: 1px solid rgb(18 17 14 / 0.08); }
+.send-foot { flex: none; padding: 14px max(20px, calc(28 * var(--cr-u, 1px))) max(14px, calc(20 * var(--cr-u, 1px))); border-top: 1px solid rgb(18 17 14 / 0.08); }
 .send-foot .now { margin-bottom: 8px; }
 .send-actions { display: flex; align-items: center; gap: 8px; }
 

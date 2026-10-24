@@ -15,7 +15,7 @@
 import { chosenWindows, latestTracking, milestones } from "../present/attention"
 import { type Bundle, num, rows, str } from "../present/bundle"
 import type { OrderCheckResult } from "./checks"
-import { along, carAt, placePosition } from "./geo"
+import { along, carAt, cityEntry, placePosition, seaLane } from "./geo"
 import type { EngineState } from "./service"
 import type { Case, CaseReason, OpsPerson } from "./types"
 import type { CarState, CaseV3Extras, KeyFact, LatLng, MapCar, Overview, PositionSource, Situation, Stop, WorkLists, WorkRow } from "./types-v3"
@@ -56,18 +56,40 @@ export function findPerson(people: OpsPerson[], id: string | null | undefined): 
 
 type Phase = "pickup" | "road" | "delivered"
 
+type Terminal = { id: string; name: string; city: string; country: string }
+
+/** Terminal to terminal: both terminals and the sea lane between them. */
+function ferryLeg(a: Terminal | undefined, b: Terminal | undefined): LatLng[] {
+  const ends = [a, b].map((terminal) => (terminal ? placePosition(terminal) : null))
+  if (!a || !b || !ends[0] || !ends[1]) return ends.filter((p): p is LatLng => !!p)
+  return [ends[0], ...seaLane(a, b), ends[1]]
+}
+
 function ferryStops(state: EngineState, bundle: Bundle): LatLng[] {
   const reservation = rows(bundle, "travel_reservations")
     .filter((row) => str(row.details.origin_terminal_id) && str(row.details.destination_terminal_id) && !/CANCEL/.test(str(row.details.status) ?? ""))
     .sort((a, b) => String(b.details.booked_at ?? "").localeCompare(String(a.details.booked_at ?? "")))[0]
   if (!reservation) return []
-  const stops: LatLng[] = []
-  for (const key of ["origin_terminal_id", "destination_terminal_id"]) {
-    const terminal = state.world.ferryTerminals.get(str(reservation.details[key]) ?? "")
-    const position = terminal ? placePosition(terminal) : null
-    if (position) stops.push(position)
-  }
-  return stops
+  const terminal = (key: string) => state.world.ferryTerminals.get(str(reservation.details[key]) ?? "")
+  return ferryLeg(terminal("origin_terminal_id"), terminal("destination_terminal_id"))
+}
+
+/** The ferry terminal in a country. */
+function terminalIn(state: EngineState, country: string): Terminal | undefined {
+  return [...state.world.ferryTerminals.values()].sort((a, b) => a.id.localeCompare(b.id)).find((t) => t.country === country)
+}
+
+/** Stops a road trip needs so a straight leg does not cross open sea: Finland is reached by
+ * ferry (from Stockholm for the Nordic side, from Hamburg for the rest), and Copenhagen to
+ * Aarhus goes over the bridges through Odense. Used when the order has no ferry booking. */
+export function viaStops(state: EngineState, from: { city: string; country: string }, to: { city: string; country: string }): LatLng[] {
+  const gate = (country: string) => terminalIn(state, country === "SE" || country === "DK" ? "SE" : "DE")
+  if (from.country === "FI" && to.country !== "FI") return ferryLeg(terminalIn(state, "FI"), gate(to.country))
+  if (to.country === "FI" && from.country !== "FI") return ferryLeg(gate(from.country), terminalIn(state, "FI"))
+  const pair = new Set([`${from.country}:${from.city}`, `${to.country}:${to.city}`])
+  const odense = cityEntry("Odense", "DK")
+  if (pair.has("DK:Copenhagen") && pair.has("DK:Aarhus") && odense) return [{ lat: odense.lat, lng: odense.lng }]
+  return []
 }
 
 /** Share of the way from pickup to delivery by the clock, when no fix says more. */
@@ -95,7 +117,8 @@ function realPosition(state: EngineState, order: OrderWorld, phase: Phase): { po
   if (!pickup || !delivery) return null
   if (phase === "pickup") return { position: carAt(pickup, order.id), source: "at_pickup" }
   if (phase === "delivered") return { position: carAt(delivery, order.id), source: "at_delivery" }
-  const route = [pickup, ...ferryStops(state, order.bundle), delivery]
+  const ferry = ferryStops(state, order.bundle)
+  const route = [pickup, ...(ferry.length ? ferry : viaStops(state, order.pickup, order.delivery)), delivery]
   const fix = lastObservation(order.bundle)
   const progress = fix ? num(fix.progress_fraction) : null
   if (fix && progress !== null) {
@@ -174,7 +197,7 @@ export function mapCars(state: EngineState): (MapCar & { phase: Phase })[] {
     if (!from || !to || !a || !b) continue
     const status = check.syntheticStatus ?? "WAITING_FOR_PICKUP"
     const phase: Phase = status === "IN_TRANSIT" ? "road" : status === "DELIVERED" ? "delivered" : "pickup"
-    const position = phase === "road" ? carAt(along([a, b], check.syntheticProgress ?? 0.5), check.orderId)
+    const position = phase === "road" ? carAt(along([a, ...viaStops(state, from, to), b], check.syntheticProgress ?? 0.5), check.orderId)
       : carAt(phase === "delivered" ? b : a, check.orderId)
     cars.push({
       orderId: check.orderId,

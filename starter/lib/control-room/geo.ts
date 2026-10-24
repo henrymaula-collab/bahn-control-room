@@ -117,6 +117,26 @@ export function carAt(place: LatLng, orderId: string): LatLng {
   return jitter(place, `car:${orderId}`, 0.04, 0.35)
 }
 
+/** Ferry lanes between the terminal cities, so a car on board is drawn on the sea route and not
+ * across Denmark or Sweden. Waypoints follow the usual Travemünde-Helsinki and Stockholm-Helsinki
+ * routes on a Baltic chart (OpenSeaMap, openseamap.org), rounded to open water. */
+const SEA_LANES: Record<string, LatLng[]> = {
+  "DE:Hamburg>FI:Helsinki": [
+    { lat: 53.96, lng: 10.87 }, { lat: 54.52, lng: 12.25 }, { lat: 55.45, lng: 15.6 }, { lat: 57.0, lng: 19.2 },
+    { lat: 58.4, lng: 20.6 }, { lat: 59.45, lng: 22.6 }, { lat: 59.95, lng: 24.6 },
+  ],
+  "SE:Stockholm>FI:Helsinki": [
+    { lat: 59.42, lng: 18.9 }, { lat: 59.85, lng: 19.7 }, { lat: 59.72, lng: 21.5 }, { lat: 59.7, lng: 23.0 }, { lat: 59.95, lng: 24.6 },
+  ],
+}
+
+export function seaLane(from: { city: string; country: string }, to: { city: string; country: string }): LatLng[] {
+  const there = SEA_LANES[`${cityKey(from.city, from.country)}>${cityKey(to.city, to.country)}`]
+  if (there) return there.map((p) => ({ ...p }))
+  const back = SEA_LANES[`${cityKey(to.city, to.country)}>${cityKey(from.city, from.country)}`]
+  return back ? [...back].reverse().map((p) => ({ ...p })) : []
+}
+
 /** Great-circle distance in km. */
 export function km(a: LatLng, b: LatLng): number {
   const r = 6371

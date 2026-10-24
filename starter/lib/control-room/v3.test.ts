@@ -7,7 +7,7 @@ import { readFileSync } from "node:fs"
 import { join } from "node:path"
 import { after, before, test } from "node:test"
 import { sql } from "drizzle-orm"
-import { CITY_COORDS, along, carAt, cityKey, inEurope, km, placePosition } from "./geo"
+import { CITY_COORDS, along, carAt, cityKey, inEurope, km, placePosition, seaLane } from "./geo"
 import type { CaseV3Extras, KeyFact, Overview, WorkLists } from "./types-v3"
 
 const RAW = /\b[A-Z]{2,}(?:_[A-Z]+)+\b|\b[a-z]+(?:_[a-z]+)+\b|\breadiness\.|\bundefined\b|\bnull\b|\bNaN\b/
@@ -121,6 +121,15 @@ test("geo: places and cars are deterministic and stay near their city", () => {
   assert.deepEqual(ll(along(route, 1)), route[2])
   const early = along(route, 0.1)
   assert.ok(early.lat > route[0]!.lat && early.lat < route[1]!.lat, "10% of Frankfurt to Helsinki via Hamburg is still on the road to Hamburg")
+})
+
+test("geo: ferry legs follow the sea lane both ways", () => {
+  const out = seaLane({ city: "Hamburg", country: "DE" }, { city: "Helsinki", country: "FI" })
+  const back = seaLane({ city: "Helsinki", country: "FI" }, { city: "Hamburg", country: "DE" })
+  assert.ok(out.length >= 3, "Hamburg to Helsinki has a lane")
+  assert.deepEqual(back, [...out].reverse())
+  assert.deepEqual(seaLane({ city: "Lyon", country: "FR" }, { city: "Paris", country: "FR" }), [], "no lane on land")
+  for (const p of out) assert.ok(inEurope(p))
 })
 
 // ---- Fixtures: no database ----

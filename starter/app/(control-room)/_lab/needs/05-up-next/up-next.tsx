@@ -6,7 +6,7 @@
 
 import "./up-next.css"
 import Link from "next/link"
-import { useEffect, useState, useSyncExternalStore } from "react"
+import { useEffect, useRef, useState, useSyncExternalStore } from "react"
 import type { Option } from "@/lib/control-room/types"
 import type { WorkRow } from "@/lib/control-room/types-v3"
 import { useLab } from "../../context"
@@ -57,11 +57,37 @@ export function UpNext() {
   const lab = useLab()
   const done = useDecided()
   const peek = usePeek(next)
+  // With room to spare (a tall window), the next card shows whole under this one; without, it peeks.
+  const box = useRef<HTMLDivElement>(null)
+  const [roomy, setRoomy] = useState(false)
+  useEffect(() => {
+    const col = box.current?.closest<HTMLElement>(".detail")
+    if (!col) return
+    const check = () => {
+      const el = box.current
+      const card = el?.firstElementChild as HTMLElement | null
+      const prev = el?.previousElementSibling as HTMLElement | null
+      if (!el || !card || !prev) return setRoomy(false)
+      // Where the rows above end (they never stick), plus the whole next card and the column's bottom air.
+      const top = col.getBoundingClientRect().top - col.scrollTop
+      const end = prev.getBoundingClientRect().bottom - top
+      const css = getComputedStyle(el)
+      // The card measured with the short bottom padding it has when it sits whole (not pinned to the edge).
+      const cs = getComputedStyle(card)
+      const whole = card.scrollHeight - parseFloat(cs.paddingBottom) + 0.85 * parseFloat(cs.fontSize)
+      const need = end + parseFloat(css.marginTop) + parseFloat(css.paddingTop) + whole + parseFloat(getComputedStyle(col).paddingBottom)
+      setRoomy(need <= col.clientHeight)
+    }
+    check()
+    const ro = new ResizeObserver(check)
+    ro.observe(col)
+    return () => ro.disconnect()
+  }, [next?.caseId, peek])
   if (!next || done === current) return null
   const t = times[next.caseId]
   const after = (index >= 0 ? rows.length - index - 1 : rows.length) - 1
   return (
-    <div className={`lab-needs-05${lab.others ? " lifted" : ""}${after > 0 ? " stack" : ""}${after > 4 ? " deep" : ""}`}>
+    <div ref={box} className={`lab-needs-05${lab.others || roomy ? " lifted" : ""}${roomy ? " roomy" : ""}${after > 0 ? " stack" : ""}${after > 4 ? " deep" : ""}`}>
       <Link href={href(next.caseId)} className="lab-needs-05-card" aria-keyshortcuts="J" aria-label={`Next: ${next.vehicle}${t ? `, decide by ${t.text}` : ""}`}>
         <span className="lab-needs-05-top">
           <span className="lab-needs-05-label">Next, {next.vehicle}</span>

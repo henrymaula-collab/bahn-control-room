@@ -100,7 +100,11 @@ export function KeysRow() {
   useEffect(() => {
     const d = dialog.current
     if (!d) return
-    if (sheet && !d.open) d.showModal()
+    if (sheet && !d.open) {
+      d.showModal()
+      // Focus the title, not the Done button, so the sheet opens without a focus ring on it.
+      d.querySelector<HTMLElement>("h2")?.focus()
+    }
     if (!sheet && d.open) d.close()
   }, [sheet])
 
@@ -129,7 +133,7 @@ export function KeysRow() {
         onClick={(e) => e.target === dialog.current && setSheet(false)}
       >
         <div className="lab-needs-06-head">
-          <h2 className="m">Keys in Your tasks</h2>
+          <h2 className="m" tabIndex={-1}>Keys in Your tasks</h2>
           <button type="button" className="btn btn-plain btn-small" onClick={() => setSheet(false)}>
             Done
           </button>

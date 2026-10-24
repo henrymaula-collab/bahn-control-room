@@ -86,9 +86,12 @@ export function SkipLine() {
   const [own, setOwn] = useState("")
   const [writing, setWriting] = useState(false)
   const first = useRef<HTMLButtonElement>(null)
+  // Opened from the keyboard, focus goes to the first reason; a click or the lab's open state leaves it.
+  const byKey = useRef(false)
   useEffect(() => setOpen(lab.others), [current, lab.others])
   useEffect(() => {
-    if (open) requestAnimationFrame(() => first.current?.focus({ preventScroll: true }))
+    if (open && byKey.current) requestAnimationFrame(() => first.current?.focus({ preventScroll: true }))
+    byKey.current = false
   }, [open])
 
   const skipped = new Set(skips.map((s) => s.id))
@@ -135,7 +138,7 @@ export function SkipLine() {
           {at >= 0 ? `${at + 1} of ${order.length}` : `${order.length} left`}, the most urgent first
         </span>
         {row && !done && order.length > 1 && (
-          <button type="button" className="lab-needs-08-skip" aria-expanded={open} aria-controls="lab-needs-08-why" onClick={() => setOpen((o) => !o)}>
+          <button type="button" className="lab-needs-08-skip" aria-expanded={open} aria-controls="lab-needs-08-why" onClick={(e) => ((byKey.current = e.detail === 0), setOpen((o) => !o))}>
             Skip for now
             <Icon name={open ? "chevron-up" : "chevron-down"} size={18} />
           </button>

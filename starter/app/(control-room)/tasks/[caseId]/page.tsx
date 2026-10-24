@@ -77,6 +77,8 @@ export default async function WorkCasePage({ params }: { params: Params }) {
       )}
 
       <CaseRows
+        caseId={c.id}
+        personId={detail.person.id}
         situation={extras?.situation}
         why={extras?.why ?? []}
         whyTitle={asks ? (mine ? "Why it came to you" : `Why it went to ${owner?.name}`) : undefined}

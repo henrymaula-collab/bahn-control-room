@@ -1,5 +1,6 @@
 import "./bx-tokens.css"
 import "./control-room.css"
+import "./chat.css"
 import { cookies } from "next/headers"
 import { dataSource, getSignedIn, getWork } from "@/lib/control-room/client"
 import { deskTitle } from "@/lib/control-room/format"

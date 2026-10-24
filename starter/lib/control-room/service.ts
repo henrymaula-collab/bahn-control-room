@@ -139,7 +139,7 @@ export async function buildState(): Promise<EngineState> {
 export function loopInput(state: EngineState): LoopInput {
   const byCase = new Map(state.cases.map((c) => [c.id, c]))
   return {
-    decisions: state.decisions, records: state.records, cases: state.cases, people: state.people,
+    decisions: state.decisions, records: state.records, cases: state.cases, people: state.people, now: state.now,
     describe: (caseId) => {
       const c = byCase.get(caseId)
       if (!c) return undefined

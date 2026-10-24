@@ -8,6 +8,7 @@ import { loadContext, type ChatCaseContext } from "./context"
 import { computeKnowledge } from "./knowledge"
 import { buildOpener, type OpenerShape, type OpenerVariant, openerShape } from "./opener"
 import { chatStore, messageId } from "./store"
+import { shownAt } from "./words"
 
 export type Failure = { ok: false; status: 400 | 404; error: string }
 
@@ -20,7 +21,9 @@ export interface Prepared {
 
 export function prepare(ctx: ChatCaseContext): Prepared {
   // Engine: the loop's own knowledge (the card, Know-how and History count the same). Fixtures: the same gate over the chat's history.
-  const knowledge = ctx.knowledge ?? computeKnowledge({ case: ctx.case, kind: ctx.kind, history: ctx.history })
+  const known = ctx.knowledge ?? computeKnowledge({ case: ctx.case, kind: ctx.kind, history: ctx.history })
+  // Precedents dated on the room's day when decided after its clock (words.ts shownAt): the opener, the prompt and the panel.
+  const knowledge: CaseKnowledge = { ...known, precedents: known.precedents.map((p) => ({ ...p, at: shownAt(p.at, ctx.now) })) }
   const shape = openerShape(ctx, knowledge)
   const { variant: _variant, ...opener } = buildOpener(ctx, knowledge)
   return { ctx, knowledge, shape, opener }

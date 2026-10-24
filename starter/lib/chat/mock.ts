@@ -6,7 +6,7 @@ import type { CaseKnowledge, ChatAction } from "@/lib/control-room/types-chat"
 import type { ChatCaseContext } from "./context"
 import { earlierOfKind } from "./knowledge"
 import type { ChatToolName } from "./tools"
-import { chosePhrase, day, dayTime, lc, names, plural, rankFacts, restsOn, sentence, sourcePhrase } from "./words"
+import { chosePhrase, day, dayTime, lc, names, plural, rankFacts, restsOn, sentence, shownAt, sourcePhrase } from "./words"
 
 export interface MockPlan {
   intent: "act" | "precedents" | "call" | "customer" | "documents" | "time" | "why" | "summary"
@@ -88,13 +88,13 @@ export function mockAnswer(input: {
         out.push(`Nobody at Bahn has decided a case of this kind before, so there is nothing to copy.`)
         out.push(`My suggestion rests on ${basis ?? "what the agent found today"}, and your answer will be the first one for this kind.`)
       } else if (earlier.length === 1) {
-        out.push(`Once. ${last.personName} decided it on ${day(last.at)} at ${last.placeName} and ${chosePhrase(last.choice)}.`)
+        out.push(`Once. ${last.personName} decided it on ${day(shownAt(last.at, ctx.now))} at ${last.placeName} and ${chosePhrase(last.choice)}.`)
         out.push(last.why ? `The reason given: "${last.why}"` : "No reason was written down.")
         out.push("One case is not a rule yet.")
       } else {
         const people = new Set(earlier.map((d) => d.personName)).size
         out.push(`${plural(earlier.length, "time")} before, by ${plural(people, "person", "people")}, and ${k.sameAsSuggestion} of them ${chosePhrase(s.label)}.`)
-        out.push(`The last time, ${last.personName} ${chosePhrase(last.choice)} at ${last.placeName} on ${day(last.at)}${last.why ? `, because "${last.why}"` : ""}.`)
+        out.push(`The last time, ${last.personName} ${chosePhrase(last.choice)} at ${last.placeName} on ${day(shownAt(last.at, ctx.now))}${last.why ? `, because "${last.why}"` : ""}.`)
       }
       break
     }
@@ -147,7 +147,7 @@ export function mockAnswer(input: {
       out.push(`In short: ${sentence(c.headline)}`)
       out.push(`You can ${lc(s.label)} (my suggestion)${c.alternatives.length ? `, or ${c.alternatives.map((a) => lc(a.label)).join(", or ")}` : ""}.`)
       if (k.novelty === "new") out.push("This kind has not happened before.")
-      else out.push(`People decided this kind ${plural(k.decided, "time")} before${earlier.length ? `, most recently ${names([last.personName])} on ${day(last.at)}` : ""}.`)
+      else out.push(`People decided this kind ${plural(k.decided, "time")} before${earlier.length ? `, most recently ${names([last.personName])} on ${day(shownAt(last.at, ctx.now))}` : ""}.`)
       break
     }
   }

@@ -1,5 +1,6 @@
 // Small text helpers for the chat, in Bahn's words (design/BAHN-VOCABULARY.md).
 
+import { onRoomDay } from "@/lib/control-room/loop"
 import type { CaseReason, Fact } from "@/lib/control-room/types"
 
 const DAY = new Intl.DateTimeFormat("en-GB", { weekday: "short", day: "numeric", month: "short", timeZone: "Europe/Helsinki" })
@@ -9,6 +10,13 @@ const TIME = new Intl.DateTimeFormat("en-GB", { hour: "2-digit", minute: "2-digi
 export const day = (iso: string) => DAY.format(new Date(iso)).replace(",", "")
 /** "Sat 24 Oct 14:05" (Helsinki). */
 export const dayTime = (iso: string) => `${day(iso)} ${TIME.format(new Date(iso))}`
+
+/**
+ * When a decision is dated: one made after the room's clock (a live one in the demo, on the wall clock)
+ * goes on the room's day at its own time, as History files it (history.ts shownAt), so the chat, the
+ * card and History name the same day. Earlier ones keep their time.
+ */
+export const shownAt = (iso: string, now: string) => onRoomDay(iso, now)
 
 /**
  * The control room's one time zone for the chat: the people sit in Helsinki. Every tool answer gives

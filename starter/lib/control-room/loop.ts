@@ -5,6 +5,8 @@
 // Inputs are plain arrays so this file has no database access and no import
 // cycle with service.ts.
 
+import { hel } from "./fixtures/clock"
+import { clock, dayKey } from "./format"
 import { OPTION_TEXT } from "./learning"
 import { type KindKey, kindDef, kindForType, kindOf } from "./kinds"
 import type { DecisionRecord, StoredTrustRule } from "./store"
@@ -23,6 +25,13 @@ export interface LoopInput {
   people: OpsPerson[]
   /** Order reference and pickup place name for a case, when the engine knows them. */
   describe?: (caseId: string) => { reference?: string; place?: string } | undefined
+  /** The room's clock: a precedent decided after it (live, on the wall clock) is dated on the room's day, as History files it. */
+  now?: string
+}
+
+/** A decision's date as every surface shows it: one made after the room's clock goes on the room's day, at its own time. */
+export function onRoomDay(at: string, now?: string): string {
+  return !now || at <= now ? at : hel(dayKey(now), clock(at))
 }
 
 export interface KindAnswer extends Answer {
@@ -99,7 +108,7 @@ export function precedentsFor(input: LoopInput, kindKey: KindKey, opts: { except
         reference: answer.record?.reference ?? described?.reference ?? "",
         place: answer.record?.situation.place ?? described?.place ?? "",
         decidedBy: firstName(input.people, answer.personId),
-        at: answer.record?.at ?? answer.at,
+        at: onRoomDay(answer.record?.at ?? answer.at, input.now),
         choice: answer.record?.choice.label ?? optionLabel(answer.optionId, answers),
         ...(answer.record?.reason ? { why: answer.record.reason } : {}),
         weight: Math.round((gate.weights[answer.personId] ?? 1) * 100) / 100,

@@ -6,9 +6,12 @@ export const runtime = "nodejs"
 export const dynamic = "force-dynamic"
 
 /**
- * POST /api/cr/decisions { caseId, personId, optionId, editedDetail?, why? }
- * Records the decision, marks the case decided, proposes a lesson and
- * recomputes trust-rule suggestions. -> { decision, case, lesson, trustRules }
+ * POST /api/cr/decisions { caseId, personId, optionId, editedDetail?, why?, openedAt?, chat? }
+ * Records the decision and one case record (kind, situation, choice, reason,
+ * chat, who, weight, minutes), marks the case decided, proposes a lesson and
+ * recomputes the kind-level trust proposals. Posting again for the same case
+ * as the same person (to add the why) updates the decision in place.
+ * -> { decision, case, lesson, record, trustRules }
  */
 export async function POST(request: Request) {
   const input = await body<DecideInput>(request)

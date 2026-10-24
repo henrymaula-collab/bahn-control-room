@@ -4,16 +4,15 @@
 // from a template today; the agent workstream can plug an LLM summariser in
 // with setLessonSummariser() without changing the signature.
 //
-// suggestTrustRules() groups decisions by case type + pickup place + the
-// option people chose, and suggests a rule when at least 5 decisions exist and
-// at least 90% chose the same option. Options that message a customer never
-// become trust rules: the agent never contacts a customer on its own.
+// Trust rules (v4): the old gate (5 decisions at 90%, per case type and pickup
+// place) is gone. Proposals come from kindRules() in loop.ts, per kind of case
+// and through the gate in trust-gate.ts (enough weighted, agreeing answers from
+// more than one person). Options that message a customer never become trust
+// rules: the agent never contacts a customer on its own.
 
+import { KINDS, kindOf } from "./kinds"
 import type { Case, CaseType, Decision, Lesson, Option, TrustRule } from "./types"
 import { caseTypeWords } from "./vocab"
-
-export const TRUST_MIN_DECISIONS = 5
-export const TRUST_MIN_SHARE = 0.9
 
 /** What each semantic option id means, for rule and lesson text. */
 export const OPTION_TEXT: Record<string, { then: string; customer: boolean }> = {
@@ -45,7 +44,7 @@ export function whenText(type: CaseType, placeName?: string) {
 
 export type LessonInput = {
   decision: Decision
-  case: Pick<Case, "id" | "type" | "placeId" | "customerId" | "suggestion" | "alternatives" | "headline">
+  case: Pick<Case, "id" | "type" | "placeId" | "customerId" | "suggestion" | "alternatives" | "headline"> & Partial<Pick<Case, "facts">>
   personName: string
   placeName?: string
   country?: string
@@ -60,9 +59,12 @@ export const templateSummariser: LessonSummariser = async ({ decision, case: c, 
   const tookSuggestion = decision.optionId === c.suggestion.id
   const because = decision.why ? ` because ${decision.why.replace(/\.$/, "").replace(/^./, (ch) => ch.toLowerCase())}` : ""
   const edited = decision.editedDetail ? ` (changed: ${decision.editedDetail})` : ""
+  // The kind says the situation more exactly than the type ("the seller has put a hold on the car").
+  const kind = kindOf({ ...c, facts: c.facts ?? [] })
+  const when = KINDS[kind]?.when ?? WHEN_TEXT[c.type] ?? "this comes up"
   return tookSuggestion
-    ? `${place}: when ${WHEN_TEXT[c.type] ?? "this comes up"}, ${chose.replace(/^./, (ch) => ch.toLowerCase())}${edited}. ${personName} decided so.`
-    : `${place}: when ${WHEN_TEXT[c.type] ?? "this comes up"}, ${personName} did not take the suggestion and chose to ${chose.replace(/^./, (ch) => ch.toLowerCase())}${because}${edited}.`
+    ? `${place}: when ${when}, ${chose.replace(/^./, (ch) => ch.toLowerCase())}${edited}. ${personName} decided so.`
+    : `${place}: when ${when}, ${personName} did not take the suggestion and chose to ${chose.replace(/^./, (ch) => ch.toLowerCase())}${because}${edited}.`
 }
 
 let summariser: LessonSummariser = templateSummariser
@@ -97,66 +99,21 @@ export function lessonsFor(c: Pick<Case, "type" | "placeId" | "customerId">, les
     && (!lesson.scope.customerId || lesson.scope.customerId === c.customerId))
 }
 
-export type DecisionFact = {
-  caseId: string
-  optionId: string
-  caseType: string
-  placeId: string | null
-}
-
-export function trustRuleId(caseType: string, placeId: string | null, optionId: string) {
-  return `rule-${caseType.replace(/\W+/g, "_")}-${placeId ?? "any"}-${optionId}`
-}
-
 /**
- * Suggest trust rules from decisions. Existing rules keep their status and who
- * changed it; only the evidence is refreshed.
+ * The ON rule that lets the agent decide this case alone, if any. Kind-level
+ * rules (v4) match the case's kind, read from its properties, at any pickup
+ * place; older place-level rules match type and scope as before. Either way
+ * the rule must name the option the agent suggests, and a customer message
+ * always needs a person.
  */
-export function suggestTrustRules(decisions: DecisionFact[], existing: (TrustRule & { optionId?: string })[], placeNames: Map<string, string>): (TrustRule & { optionId: string })[] {
-  const groups = new Map<string, DecisionFact[]>()
-  for (const decision of decisions) {
-    if (!decision.placeId) continue
-    const key = `${decision.caseType}|${decision.placeId}`
-    const list = groups.get(key) ?? []
-    list.push(decision)
-    groups.set(key, list)
-  }
-  const byId = new Map(existing.map((rule) => [rule.id, rule]))
-  const out = new Map<string, TrustRule & { optionId: string }>()
-  for (const [key, list] of groups) {
-    const [caseType, placeId] = key.split("|") as [string, string]
-    const counts = new Map<string, DecisionFact[]>()
-    for (const decision of list) counts.set(decision.optionId, [...(counts.get(decision.optionId) ?? []), decision])
-    const [optionId, matched] = [...counts.entries()].sort((a, b) => b[1].length - a[1].length)[0]!
-    const id = trustRuleId(caseType, placeId, optionId)
-    const known = byId.get(id)
-    const meets = list.length >= TRUST_MIN_DECISIONS && matched.length / list.length >= TRUST_MIN_SHARE
-    const eligible = OPTION_TEXT[optionId] ? !OPTION_TEXT[optionId]!.customer : false
-    if (!known && !(meets && eligible)) continue
-    out.set(id, {
-      id,
-      caseType,
-      scope: { placeId },
-      when: whenText(caseType, placeNames.get(placeId)),
-      then: OPTION_TEXT[optionId]?.then ?? optionId,
-      evidence: { matched: matched.length, total: list.length, caseIds: matched.map((decision) => decision.caseId) },
-      status: known?.status ?? "suggested",
-      changedBy: known?.changedBy,
-      changedAt: known?.changedAt,
-      optionId,
-    })
-  }
-  // Rules whose evidence disappeared (e.g. history reseeded) stay as they were.
-  for (const rule of existing) if (!out.has(rule.id)) out.set(rule.id, { ...rule, optionId: rule.optionId ?? "" })
-  return [...out.values()].sort((a, b) => a.id.localeCompare(b.id))
-}
-
-/** The ON rule that lets the agent decide this case alone, if any. */
-export function ruleFor(c: Pick<Case, "type" | "placeId" | "customerId" | "suggestion">, rules: (TrustRule & { optionId?: string })[]) {
+export function ruleFor(c: Pick<Case, "type" | "placeId" | "customerId" | "suggestion" | "headline" | "facts" | "alternatives">, rules: (TrustRule & { optionId?: string; kindKey?: string })[]) {
+  if (c.suggestion.changes.some((change) => change.kind === "customer_message")) return null
+  const kind = kindOf(c)
   return rules.find((rule) => rule.status === "on"
-    && rule.caseType === c.type
-    && (!rule.scope.placeId || rule.scope.placeId === c.placeId)
-    && (!rule.scope.customerId || rule.scope.customerId === c.customerId)
     && rule.optionId === c.suggestion.id
-    && !c.suggestion.changes.some((change) => change.kind === "customer_message")) ?? null
+    && (rule.kindKey
+      ? rule.kindKey === kind
+      : rule.caseType === c.type
+        && (!rule.scope.placeId || rule.scope.placeId === c.placeId)
+        && (!rule.scope.customerId || rule.scope.customerId === c.customerId))) ?? null
 }

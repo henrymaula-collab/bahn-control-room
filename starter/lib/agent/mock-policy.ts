@@ -126,8 +126,8 @@ export function mockTurn(messages: BetaMessageParam[]): BetaMessage {
     return message([toolUse("propose_case", {
       order, type: "readiness.keys_or_access", headline: "The pickup place is run by the customer, so a person has to ask them about the pickup.",
       reasons: ["needs_the_customer"], fact_ids: pickFacts(all, [], /(instruction|contact|slot|alert|work item)/i), new_facts: [],
-      suggestion: { key: "ask_customer", label: "Call the customer's branch about the pickup", effect: "You call them; the agent records what they say on the order.", changes: [{ kind: "customer_message", detail: "Ask the branch to confirm the car, the keys and the release for the selected slot.", amount_eur: null }] },
-      alternatives: [{ key: "keep_slot_call_again", label: "Keep the slot and check again tomorrow", effect: "Nothing changes now; the agent checks the order again tomorrow morning.", changes: [] }],
+      suggestion: { key: "ask_customer", label: "Call the customer's branch about the pickup", effect: "You call them; the agent records what they say on the order.", changes: [{ kind: "customer_message", detail: "Ask the branch to confirm the car, the keys and the release for the selected slot.", amount_eur: null }], draft: null, why_choices: [] },
+      alternatives: [{ key: "keep_slot_call_again", label: "Keep the slot and check again tomorrow", effect: "Nothing changes now; the agent checks the order again tomorrow morning.", changes: [], draft: null, why_choices: [] }],
       decide_by: decideBy, lesson_ids_used: [],
     })], "tool_use")
   }
@@ -170,8 +170,8 @@ export function mockTurn(messages: BetaMessageParam[]): BetaMessage {
     return message([toolUse("propose_case", {
       order, type: "readiness.fee_requested", headline: `The pickup place asks for a ${amount} EUR fee before the car can leave.`,
       reasons: ["costs_extra_money"], fact_ids: pickFacts(all, cf, /(slot|instruction)/i), new_facts: [],
-      suggestion: { key: "accept_fee", label: `Accept the ${amount} EUR fee and confirm the pickup`, effect: "The agent confirms with the pickup place and the gig stays as planned.", changes: [{ kind: "cost", detail: `${amount} EUR fee at the pickup place`, amount_eur: amount }] },
-      alternatives: [{ key: "ask_customer", label: "Ask the customer who pays the fee", effect: "You send the message; the agent waits for the answer before confirming.", changes: [{ kind: "customer_message", detail: `The pickup place asks ${amount} EUR to release the car. Do you want us to pay it and add it to the invoice?`, amount_eur: null }] }],
+      suggestion: { key: "accept_fee", label: `Accept the ${amount} EUR fee and confirm the pickup`, effect: "The agent confirms with the pickup place and the gig stays as planned.", changes: [{ kind: "cost", detail: `${amount} EUR fee at the pickup place`, amount_eur: amount }], draft: null, why_choices: [] },
+      alternatives: [{ key: "ask_customer", label: "Ask the customer who pays the fee", effect: "You send the message; the agent waits for the answer before confirming.", changes: [{ kind: "customer_message", detail: `The pickup place asks ${amount} EUR to release the car. Do you want us to pay it and add it to the invoice?`, amount_eur: null }], draft: null, why_choices: [] }],
       decide_by: decideBy, lesson_ids_used: lessons.map((l) => l.lesson_id),
     })], "tool_use")
   }
@@ -185,8 +185,8 @@ export function mockTurn(messages: BetaMessageParam[]): BetaMessage {
       reasons: holds ? ["papers_missing", "needs_the_customer"] : ["papers_missing", "needs_the_customer"],
       fact_ids: pickFacts(all, cf, /(release document|learned from|slot|hold)/i),
       new_facts: usedLessons.length ? [{ statement: "Asking ahead: the release document has to reach the workshop before the pickup day, as the accepted lesson says.", basis_fact_ids: usedLessons.map((l) => l.fact_id) }] : [],
-      suggestion: { key: "ask_customer_for_release", label: "Ask the customer to have the seller e-mail the signed release document to the workshop", effect: "You send the message; the agent checks with the workshop the next morning and keeps the gig unpublished until it arrives.", changes: [{ kind: "customer_message", detail: "For this pickup the pickup place releases the car only after the seller's signed release document is e-mailed to their workshop (see the address they gave). Could you ask the seller to send it before the pickup day?", amount_eur: null }] },
-      alternatives: [{ key: "pause_gig", label: "Hold the pickup until the seller clears it", effect: "No driver is sent; the agent checks with the pickup place again tomorrow.", changes: [{ kind: "booking", detail: "Keep the gig paused", amount_eur: null }] }],
+      suggestion: { key: "ask_customer_for_release", label: "Ask the customer to have the seller e-mail the signed release document to the workshop", effect: "You send the message; the agent checks with the workshop the next morning and keeps the gig unpublished until it arrives.", changes: [{ kind: "customer_message", detail: "For this pickup the pickup place releases the car only after the seller's signed release document is e-mailed to their workshop (see the address they gave). Could you ask the seller to send it before the pickup day?", amount_eur: null }], draft: null, why_choices: [] },
+      alternatives: [{ key: "pause_gig", label: "Hold the pickup until the seller clears it", effect: "No driver is sent; the agent checks with the pickup place again tomorrow.", changes: [{ kind: "booking", detail: "Keep the gig paused", amount_eur: null }], draft: null, why_choices: [] }],
       decide_by: decideBy, lesson_ids_used: usedLessons.map((l) => l.lesson_id),
     })], "tool_use")
   }
@@ -195,8 +195,8 @@ export function mockTurn(messages: BetaMessageParam[]): BetaMessage {
     return message([toolUse("propose_case", {
       order, type: "readiness.car_not_ready", headline: "The car is not at the pickup place for the selected slot; it will only be ready later.",
       reasons: ["car_not_ready", "moves_delivery_date", "needs_the_customer"], fact_ids: pickFacts(all, cf, /(slot|delivery promise|note|instruction)/i), new_facts: [],
-      suggestion: { key: "move_pickup_next_day", label: "Ask the customer to move pickup and delivery to the day the car is ready", effect: "You send the message; once the customer agrees the agent moves the slot and tells the pickup place.", changes: [{ kind: "date", detail: "Pickup and delivery move to the day the pickup place named", amount_eur: null }, { kind: "customer_message", detail: "The pickup place tells us the car is not at the branch for the agreed slot and will be ready later. Can we move pickup and delivery to that day?", amount_eur: null }] },
-      alternatives: [{ key: "keep_slot_call_again", label: "Keep the slot and ask the pickup place to bring the car back in time", effect: "The agent asks the pickup place and calls again tomorrow morning.", changes: [] }],
+      suggestion: { key: "move_pickup_next_day", label: "Ask the customer to move pickup and delivery to the day the car is ready", effect: "You send the message; once the customer agrees the agent moves the slot and tells the pickup place.", changes: [{ kind: "date", detail: "Pickup and delivery move to the day the pickup place named", amount_eur: null }, { kind: "customer_message", detail: "The pickup place tells us the car is not at the branch for the agreed slot and will be ready later. Can we move pickup and delivery to that day?", amount_eur: null }], draft: null, why_choices: [] },
+      alternatives: [{ key: "keep_slot_call_again", label: "Keep the slot and ask the pickup place to bring the car back in time", effect: "The agent asks the pickup place and calls again tomorrow morning.", changes: [], draft: null, why_choices: [] }],
       decide_by: decideBy, lesson_ids_used: [],
     })], "tool_use")
   }
@@ -213,8 +213,8 @@ export function mockTurn(messages: BetaMessageParam[]): BetaMessage {
     return message([toolUse("propose_case", {
       order, type: "readiness.facts_disagree", headline: "The pickup place cannot confirm where the car and keys are, and the gig is still open to drivers.",
       reasons: ["facts_disagree"], fact_ids: pickFacts(all, cf, /(instruction|note|gig|alert)/i), new_facts: [],
-      suggestion: { key: "pause_gig", label: "Pause the gig until the pickup place confirms", effect: "No driver can take it; the agent calls the pickup place again after their check.", changes: [{ kind: "booking", detail: "Pause the published gig", amount_eur: null }] },
-      alternatives: [{ key: "keep_slot_call_again", label: "Keep the gig open and call again in an hour", effect: "Nothing changes now; the agent calls again in an hour.", changes: [] }],
+      suggestion: { key: "pause_gig", label: "Pause the gig until the pickup place confirms", effect: "No driver can take it; the agent calls the pickup place again after their check.", changes: [{ kind: "booking", detail: "Pause the published gig", amount_eur: null }], draft: null, why_choices: [] },
+      alternatives: [{ key: "keep_slot_call_again", label: "Keep the gig open and call again in an hour", effect: "Nothing changes now; the agent calls again in an hour.", changes: [], draft: null, why_choices: [] }],
       decide_by: decideBy, lesson_ids_used: [],
     })], "tool_use")
   }

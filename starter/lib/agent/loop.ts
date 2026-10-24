@@ -265,3 +265,16 @@ export async function replayLatest(orderRef: string, opts: RunOptions = {}): Pro
   return replayTrace(pick.file, { onStep: opts.onStep })
 }
 
+/** Replay every recorded run (or one order's), oldest first, into the store. */
+export async function replayAll(orderRef?: string): Promise<{ runId: string; order: string; outcome: string }[]> {
+  const traces = listTraces()
+    .filter((t) => t.outcome !== "unfinished" && t.outcome !== "error")
+    .filter((t) => !orderRef || t.orderRef.toUpperCase() === orderRef.toUpperCase())
+    .reverse()
+  const out: { runId: string; order: string; outcome: string }[] = []
+  for (const t of traces) {
+    const r = await replayTrace(t.file)
+    out.push({ runId: t.runId, order: t.orderRef, outcome: r.run.outcome })
+  }
+  return out
+}

@@ -8,6 +8,7 @@
 //   npm run agent -- --seed-demo                     local store only: the suggested Arvelano rule
 //   npm run agent -- --list                          cases, lessons, trust rules, runs
 //   npm run agent -- --replay <runId>                play a recorded trace back
+//   npm run agent -- --replay-all                    load every recorded run into the store (fresh clone, no model)
 //   npm run agent -- --reset                         clear the local store (.cr-data)
 
 import { config } from "dotenv"
@@ -18,7 +19,7 @@ import { carryOutDecision, decideAndCarryOut, reviewLesson } from "../lib/agent/
 import { registerAgentHooks } from "../lib/agent/hooks"
 import { agentModel, effectiveProvider, type Provider } from "../lib/agent/config"
 import { findOrder, LANGUAGE_NAMES, site } from "../lib/agent/data"
-import { runReadinessAgent, replayTrace, type RunResult } from "../lib/agent/loop"
+import { replayAll, runReadinessAgent, replayTrace, type RunResult } from "../lib/agent/loop"
 import { closeStore, getStore, initStore, resetLocalStore, type StoredRun } from "../lib/agent/store"
 import { appendTrace, listTraces } from "../lib/agent/trace"
 import type { TrustRule } from "../lib/agent/gate"
@@ -101,6 +102,12 @@ function printCase(c: Case) {
   console.log(`  Suggestion: ${bold(c.suggestion.label)}  [${c.suggestion.id}]`)
   console.log(`    ${c.suggestion.effect}`)
   for (const ch of c.suggestion.changes) console.log(`    change ${ch.kind}: ${ch.detail}${ch.amountEur !== undefined ? ` (EUR ${ch.amountEur})` : ""}`)
+  const draft = (c.suggestion as { draft?: { to: string; language: string; text: string; translation?: string } }).draft
+  if (draft) {
+    console.log(`    Draft to ${draft.to} (${LANGUAGE_NAMES[draft.language] ?? draft.language}):`)
+    console.log(`      ${draft.text.replace(/\n/g, "\n      ")}`)
+    if (draft.translation) console.log(dim(`      Translated: ${draft.translation.replace(/\n/g, " ")}`))
+  }
   for (const o of c.alternatives) {
     console.log(`  Other option: ${o.label}  [${o.id}]`)
     console.log(`    ${dim(o.effect)}`)
@@ -189,6 +196,12 @@ async function main() {
       await store.saveTrustRule({ ...rule, status: state, changedBy: flag("--by") ?? "p-kaisa", changedAt: new Date().toISOString() })
     }
     console.log(`Trust rule ${id} is now ${state}.`)
+    return
+  }
+  if (has("--replay-all")) {
+    const done = await replayAll(flag("--replay-all")?.startsWith("CD-") ? flag("--replay-all") : undefined)
+    for (const r of done) console.log(`  replayed ${r.runId}  ${r.order}  ${r.outcome}`)
+    console.log(`${done.length} recorded run(s) loaded into the ${kind === "foundation" ? "control room tables" : "local store"}.`)
     return
   }
   if (has("--replay")) {

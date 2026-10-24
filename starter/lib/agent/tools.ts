@@ -78,11 +78,20 @@ const changeShape = z.object({
   amount_eur: z.number().nullable().describe("Amount in EUR for a cost change, else null"),
 })
 
+const draftShape = z.object({
+  to: z.string().describe("Who receives it and how, e.g. 'Kovellin Automobilhandel, by email'"),
+  language: z.string().describe("Two-letter language of the recipient (the customer's country)"),
+  text: z.string().describe("The message in the recipient's language, ready to send"),
+  translation: z.string().describe("The same message in English, or empty when it is already English"),
+})
+
 const optionShape = z.object({
   key: z.enum(OPTION_KEYS).describe("The kind of option, from Bahn's list; 'other' when none fits"),
   label: z.string().describe("Names the action, e.g. 'Ask the customer to move delivery to Tuesday'. Never 'Approve'."),
   effect: z.string().describe("What happens next, in one sentence, e.g. 'The agent sends your message and calls the pickup place back.'"),
   changes: z.array(changeShape),
+  draft: draftShape.nullable().describe("For an option that sends a message (to the customer or the pickup place): the draft a person reads before sending. Else null."),
+  why_choices: z.array(z.string()).describe("Three short reasons a person might choose this option, each written as a rule someone could reuse"),
 })
 
 const orderArg = z.string().describe("Order reference, e.g. CD-420516")
@@ -208,13 +217,29 @@ function toChange(c: z.infer<typeof changeShape>): Change {
   return { kind: c.kind, detail: c.detail, ...(c.amount_eur !== null && c.amount_eur !== undefined ? { amountEur: c.amount_eur } : {}) }
 }
 
-function toOptions(list: z.infer<typeof optionShape>[]): Option[] {
+/** A message draft for the case page ("Read the draft, in German"). Not in the shared contract yet: an optional field on Option. */
+export interface Draft {
+  to: string
+  language: string
+  text: string
+  translation?: string
+}
+export type AgentOption = Option & { draft?: Draft; whyChoices?: string[] }
+
+function toOptions(list: z.infer<typeof optionShape>[], ctx: RunContext): AgentOption[] {
   const seen = new Set<string>()
+  const cust = customer(ctx.order.customer_id)
   return list.map((o) => {
     let id: string = o.key
     for (let n = 2; seen.has(id); n++) id = `${o.key}_${n}`
     seen.add(id)
-    return { id, label: o.label, effect: o.effect, changes: o.changes.map(toChange) }
+    const msg = o.changes.find((c) => c.kind === "customer_message")
+    const draft: Draft | undefined = o.draft
+      ? { to: o.draft.to, language: o.draft.language, text: o.draft.text, ...(o.draft.translation && o.draft.language !== "en" ? { translation: o.draft.translation } : {}) }
+      : msg
+        ? { to: `${String(cust?.name ?? "The customer")}, by email`, language: "en", text: msg.detail }
+        : undefined
+    return { id, label: o.label, effect: o.effect, changes: o.changes.map(toChange), ...(draft ? { draft } : {}), ...(o.why_choices?.length ? { whyChoices: o.why_choices.slice(0, 3) } : {}) }
   })
 }
 
@@ -277,7 +302,7 @@ function getOrder(ctx: RunContext): ToolResult {
     lane: o.display_lane,
     readiness: o.readiness_status,
     route: o.route_kind,
-    customer: { name: cust?.name, tier: cust?.account_tier, country: cust?.country, note: "The customer pays. Never contact them yourself." },
+    customer: { name: cust?.name, tier: cust?.account_tier, country: cust?.country, language: placeLanguage(str(cust?.country)), note: "The customer pays. Never contact them yourself; a person sends what you draft." },
     car: vehicleLabel(v),
     now: ctx.clock.now(),
     facts: facts.map(factOut),
@@ -539,8 +564,8 @@ async function proposeCase(ctx: RunContext, a: z.infer<z.ZodObject<typeof TOOL_S
     reasons: a.reasons as CaseReason[],
     facts,
     agentSteps: [...ctx.steps],
-    suggestion: toOptions([a.suggestion, ...a.alternatives])[0],
-    alternatives: toOptions([a.suggestion, ...a.alternatives]).slice(1),
+    suggestion: toOptions([a.suggestion, ...a.alternatives], ctx)[0],
+    alternatives: toOptions([a.suggestion, ...a.alternatives], ctx).slice(1),
     status: "waiting_for_person",
     placeId: site?.id,
     customerId: ctx.order.customer_id,
@@ -700,7 +725,10 @@ export function apiToolDefinitions(): { name: string; description: string; input
   return TOOL_NAMES.map((name) => {
     const schema = z.toJSONSchema(z.object(TOOL_SHAPES[name] as z.ZodRawShape)) as Record<string, unknown>
     delete schema.$schema
-    return { name, description: TOOL_DESCRIPTIONS[name], input_schema: closeObjects(schema), strict: true }
+    // Strict mode compiles a grammar per tool; the two big decision tools exceed the API's grammar size,
+    // so they run unstrict and executeTool() validates every input with zod instead.
+    const big = name === "propose_case" || name === "resolve_without_person"
+    return { name, description: TOOL_DESCRIPTIONS[name], input_schema: closeObjects(schema), strict: !big }
   })
 }
 

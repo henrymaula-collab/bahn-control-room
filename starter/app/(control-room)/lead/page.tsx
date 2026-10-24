@@ -1,7 +1,7 @@
 import type { Metadata } from "next"
 import { dataSource, getLead } from "@/lib/control-room/client"
 import { coverageRows } from "@/lib/control-room/coverage"
-import { clock, count, euro, onDay } from "@/lib/control-room/format"
+import { clock, count, onDay } from "@/lib/control-room/format"
 import type { LeadView } from "@/lib/control-room/views"
 import { Frame } from "../_ui/frame"
 import { LessonRow, RuleRow, SuggestedRule } from "../_ui/learning"
@@ -143,17 +143,16 @@ export default async function LeadPage({ searchParams }: { searchParams: Search 
 
         <section className="money quiet" aria-label="Money" style={{ padding: 0 }}>
           <p className="quiet-line">
-            <strong>
-              This week the Readiness desk held {view.money.wastedTripsAvoided} drivers before a wasted trip.
-            </strong>{" "}
-            A wasted cross-border pickup costs about {euro(view.money.costPerWastedTrip)}.
+            <strong>{view.money.line}</strong> {view.money.detail}
           </p>
-          <details className="quiet-more" style={{ display: "block" }}>
-            <summary className="btn-text" style={{ minHeight: 28, fontSize: 13, cursor: "pointer" }}>
-              How we count
-            </summary>
-            <p style={{ marginTop: 4 }}>{view.money.basis}</p>
-          </details>
+          {view.money.basis && (
+            <details className="quiet-more" style={{ display: "block" }}>
+              <summary className="btn-text" style={{ minHeight: 28, fontSize: 13, cursor: "pointer" }}>
+                How we count
+              </summary>
+              <p style={{ marginTop: 4 }}>{view.money.basis}</p>
+            </details>
+          )}
         </section>
       </div>
     </Frame>

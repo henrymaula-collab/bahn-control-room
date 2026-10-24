@@ -177,8 +177,8 @@ export const TODAY_STATS = {
 }
 
 export const MONEY = {
-  wastedTripsAvoided: 3,
-  costPerWastedTrip: 503,
+  line: "This week the Readiness desk held 3 drivers before a wasted trip.",
+  detail: "A wasted cross-border pickup costs about €503.",
   // Source: research/05-money.md (typical wasted cross-border trip).
   basis: "A wasted cross-border pickup costs about €503 in driver fee, travel and time. This is an estimate from public fares and Bahn's import gig fees.",
 }

@@ -128,7 +128,7 @@ export function LessonRow({ id, text, sub }: { id: string; text: string; sub: st
           <p className="row-sub" style={{ marginTop: 6 }}>{sub}</p>
           <div className="actions">
             <button type="button" className="btn btn-secondary btn-small" disabled={pending || !draft.trim()} onClick={() => act("edit", draft.trim())}>
-              Save the wording
+              Accept with this wording
             </button>
             <button type="button" className="btn-text" onClick={() => (setDraft(text), setEditing(false))}>
               Cancel

@@ -115,5 +115,5 @@ export interface LeadView {
   lessons: (Lesson & { source?: LessonSource })[]
   trustRules: (TrustRule & { placeName?: string; usedCount?: number })[]
   evidence: Record<string, EvidenceRow[]> // by trust rule id
-  money: { wastedTripsAvoided: number; costPerWastedTrip: number; basis: string }
+  money: { line: string; detail?: string; basis?: string } // cost side only: the packet has no customer prices
 }

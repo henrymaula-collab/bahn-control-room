@@ -44,22 +44,46 @@ export function DecisionControls(props: Props) {
       : null,
   )
   const [error, setError] = useState<string | null>(null)
+  // Another step than the suggestion: ask the one-tap why first, then save once.
+  const [asking, setAsking] = useState<Option | null>(null)
 
   const selected = all.find((o) => o.id === selectedId) ?? suggestion
 
-  const commit = (option: Option) => {
+  const save = (option: Option, why?: string) => {
     setError(null)
     const id = `dec-${caseId}-${Date.now().toString(36)}`
     start(async () => {
       try {
-        const d = await decide({ id, caseId, optionId: option.id })
+        const d = await decide({ id, caseId, optionId: option.id, why })
         const at = new Date(d.at)
         const timeWords = at.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit", hourCycle: "h23", timeZone: "Europe/Helsinki" })
-        setDecided({ id, optionId: option.id, timeWords, personName: props.personName })
+        const tookSuggestion = option.id === suggestion.id
+        setAsking(null)
+        setDecided({ id, optionId: option.id, timeWords, personName: props.personName, whyState: tookSuggestion ? undefined : why ? "saved" : "skipped" })
       } catch {
         setError("This was not saved. Nothing was sent or booked. Try again.")
       }
     })
+  }
+
+  const commit = (option: Option) => (option.id === suggestion.id ? save(option) : setAsking(option))
+
+  if (asking && !decided) {
+    return (
+      <div className="receipt">
+        <p className="t-label">Another step than the agent suggested</p>
+        <p className="t-lead">{asking.label}</p>
+        <p className="t-body">{asking.effect}</p>
+        <WhyPrompt choices={props.whyChoices[asking.id] ?? []} leadName={props.leadName} pending={pending} onDone={(why) => save(asking, why ?? undefined)} />
+        {error && <p className="t-2 t-now" style={{ marginTop: 12 }}>{error}</p>}
+        <div style={{ marginTop: 4 }}>
+          <button type="button" className="btn-text" onClick={() => setAsking(null)}>
+            <Icon name="chevron-left" size={16} />
+            Back to the options
+          </button>
+        </div>
+      </div>
+    )
   }
 
   if (decided) {
@@ -72,22 +96,12 @@ export function DecisionControls(props: Props) {
         </p>
         <p className="t-lead">{option.label}</p>
         <p className="t-body">{option.effect}</p>
-        {!tookSuggestion && decided.id && !decided.whyState && (
-          <WhyPrompt
-            caseId={caseId}
-            decisionId={decided.id}
-            optionId={option.id}
-            choices={props.whyChoices[option.id] ?? []}
-            leadName={props.leadName}
-            onDone={(why) => setDecided({ ...decided, whyState: why ? "saved" : "skipped" })}
-          />
-        )}
         {!tookSuggestion && decided.whyState === "saved" && (
           <p className="t-2" style={{ marginTop: 8 }}>
-            Saved as a lesson. {props.leadName} reviews it before the agent relies on it.
+            Your reason is saved as a lesson. {props.leadName} reviews it before the agent relies on it.
           </p>
         )}
-        {(tookSuggestion || decided.whyState) && (
+        {(
           <div className="actions" style={{ marginTop: 16 }}>
             {variant === "desk" ? (
               <button type="button" className="btn btn-secondary" onClick={() => router.refresh()}>
@@ -216,36 +230,23 @@ function DraftCard({ draft }: { draft: Draft }) {
   )
 }
 
-/** Asked only when the person did not take the suggestion. One tap, or Skip. */
+/** Asked only when the person did not take the suggestion. One tap, or skip it. */
 function WhyPrompt({
-  caseId,
-  decisionId,
-  optionId,
   choices,
   leadName,
+  pending,
   onDone,
 }: {
-  caseId: string
-  decisionId: string
-  optionId: string
   choices: string[]
   leadName: string
+  pending: boolean
   onDone: (why: string | null) => void
 }) {
   const name = useId()
   const [choice, setChoice] = useState<string | null>(null)
   const [other, setOther] = useState("")
-  const [pending, start] = useTransition()
   const OTHER = "__other"
   const why = choice === OTHER ? other.trim() : choice
-
-  const save = () => {
-    if (!why) return
-    start(async () => {
-      await decide({ id: decisionId, caseId, optionId, why })
-      onDone(why)
-    })
-  }
 
   return (
     <div className="why">
@@ -277,11 +278,11 @@ function WhyPrompt({
         )}
       </fieldset>
       <div className="actions">
-        <button type="button" className="btn btn-primary" disabled={!why || pending} onClick={save}>
-          Save
+        <button type="button" className="btn btn-primary" disabled={!why || pending} onClick={() => onDone(why)}>
+          Decide, with this reason
         </button>
-        <button type="button" className="btn-text" onClick={() => onDone(null)}>
-          Skip
+        <button type="button" className="btn-text" disabled={pending} onClick={() => onDone(null)}>
+          Decide without a reason
         </button>
       </div>
     </div>

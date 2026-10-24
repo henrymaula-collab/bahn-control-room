@@ -204,6 +204,20 @@ function AgentOwned({ detail }: { detail: CaseDetail }) {
       </div>
     )
   }
+  if (card.case.status === "decided" || card.case.status === "done") {
+    const last = [...card.case.agentSteps].reverse().find((s) => s.kind === "propose")
+    return (
+      <div className="receipt">
+        <p className="t-label">{card.case.status === "done" ? "Done" : "Decided. The agent carries it out."}</p>
+        <p className="t-lead">{last?.summary ?? "A person decided this case."}</p>
+        <div className="actions" style={{ marginTop: 16 }}>
+          <Link href="/" className="btn btn-secondary">
+            Back to your desk
+          </Link>
+        </div>
+      </div>
+    )
+  }
   return (
     <div className="receipt">
       <p className="t-label">No person needed yet</p>

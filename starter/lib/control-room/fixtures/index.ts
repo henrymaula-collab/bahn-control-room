@@ -39,7 +39,8 @@ export function resetFixtures() {
   delete g.__crFixtureStore
 }
 
-const person = (id?: string) => PEOPLE.find((p) => p.id === id) ?? PEOPLE[0]
+// Accepts the engine's ids too ("p-aino"), so one cookie works in both modes.
+const person = (id?: string) => PEOPLE.find((p) => p.id === (id ?? "").replace(/^p-/, "")) ?? PEOPLE[0]
 
 function card(c: Case): CaseCard {
   const order = ORDERS[c.orderId]
@@ -205,7 +206,7 @@ export function reviewLesson(id: string, action: "accept" | "retire" | "edit", p
   const l = store().lessons.find((x) => x.id === id)
   if (!l) throw new Error("Lesson not found")
   if (action === "edit" && text) l.text = text
-  if (action === "accept") l.status = "accepted"
+  if (action === "accept" || action === "edit") l.status = "accepted"
   if (action === "retire") l.status = "retired"
   l.reviewedBy = personId
   return l

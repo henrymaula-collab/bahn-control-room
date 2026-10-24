@@ -8,7 +8,7 @@ import { z } from "zod"
 import type { Case, Call, Decision, Lesson } from "@/lib/control-room/types"
 import { RunClock, worldNow } from "./clock"
 import { agentModel, callModel, claudeCodeEnv, effectiveProvider, emptyUsage, guards, paths, type Provider } from "./config"
-import { findOrder } from "./data"
+import { findOrder, site } from "./data"
 import { FactRegistry } from "./facts"
 import { createTurn, type BetaContentBlock, type BetaMessage, type BetaMessageParam } from "./llm"
 import { mockTurn } from "./mock-policy"
@@ -86,6 +86,7 @@ export async function runReadinessAgent(orderRef: string, opts: RunOptions = {})
     trace.step("message", `Stopped with an error: ${error}`, clock.now(), "error")
   }
 
+  if (ctx.outcome?.kind === "waiting" && !ctx.outcome.caseId && !opts.callback) await writeWaitingCase(ctx)
   const outcome: StoredRun["outcome"] = error && !ctx.outcome ? "error" : ctx.outcome?.kind ?? (error ? "error" : "waiting")
   const finished: StoredRun = {
     ...run,
@@ -101,6 +102,47 @@ export async function runReadinessAgent(orderRef: string, opts: RunOptions = {})
   await store.saveRun(finished)
   const theCase = ctx.outcome?.caseId ? await store.getCase(ctx.outcome.caseId) : undefined
   return { run: finished, case: theCase, calls: ctx.calls, traceFile: trace.file, handover: handover || ctx.outcome?.summary || error || "" }
+}
+
+/**
+ * The agent is still on it (nobody answered, a follow-up is promised): the
+ * order shows as "agent working" with what was done, instead of a person's case.
+ */
+async function writeWaitingCase(ctx: RunContext): Promise<void> {
+  const callbacks = (await ctx.store.listCallbacks()).filter((c) => c.createdByRunId === ctx.runId && c.status === "scheduled")
+  const next = callbacks.sort((a, b) => a.dueAt.localeCompare(b.dueAt))[0]
+  if (!next) return
+  const place = site(ctx.order.pickup_site_id)
+  const tz = place?.timezone ?? "Europe/Helsinki"
+  const when = new Intl.DateTimeFormat("en-GB", { timeZone: tz, hour: "2-digit", minute: "2-digit", hour12: false }).format(new Date(next.dueAt))
+  const noAnswer = ctx.calls.some((c) => c.outcome === "no_answer")
+  const placeName = place?.name ?? "The pickup place"
+  const factIds = new Set<string>([...ctx.calls.flatMap((c) => c.factIds), ...ctx.steps.filter((s) => s.kind === "message" || s.kind === "ask").flatMap((s) => s.factIds ?? [])])
+  const slot = ctx.registry.all().find((f) => /^Selected pickup slot/.test(f.statement))
+  if (slot) factIds.add(slot.id)
+  const id = `case-${ctx.order.id}-agent`
+  const theCase: Case = {
+    id,
+    orderId: ctx.order.id,
+    desk: "ops-readiness",
+    type: noAnswer ? "readiness.no_answer" : "readiness.keys_or_access",
+    headline: noAnswer ? `${placeName} did not answer. The agent wrote to them and calls again at ${when}.` : `The agent is waiting: ${next.reason}`,
+    decideBy: next.dueAt,
+    reasons: noAnswer ? ["pickup_place_not_answering"] : [],
+    facts: [...factIds].map((f) => ctx.registry.get(f)).filter((f): f is NonNullable<typeof f> => Boolean(f)),
+    agentSteps: [...ctx.steps],
+    suggestion: { id: "keep_slot_call_again", label: "Keep the slot and call the pickup place again", effect: `The agent calls again at ${when} and brings you a decision if they still do not answer.`, changes: [] },
+    alternatives: [],
+    status: "agent_working",
+    placeId: place?.id,
+    customerId: ctx.order.customer_id,
+    createdAt: ctx.clock.now(),
+  }
+  for (const c of ctx.calls) c.caseId = c.caseId ?? id
+  await ctx.store.saveCase(theCase)
+  for (const c of ctx.calls) await ctx.store.saveCall(c)
+  ctx.trace.write({ type: "case", case: theCase })
+  ctx.outcome = { kind: "waiting", caseId: id, summary: theCase.headline }
 }
 
 function overBudget(ctx: RunContext, started: number): string | undefined {
@@ -227,6 +269,7 @@ export async function replayTrace(file: string, opts: { onStep?: RunOptions["onS
   let theCase: Case | undefined
   const decisions: Decision[] = []
   const lessons: Lesson[] = []
+  const rules: TrustRule[] = []
   for (const l of lines) {
     if (l.type === "step") {
       opts.onStep?.(l.step)
@@ -242,6 +285,7 @@ export async function replayTrace(file: string, opts: { onStep?: RunOptions["onS
     if (l.type === "case") theCase = l.case
     if (l.type === "decision") decisions.push(l.decision)
     if (l.type === "lesson") lessons.push(l.lesson)
+    if (l.type === "trust_rule") rules.push(l.rule)
   }
   if (theCase) {
     const audioCalls = calls.map((c) => ({ ...c, caseId: c.caseId ?? theCase!.id }))
@@ -251,6 +295,12 @@ export async function replayTrace(file: string, opts: { onStep?: RunOptions["onS
   for (const c of calls) await store.saveCall(c)
   for (const d of decisions) await store.saveDecision(d)
   for (const l of lessons) await store.saveLesson(l)
+  // A run that acted under a trust rule restores that rule as it was (ON, who turned it on).
+  const existingRules = rules.length ? await store.listTrustRules() : []
+  for (const r of rules) {
+    const existing = existingRules.find((x) => x.id === r.id)
+    await store.saveTrustRule(existing ? { ...existing, status: r.status, changedBy: r.changedBy, changedAt: r.changedAt } : r)
+  }
   const run: StoredRun = { ...end.run, mode: "replay", replayOf: end.run.id }
   await store.saveRun(run)
   const lastMessage = [...end.run.steps].reverse().find((s) => s.type === "message" && !s.name)

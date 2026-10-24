@@ -1,0 +1,44 @@
+{
+  "callId": "call-a22n83hf0",
+  "audioUrl": "/calls/call-a22n83hf0.mp3",
+  "durationSec": 72.19,
+  "model": "eleven_multilingual_v2",
+  "voices": {
+    "agent": "Soili - Neutral and Light",
+    "pickup_place": "Aapo - Friendly and approachable"
+  },
+  "characters": 962,
+  "renderedCharacters": 962,
+  "turns": [
+    {
+      "index": 0,
+      "speaker": "pickup_place",
+      "start": 0,
+      "end": 5.11
+    },
+    {
+      "index": 1,
+      "speaker": "agent",
+      "start": 5.56,
+      "end": 22.65
+    },
+    {
+      "index": 2,
+      "speaker": "pickup_place",
+      "start": 23.1,
+      "end": 38.98
+    },
+    {
+      "index": 3,
+      "speaker": "agent",
+      "start": 39.43,
+      "end": 55.82
+    },
+    {
+      "index": 4,
+      "speaker": "pickup_place",
+      "start": 56.27,
+      "end": 71.74
+    }
+  ]
+}

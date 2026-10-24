@@ -10,6 +10,7 @@
 //   npm run agent -- --replay <runId>                play a recorded trace back
 //   npm run agent -- --replay-all                    load every recorded run into the store (fresh clone, no model)
 //   npm run agent -- --reset                         clear the local store (.cr-data)
+//   npm run agent -- --purge-agent                   remove the agent's rows from the control room tables
 
 import { config } from "dotenv"
 config({ path: ".env.local", override: true, quiet: true })
@@ -145,7 +146,7 @@ async function main() {
       id: "rule-readiness_facts_disagree-site-047-pause_gig",
       caseType: "readiness.facts_disagree",
       scope: { placeId: "site-047" },
-      when: "At Arvelano Hamburg, the order notes and the pickup place disagree about where to collect the car",
+      when: "At Arvelano Hamburg, the pickup place and the order disagree on where to collect the car",
       then: "Pause the gig until the pickup place confirms",
       evidence: { matched: 13, total: 14, caseIds: [] },
       status: "suggested",
@@ -196,6 +197,12 @@ async function main() {
       await store.saveTrustRule({ ...rule, status: state, changedBy: flag("--by") ?? "p-kaisa", changedAt: new Date().toISOString() })
     }
     console.log(`Trust rule ${id} is now ${state}.`)
+    return
+  }
+  if (has("--purge-agent")) {
+    if (kind !== "foundation") throw new Error("--purge-agent works on the control room tables (Postgres).")
+    const { purgeAgentRows } = await import("../lib/agent/purge")
+    console.log("Removed from the control room tables:", await purgeAgentRows())
     return
   }
   if (has("--replay-all")) {

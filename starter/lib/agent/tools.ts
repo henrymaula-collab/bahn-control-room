@@ -623,6 +623,7 @@ async function resolve(ctx: RunContext, a: z.infer<z.ZodObject<typeof TOOL_SHAPE
     await ctx.store.saveCase(theCase)
     for (const c of ctx.calls) await ctx.store.saveCall(c)
     ctx.trace.write({ type: "case", case: theCase })
+    ctx.trace.write({ type: "trust_rule", rule: gate.rule })
   } else {
     step(ctx, "read", `Checked and found nothing that needs a person: ${a.summary}`)
   }

@@ -1,0 +1,56 @@
+{
+  "callId": "call-a0qld2ozm",
+  "audioUrl": "/calls/call-a0qld2ozm.mp3",
+  "durationSec": 95.01,
+  "model": "eleven_multilingual_v2",
+  "voices": {
+    "agent": "Sapphire - Well-Mannered, Smooth & Clean",
+    "pickup_place": "Ralf Eisend"
+  },
+  "characters": 1213,
+  "renderedCharacters": 1133,
+  "turns": [
+    {
+      "index": 0,
+      "speaker": "pickup_place",
+      "start": 0,
+      "end": 6.46
+    },
+    {
+      "index": 1,
+      "speaker": "agent",
+      "start": 6.91,
+      "end": 30.59
+    },
+    {
+      "index": 2,
+      "speaker": "pickup_place",
+      "start": 31.04,
+      "end": 45.2
+    },
+    {
+      "index": 3,
+      "speaker": "agent",
+      "start": 45.65,
+      "end": 55.27
+    },
+    {
+      "index": 4,
+      "speaker": "pickup_place",
+      "start": 55.72,
+      "end": 70.02
+    },
+    {
+      "index": 5,
+      "speaker": "agent",
+      "start": 70.47,
+      "end": 89.56
+    },
+    {
+      "index": 6,
+      "speaker": "pickup_place",
+      "start": 90.01,
+      "end": 94.56
+    }
+  ]
+}

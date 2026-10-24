@@ -6,7 +6,7 @@
 
 import fs from "node:fs"
 import path from "node:path"
-import type { AgentRun, Call, Case, Decision, Fact, Lesson, OrderCheck } from "@/lib/control-room/types"
+import type { AgentRun, Call, Case, Decision, Fact, Lesson, OrderCheck, TrustRule } from "@/lib/control-room/types"
 import { paths } from "./config"
 import type { Callback, StoredRun } from "./store"
 
@@ -20,6 +20,7 @@ export type TraceLine =
   | { type: "callback"; callback: Callback }
   | { type: "decision"; decision: Decision }
   | { type: "lesson"; lesson: Lesson }
+  | { type: "trust_rule"; rule: TrustRule & { optionId?: string } }
   | { type: "end"; run: StoredRun }
 
 const MAX_CONTENT = 8000

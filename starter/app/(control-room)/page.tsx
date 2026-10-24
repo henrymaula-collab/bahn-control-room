@@ -45,11 +45,16 @@ export default async function DeskPage({ searchParams }: { searchParams: Search 
           </>
         ) : (
           <>
-            <div className="empty">
+            <section className="panel empty-panel" aria-label="Nothing to decide">
               <h2 className="t-headline">Nothing needs you right now.</h2>
-              <p className="t-body">The agent brings the next decision here when one comes up.</p>
-            </div>
-            <Quiet desk={desk} lead="" />
+              <p className="t-body">
+                {desk.quiet.notChecked > 0
+                  ? `${count(desk.quiet.ordersChecked)} of ${count(desk.quiet.ordersChecked + desk.quiet.notChecked)} orders checked at ${clock(desk.quiet.checkedAt)}, ${count(desk.quiet.notChecked)} not checked yet.`
+                  : `${count(desk.quiet.ordersChecked)} orders checked at ${clock(desk.quiet.checkedAt)}.`}{" "}
+                The agent brings the next decision here when one comes up.
+              </p>
+            </section>
+            <Quiet desk={desk} lead="" bare />
           </>
         )}
       </div>
@@ -169,7 +174,7 @@ function Queue({ cards, now }: { cards: CaseCard[]; now: string }) {
   )
 }
 
-function Quiet({ desk, lead }: { desk: DeskView; lead: string }) {
+function Quiet({ desk, lead, bare = false }: { desk: DeskView; lead: string; bare?: boolean }) {
   const q = desk.quiet
   // An order nobody checked is not fine: say how many, never hide them in the count.
   const rest =
@@ -196,5 +201,5 @@ function Quiet({ desk, lead }: { desk: DeskView; lead: string }) {
       sub: c.ruleUsed ? `Handled by the agent under the rule: ${ruleSentence(c.ruleUsed)}` : "Handled by the agent under a trust rule.",
     })),
   ]
-  return <QuietLine lead={lead} rest={rest} more={more} items={items} />
+  return <QuietLine lead={bare ? undefined : lead} rest={bare ? undefined : rest} more={more} items={items} />
 }

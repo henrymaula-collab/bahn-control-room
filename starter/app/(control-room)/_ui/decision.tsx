@@ -60,6 +60,8 @@ export function DecisionControls(props: Props) {
         const tookSuggestion = option.id === suggestion.id
         setAsking(null)
         setDecided({ id, optionId: option.id, timeWords, personName: props.personName, whyState: tookSuggestion ? undefined : why ? "saved" : "skipped" })
+        // On the case page the rest of the page follows the decision; on the desk the receipt stays until "Next for you".
+        if (variant === "case") router.refresh()
       } catch {
         setError("This was not saved. Nothing was sent or booked. Try again.")
       }

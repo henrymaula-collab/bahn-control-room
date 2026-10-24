@@ -1,7 +1,7 @@
 import type { Metadata } from "next"
 import { dataSource, getLead } from "@/lib/control-room/client"
 import { coverageRows } from "@/lib/control-room/coverage"
-import { clock, count, onDay } from "@/lib/control-room/format"
+import { clock, count, dayKey, onDay } from "@/lib/control-room/format"
 import type { LeadView } from "@/lib/control-room/views"
 import { Frame } from "../_ui/frame"
 import { LessonRow, RuleRow, SuggestedRule } from "../_ui/learning"
@@ -33,7 +33,14 @@ export default async function LeadPage({ searchParams }: { searchParams: Search 
   }
 
   const name = (id?: string) => view.people.find((p) => p.id === id)?.name
-  const featured = view.trustRules.find((r) => r.status === "suggested") ?? null
+  // The suggested rule leads the page; once switched today it stays there, so the way back is in the same place.
+  const featured =
+    view.trustRules.find((r) => r.status === "suggested") ??
+    view.trustRules
+      .filter((r) => r.changedAt && r.evidence.caseIds.length > 0)
+      .filter((r) => dayKey(r.changedAt!) === dayKey(now) || Date.now() - Date.parse(r.changedAt!) < 12 * 3_600_000)
+      .sort((a, b) => b.changedAt!.localeCompare(a.changedAt!))[0] ??
+    null
   const otherRules = view.trustRules.filter((r) => r.id !== featured?.id)
   const proposed = view.lessons.filter((l) => l.status === "proposed")
   const accepted = view.lessons.filter((l) => l.status === "accepted")

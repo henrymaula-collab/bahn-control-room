@@ -39,7 +39,7 @@ export type RouteInput = {
   /** Open cases already routed to each person. */
   queueLengths?: Map<string, number>
   now: string
-  /** Share of cases routed to learn, 0..1. Default 0.15. */
+  /** Share of cases routed to learn, 0..1. Default 0.2 (one in five). */
   learningShare?: number
 }
 
@@ -128,7 +128,7 @@ export function routeCase(input: RouteInput): Routing {
     return { personId: ranked[0]!.person.id, why: `Sent to you because you are the only one on the ${deskTitle} on shift.`, mode: "only_one_on_shift", at: now }
   }
 
-  const share = input.learningShare ?? 0.15
+  const share = input.learningShare ?? 0.2
   const learners = ranked.filter((entry) => entry.type.net < 3)
   if (learners.length && bucket(input.caseId) < share * 100) {
     const learner = [...learners].sort((a, b) => a.type.net - b.type.net || queue(a.person.id) - queue(b.person.id) || a.person.id.localeCompare(b.person.id))[0]!

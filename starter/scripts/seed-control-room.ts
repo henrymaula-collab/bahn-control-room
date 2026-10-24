@@ -164,16 +164,19 @@ async function main() {
     }
   }
 
-  for (let i = 0; i < decisions.length; i += 200) {
-    await crDb.insert(crDecisions).values(decisions.slice(i, i + 200).map((row) => ({ ...row, at: new Date(row.at) })))
-  }
-
   // Lessons: one per case type, at the pickup place of a case open today when there is one.
   const lessons: Lesson[] = []
   const types = Object.keys(LESSON_TEXT)
   for (const [index, type] of types.entries()) {
     const today = derived.find((c) => c.type === type && c.placeId)
-    const fromHistory = decisions.filter((row) => row.caseType === type && (!today || row.placeId === today.placeId))
+    let fromHistory = decisions.filter((row) => row.caseType === type && (!today || row.placeId === today.placeId))
+    if (!fromHistory.length && today?.placeId) {
+      // Nobody has decided this type at today's pickup place yet: the person who handles this type most did once.
+      const expert = [...TEAM].sort((a, b) => (b.types[type as CaseType & string] ?? 0) - (a.types[type as CaseType & string] ?? 0))[0]!
+      const place = world.places.get(today.placeId)!
+      add(expert.id, type, today.placeId, place.country, SUGGESTED[type]!, randomDate("2026-09-14"), false)
+      fromHistory = decisions.slice(-1)
+    }
     const source = fromHistory.sort((a, b) => b.at.localeCompare(a.at))[0] ?? decisions.find((row) => row.caseType === type)
     if (!source?.placeId) continue
     const place = world.places.get(source.placeId)
@@ -188,6 +191,9 @@ async function main() {
       reviewedBy: proposed ? undefined : "p-kaisa",
       createdAt: source.at,
     })
+  }
+  for (let i = 0; i < decisions.length; i += 200) {
+    await crDb.insert(crDecisions).values(decisions.slice(i, i + 200).map((row) => ({ ...row, at: new Date(row.at) })))
   }
   for (const lesson of lessons) await saveLesson(lesson)
 

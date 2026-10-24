@@ -3,16 +3,22 @@
 // smoke script call these functions; nothing here is cached, so a reseed shows
 // on the next request.
 
+import { sql } from "drizzle-orm"
 import { type OrderCheckResult, computeOrderChecks, countChecks } from "./checks"
-import { lessonsFor, proposeLesson, reviewLesson, ruleFor, suggestTrustRules } from "./learning"
+import { crDb } from "./db"
+import { kindDef, kindOf } from "./kinds"
+import { lessonsFor, proposeLesson, reviewLesson, ruleFor } from "./learning"
+import { type LoopInput, kindRules, kindSummaries, knowledgeFor, weightOn } from "./loop"
 import { deriveReadinessCases } from "./readiness-cases"
 import { type HistoryRow, routeCase } from "./routing"
 import { scaleChecks } from "./scale"
 import {
-  type DecisionRecord, type StoredTrustRule, getLesson, listAgentRuns, listCalls, listDecisions, listLessons, listPeople,
-  listStoredCases, listTrustRules, saveCase, saveDecision, saveLesson, saveTrustRule,
+  type DecisionRecord, type StoredTrustRule, deleteTrustRule, getLesson, listAgentRuns, listCalls, listCaseRecords, listDecisions, listLessons, listPeople,
+  listStoredCases, listTrustRules, replaceDecision, saveCase, saveCaseRecord, saveDecision, saveLesson, saveTrustRule,
 } from "./store"
+import { GATE_FLOOR, GATE_MIN_PEOPLE, GATE_N } from "./trust-gate"
 import type { Case, Decision, Lesson, OpsPerson, OrderCheck } from "./types"
+import type { CaseRecord } from "./types-loop"
 import { CASE_TYPE_WORDS, caseTypeWords } from "./vocab"
 import { caseExtras, findPerson, overview, workLists } from "./v3"
 import { type World, loadWorld, worldNow } from "./world"
@@ -24,6 +30,8 @@ export type EngineState = {
   now: string
   people: OpsPerson[]
   decisions: DecisionRecord[]
+  /** One case record per decided case (v4 learning loop). */
+  records: CaseRecord[]
   lessons: Lesson[]
   rules: StoredTrustRule[]
   cases: Case[]
@@ -36,10 +44,49 @@ function history(decisions: DecisionRecord[]): HistoryRow[] {
   return decisions.map((row) => ({ personId: row.personId, caseType: row.caseType, placeId: row.placeId, country: row.country, laterChanged: row.laterChanged, at: row.at }))
 }
 
+/**
+ * A stored case can be held back until another case is decided ("a second
+ * case of the same kind comes in"): the demo's round 2. Until then it is not
+ * part of the state at all. When it shows, `followPrecedent` makes the option
+ * that person chose the agent's suggestion, so the agent visibly learned.
+ */
+export type HeldBack = { showAfter?: { caseId: string; followPrecedent?: boolean } }
+
+function revealHeldBack(stored: (Case & HeldBack)[], decisions: DecisionRecord[], people: OpsPerson[]): Case[] {
+  const latest = new Map<string, DecisionRecord>()
+  for (const row of decisions) {
+    const known = latest.get(row.caseId)
+    if (!known || row.at >= known.at) latest.set(row.caseId, row)
+  }
+  const out: Case[] = []
+  for (const c of stored) {
+    const hold = c.showAfter
+    if (!hold) { out.push(c); continue }
+    const decided = latest.get(hold.caseId)
+    if (!decided) continue
+    const shown: Case & HeldBack = { ...c, createdAt: decided.at > c.createdAt ? decided.at : c.createdAt, agentSteps: [...c.agentSteps] }
+    const name = people.find((person) => person.id === decided.personId)?.name ?? "a person"
+    const kind = kindDef(kindOf(c))
+    const same = [c.suggestion, ...c.alternatives].find((option) => option.id === decided.optionId)
+    if (hold.followPrecedent && same && same.id !== c.suggestion.id && shown.status === "waiting_for_person") {
+      shown.alternatives = [c.suggestion, ...c.alternatives.filter((option) => option.id !== same.id)]
+      shown.suggestion = same
+    }
+    const propose = shown.agentSteps.findIndex((step) => step.kind === "propose")
+    const step = { at: decided.at, kind: "lookup" as const, summary: `Looked up earlier ${kind.many}: decided once before, by ${name}.` }
+    if (propose >= 0) {
+      shown.agentSteps.splice(propose, 1, step, { ...shown.agentSteps[propose]!, summary: `Stopped here and suggested: ${shown.suggestion.label.replace(/^./, (ch) => ch.toLowerCase())}.` })
+    } else shown.agentSteps.push(step)
+    out.push(shown)
+  }
+  return out
+}
+
 export async function buildState(): Promise<EngineState> {
-  const [world, people, decisions, lessons, rules, stored] = await Promise.all([
-    loadWorld(), listPeople(), listDecisions(), listLessons(), listTrustRules(), listStoredCases(),
+  const [world, people, decisions, records, lessons, rules, storedAll] = await Promise.all([
+    loadWorld(), listPeople(), listDecisions(), listCaseRecords(), listLessons(), listTrustRules(), listStoredCases(),
   ])
+  const stored = revealHeldBack(storedAll as (Case & HeldBack)[], decisions, people)
   const now = worldNow(world)
   // Contract: every option says what changes. Agent cases can store an option with no
   // change at all (keep the slot, call again); it reads as "nothing changes".
@@ -81,7 +128,20 @@ export async function buildState(): Promise<EngineState> {
     queue.set(c.routedTo.personId, (queue.get(c.routedTo.personId) ?? 0) + 1)
   }
   const checks = [...computeOrderChecks(world, cases), ...scaleChecks(world, now)]
-  return { world, now, people, decisions, lessons, rules, cases, derivedIds, checks }
+  return { world, now, people, decisions, records, lessons, rules, cases, derivedIds, checks }
+}
+
+/** The learning loop's view of the state (lib/control-room/loop.ts). */
+export function loopInput(state: EngineState): LoopInput {
+  const byCase = new Map(state.cases.map((c) => [c.id, c]))
+  return {
+    decisions: state.decisions, records: state.records, cases: state.cases, people: state.people,
+    describe: (caseId) => {
+      const c = byCase.get(caseId)
+      if (!c) return undefined
+      return { reference: state.world.byId.get(c.orderId)?.reference, place: c.placeId ? state.world.places.get(c.placeId)?.name : undefined }
+    },
+  }
 }
 
 const byUrgency = (a: Case, b: Case) => (a.decideBy ?? "9999").localeCompare(b.decideBy ?? "9999") || a.id.localeCompare(b.id)
@@ -128,6 +188,9 @@ export async function getCaseDetail(id: string, given?: EngineState) {
     agentRuns,
     check: state.checks.find((check) => check.orderId === c.orderId) ?? null,
     derived: state.derivedIds.has(c.id),
+    // v4 learning loop: the kind of case and what people decided on it before.
+    kind: { key: kindOf(c), label: kindDef(kindOf(c)).label },
+    knowledge: knowledgeFor(loopInput(state), c),
     // v3 (types-v3.ts CaseV3Extras): key facts and the situation panel.
     ...(caseExtras(state, c) ?? { why: [], situation: null }),
   }
@@ -156,8 +219,44 @@ function lessonOrigin(state: EngineState, lesson: Lesson) {
   })
 }
 
-export type DecideInput = { caseId: string; personId: string; optionId: string; editedDetail?: string; why?: string }
+export type DecideInput = {
+  caseId: string
+  personId: string
+  optionId: string
+  editedDetail?: string
+  why?: string
+  /** When the person opened the case, so the record keeps the minutes it took (ISO). */
+  openedAt?: string
+  /** The conversation before deciding (Track 1's chat), if the caller has it. */
+  chat?: CaseRecord["chat"]
+}
 
+type ChatSource = (input: { caseId: string; personId: string }) => Promise<CaseRecord["chat"] | undefined>
+
+/** The chat workstream can register where a case's conversation lives. */
+let chatSource: ChatSource = async ({ caseId }) => {
+  // Default: message ids from cr_chat_messages when that table exists; nothing otherwise.
+  try {
+    const rows = await crDb.execute(sql`SELECT id FROM cr_chat_messages WHERE case_id = ${caseId} ORDER BY 1`) as unknown as { id: string }[]
+    return rows.length ? { messageIds: rows.map((row) => String(row.id)) } : undefined
+  } catch {
+    return undefined
+  }
+}
+
+export function setCaseChatSource(next: ChatSource) {
+  chatSource = next
+}
+
+const lower = (text: string) => text.replace(/^./, (ch) => ch.toLowerCase())
+
+/**
+ * A person decides. Saves the decision, one case record (kind, situation,
+ * choice, reason, chat, who, weight), a proposed lesson, and refreshes the
+ * kind-level trust proposals. Deciding the same case again as the same person
+ * (the UI saves the choice, then adds the why) updates that decision and its
+ * record in place instead of counting twice.
+ */
 export async function decide(input: DecideInput) {
   const state = await buildState()
   const c = state.cases.find((candidate) => candidate.id === input.caseId)
@@ -168,37 +267,111 @@ export async function decide(input: DecideInput) {
   if (input.optionId !== "other" && !options.some((option) => option.id === input.optionId)) {
     return { error: `Unknown option ${input.optionId}`, status: 400 as const }
   }
-  const at = new Date().toISOString()
+  const earlier = c.status === "decided"
+    ? state.decisions.filter((row) => row.caseId === c.id && !row.synthetic && row.personId === person.id).at(-1)
+    : undefined
+  const at = earlier?.at ?? new Date().toISOString()
+  const why = input.why ?? (earlier?.optionId === input.optionId ? earlier?.data.why : undefined)
+  const editedDetail = input.editedDetail ?? (earlier?.optionId === input.optionId ? earlier?.data.editedDetail : undefined)
   const decision: Decision = {
-    id: `dec-${c.id.replace(/^case-/, "")}-${Date.now().toString(36)}`,
-    caseId: c.id, personId: person.id, optionId: input.optionId, editedDetail: input.editedDetail, why: input.why, at,
+    id: earlier?.id ?? `dec-${c.id.replace(/^case-/, "")}-${Date.now().toString(36)}`,
+    caseId: c.id, personId: person.id, optionId: input.optionId, ...(editedDetail ? { editedDetail } : {}), ...(why ? { why } : {}), at,
   }
   const place = c.placeId ? state.world.places.get(c.placeId) : undefined
-  await saveDecision({
+  const row = {
     id: decision.id, caseId: c.id, personId: person.id, optionId: input.optionId, caseType: c.type, placeId: c.placeId ?? null,
     customerId: c.customerId ?? null, country: place?.country ?? null, tookSuggestion: input.optionId === c.suggestion.id,
     laterChanged: false, onTime: true, synthetic: false, at, data: decision,
-  })
+  }
+  if (earlier) await replaceDecision(row)
+  else await saveDecision(row)
+
+  const chosen = options.find((option) => option.id === input.optionId)
+  const label = chosen?.label ?? editedDetail ?? "another way"
+  const decidedStep = (step: Case["agentSteps"][number]) => step.kind === "propose" && step.summary.startsWith(`${person.name} decided:`)
+  const steps = earlier ? c.agentSteps.filter((step) => !decidedStep(step)) : c.agentSteps
   const updated: Case = {
     ...c, status: "decided",
-    agentSteps: [...c.agentSteps, { at, kind: "propose", summary: `${person.name} decided: ${(options.find((option) => option.id === input.optionId)?.label ?? input.editedDetail ?? "another way").replace(/^./, (ch) => ch.toLowerCase())}. The agent carries it out.` }],
+    agentSteps: [...steps, { at, kind: "propose", summary: `${person.name} decided: ${lower(label)}. The agent carries it out.` }],
   }
   await saveCase(updated, state.derivedIds.has(c.id) ? "derived" : "agent")
+
+  const kindKey = kindOf(c)
+  const loop = loopInput(state)
+  const order = state.world.byId.get(c.orderId)
+  const openedAt = input.openedAt && !Number.isNaN(Date.parse(input.openedAt)) ? input.openedAt : undefined
+  const earlierRecord = state.records.find((record) => record.caseId === c.id)
+  const minutes = openedAt ? Math.max(1, Math.round((Date.parse(at) - Date.parse(openedAt)) / 60_000)) : earlierRecord?.minutes
+  const chat = input.chat ?? await chatSource({ caseId: c.id, personId: person.id }) ?? earlierRecord?.chat
+  const record: CaseRecord = {
+    id: `rec-${c.id}`,
+    caseId: c.id,
+    decisionId: decision.id,
+    orderId: c.orderId,
+    ...(order?.reference ? { reference: order.reference } : {}),
+    kindKey,
+    kindLabel: kindDef(kindKey).label,
+    situation: {
+      headline: c.headline,
+      ...(place?.name ? { place: place.name } : {}),
+      ...(c.placeId ? { placeId: c.placeId } : {}),
+      ...(place?.country ? { country: place.country } : {}),
+      facts: c.facts.slice(0, 12).map((fact) => ({ statement: fact.statement, source: fact.source.name ?? fact.source.kind, at: fact.source.at })),
+      suggestion: { id: c.suggestion.id, label: c.suggestion.label },
+      alternatives: c.alternatives.map((option) => ({ id: option.id, label: option.label })),
+    },
+    choice: {
+      optionId: input.optionId, label, tookSuggestion: input.optionId === c.suggestion.id,
+      ...(editedDetail ? { editedDetail } : {}),
+      changes: (chosen?.changes ?? []).map((change) => change.kind).filter((kind) => kind !== "none"),
+    },
+    ...(why ? { reason: why } : {}),
+    ...(chat ? { chat } : {}),
+    decidedBy: { personId: person.id, name: person.name },
+    weight: weightOn(loop, kindKey, person.id, c.id),
+    ...(minutes ? { minutes } : {}),
+    at,
+    synthetic: false,
+  }
+  await saveCaseRecord(record)
+
   const lesson = await proposeLesson({ decision, case: c, personName: person.name, placeName: place?.name, country: place?.country }, at)
   await saveLesson(lesson)
   const rules = await refreshTrustRules(state)
-  return { decision, case: updated, lesson, trustRules: rules }
+  return { decision, case: updated, lesson, record, trustRules: rules }
 }
 
-/** Recompute trust-rule suggestions from every decision and save them. */
+/**
+ * Recompute the kind-level trust proposals from every decision and save them
+ * (lib/control-room/loop.ts kindRules, gate in trust-gate.ts). Proposals whose
+ * kind no longer passes are withdrawn.
+ */
 export async function refreshTrustRules(state?: EngineState) {
-  const [decisions, existing] = await Promise.all([listDecisions(), listTrustRules()])
-  const placeNames = new Map<string, string>()
-  const world = state?.world ?? await loadWorld()
-  for (const [id, place] of world.places) placeNames.set(id, place.name)
-  const rules = suggestTrustRules(decisions.map((row) => ({ caseId: row.caseId, optionId: row.optionId, caseType: row.caseType, placeId: row.placeId })), existing, placeNames)
+  const base = state ?? await buildState()
+  const [decisions, records, existing] = await Promise.all([listDecisions(), listCaseRecords(), listTrustRules()])
+  const { rules, drop } = kindRules({ ...loopInput(base), decisions, records }, existing)
+  for (const id of drop) await deleteTrustRule(id)
   for (const rule of rules) await saveTrustRule(rule)
   return rules
+}
+
+/** The kinds of case for Know-how and the shift lead: decided ones and the kinds of today's open cases. */
+export function kindsOf(state: EngineState) {
+  const open = state.cases.filter((c) => OPEN.includes(c.status)).map((c) => kindOf(c))
+  return kindSummaries(loopInput(state), state.rules, open)
+}
+
+/** GET /api/cr/kinds */
+export async function getKinds(given?: EngineState) {
+  const state = given ?? await buildState()
+  return { kinds: kindsOf(state), gate: { needed: GATE_N, minPeople: GATE_MIN_PEOPLE, lowerBound: Math.round(GATE_FLOOR * 1000) / 1000 } }
+}
+
+/** What the agent knows about this case's kind (types-chat.ts CaseKnowledge), for the chat. */
+export async function getCaseKnowledge(caseId: string, given?: EngineState) {
+  const state = given ?? await buildState()
+  const c = state.cases.find((candidate) => candidate.id === caseId)
+  return c ? knowledgeFor(loopInput(state), c) : null
 }
 
 export async function setTrustRule(id: string, status: "on" | "off", personId: string) {
@@ -262,6 +435,7 @@ export async function getLead(given?: EngineState) {
       accepted: state.lessons.filter((lesson) => lesson.status === "accepted"),
     },
     trustRules: state.rules,
+    kinds: kindsOf(state),
     today: {
       orders: counts.total,
       needsPerson: counts.needs_person,

@@ -5,10 +5,12 @@
 
 import { asc, desc, eq, or } from "drizzle-orm"
 import { crDb } from "./db"
-import { crAgentRuns, crCalls, crCases, crDecisions, crLessons, crOpsPeople, crTrustRules } from "./schema"
+import { crAgentRuns, crCalls, crCaseRecords, crCases, crDecisions, crLessons, crOpsPeople, crTrustRules } from "./schema"
 import type { AgentRun, Call, Case, Decision, Lesson, OpsPerson, TrustRule } from "./types"
+import type { CaseRecord, RuleGateExtras } from "./types-loop"
 
-export type StoredTrustRule = TrustRule & { optionId: string }
+/** Stored rules carry the option they cover and, for kind-level rules, the kind and the gate's numbers. */
+export type StoredTrustRule = TrustRule & { optionId: string } & Partial<RuleGateExtras>
 
 export type DecisionRecord = {
   id: string
@@ -83,6 +85,33 @@ export async function saveDecision(record: Omit<DecisionRecord, "at"> & { at: st
   await crDb.insert(crDecisions).values({ ...record, at: new Date(record.at) }).onConflictDoNothing()
 }
 
+/** Replace a decision in place (same id), e.g. when the person adds the why after choosing. */
+export async function replaceDecision(record: Omit<DecisionRecord, "at"> & { at: string }) {
+  const values = { ...record, at: new Date(record.at) }
+  const { id: _id, ...set } = values
+  void _id
+  await crDb.insert(crDecisions).values(values).onConflictDoUpdate({ target: crDecisions.id, set })
+}
+
+// ---- Case records (v4 learning loop) -----------------------------------------
+
+export async function listCaseRecords(): Promise<CaseRecord[]> {
+  const rows = await crDb.select().from(crCaseRecords).orderBy(asc(crCaseRecords.at))
+  return rows.map((row) => row.data)
+}
+
+/** One record per case: a second decision on the same case replaces the first. */
+export async function saveCaseRecord(record: CaseRecord) {
+  const values = {
+    id: record.id, caseId: record.caseId, decisionId: record.decisionId, kindKey: record.kindKey, personId: record.decidedBy.personId,
+    optionId: record.choice.optionId, synthetic: record.synthetic, at: new Date(record.at), data: record,
+  }
+  const { caseId: _caseId, ...set } = values
+  void _caseId
+  await crDb.insert(crCaseRecords).values(values).onConflictDoUpdate({ target: crCaseRecords.caseId, set })
+  return record
+}
+
 // ---- Lessons ----------------------------------------------------------------
 
 export async function listLessons(): Promise<Lesson[]> {
@@ -113,6 +142,10 @@ export async function saveTrustRule(rule: StoredTrustRule) {
   const values = { id: rule.id, status: rule.status, caseType: rule.caseType, placeId: rule.scope.placeId ?? null, optionId, data: data as TrustRule }
   await crDb.insert(crTrustRules).values(values).onConflictDoUpdate({ target: crTrustRules.id, set: { status: values.status, data: values.data, optionId } })
   return rule
+}
+
+export async function deleteTrustRule(id: string) {
+  await crDb.delete(crTrustRules).where(eq(crTrustRules.id, id))
 }
 
 // ---- Calls and agent runs (the agent workstream writes these) -------------

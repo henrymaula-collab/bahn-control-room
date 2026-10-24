@@ -9,6 +9,7 @@
 
 import { boolean, index, integer, jsonb, pgTable, text, timestamp } from "drizzle-orm/pg-core"
 import type { AgentRun, Call, Case, Decision, Lesson, OpsPerson, TrustRule } from "./types"
+import type { CaseRecord } from "./types-loop"
 
 /** The made-up ops team. Fiction: no real people. */
 export const crOpsPeople = pgTable("cr_ops_people", {
@@ -64,6 +65,23 @@ export const crCases = pgTable("cr_cases", {
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull(),
   data: jsonb("data").$type<Case>().notNull(),
 }, (table) => [index("cr_cases_order_idx").on(table.orderId), index("cr_cases_routed_idx").on(table.routedTo, table.status)])
+
+/**
+ * One case record per decided case (v4 learning loop): the kind, a snapshot of
+ * the situation, the choice, the reason, the chat, who decided and the weight.
+ * A second decision on the same case (the why added later) replaces it.
+ */
+export const crCaseRecords = pgTable("cr_case_records", {
+  id: text("id").primaryKey(),
+  caseId: text("case_id").notNull().unique(),
+  decisionId: text("decision_id").notNull(),
+  kindKey: text("kind_key").notNull(),
+  personId: text("person_id").notNull(),
+  optionId: text("option_id").notNull(),
+  synthetic: boolean("synthetic").notNull().default(false),
+  at: timestamp("at", { withTimezone: true }).notNull(),
+  data: jsonb("data").$type<CaseRecord>().notNull(),
+}, (table) => [index("cr_case_records_kind_idx").on(table.kindKey, table.at)])
 
 export const crLessons = pgTable("cr_lessons", {
   id: text("id").primaryKey(),

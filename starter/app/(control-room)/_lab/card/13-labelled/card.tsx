@@ -49,7 +49,8 @@ export function Labelled(props: CardProps) {
       {props.next && (
         <div className="c13-block">
           <p className="lc-label">After that</p>
-          <p className="c13-next">{props.next}</p>
+          {/* The label already says "After that"; drop the next line's own "After a yes," so it is not said twice. */}
+          <p className="c13-next">{props.next.replace(/^After a yes,\s*(\w)/i, (_, c: string) => c.toUpperCase())}</p>
         </div>
       )}
       <CardTail props={props} q={q} />

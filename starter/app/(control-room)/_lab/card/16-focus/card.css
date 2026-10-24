@@ -2,12 +2,13 @@
    The frame rules below reach outside the card with :has(.lab-card-16.c16-focus): they match only
    while this variant is on screen in focus, so today's pages never change. */
 
-/* The frame in focus: no room kept for the panel, the card centred in the whole work area. */
-.work.has-panel:has(.lab-card-16.c16-focus) { padding-right: 0; --card-pad: max(calc(28 * var(--type-kf)), calc(64 * var(--cr-u, 1px))); }
-.work.has-panel:not(.look-column):has(.lab-card-16.c16-focus) { --card-room: calc(var(--cr-vw, 100vw) - var(--side) - 8px); }
-.work.has-panel.look-column:has(.lab-card-16.c16-focus) { --card-room: calc(var(--cr-vw, 100vw) - var(--side) - 8px - var(--list)); }
-.work.has-panel:has(.lab-card-16.c16-focus) .detail-inner { margin-inline: auto; }
-.work:has(.lab-card-16.c16-focus) .situation-panel.open { transform: translateX(100%); visibility: hidden; transition: transform 200ms var(--ease), visibility 0s linear 200ms; }
+/* The frame in focus: no room kept for the panel, the card centred in the whole work area.
+   Not while another side panel is open (a needs variant's list, the email, the chat): that panel keeps its room. */
+.work.has-panel:has(.lab-card-16.c16-focus):not(:has(.panel.open:not(.situation-panel))) { padding-right: 0; --card-pad: max(calc(28 * var(--type-kf)), calc(64 * var(--cr-u, 1px))); }
+.work.has-panel:not(.look-column):has(.lab-card-16.c16-focus):not(:has(.panel.open:not(.situation-panel))) { --card-room: calc(var(--cr-vw, 100vw) - var(--side) - 8px); }
+.work.has-panel.look-column:has(.lab-card-16.c16-focus):not(:has(.panel.open:not(.situation-panel))) { --card-room: calc(var(--cr-vw, 100vw) - var(--side) - 8px - var(--list)); }
+.work.has-panel:has(.lab-card-16.c16-focus):not(:has(.panel.open:not(.situation-panel))) .detail-inner { margin-inline: auto; }
+.work:has(.lab-card-16.c16-focus):not(:has(.panel.open:not(.situation-panel))) .situation-panel.open { transform: translateX(100%); visibility: hidden; transition: transform 200ms var(--ease), visibility 0s linear 200ms; }
 
 /* The inspector button, top right of the work area (macOS puts the inspector toggle there). */
 .lab-card-16 .c16-inspector {
@@ -20,6 +21,8 @@
 .lab-card-16 .c16-inspector svg { width: 1.3em; height: 1.3em; flex: none; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linejoin: round; }
 .lab-card-16 .c16-inspector .c16-pane { stroke: none; fill: transparent; transition: fill 150ms var(--lc-ease); }
 .lab-card-16 .c16-inspector[aria-pressed="true"] { color: var(--ink); }
+/* Another panel holds the side (a needs variant's list): the inspector has nothing to show there. */
+.work:has(.panel.open:not(.situation-panel)) .lab-card-16 .c16-inspector { display: none; }
 .lab-card-16 .c16-inspector[aria-pressed="true"] .c16-pane { fill: rgb(18 17 14 / 0.22); }
 
 /* The stage: centred, the question the one large line, air above it from the window's height

@@ -1,0 +1,26 @@
+/* The side menu, about 1.4 times larger (Henry, 24 Oct: "the side menu feels small; the
+   sidebar has plenty of room"). Overrides control-room.css; loaded after it by the layout.
+   Applies on every page. Phones keep the compact top strip. */
+:root { --side: 284px; }
+.side { padding: 20px 16px 16px; }
+.brand { gap: 12px; padding: 8px 10px; margin-bottom: 28px; border-radius: 12px; }
+.brand svg { height: 24px; }
+.brand span { font-size: 17px; line-height: 22px; padding-top: 3px; }
+.nav { gap: 4px; }
+.nav a { height: 46px; gap: 14px; padding: 0 14px; border-radius: 12px; font-size: 18px; line-height: 24px; }
+.nav a svg { width: 22px; height: 22px; }
+.nav .count { font-size: 17px; }
+.person-button { padding: 12px 14px; border-radius: 12px; }
+.person-button svg { width: 22px; height: 22px; }
+.person-name { font-size: 18px; line-height: 24px; }
+.person-name .s { font-size: 15px; line-height: 20px; }
+.menu { padding: 8px; border-radius: 16px; }
+.menu-item { padding: 10px 14px; border-radius: 10px; font-size: 16px; line-height: 22px; }
+
+@media (max-width: 860px) {
+  .side { padding: 8px 16px; }
+  .brand { margin: 0; padding: 6px 8px; }
+  .brand svg { height: 20px; }
+  .nav a { height: 40px; padding: 0 10px; }
+  .nav a svg { width: 20px; height: 20px; }
+}

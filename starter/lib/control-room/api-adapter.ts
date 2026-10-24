@@ -34,6 +34,7 @@ interface ApiCaseDetail {
   lessons: (Lesson & { fromDecisions?: { personName: string | null; at: string | null }[] })[]
   calls: Call[]
   check: OrderCheck | null
+  decision?: Decision | null // the decision a person took on this case, once decided
 }
 interface ApiLead {
   coverage: { caseType: string; label: string; people: { personId: string; name: string; onShift: boolean; decided: number }[] }[]
@@ -132,15 +133,28 @@ export async function apiDesk(get: Fetch, personId: string): Promise<DeskView> {
 }
 
 export async function apiCase(get: Fetch, id: string, personId: string): Promise<CaseDetail | null> {
+  return (await apiWorkCase(get, id, personId))?.detail ?? null
+}
+
+/** A case as Your tasks shows it, from one read of /api/cr/cases/:id: the detail, plus why, the situation and the next line. */
+export async function apiWorkCase(get: Fetch, id: string, personId: string): Promise<{ detail: CaseDetail; extras: CaseV3Extras | null } | null> {
   const [people, d] = await Promise.all([
     get<OpsPerson[]>("/api/cr/people"),
-    get<ApiCaseDetail | null>(`/api/cr/cases/${encodeURIComponent(id)}`),
+    get<(ApiCaseDetail & Partial<CaseV3Extras>) | null>(`/api/cr/cases/${encodeURIComponent(id)}`),
   ])
   if (!d || !d.case) return null
+  const detail = await caseDetailFrom(get, d, people, personId)
+  const extras = d.situation ? { why: d.why ?? [], situation: d.situation, ...(d.next ? { next: d.next } : {}) } : null
+  return { detail, extras }
+}
+
+async function caseDetailFrom(get: Fetch, d: ApiCaseDetail, people: OpsPerson[], personId: string): Promise<CaseDetail> {
   const person = resolvePerson(people, personId)
   const c = d.case
   const options = [c.suggestion, ...c.alternatives]
-  const whyChoices = Object.fromEntries(options.map((o) => [o.id, whyFor(o.id)]))
+  // The agent writes its own likely reasons and the message each option would send; the generic ones fill the gaps.
+  const whyChoices = Object.fromEntries(options.map((o) => [o.id, o.whyChoices?.length ? o.whyChoices : whyFor(o.id)]))
+  const drafts = Object.fromEntries(options.filter((o) => o.draft).map((o) => [o.id, o.draft!]))
   // Where this case sits in its owner's queue, for Previous and Next.
   let queue: CaseDetail["queue"]
   if (c.status === "waiting_for_person" && c.routedTo?.personId) {
@@ -149,7 +163,7 @@ export async function apiCase(get: Fetch, id: string, personId: string): Promise
     const i = ids.indexOf(c.id)
     if (i >= 0) queue = { index: i + 1, total: ids.length, prevId: ids[i - 1], nextId: ids[i + 1] }
   }
-  // The decision itself is not returned yet; the last agent step says who decided.
+  const decision = d.decision ?? undefined
   return {
     asOf: d.check?.checkedAt ?? c.createdAt,
     person,
@@ -160,8 +174,10 @@ export async function apiCase(get: Fetch, id: string, personId: string): Promise
       const from = l.fromDecisions?.find((f) => f.personName)
       return { ...l, source: from?.personName ? { personName: from.personName, at: from.at ?? l.createdAt } : undefined }
     }),
-    drafts: {},
+    drafts,
     whyChoices,
+    decision,
+    decidedBy: decision ? people.find((p) => p.id === decision.personId) : undefined,
     queue,
   }
 }
@@ -220,11 +236,4 @@ export async function apiOverview(get: Fetch, personId: string): Promise<Overvie
 
 export async function apiWork(get: Fetch, personId: string): Promise<WorkLists> {
   return get<WorkLists>(`/api/cr/work?person=${encodeURIComponent(personId)}`)
-}
-
-/** The case detail carries `why` and `situation` next to its other fields. */
-export async function apiCaseExtras(get: Fetch, caseId: string): Promise<CaseV3Extras | null> {
-  const d = await get<(ApiCaseDetail & Partial<CaseV3Extras>) | null>(`/api/cr/cases/${encodeURIComponent(caseId)}`)
-  if (!d || !d.situation) return null
-  return { why: d.why ?? [], situation: d.situation }
 }

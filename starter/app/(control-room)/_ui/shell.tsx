@@ -10,7 +10,7 @@ type P = { id: string; name: string; desk: string }
 
 const SECTIONS: { href: string; label: string; icon: IconName }[] = [
   { href: "/", label: "Overview", icon: "map" },
-  { href: "/work", label: "Work", icon: "inbox" },
+  { href: "/tasks", label: "Your tasks", icon: "inbox" },
   { href: "/orders", label: "Orders", icon: "car" },
   { href: "/agents", label: "Agents", icon: "headset" },
   { href: "/know-how", label: "Know-how", icon: "book-open" },
@@ -36,7 +36,7 @@ export function Shell({ person, people, needYou, children }: { person: P; people
             <Link key={s.href} href={s.href} aria-current={s === here ? "page" : undefined}>
               <Icon name={s.icon} size={16} />
               <span>{s.label}</span>
-              {s.href === "/work" && needYou > 0 && (
+              {s.href === "/tasks" && needYou > 0 && (
                 <span className="count num" aria-label={`${needYou} need you`}>
                   {needYou}
                 </span>

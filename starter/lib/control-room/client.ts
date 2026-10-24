@@ -7,7 +7,7 @@
 // flag must not need any change in the screens.
 
 import { headers } from "next/headers"
-import { apiCase, apiCaseExtras, apiDecide, apiDesk, apiLead, apiOverview, apiWork, resolvePerson } from "./api-adapter"
+import { apiCase, apiDecide, apiDesk, apiLead, apiOverview, apiWork, apiWorkCase, resolvePerson } from "./api-adapter"
 import type { Decision, Lesson, OpsPerson, TrustRule } from "./types"
 import type { CaseV3Extras, Overview, WorkLists } from "./types-v3"
 import type { CaseDetail, DeskView, LeadView } from "./views"
@@ -51,22 +51,27 @@ export async function getLead(personId: string): Promise<LeadView> {
   return fixtures.leadView(personId)
 }
 
-/** v3 Overview: every car active today, the counts, and this person's cases (types-v3.ts). */
+/** Overview: every car active today, the counts, and this person's cases (types-v3.ts). */
 export async function getOverview(personId: string): Promise<Overview> {
-  if (dataSource() === "api") return apiOverview(api, personId)
+  // The engine takes "aino" or "p-aino"; an unknown cookie falls back to someone on shift, as the desk does.
+  if (dataSource() === "api") return (await apiOverview(api, personId)) ?? apiOverview(api, await apiPersonId(personId))
   return fixtures.overview(personId)
 }
 
-/** v3 Work: Needs you, Agent working, Done today for one person. */
-export async function getWork(personId: string): Promise<WorkLists> {
-  if (dataSource() === "api") return apiWork(api, personId)
-  return fixtures.workLists(personId)
+/** Your tasks: Needs you, Agent working, Done today for one person. `extraRows` is fixture-only (a long-list check). */
+export async function getWork(personId: string, opts: { extraRows?: number } = {}): Promise<WorkLists> {
+  if (dataSource() === "api") return (await apiWork(api, personId)) ?? (await apiWork(api, await apiPersonId(personId))) ?? { needYou: [], agentWorking: [], doneToday: [] }
+  return fixtures.workLists(personId, opts)
 }
 
-/** v3 case extras: "Why it came to you" key facts and "The situation" panel. */
-export async function getCaseExtras(caseId: string): Promise<CaseV3Extras | null> {
-  if (dataSource() === "api") return apiCaseExtras(api, caseId)
-  return fixtures.caseExtras(caseId)
+/** A case as Your tasks shows it: the detail, plus why it came to you, the situation and the line under the button. */
+export type WorkCase = { detail: CaseDetail; extras: CaseV3Extras | null }
+
+export async function getWorkCase(id: string, personId: string): Promise<WorkCase | null> {
+  if (dataSource() === "api") return apiWorkCase(api, id, personId)
+  const base = fixtures.baseCaseId(id)
+  const detail = fixtures.caseDetail(base, personId)
+  return detail ? { detail, extras: fixtures.caseExtras(base) } : null
 }
 
 /** Saves a decision, once, with the "why" when the person gave one. */

@@ -1,6 +1,6 @@
 import type { Metadata } from "next"
 import { notFound } from "next/navigation"
-import { getWork, getWorkCase } from "@/lib/control-room/client-v3"
+import { getWork, getWorkCase } from "@/lib/control-room/client"
 import { clock } from "@/lib/control-room/format"
 import { dueFor } from "../../_ui/lines"
 import { Question } from "../../_ui/question"
@@ -13,10 +13,10 @@ type Params = Promise<{ caseId: string }>
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
   const { caseId } = await params
   const w = await getWorkCase(caseId, await currentPersonId())
-  return { title: w ? `${w.detail.card.order.vehicle}, Work` : "Work" }
+  return { title: w ? `${w.detail.card.order.vehicle}, Your tasks` : "Your tasks" }
 }
 
-/** One case in Work: flow 1's decision card, then two rows, The situation and Why it came to you. */
+/** One case in Your tasks: flow 1's decision card, then two rows, The situation and Why it came to you. */
 export default async function WorkCasePage({ params }: { params: Params }) {
   const { caseId } = await params
   const personId = await currentPersonId()
@@ -49,7 +49,7 @@ export default async function WorkCasePage({ params }: { params: Params }) {
           whyChoices={detail.whyChoices}
           leadName={lead?.name ?? "The shift lead"}
           personName={detail.person.name}
-          nextHref={nextId ? `/work/${nextId}` : undefined}
+          nextHref={nextId ? `/tasks/${nextId}` : undefined}
           next={extras?.next}
           existing={
             detail.decision

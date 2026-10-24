@@ -1,6 +1,5 @@
 import { cookies } from "next/headers"
-import { dataSource, getDesk } from "@/lib/control-room/client"
-import { getWork } from "@/lib/control-room/client-v3"
+import { dataSource, getDesk, getWork } from "@/lib/control-room/client"
 import { minutesUntil, NOW_WINDOW_MINUTES, when } from "@/lib/control-room/format"
 import { currentPersonId } from "../_ui/session"
 import { type RowTime, WorkFrame } from "../_ui/work-frame"

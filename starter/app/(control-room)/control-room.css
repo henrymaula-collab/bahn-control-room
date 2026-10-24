@@ -311,7 +311,7 @@ dialog.sheet[open] { animation: sheet-in 260ms var(--ease-open); }
 .maplibregl-ctrl-attrib { font-family: var(--font); font-size: 11px; background: rgb(255 254 247 / 0.8) !important; }
 .maplibregl-ctrl-attrib a { color: var(--ink-2) !important; }
 
-/* ---------- Work: the quiet list, the card, the situation ---------- */
+/* ---------- Your tasks: the quiet list, the card, the situation ---------- */
 .work {
   position: absolute; inset: 0;
   display: grid; grid-template-columns: var(--list) minmax(0, 1fr);

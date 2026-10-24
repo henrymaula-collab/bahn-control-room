@@ -33,8 +33,8 @@ export function PersonSwitcher({ current, people }: { current: P; people: P[] })
     setOpen(false)
     start(async () => {
       await choosePerson(p.id)
-      // Stay in the same section; in Work, open the new person's own list.
-      if (path.startsWith("/work")) router.push("/work")
+      // Stay in the same section; in Your tasks, open the new person's own list.
+      if (path.startsWith("/tasks")) router.push("/tasks")
       router.refresh()
     })
   }

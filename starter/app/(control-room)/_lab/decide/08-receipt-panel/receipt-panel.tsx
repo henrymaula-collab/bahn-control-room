@@ -10,7 +10,7 @@ import { Icon } from "../../../_ui/icons"
 import { Keep } from "../../../_ui/text"
 import { usePanel } from "../../../_ui/work-frame"
 import { useLab } from "../../context"
-import { agentPlan, type DoneProps, type PreviewProps, recipient, useCaseBack, useCaseId, useDefaultKey } from "../_shared/helpers"
+import { agentPlan, type DoneProps, type PreviewProps, recipient, useAfterPanel, useCaseBack, useCaseId, useDefaultKey } from "../_shared/helpers"
 import { pauseSend, startSend, undoSend, useFrozen, useSendView, useSendWindow, useSendError } from "../_shared/send-window"
 import { useDraft, useReveal } from "../_shared/use-draft"
 
@@ -184,6 +184,8 @@ export function ReceiptPanelDone({ headline, option, done, nextHref }: DoneProps
   const back = useCaseBack(caseId)
   const justSent = !!live && live.caseId === caseId && live.phase === "sent"
   const [receipt, setReceipt] = useState(justSent || lab.decided)
+  // The receipt holds the panel's place through the shared panel state (a list or a chat can take it back).
+  const after = useAfterPanel(receipt, () => setReceipt(false))
   useDefaultKey(() => router.push(nextHref ?? "/tasks"))
   const sent = option.draft ? recipient(option.draft.to) : null
   const call = back.steps.find((s) => s.kind === "call")
@@ -211,12 +213,17 @@ export function ReceiptPanelDone({ headline, option, done, nextHref }: DoneProps
       {receipt &&
         slot &&
         createPortal(
-          <aside className="panel send-panel open lab-decide-08 is-receipt r8-over" aria-label={title}>
+          <aside
+            className={`panel send-panel lab-decide-08 is-receipt r8-over${after.shown ? " open" : ""}`}
+            aria-label={title}
+            aria-hidden={!after.shown}
+            inert={!after.shown}
+          >
             <Receipt
               title={title}
               line={line}
               more={more}
-              onClose={() => setReceipt(false)}
+              onClose={after.close}
               foot={
                 <div className="send-actions r8-actions">
                   <Link href={`/history?open=${encodeURIComponent(caseId)}`} className="btn btn-secondary">

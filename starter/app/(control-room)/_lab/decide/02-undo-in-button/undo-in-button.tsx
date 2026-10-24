@@ -11,7 +11,7 @@ import { Icon } from "../../../_ui/icons"
 import { Keep } from "../../../_ui/text"
 import { usePanel } from "../../../_ui/work-frame"
 import { useLab } from "../../context"
-import { type DoneProps, type PreviewProps, recipient, useCaseBack, useCaseId, useDefaultKey } from "../_shared/helpers"
+import { type DoneProps, type PreviewProps, recipient, useAfterPanel, useCaseBack, useCaseId, useDefaultKey } from "../_shared/helpers"
 import { pauseSend, startSend, undoSend, useFrozen, useSendView, useSendWindow, type SendState, useSendError } from "../_shared/send-window"
 import { useDraft, useReveal } from "../_shared/use-draft"
 
@@ -163,13 +163,18 @@ export function UndoInButtonPreview({ draft, subject, verb, pending, error, onSe
   )
 }
 
-/** The sent email as a record over the situation, until the person closes it. */
-function SentRecord({ draft, at, onClose }: { draft: Draft; at: string; onClose: () => void }) {
+/** The sent email as a record in the panel's place (shared panel state, see useAfterPanel), until closed. */
+function SentRecord({ draft, at, shown, onClose }: { draft: Draft; at: string; shown: boolean; onClose: () => void }) {
   const { slot } = usePanel()
   const who = recipient(draft.to)
   if (!slot) return null
   return createPortal(
-    <aside className="panel send-panel open lab-decide-02 is-sent u2-record" aria-label={`The ${who.email ? "email" : "message"}, sent`}>
+    <aside
+      className={`panel send-panel lab-decide-02 is-sent u2-record${shown ? " open" : ""}`}
+      aria-label={`The ${who.email ? "email" : "message"}, sent`}
+      aria-hidden={!shown}
+      inert={!shown}
+    >
       <div className="panel-head send-head">
         <h2 className="m strong">The {who.email ? "email" : "message"}, sent</h2>
         <button type="button" className="close" aria-label="Close" onClick={onClose}>
@@ -216,6 +221,7 @@ export function UndoInButtonDone({ headline, option, done, nextHref }: DoneProps
   const back = useCaseBack(caseId)
   const justSent = !!live && live.caseId === caseId && live.phase === "sent"
   const [record, setRecord] = useState(!!option.draft && (justSent || lab.decided))
+  const after = useAfterPanel(record && !!option.draft, () => setRecord(false))
   useDefaultKey(() => router.push(nextHref ?? "/tasks"))
   const count = back.count
   return (
@@ -254,7 +260,7 @@ export function UndoInButtonDone({ headline, option, done, nextHref }: DoneProps
           {nextHref ? "Next case" : "Back to your tasks"}
         </Link>
       </div>
-      {record && option.draft && <SentRecord draft={option.draft} at={live?.at ?? done.timeWords} onClose={() => setRecord(false)} />}
+      {record && option.draft && <SentRecord draft={option.draft} at={live?.at ?? done.timeWords} shown={after.shown} onClose={after.close} />}
     </section>
   )
 }

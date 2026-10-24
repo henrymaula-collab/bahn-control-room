@@ -4,10 +4,11 @@
 // translation, and the case read back after a decision (the agent's new steps, the kind's count).
 
 import { usePathname } from "next/navigation"
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import type { AgentStep, Option } from "@/lib/control-room/types"
 import type { Draft } from "@/lib/control-room/views"
 import { useLab } from "../../context"
+import { usePanel } from "../../../_ui/work-frame"
 
 /** "Kovellin Automobilhandel, by email" -> name, how, whether it is an email. */
 export function recipient(to: string) {
@@ -176,4 +177,31 @@ export function useDefaultKey(go: () => void, on = true) {
     window.addEventListener("keydown", onKey)
     return () => window.removeEventListener("keydown", onKey)
   })
+}
+
+/**
+ * A panel the moment after a decision keeps open (02's sent email, 08's receipt) goes through the
+ * shared panel state like every other panel: it asks for the "email" place one frame after it mounts
+ * (so it is the newest request, after a needs variant that opens its list on the same decision), shows
+ * only while it holds that place, and gives it up for good once anything else takes it (Talk it
+ * through, the list, Escape). Closing it hands the panel back (`setOpen(null)`: the situation, or the
+ * list that stepped aside).
+ */
+export function useAfterPanel(want: boolean, gone: () => void) {
+  const { open, setOpen } = usePanel()
+  const held = useRef(false)
+  useEffect(() => {
+    if (!want) return
+    const id = requestAnimationFrame(() => setOpen("email"))
+    return () => cancelAnimationFrame(id)
+  }, [want, setOpen])
+  useEffect(() => {
+    if (!want) return
+    if (open === "email") held.current = true
+    else if (held.current) {
+      held.current = false
+      gone()
+    }
+  }, [open, want]) // eslint-disable-line react-hooks/exhaustive-deps
+  return { shown: want && open === "email", close: () => setOpen(null) }
 }

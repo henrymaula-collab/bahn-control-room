@@ -47,3 +47,10 @@ reduced motion.
   dot and small grey dots, and the kind's count sits with the done lines before what is still to come.
 - 03: the reveal left Send under the frame edge at Henry's size; Send now keeps air under it.
 - Needs variants 01, 02, 03, 05, 07 and 11 have their own Done, which wins over this slot's Done.
+- 02 and 08 (follow-up): their after-panels (the sent email, the receipt) were portals with `open`
+  outside the shared panel state, so with needs 11 they sat on top of its list. `useAfterPanel` in
+  `_shared/helpers.ts` asks for the "email" place one frame after the Done mounts (after needs 11's
+  Done opens the list), shows only while it holds it, gives it up for good when anything else takes it,
+  and its close is `setOpen(null)`. Checked in WebKit with `?v=needs:11,decide:02|07|08&others=open`:
+  preview, Send, Undo, Cancel, and the after-state (`decided=1`) with close; without needs 11 the after
+  looks as before (re-shot 02 and 08 after, volvo-after).

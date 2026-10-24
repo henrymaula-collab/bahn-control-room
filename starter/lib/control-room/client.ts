@@ -1,7 +1,7 @@
 // The one place the screens get their data from.
 //
-//   CR_DATA=fixtures (default)  typed fixtures in ./fixtures, no database needed
-//   CR_DATA=api                 the foundation API under /api/cr/*
+//   CR_DATA=api (default)   the foundation engine through /api/cr/* (needs the seeded database)
+//   CR_DATA=fixtures        typed fixtures in ./fixtures, no database needed (design work, screenshots)
 //
 // Server-side only: pages and server actions call these functions. Switching the
 // flag must not need any change in the screens.
@@ -14,7 +14,7 @@ import * as fixtures from "./fixtures"
 
 export type DataSource = "fixtures" | "api"
 
-export const dataSource = (): DataSource => (process.env.CR_DATA === "api" ? "api" : "fixtures")
+export const dataSource = (): DataSource => (process.env.CR_DATA === "fixtures" ? "fixtures" : "api")
 
 /** The API lives in the same app: use this request's own host unless CR_API_BASE says otherwise. */
 async function base(): Promise<string> {

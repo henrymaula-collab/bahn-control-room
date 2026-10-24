@@ -25,3 +25,4 @@
 .lab-map-02 .maplibregl-ctrl-group { background: var(--lk-surface) !important; box-shadow: 0 0 0 1px rgb(255 254 247 / 0.08), 0 8px 24px rgb(0 0 0 / 0.4) !important; }
 .lab-map-02 .maplibregl-ctrl-group .maplibregl-ctrl-icon { filter: invert(1) sepia(0.15); }
 .lab-map-02 .maplibregl-ctrl-group button:hover { background-color: rgb(255 254 247 / 0.06) !important; }
+.lab-map-02 .maplibregl-ctrl-attrib-button { filter: invert(1); }

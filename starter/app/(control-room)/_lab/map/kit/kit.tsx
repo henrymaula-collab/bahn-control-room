@@ -137,8 +137,11 @@ export function KitMap({ opts, ...p }: CarMapProps & { opts: KitOpts }) {
       const ctl = opts.controls ?? p.controls ?? "top-right"
       if (ctl !== "none") m.addControl(new ml.NavigationControl({ showCompass: false }), ctl)
       if (opts.legend || opts.card === "dock") m.addControl(new ml.AttributionControl({ compact: true }), "bottom-left")
-      // The arrival starts a little wider and settles on the frame once the map has loaded.
+      // The arrival starts a little wider and settles on the frame once the map has loaded. Until
+      // then the marks wait (lk-wait: hidden, no animation), so the agent's cars and the red dots
+      // arrive on a painted map in step with the camera, not on blank paper while tiles still load.
       if (intro) m.jumpTo({ zoom: Math.max(minZoom ?? 0, m.getZoom() - 0.55) })
+      if (intro) box.current?.classList.add("lk-wait")
 
       const dark = look === "dark"
       const g = opts.green ?? {}
@@ -174,6 +177,7 @@ export function KitMap({ opts, ...p }: CarMapProps & { opts: KitOpts }) {
           requestAnimationFrame(() => {
             m?.setPaintProperty("cars-on-plan", "circle-opacity", gOpacity)
             m?.setPaintProperty("cars-on-plan", "circle-stroke-opacity", 1)
+            box.current?.classList.remove("lk-wait")
           })
           m.fitBounds(frame, { padding: padFor(box.current!), maxZoom: 9, duration: 1700, easing: EASE })
         }
@@ -205,8 +209,11 @@ export function KitMap({ opts, ...p }: CarMapProps & { opts: KitOpts }) {
         turns = window.setInterval(step, 1100)
       }
 
-      // The cars that need a person: red dots, buttons.
-      live.current.order.forEach((c, i) => {
+      // The cars that need a person: red dots, buttons. Added last-first, so where several share one
+      // spot (Helsinki holds seven at this zoom, Aino's BMW M4 and Volvo V60 among them) the one a
+      // person reads first, theirs and the most urgent, is on top and is the one a click opens.
+      const reading = live.current.order.map((c, i) => [c, i] as const)
+      reading.reverse().forEach(([c, i]) => {
         const info = red[c.orderId]
         const el = document.createElement("button")
         el.type = "button"

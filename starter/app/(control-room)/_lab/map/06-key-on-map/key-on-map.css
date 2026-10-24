@@ -3,6 +3,9 @@
    and only what needs a person and the agent's work stay (Flexport's "Exceptions"). The welcome
    panel's own key steps aside while this variant is on, so the key is never said twice. */
 .overview:has(> .lab-map-06) .float-me > .key { display: none; }
+/* The same with a welcome variant on (RV6): its key in the panel (.lw-key: 01, 12, 13, 15 ...) or on
+   the map (04, 11) steps aside too. Only matches while this variant's own box is on the Overview. */
+.overview:has(> .lab-map-06) :is(.lw-key, .lab-welcome-04-legend, .lab-welcome-11-legend) { display: none; }
 .lab-map-06 .lp-halo { width: 24px; height: 24px; background: rgb(253 74 97 / 0.14); }
 .lab-map-06 .pin.lp:hover .lp-dot, .lab-map-06 .pin.lp.lift .lp-dot { transform: scale(1.2); }
 .lab-map-06 .pin.lp.on .lp-dot { box-shadow: 0 0 0 2px var(--page), 0 0 0 4px var(--ink), 0 2px 6px rgb(18 17 14 / 0.3); }

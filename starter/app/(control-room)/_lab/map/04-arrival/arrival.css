@@ -12,8 +12,13 @@
   .lab-map-04 .lk-a { animation: lk04-in 500ms var(--ease-open) backwards; animation-delay: calc(800ms + var(--i, 0) * 45ms); }
   .lab-map-04 .pin.lp .lp-dot { animation: lk04-drop 460ms var(--ease-open) backwards; animation-delay: calc(1300ms + var(--i, 0) * 32ms); }
   .lab-map-04 .pin.lp .lp-halo { animation: lk04-in 500ms ease-out backwards; animation-delay: calc(1450ms + var(--i, 0) * 32ms); }
-  .lab-map-04 .pin.lp.mine .lp-halo { animation: lk04-in 500ms ease-out calc(1450ms + var(--i, 0) * 32ms) backwards, lk04-pulse 1200ms cubic-bezier(.2, 0, .2, 1) 2500ms 2; }
+  .lab-map-04 .pin.lp.mine .lp-halo { animation: lk04-in 500ms ease-out calc(1450ms + var(--i, 0) * 32ms) backwards, lk04-pulse 1200ms cubic-bezier(.2, 0, .2, 1) 2500ms 1; }
 }
+/* Until the map has painted (kit.tsx removes lk-wait on load) the marks wait, so the sequence starts
+   with the camera on a drawn map, also on a cold tile cache (RV6: on a cold load the dots used to drop
+   onto blank paper seconds before the tiles and the green arrived). */
+.lab-map-04.lk-wait .lk-agent, .lab-map-04.lk-wait .pin.lp { visibility: hidden; }
+.lab-map-04.lk-wait .lk-a, .lab-map-04.lk-wait .lp-dot, .lab-map-04.lk-wait .lp-halo { animation: none !important; }
 @keyframes lk04-in { from { opacity: 0; } to { opacity: 1; } }
 @keyframes lk04-drop { from { opacity: 0; transform: translateY(-10px) scale(0.5); } 60% { opacity: 1; } to { opacity: 1; transform: none; } }
 @keyframes lk04-pulse { 0% { transform: scale(1); background: rgb(253 74 97 / 0.30); } 100% { transform: scale(2.4); background: rgb(253 74 97 / 0); } }

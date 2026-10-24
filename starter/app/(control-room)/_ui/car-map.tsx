@@ -91,9 +91,9 @@ export function CarMap({ cars, red, lift, look, pad, padPhone, focus, controls =
           type: "circle",
           source: "cars",
           paint: {
-            "circle-color": "#238f62",
+            "circle-color": look === "dark" ? "#29af77" : "#238f62",
             "circle-radius": ["interpolate", ["linear"], ["zoom"], 3, 2.8, 6, 4, 10, 5.5],
-            "circle-stroke-color": "#fffef7",
+            "circle-stroke-color": look === "dark" ? "#12110e" : "#fffef7",
             "circle-stroke-width": ["interpolate", ["linear"], ["zoom"], 3, 0.6, 8, 1.2],
             "circle-opacity": 0.92,
           },
@@ -115,7 +115,8 @@ export function CarMap({ cars, red, lift, look, pad, padPhone, focus, controls =
         const info = red[c.orderId]
         const el = document.createElement("button")
         el.type = "button"
-        el.className = "pin"
+        // Dots only: no car names on the map (Henry, 24 Oct); the card says which car.
+        el.className = "pin dot-only"
         el.setAttribute("aria-label", `${c.vehicle}, ${c.from}, needs a person`)
         el.innerHTML = `<span class="dot dot-red"></span><span class="label"></span>`
         el.querySelector(".label")!.textContent = info?.vehicle ?? c.vehicle
@@ -203,7 +204,7 @@ export function CarMap({ cars, red, lift, look, pad, padPhone, focus, controls =
       const w = p.width || 120
       const r = { x0: pt.x - w / 2 - 6, x1: pt.x + w / 2 + 6, y0: pt.y - 17, y1: pt.y + 17 }
       const clash = kept.some((k) => r.x0 < k.x1 && r.x1 > k.x0 && r.y0 < k.y1 && r.y1 > k.y0)
-      p.el.classList.toggle("compact", clash)
+      p.el.classList.toggle("compact", clash || p.el.classList.contains("dot-only"))
       // A folded pin sits under a labelled one, never on top of its words.
       p.marker.getElement().style.zIndex = p.el.classList.contains("lift") ? "5" : clash ? "1" : "3"
       if (!clash) kept.push(r)
@@ -220,7 +221,7 @@ export function CarMap({ cars, red, lift, look, pad, padPhone, focus, controls =
 
   return (
     <>
-      <div ref={box} className="map" role="region" aria-label="Map of the cars on the road today" />
+      <div ref={box} className={`map map-${look}`} role="region" aria-label="Map of the cars on the road today" />
       {open && createPortal(card(open.orderId, hide), open.el)}
     </>
   )

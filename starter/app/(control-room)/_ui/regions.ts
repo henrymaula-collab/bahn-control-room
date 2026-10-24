@@ -55,3 +55,14 @@ export function boundsOf(cars: MapCar[]): Bounds | null {
   }
   return [[w, s], [e, n]]
 }
+
+/**
+ * The Overview frames Northern Europe: Finland, Sweden, Denmark, the Baltic, northern and
+ * central Germany (down to Frankfurt). The dataset also has orders around Munich, Lyon,
+ * Paris and Marseille; drawing them zoomed the map out to half a continent, so they stay
+ * off the map (their tasks still reach people in Your tasks and Orders).
+ */
+export function inNorthernEurope(c: MapCar): boolean {
+  const { lat, lng } = c.position
+  return lat >= 49.9 && lat <= 71 && lng >= 4.5 && lng <= 32
+}

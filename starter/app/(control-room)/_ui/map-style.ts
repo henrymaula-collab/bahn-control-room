@@ -6,7 +6,7 @@
 
 import type { StyleSpecification } from "maplibre-gl"
 
-export type MapLook = "bahn" | "positron" | "liberty"
+export type MapLook = "bahn" | "dark" | "positron" | "liberty"
 
 /** MapLibre finds its worker next to its own module, which a bundler moves. Serve a copy
  *  from public/ instead; keep the name in step with the pinned maplibre-gl version. */
@@ -14,6 +14,7 @@ export const WORKER_URL = "/maplibre/maplibre-gl-worker-6.13.0.mjs"
 
 const URL: Record<MapLook, string> = {
   bahn: "https://tiles.openfreemap.org/styles/positron",
+  dark: "https://tiles.openfreemap.org/styles/positron",
   positron: "https://tiles.openfreemap.org/styles/positron",
   liberty: "https://tiles.openfreemap.org/styles/liberty",
 }
@@ -26,20 +27,25 @@ export function loadStyle(look: MapLook): Promise<StyleSpecification> {
       look,
       fetch(URL[look])
         .then((r) => r.json() as Promise<StyleSpecification>)
-        .then((s) => (look === "bahn" ? bahn(s) : s)),
+        .then((s) => (look === "bahn" ? bahn(s, LIGHT) : look === "dark" ? bahn(s, DARK) : s)),
     )
   }
   return cache.get(look)!
 }
 
-const LAND = "#f5f3ec"
-const WATER = "#d5ecf0"
-const GREEN = "#e6ecdb"
-const ROAD = "#fffef7"
-const CASING = "#e7e3d9"
-const BORDER = "#cdc6b8"
-const LABEL = "#7a7262"
-const HALO = "rgba(255, 254, 247, 0.9)"
+type Palette = { land: string; water: string; green: string; road: string; casing: string; border: string; label: string; halo: string; waterLabel: string; countryLabel: string; residential: string; ice: string }
+
+const LIGHT: Palette = {
+  land: "#f5f3ec", water: "#d5ecf0", green: "#e6ecdb", road: "#fffef7", casing: "#e7e3d9", border: "#cdc6b8",
+  label: "#7a7262", halo: "rgba(255, 254, 247, 0.9)", waterLabel: "#86aeb6", countryLabel: "#b1a996", residential: "#f1efe7", ice: "#fbfaf6",
+}
+
+// Bahn's asphalt tones (driver app, dark sections): warm near-black land, the darkest
+// asphalt for water, roads one step up, labels in the warm greys.
+const DARK: Palette = {
+  land: "#24211c", water: "#12110e", green: "#262a21", road: "#34302a", casing: "#2c2924", border: "#5a5346",
+  label: "#8a7f6b", halo: "rgba(18, 17, 14, 0.9)", waterLabel: "#4f6266", countryLabel: "#726958", residential: "#28251f", ice: "#2c2924",
+}
 
 const HIDE = /^(highway-name|highway-shield|road_shield|airport|label_other|label_village|label_state|waterway_line_label|railway|aeroway|building)/
 
@@ -53,7 +59,8 @@ const NAME = ["coalesce", ["get", "name_en"], ["get", "name:latin"], ["get", "na
 
 type Layer = StyleSpecification["layers"][number]
 
-function bahn(style: StyleSpecification): StyleSpecification {
+function bahn(style: StyleSpecification, c: Palette): StyleSpecification {
+  const { land: LAND, water: WATER, green: GREEN, road: ROAD, casing: CASING, border: BORDER, label: LABEL, halo: HALO } = c
   const s = structuredClone(style)
   const out: Layer[] = []
   for (const l of s.layers) {
@@ -67,13 +74,13 @@ function bahn(style: StyleSpecification): StyleSpecification {
     else if (id === "park" || id === "landcover_wood") {
       paint["fill-color"] = GREEN
       paint["fill-opacity"] = 0.7
-    } else if (id === "landuse_residential") paint["fill-color"] = "#f1efe7"
-    else if (/landcover_(ice|glacier)/.test(id)) paint["fill-color"] = "#fbfaf6"
+    } else if (id === "landuse_residential") paint["fill-color"] = c.residential
+    else if (/landcover_(ice|glacier)/.test(id)) paint["fill-color"] = c.ice
     else if (/casing/.test(id)) paint["line-color"] = CASING
     else if (/(inner|minor|path|pier|subtle)/.test(id)) paint[l.type === "fill" ? "fill-color" : "line-color"] = /subtle/.test(id) ? CASING : ROAD
     else if (/^boundary/.test(id)) paint["line-color"] = BORDER
     if (l.type === "symbol") {
-      paint["text-color"] = /water_name/.test(id) ? "#86aeb6" : /country/.test(id) ? "#b1a996" : LABEL
+      paint["text-color"] = /water_name/.test(id) ? c.waterLabel : /country/.test(id) ? c.countryLabel : LABEL
       paint["text-halo-color"] = HALO
       paint["text-halo-width"] = 1.4
       layout["text-field"] = NAME // one name, in English where there is one

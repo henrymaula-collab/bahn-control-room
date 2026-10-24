@@ -1,6 +1,6 @@
 import "./overview.css"
 import type { Metadata } from "next"
-import { getCase, getLead, getOverview } from "@/lib/control-room/client"
+import { getCase, getDesk, getLead, getOverview } from "@/lib/control-room/client"
 import { minutesUntil, NOW_WINDOW_MINUTES, when } from "@/lib/control-room/format"
 import { questionFor } from "./_ui/ask"
 import type { RedInfo } from "./_ui/car-map"
@@ -8,6 +8,7 @@ import type { MapLook } from "./_ui/map-style"
 import { figtree } from "./_ui/overview-fonts"
 import { OverviewLooks, type Look, type Quote } from "./_ui/overview-looks"
 import { OverviewView } from "./_ui/overview-view"
+import { inNorthernEurope } from "./_ui/regions"
 import { currentPersonId } from "./_ui/session"
 
 export const metadata: Metadata = { title: "Overview" }
@@ -18,12 +19,14 @@ type Search = Promise<{ [k: string]: string | string[] | undefined }>
 export default async function OverviewPage({ searchParams }: { searchParams: Search }) {
   const sp = await searchParams
   const personId = await currentPersonId()
-  const data = await getOverview(personId)
-  // ?map=positron or ?map=liberty shows the raw OpenFreeMap styles, for comparing.
-  const look: MapLook = sp.map === "positron" || sp.map === "liberty" ? sp.map : "bahn"
+  const [all, desk] = await Promise.all([getOverview(personId), getDesk(personId)])
+  // Northern Europe only (see regions.ts); the key's counts follow the dots on the map.
+  const data = { ...all, cars: all.cars.filter(inNorthernEurope) }
+  // ?map=dark is Bahn's asphalt map; ?map=positron or ?map=liberty the raw OpenFreeMap styles.
+  const look: MapLook = sp.map === "dark" || sp.map === "positron" || sp.map === "liberty" ? sp.map : "bahn"
   // ?look=a|b|c picks the website layout (DEFAULT_LOOK otherwise); ?look=v3 is the calm v3 panel.
   const asked = typeof sp.look === "string" ? sp.look : ""
-  const page: Look | "v3" = asked === "v3" ? "v3" : LOOKS.includes(asked as Look) ? (asked as Look) : DEFAULT_LOOK
+  const page: Look | "v3" = LOOKS.includes(asked as Look) ? (asked as Look) : "v3" // Henry, 24 Oct: v3 is the default
 
   // Each red pin's card: with a case, its one question (one read per case); without one, the order.
   const red: Record<string, RedInfo> = {}
@@ -59,7 +62,8 @@ export default async function OverviewPage({ searchParams }: { searchParams: Sea
         }
       }),
   )
-  if (page === "v3") return <OverviewView data={data} red={red} look={look} />
+  const firstName = desk.person.name.split(" ")[0]
+  if (page === "v3") return <OverviewView data={data} red={red} look={look} firstName={firstName} />
   const quote = page === "a" ? await latestLesson(personId) : undefined
   return (
     <div className={`${figtree.variable} ovx-root`}>
@@ -69,7 +73,6 @@ export default async function OverviewPage({ searchParams }: { searchParams: Sea
 }
 
 const LOOKS: Look[] = ["a", "b", "c"]
-const DEFAULT_LOOK: Look = "b"
 
 /** The newest know-how the agents use, with the person it came from (look a's quote card). */
 async function latestLesson(personId: string): Promise<Quote | undefined> {

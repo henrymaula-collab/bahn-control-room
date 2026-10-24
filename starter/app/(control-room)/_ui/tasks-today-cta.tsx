@@ -6,8 +6,8 @@ import { Icon } from "./icons"
  * pill ("Get a quote" on bahnexpress.com). Track 5 sends the live count and owns the
  * route; this component only draws it. With nothing waiting it steps back to a quiet pill.
  */
-export function TasksTodayCta({ count, href = "/tasks", size = "l" }: { count: number; href?: string; size?: "l" | "m" }) {
-  const label = count === 0 ? "Nothing for you right now" : `${count} task${count === 1 ? "" : "s"} for you today`
+export function TasksTodayCta({ count, href = "/tasks", size = "l", label: text }: { count: number; href?: string; size?: "l" | "m"; label?: string }) {
+  const label = text ?? (count === 0 ? "Nothing for you right now" : `${count} task${count === 1 ? "" : "s"} for you today`)
   return (
     <Link href={href} className={`tasks-today tasks-today-${size}${count === 0 ? " tasks-today-none" : ""}`}>
       <span>{label}</span>

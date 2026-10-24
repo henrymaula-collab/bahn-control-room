@@ -17,7 +17,7 @@ export function Card({ card, role }: { card: BoardCard; role?: string | null }) 
   const date = card.decisive
   return <div>
     {role && <div className="card-role">{role}</div>}
-    <Link className="card" href={`/orders/${card.id}`} aria-label={`${card.vehicle}, ${card.reference}, ${laneLabel(card.displayLane)}`}>
+    <Link className="card" href={`/board/${card.id}`} aria-label={`${card.vehicle}, ${card.reference}, ${laneLabel(card.displayLane)}`}>
       <div className="card-body">
         <div className="card-line">
           <span className="card-vehicle">{card.vehicle}</span>

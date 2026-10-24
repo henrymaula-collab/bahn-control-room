@@ -56,7 +56,7 @@ export const CASES: Case[] = [
     ],
     suggestion: {
       id: "o458-email",
-      label: "Email Kovellin to clear the seller's hold",
+      label: "Email Kovellin and keep the pickup unbooked until the release arrives",
       effect: "The agent sends the email and keeps the pickup unbooked. When the release arrives, it checks it with Calverona before any driver is booked.",
       changes: [{ kind: "customer_message", detail: "An email to Kovellin Automobilhandel, in German, from the Readiness desk." }],
     },

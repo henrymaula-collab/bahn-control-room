@@ -1,67 +1,84 @@
 import Link from "next/link"
-import { clock, needsPersonNow, range, sourceLine, strengthWords, when } from "@/lib/control-room/format"
-import type { AgentStep, Fact } from "@/lib/control-room/types"
+import { needsPersonNow, onDay, reasonWords, sourceLine, strengthWords, when } from "@/lib/control-room/format"
+import type { Case, Fact } from "@/lib/control-room/types"
 import type { CaseCard } from "@/lib/control-room/views"
+import { Icon } from "./icons"
 
-/** A fact: the statement, then who said it, how, when, and how strong, in words. */
+/** "Decide by 13:00", red only within the hour or when it is past. */
+export function dueFor(c: Case, now: string): { text: string; now: boolean } | undefined {
+  if (!c.decideBy) return undefined
+  const past = Date.parse(c.decideBy) <= Date.parse(now)
+  return { text: `${past ? "Was due at" : "Decide by"} ${when(c.decideBy, now, undefined, true)}`, now: needsPersonNow(c, now) }
+}
+
+/** A fact: the statement, then who said it, how, when, and how strong. */
 export function FactLine({ fact, now }: { fact: Fact; now: string }) {
   return (
     <div className="fact">
-      <p className="statement">{fact.statement}</p>
-      <p className="meta">
+      <p className="m">{fact.statement}</p>
+      <p className="s">
         {sourceLine(fact, now)}. {strengthWords(fact.strength)}.
       </p>
     </div>
   )
 }
 
-/** What the agent did, in its own past tense, with the time. */
-export function StepLine({ step }: { step: AgentStep }) {
+/** The chevron that says there is more behind a row. */
+export function Chev({ size = 18 }: { size?: number }) {
   return (
-    <li className="step">
-      <time dateTime={step.at}>{clock(step.at)}</time>
-      <span>{step.summary}</span>
-    </li>
-  )
-}
-
-/** "Decide by 13:00", red-700 only when a person is needed now. */
-export function DecideBy({ card, now }: { card: CaseCard; now: string }) {
-  const c = card.case
-  if (!c.decideBy) return null
-  const urgent = needsPersonNow(c, now)
-  const past = Date.parse(c.decideBy) <= Date.parse(now)
-  return (
-    <span className={`decide-by${urgent ? " now" : ""}`}>
-      {past ? "Was due at " : "Decide by "}
-      <time dateTime={c.decideBy}>{when(c.decideBy, now, undefined, true)}</time>
+    <span className="chev">
+      <Icon name="chevron-right" size={size} />
     </span>
   )
 }
 
-/** The order in one line: the car, where it waits, and the time that decides the next step. */
-export function orderLine(card: CaseCard, now: string): string {
-  const o = card.order
-  const w = o.pickup.window
-  const lower = (s: string) => s.replace(/^Today/, "today").replace(/^Tomorrow/, "tomorrow")
-  const pickup = !w ? "" : /not booked/i.test(w.label) ? " No pickup booked yet." : ` Pickup ${lower(range(w.start, w.end, now))}.`
-  return `${o.vehicle} at ${o.pickup.placeName}.${pickup}`
+/** A disclosure row: a title that says what is inside, one grey line that sums it up. */
+export function Row({ title, sub, open, children, id }: { title: React.ReactNode; sub?: React.ReactNode; open?: boolean; children: React.ReactNode; id?: string }) {
+  return (
+    <details className="row" open={open} id={id}>
+      <summary>
+        <span>
+          <span className="m title" style={{ display: "block" }}>
+            {title}
+          </span>
+          {sub && (
+            <span className="s" style={{ display: "block", marginTop: 2 }}>
+              {sub}
+            </span>
+          )}
+        </span>
+        <Chev />
+      </summary>
+      <div className="body">{children}</div>
+    </details>
+  )
 }
 
-/** A calm queue row. The 3 px red bar only when it needs a person now. */
-export function QueueRow({ card, now }: { card: CaseCard; now: string }) {
-  const urgent = needsPersonNow(card.case, now)
+/** A case in a list: the headline, and when it is due or what the agent is doing. */
+export function CaseItem({ card, now, sub }: { card: CaseCard; now: string; sub?: string }) {
+  const due = dueFor(card.case, now)
   return (
     <li>
-      <Link href={`/cases/${card.case.id}`} className={`queue-row${urgent ? " now" : ""}`}>
-        <span className="headline">{card.case.headline}</span>
-        <span className={`due num${urgent ? " now" : ""}`}>
-          {card.case.decideBy
-            ? `${Date.parse(card.case.decideBy) <= Date.parse(now) ? "Was due at" : "Decide by"} ${when(card.case.decideBy, now, undefined, true)}`
-            : ""}
-        </span>
-        <span className="sub">{orderLine(card, now)}</span>
+      <Link href={`/cases/${card.case.id}`} className="item">
+        <p className="m">{card.case.headline}</p>
+        {sub ? <p className="s">{sub}</p> : due ? <p className={`s${due.now ? " now" : ""}`}>{due.text}</p> : null}
       </Link>
     </li>
   )
+}
+
+/** "Papers are missing and it needs the customer." Bahn's gate words, as one sentence. */
+export function reasonSentence(c: Case): string {
+  if (c.reasons.length === 0) return ""
+  return `The agent stopped here because ${joinIt(c.reasons.map(reasonWords))}.`
+}
+
+export function joinIt(items: string[]): string {
+  return items.length === 1 ? items[0] : `${items.slice(0, -1).join(", ")} and ${items.at(-1)}`
+}
+
+/** "today", "yesterday", "on 14 Oct". */
+export function dayPhrase(iso: string, now: string): string {
+  const d = onDay(iso, now)
+  return d === "today" || d === "yesterday" ? d : `on ${d}`
 }

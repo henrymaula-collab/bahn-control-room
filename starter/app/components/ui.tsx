@@ -37,7 +37,7 @@ export function ActorName({ actor }: { actor: Actor }) {
 }
 
 export function OrderLink({ order }: { order: OrderRef }) {
-  return <Link className="ref-link" href={`/orders/${order.id}`}>{order.reference}</Link>
+  return <Link className="ref-link" href={`/board/${order.id}`}>{order.reference}</Link>
 }
 
 export function OrderLinks({ orders }: { orders: OrderRef[] }) {

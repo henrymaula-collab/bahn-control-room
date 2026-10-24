@@ -1,20 +1,18 @@
 "use client"
 
-import { BareFrame } from "./_ui/bare-frame"
-
-/** Failure is never shown as an empty desk. */
+/** Failure is never shown as an empty page. */
 export default function ControlRoomError({ reset }: { error: Error; reset: () => void }) {
   return (
-    <BareFrame title="Control room">
-      <div className="state" role="alert">
-        <h2 className="t-headline">This page could not load.</h2>
-        <p className="t-body">Nothing was changed, sent or booked. Your cases are where you left them.</p>
-        <div className="actions">
-          <button type="button" className="btn btn-secondary" onClick={() => reset()}>
+    <div className="detail">
+      <section className="question detail-inner" role="alert">
+        <h1 className="l what">This page could not load.</h1>
+        <p className="l ask quiet">Nothing was changed, sent or booked.</p>
+        <div className="answers">
+          <button type="button" className="btn btn-primary" onClick={() => reset()}>
             Try again
           </button>
         </div>
-      </div>
-    </BareFrame>
+      </section>
+    </div>
   )
 }

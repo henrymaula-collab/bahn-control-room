@@ -1,18 +1,17 @@
 import Link from "next/link"
-import { BareFrame } from "./_ui/bare-frame"
 
 export default function NotFound() {
   return (
-    <BareFrame title="Control room">
-      <div className="state">
-        <h2 className="t-headline">This case is not open any more.</h2>
-        <p className="t-body">It may have been decided, or the agent closed it after a reseed.</p>
-        <div className="actions">
-          <Link href="/" className="btn btn-secondary">
-            Back to your desk
+    <div className="detail">
+      <section className="question detail-inner">
+        <h1 className="l what">This case is not open any more.</h1>
+        <p className="l ask quiet">It may have been decided, or the agent closed it.</p>
+        <div className="answers">
+          <Link href="/work" className="btn btn-secondary">
+            Back to Work
           </Link>
         </div>
-      </div>
-    </BareFrame>
+      </section>
+    </div>
   )
 }

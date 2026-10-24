@@ -1,17 +1,18 @@
 "use client"
 
-import { useRouter } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 import { useEffect, useRef, useState, useTransition } from "react"
 import { choosePerson } from "../actions"
 import { Icon } from "./icons"
 
-type P = { id: string; name: string; desk: string; lead?: boolean }
+type P = { id: string; name: string; desk: string }
 
 /** Who is on shift on this screen. A switch for the demo, shaped like the portal's account menu. */
 export function PersonSwitcher({ current, people }: { current: P; people: P[] }) {
   const [open, setOpen] = useState(false)
   const [, start] = useTransition()
   const router = useRouter()
+  const path = usePathname() ?? "/"
   const ref = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -32,7 +33,8 @@ export function PersonSwitcher({ current, people }: { current: P; people: P[] })
     setOpen(false)
     start(async () => {
       await choosePerson(p.id)
-      router.push(p.lead ? "/lead" : "/")
+      // Stay in the same section; in Work, open the new person's own list.
+      if (path.startsWith("/work")) router.push("/work")
       router.refresh()
     })
   }
@@ -40,20 +42,19 @@ export function PersonSwitcher({ current, people }: { current: P; people: P[] })
   return (
     <div className="person" ref={ref}>
       <button type="button" className="person-button" aria-haspopup="menu" aria-expanded={open} onClick={() => setOpen((o) => !o)}>
-        <span>
-          {current.name}
-          <span className="desk">, {current.desk}</span>
+        <span className="person-name">
+          <span>{current.name}</span>
+          <span className="s">{current.desk}</span>
         </span>
-        <Icon name="chevron-down" size={18} />
+        <Icon name="chevron-up" size={16} />
       </button>
       {open && (
         <div className="menu" role="menu">
-          <p className="menu-label">On shift now</p>
           {people.map((p) => (
             <button key={p.id} type="button" role="menuitemradio" aria-checked={p.id === current.id} className="menu-item" onClick={() => choose(p)}>
               <span>
                 {p.name}
-                <span className="desk">, {p.desk}</span>
+                <span className="s">{p.desk}</span>
               </span>
               {p.id === current.id && <Icon name="check" size={16} />}
             </button>

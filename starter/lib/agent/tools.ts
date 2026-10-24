@@ -404,7 +404,8 @@ function getTimeWindows(ctx: RunContext): ToolResult {
     const local = fmtRange(String(w.start_at), String(w.end_at), tz)
     const setBy = w.source === "CUSTOMER" ? "the customer" : w.source === "OPS" ? "Bahn ops" : String(w.source).toLowerCase()
     if (w.is_selected || w.purpose === "SELECTED_PICKUP_SLOT") {
-      facts.push(r.add(`${purpose.charAt(0).toUpperCase()}${purpose.slice(1)}: ${local} (${tz.split("/")[1]?.replace("_", " ")} time), set by ${setBy}${w.is_selected ? "" : ", not selected"}.`, { kind: sourceKindFrom(String(w.source)), channel: "record", recordRef: `time_windows:${w.id}`, at: String(w.stated_at ?? ctx.order.created_at) }, w.is_selected ? "confirmed" : "stated"))
+      const label = w.is_selected ? `${purpose.charAt(0).toUpperCase()}${purpose.slice(1)}` : `Planned ${purpose.replace(/^selected /, "")} (not confirmed yet)`
+      facts.push(r.add(`${label}: ${local} (${tz.split("/")[1]?.replace("_", " ")} time), set by ${setBy}.`, { kind: sourceKindFrom(String(w.source)), channel: "record", recordRef: `time_windows:${w.id}`, at: String(w.stated_at ?? ctx.order.created_at) }, w.is_selected ? "confirmed" : "stated"))
     }
     if (str(w.commitment_deadline_at)) {
       facts.push(r.add(`Commitment deadline agreed with the customer: ${fmtLocal(String(w.commitment_deadline_at), tz)}.`, { kind: "customer", channel: "record", recordRef: `time_windows:${w.id}`, at: String(w.stated_at ?? ctx.order.created_at) }, "confirmed"))
@@ -419,7 +420,7 @@ function listTrustRules(ctx: RunContext): ToolResult {
   const rules = ctx.snap.trustRules.filter((t) => t.caseType.startsWith("readiness") && t.status !== "off")
   step(ctx, "lookup", rules.some((t) => t.status === "on") ? "Checked the trust rules." : "Checked the trust rules: none is ON.")
   return ok({
-    rules: rules.map((t) => ({ trust_rule_id: t.id, status: t.status, case_type: t.caseType, scope: t.scope, option_key: t.optionId ?? null, when: t.when, then: t.then, evidence: `${t.evidence.matched} of ${t.evidence.total}` })),
+    rules: rules.map((t) => ({ trust_rule_id: t.id, status: t.status, case_type: t.caseType, scope: { ...t.scope, ...(t.scope.placeId ? { pickup_place: byId("sites", t.scope.placeId)?.name ?? t.scope.placeId } : {}) }, this_order_matches_scope: !t.scope.placeId || t.scope.placeId === ctx.order.pickup_site_id, option_key: t.optionId ?? null, when: t.when, then: t.then, evidence: `${t.evidence.matched} of ${t.evidence.total}` })),
     note: "Only a rule with status 'on' lets you change something without a person. 'suggested' rules do not.",
   })
 }

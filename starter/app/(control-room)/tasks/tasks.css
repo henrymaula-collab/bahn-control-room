@@ -1,0 +1,65 @@
+/* Your tasks at full size. The side menu already names the page, so the header row goes
+   (as on the Overview). The decision card is scaled up to fill the detail area at
+   1440x900: the same three sizes as before, larger (40, 20, 16), a wider measure, more
+   air. Scoped to .work .detail, so the list on the left, the side panels and the Other
+   options sheet keep the base sizes. */
+
+.main:has(.work) .top { display: none; }
+.work .list { padding-top: 12px; }
+
+.work .detail {
+  --size-l: 40px;
+  --size-m: 20px;
+  --size-s: 16px;
+  --column: 760px;
+  padding: 56px 64px 56px;
+  font-size: var(--size-m);
+  line-height: 30px;
+}
+.work .detail .l { line-height: 46px; letter-spacing: -0.9px; }
+.work .detail .m { line-height: 30px; }
+.work .detail .s { line-height: 24px; }
+
+/* The card */
+.work .question .what { margin-top: 10px; }
+.work .question .context { margin-top: 16px; }
+.work .answers { margin-top: 36px; gap: 12px; }
+.work .answers .btn { min-height: 60px; padding: 0 30px; font-size: var(--size-m); }
+.work .answers .btn-plain { padding: 0 22px; }
+.work .question .next { margin-top: 16px; }
+
+/* The rows under it */
+.work .work-rows { margin-top: 40px; }
+.work .detail .row > summary,
+.work .detail .row-link { gap: 20px; padding: 14px 20px; margin: 0 -20px; border-radius: 18px; }
+.work .detail button.row-link { width: calc(100% + 40px); }
+.work .detail .chev svg { width: 24px; height: 24px; }
+.work .detail .row > .body { padding: 12px 0 32px; }
+.work .detail .kv { grid-template-columns: 220px minmax(0, 1fr); column-gap: 20px; row-gap: 14px; }
+
+/* The walk control stays at the frame's size, level with the list's tabs. */
+.work .walk { font-size: 13px; line-height: 18px; }
+
+/* With a side panel open the card keeps its size and gives up some air on the left. */
+.work.with-panel .detail { padding-left: 56px; padding-right: 48px; }
+
+/* The Other options sheet sits inside the card but keeps the base sizes. */
+.work .detail dialog.sheet {
+  --size-l: 28px;
+  --size-m: 16px;
+  --size-s: 13px;
+  font-size: var(--size-m);
+  line-height: 24px;
+}
+.work .detail dialog.sheet .l { line-height: 36px; letter-spacing: -0.45px; }
+.work .detail dialog.sheet .m { line-height: 24px; }
+.work .detail dialog.sheet .s { line-height: 18px; }
+.work .detail dialog.sheet .chev svg { width: 18px; height: 18px; }
+
+/* Narrow screens keep the base layout. */
+@media (max-width: 860px) {
+  .work .detail { --size-l: 24px; --size-m: 16px; --size-s: 13px; padding: 32px 16px; font-size: 16px; line-height: 24px; }
+  .work .detail .l { line-height: 30px; letter-spacing: -0.45px; }
+  .work .detail .m { line-height: 24px; }
+  .work .detail .s { line-height: 18px; }
+}

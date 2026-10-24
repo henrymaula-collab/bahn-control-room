@@ -1,3 +1,4 @@
+import "./tasks.css"
 import { cookies } from "next/headers"
 import { dataSource, getSignedIn, getWork } from "@/lib/control-room/client"
 import { minutesUntil, NOW_WINDOW_MINUTES, when } from "@/lib/control-room/format"

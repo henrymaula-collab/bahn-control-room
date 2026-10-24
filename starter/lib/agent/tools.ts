@@ -506,8 +506,11 @@ async function proposeCase(ctx: RunContext, a: z.infer<z.ZodObject<typeof TOOL_S
   const caseId = `case-${ctx.order.reference.toLowerCase()}-${ctx.runId.slice(-6)}`
   const inferred = a.new_facts.map((n) => ctx.registry.add(n.statement, { kind: "agent", name: "Readiness agent", channel: "record", recordRef: `inferred_from:${n.basis_fact_ids.join(",")}`, at: ctx.clock.now() }, "inferred"))
   const facts = [...a.fact_ids.map((id) => ctx.registry.get(id)!), ...inferred]
-  // Facts produced by this run's calls always travel with the case.
-  for (const c of ctx.calls) for (const id of c.factIds) if (!facts.some((f) => f.id === id)) facts.push(ctx.registry.get(id)!)
+  // The call keeps all its facts (Call.factIds). If the model cited none of them, bring the call's facts along.
+  const callFactIds = ctx.calls.flatMap((c) => c.factIds)
+  if (callFactIds.length && !a.fact_ids.some((id) => callFactIds.includes(id))) {
+    for (const id of callFactIds) if (!facts.some((f) => f.id === id)) facts.push(ctx.registry.get(id)!)
+  }
   const used = knownLessons.filter((l) => lessonIds.includes(l.id))
   ctx.lessonsUsed = used
   for (const l of used) {

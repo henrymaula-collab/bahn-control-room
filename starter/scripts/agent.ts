@@ -31,7 +31,7 @@ const has = (name: string) => args.includes(name)
 
 const dim = (s: string) => (process.stdout.isTTY ? `\x1b[2m${s}\x1b[0m` : s)
 const bold = (s: string) => (process.stdout.isTTY ? `\x1b[1m${s}\x1b[0m` : s)
-const hhmm = (iso: string) => iso.slice(11, 16)
+const hhmm = (iso: string) => new Intl.DateTimeFormat("en-GB", { timeZone: "Europe/Helsinki", hour: "2-digit", minute: "2-digit", hour12: false }).format(new Date(iso))
 const short = (s: string, n = 160) => (s.length > n ? `${s.slice(0, n - 1)}…` : s)
 
 function printStep(step: StoredRun["steps"][number]) {
@@ -58,6 +58,8 @@ function printStep(step: StoredRun["steps"][number]) {
         const o = JSON.parse(step.content) as Record<string, unknown>
         if (o.error) line = `refused: ${String(o.error)}`
         else if (Array.isArray(o.facts)) line = `${o.facts.length} fact(s)${o.summary ? `. ${String(o.summary)}` : ""}`
+        else if (Array.isArray(o.conversations)) line = `${o.conversations.length} conversation(s), ${(o.conversations as { messages: unknown[] }[]).reduce((n, c) => n + c.messages.length, 0)} message(s)`
+        else if (Array.isArray(o.rules)) line = `${o.rules.length} rule(s)${(o.rules as { status: string }[]).some((r) => r.status === "on") ? ", ON: " + (o.rules as { status: string; trust_rule_id: string }[]).filter((r) => r.status === "on").map((r) => r.trust_rule_id).join(", ") : ", none ON"}`
         else if (o.case_id) line = `case ${String(o.case_id)} (${String(o.status ?? (o.handled_under_rule ? "handled_by_agent" : "resolved"))})`
         else if (o.resolved) line = "resolved"
       } catch {
@@ -200,6 +202,7 @@ async function main() {
   const order = findOrder(ref)
   if (!order) throw new Error(`No order ${ref}`)
   const provider = effectiveProvider(providerArg())
+  console.log(dim("Times are Helsinki time. Dataset clock unless CR_CLOCK=real."))
   console.log(`${bold("Readiness agent")}  ${order.reference}  ${dim(`${provider}${provider === "mock" || provider === "replay" ? "" : `, ${agentModel()}`}`)}`)
   const res = await runReadinessAgent(order.reference, { provider, onStep: printStep })
   printResult(res)

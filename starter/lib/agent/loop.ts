@@ -104,7 +104,8 @@ export async function runReadinessAgent(orderRef: string, opts: RunOptions = {})
 
 function overBudget(ctx: RunContext, started: number): string | undefined {
   if ((Date.now() - started) / 1000 > guards.maxSeconds) return `time limit (${guards.maxSeconds} s)`
-  if (ctx.usage.usd > guards.maxUsd) return `cost limit (USD ${guards.maxUsd})`
+  // Claude Code reports a nominal cost on a subscription login; the money guard is for the API.
+  if (ctx.provider === "api" && ctx.usage.usd > guards.maxUsd) return `cost limit (USD ${guards.maxUsd})`
   return undefined
 }
 
@@ -183,7 +184,6 @@ async function sdkLoop(ctx: RunContext, prompt: string, model: string): Promise<
         persistSession: false,
         permissionMode: "dontAsk",
         maxTurns: guards.maxModelTurns,
-        maxBudgetUsd: guards.maxUsd,
         thinking: { type: "adaptive", display: "summarized" },
         effort: "medium",
         cwd: paths.starter(),

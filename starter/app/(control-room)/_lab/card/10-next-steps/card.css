@@ -1,13 +1,13 @@
-/* card 10: next steps. Under the answer, the steps on a 1 px line: a filled dot for what your press does now,
-   rings for what follows; who in grey Subhead, what in ink Subhead. No numbers. */
+/* card 10: next steps. Under the answer, the steps on a 1 px line: an ink dot for what your press does now,
+   small sand dots for what follows; who in grey Subhead, what in ink Subhead. No numbers. */
 .lab-card-10 .c10-what { margin-top: 0.2em; }
 .lab-card-10 .c10-ask { margin-top: 1em; }
 .lab-card-10 .c10-acts { margin-top: calc(24 / 17 * 1em); }
 .lab-card-10 .c10-steps { position: relative; display: grid; gap: 0.7em; max-width: 34em; margin-top: 1.25em; padding-left: 1.5em; font-size: var(--size-s); line-height: var(--lh-subhead); }
-.lab-card-10 .c10-steps::before { content: ""; position: absolute; left: calc(0.35em - 0.5px); top: 0.7em; bottom: 0.7em; width: 1px; background: rgb(18 17 14 / 0.16); }
+.lab-card-10 .c10-steps li:not(:last-child)::before { content: ""; position: absolute; left: calc(-1.5em + 0.35em - 0.5px); top: 0.75em; bottom: calc(-0.7em - 0.75em); width: 1px; background: rgb(18 17 14 / 0.18); }
 .lab-card-10 .c10-steps li { position: relative; }
-.lab-card-10 .c10-dot { position: absolute; left: -1.5em; top: 0.38em; width: 0.7em; height: 0.7em; border-radius: 50%; background: var(--page); box-shadow: inset 0 0 0 1.5px var(--ink-2); }
-.lab-card-10 .c10-steps li.first .c10-dot { background: var(--ink); box-shadow: none; }
+.lab-card-10 .c10-dot { position: absolute; left: calc(-1.5em + 0.1em); top: 0.48em; width: 0.5em; height: 0.5em; border-radius: 50%; background: var(--bx-color-grey-300); box-shadow: 0 0 0 3px var(--page); }
+.lab-card-10 .c10-steps li.first .c10-dot { left: -1.5em; top: 0.38em; width: 0.7em; height: 0.7em; background: var(--ink); }
 .lab-card-10 .c10-body { display: grid; }
 .lab-card-10 .c10-who { color: var(--ink-2); }
 .lab-card-10 .c10-text { color: var(--ink); }

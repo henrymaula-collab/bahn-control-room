@@ -1,0 +1,19 @@
+/* rows 06: tasks sheet. Today's sheet frame (dialog.sheet); a find field; rows on hairlines' air. */
+.lab-rows-06 .r06-row { grid-template-columns: minmax(0, 1fr) auto auto; }
+.lab-rows-06 .r06-count { color: var(--ink-2); font-variant-numeric: tabular-nums; }
+.lab-rows-06.r06-sheet { width: min(calc(30 * var(--type-body)), calc(100vw - 32px)); overflow: hidden; }
+.lab-rows-06.r06-sheet[open] { display: flex; flex-direction: column; }
+.lab-rows-06 .r06-find { padding: 0.4em 1.2em 0.6em; }
+.lab-rows-06 .r06-find .text-input { min-height: 44px; }
+.lab-rows-06 .r06-list { flex: 1 1 auto; min-height: 0; overflow: auto; padding: 0.2em 0.8em 1.2em; overscroll-behavior: contain; }
+.lab-rows-06 .r06-task {
+  display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: 0.9em;
+  padding: 0.55em 0.6em; border-radius: 0.7em; outline-offset: -2px;
+  transition: background-color 100ms cubic-bezier(0.2, 0, 0, 1);
+}
+.lab-rows-06 .r06-task:hover, .lab-rows-06 .r06-task:focus-visible { background: var(--raise); }
+.lab-rows-06 .r06-task .v { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.lab-rows-06 .r06-task .p { grid-column: 1; color: var(--ink-2); font-size: var(--size-s); line-height: var(--lh-subhead); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.lab-rows-06 .r06-task time { grid-row: 1; grid-column: 2; color: var(--ink-2); font-size: var(--size-s); line-height: calc(var(--lh-body) * var(--size-m)); }
+.lab-rows-06 .r06-task time.now { color: var(--now); }
+.lab-rows-06 .r06-none { padding: 0.6em; color: var(--ink-2); }

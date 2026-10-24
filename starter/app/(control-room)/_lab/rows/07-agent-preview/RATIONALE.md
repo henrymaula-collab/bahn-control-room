@@ -1,0 +1,6 @@
+# rows 07: Talk it through speaks first
+
+- Reference: Intercom Copilot (https://www.intercom.com/helpdesk/copilot, `research/premium/product/shots/chat-04-intercom-copilot-panel.png`): the panel opens already filled, with what happened in a line. Linear related issues (https://linear.app/docs/triage-intelligence#duplicate-and-relationship-detection, `research/premium/product/shots/rows-01-linear-related-why.png`): the suggestion shows why it appears before it is opened.
+- Borrowed: the Talk it through row carries the agent's mark and the first sentence of its own opener ("This has not happened before: nobody at Bahn has decided a case like this yet."), with the kind line beside the title. Why it came to you ends with where the kind stands toward the agent doing it alone ("16 more agreeing answers, from more than one person, and the agent may offer to handle this kind alone").
+- Why for ops: the conversation invites itself with something worth reading, and the loop (your answer counts toward the agent learning this kind) shows on every case, not only in Know-how.
+- Trade-off: the Talk row grows to two or three lines; the opener's first sentence can repeat the card's situation on known kinds.

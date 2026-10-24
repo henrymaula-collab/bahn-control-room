@@ -1,0 +1,42 @@
+/* rows 05: panels. Over the situation (z above it), the same width and edge; slides in 250 ms. */
+.lab-rows-05.r05-panel {
+  z-index: 12; outline: none; font-size: var(--type-subhead); line-height: var(--lh-subhead);
+  padding: max(14px, calc(18 * var(--cr-u, 1px))) max(20px, calc(28 * var(--cr-u, 1px))) 28px;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .lab-rows-05.r05-panel { animation: r05-in 250ms cubic-bezier(0.2, 0, 0, 1); }
+  @keyframes r05-in { from { transform: translateX(24px); opacity: 0; } }
+}
+.lab-rows-05 .r05-body { margin-top: 1.2em; }
+.lab-rows-05 .r05-body .kv { grid-template-columns: 6.5em minmax(0, 1fr); column-gap: 0.8em; row-gap: 0.5em; margin-top: 0; }
+.lab-rows-05 .r05-kind { margin-top: 1.2em; }
+.lab-rows-05 .r05-options { margin: 0.9em -0.7em 0; display: flex; flex-direction: column; gap: 2px; }
+.lab-rows-05 .r05-option {
+  width: 100%; display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 0.8em;
+  padding: 0.7em; border-radius: 0.8em; text-align: left; transition: background-color 100ms cubic-bezier(0.2, 0, 0, 1);
+}
+.lab-rows-05 .r05-option:hover { background: var(--raise); }
+.lab-rows-05 .r05-option .chev { color: var(--ink-2); display: inline-flex; }
+.lab-rows-05 .r05-title { display: block; color: var(--ink); font-size: var(--type-body); line-height: var(--lh-body); }
+.lab-rows-05 .r05-sub { display: block; margin-top: 2px; color: var(--ink-2); }
+.lab-rows-05 .r05-step { margin-top: 0.6em; }
+.lab-rows-05 .r05-back { display: inline-flex; align-items: center; gap: 0.15em; margin: 0 0 0.6em -0.3em; padding: 0.1em 0.3em; border-radius: 0.5em; color: var(--ink-2); }
+.lab-rows-05 .r05-back:hover { color: var(--ink); background: var(--raise); }
+.lab-rows-05 .r05-chosen { font-weight: 600; }
+.lab-rows-05 .r05-changes { margin-top: 0.5em; display: flex; flex-direction: column; gap: 0.25em; }
+.lab-rows-05 .r05-draft { margin-top: 0.8em; }
+.lab-rows-05 .r05-draft summary { display: inline-flex; align-items: center; gap: 0.2em; color: var(--ink-2); }
+.lab-rows-05 .r05-draft p { margin-top: 0.5em; white-space: pre-wrap; }
+.lab-rows-05 .r05-note { margin-top: 1.4em; color: var(--ink-2); }
+.lab-rows-05 .r05-reasons { display: flex; flex-direction: column; gap: 0.45em; margin-top: 0.7em; }
+.lab-rows-05 .r05-reason {
+  width: 100%; padding: 0.7em 0.95em; border-radius: 0.9em; background: var(--raise); text-align: left;
+  font-size: var(--type-body); line-height: var(--lh-body); transition: background-color 100ms cubic-bezier(0.2, 0, 0, 1);
+}
+.lab-rows-05 .r05-reason:hover { background: var(--press); }
+.lab-rows-05 .r05-reason.r05-else { background: none; color: var(--ink-2); }
+.lab-rows-05 .r05-reason.r05-else:hover { background: var(--raise); color: var(--ink); }
+.lab-rows-05 .r05-own { display: flex; gap: 8px; }
+.lab-rows-05 .r05-plain { margin: 1.2em 0 0 -0.6em; padding: 0.5em 0.6em; border-radius: 0.65em; font-size: var(--type-body); }
+.lab-rows-05 .r05-plain:hover { background: var(--raise); }
+.lab-rows-05 .r05-err { margin-top: 0.8em; }

@@ -1,0 +1,7 @@
+# rows 03: One line of quiet links, popovers
+
+- Reference: Zendesk auto assist (https://support.zendesk.com/hc/en-us/articles/9945148867866-About-auto-assist, `research/premium/product/shots/card-03-zendesk-auto-assist-approve.png`): a plain "Details" text link beside Edit and Approve instead of a row of its own. Linear Triage Intelligence (https://linear.app/docs/triage-intelligence, `research/premium/product/shots/card-01-linear-suggestion-why.png`): the why opens as a popover. Apple HIG Popovers (https://developer.apple.com/design/human-interface-guidelines/popovers, `research/premium/rule/shots/rows-hig-popovers.png`): one popover at a time, closes on a click outside.
+- Borrowed: the three rows become one line of text buttons under the card (Talk it through, Why it came to you, 2 other tasks); the kind line ("New kind of case") moves into the Why popover, under the facts, since it does not fit on the line at a laptop width; Why and Other tasks open as popovers anchored to their word, one at a time; Escape or a click outside closes them.
+- Many tasks: the Other tasks popover scrolls in place (at most about 16 lines), and opens upward when the window has no room below (Henry's Safari window is 544 CSS px tall).
+- Why for ops: the card keeps the whole fold; the extras are present but take one line, not three rows.
+- Trade-off: text buttons are less discoverable than full-width rows, and a popover can cover the card's line under the buttons while open.

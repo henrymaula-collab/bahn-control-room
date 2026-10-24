@@ -1,0 +1,17 @@
+/* rows 01: sublines. Today's rows, each with its grey second line; the count before the chevron. */
+.lab-rows-01 .r01-text { display: flex; flex-direction: column; min-width: 0; }
+.lab-rows-01 .r01-text .title, .lab-rows-01 .r01-text .sub { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.lab-rows-01 .r01-now { color: var(--now); }
+.lab-rows-01 .r01-others > summary { grid-template-columns: minmax(0, 1fr) auto auto; }
+.lab-rows-01 .r01-count { color: var(--ink-2); font-variant-numeric: tabular-nums; }
+.lab-rows-01 .r01-others > .body { padding: 0.17em 0 1em; }
+.lab-rows-01 .r01-others .rows-list { gap: 0; }
+.lab-rows-01 .r01-others .wrow { column-gap: 0.83em; margin: 0 -0.83em; padding: 0.5em 0.83em; border-radius: 0.75em; }
+.lab-rows-01 .r01-others .wrow:hover { background: var(--raise); }
+.lab-rows-01 .r01-others .wrow time { padding-right: calc(1em + 0.83em); }
+.lab-rows-01 .r01-all {
+  margin: 0.3em 0 0 -0.83em; padding: 0.45em 0.83em; border-radius: 0.75em; color: var(--ink-2);
+  transition: background-color 100ms cubic-bezier(0.2, 0, 0, 1), color 100ms cubic-bezier(0.2, 0, 0, 1);
+}
+.lab-rows-01 .r01-all:hover { background: var(--raise); color: var(--ink); }
+.lab-rows-01 details[open] > summary .r01-text .sub { display: none; }

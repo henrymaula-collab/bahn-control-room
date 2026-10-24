@@ -48,10 +48,19 @@
   .work .detail { container-type: inline-size; }
 }
 .work .detail {
-  --size-l: clamp(20px, min(4cqw, calc(54 * var(--cr-u, 1px))), 54px);
+  /* The card's type, easy to tune (Henry, 20:44: the situation and the question as two blocks).
+     --card-measure: the headline's measure in its own size (25.5 em, about 56 characters), so the
+     longest headline today (156 characters) keeps to three lines.
+     --card-head: the situation, bold: the card's width holds one measure; never above 54 px
+     (the 2560 x 1300 size).
+     --card-ask: the question, one step smaller, regular weight, ink. */
+  --card-measure: 25.5;
+  --card-head: clamp(20px, min(calc(100cqw / var(--card-measure)), calc(54 * var(--cr-u, 1px))), 54px);
+  --card-ask: calc(var(--card-head) * 0.8);
+  --size-l: var(--card-head);
   --size-m: clamp(17px, calc(24 * var(--cr-u, 1px)), 24px);
   --size-s: clamp(15px, calc(18 * var(--cr-u, 1px)), 18px);
-  --column: 960px;
+  --column: calc(var(--card-measure) * var(--card-head));
   overflow: hidden auto;
   padding: max(28px, calc(56 * var(--cr-u, 1px))) max(28px, calc(64 * var(--cr-u, 1px)));
 }
@@ -67,12 +76,19 @@
 .work.has-panel .detail-inner { margin-inline: auto 0; }
 
 /* The card. Air in em, so it scales with the type. */
-.work .question .what { margin-top: 0.185em; }
+.work .question .what { margin-top: 0.185em; max-width: calc(var(--card-measure) * 1em); }
+/* The question: its own paragraph, a clear gap under the situation (0.7 of its line). */
+.work .detail .question .ask {
+  max-width: 27em; /* about 60 characters */
+  margin-top: calc(0.7 * (var(--card-head) + 6px));
+  font-size: var(--card-ask); line-height: calc(var(--card-ask) + 8px); font-weight: 400;
+  letter-spacing: -0.015em;
+}
 .work .question .context { margin-top: 0.667em; }
 .work .answers { margin-top: 1.5em; gap: 0.5em; }
 .work .answers .btn { min-height: max(44px, calc(2.5 * var(--size-m))); padding: 0 1.25em; font-size: var(--size-m); }
 .work .answers .btn-plain { padding: 0 0.92em; }
-.work .question .next { margin-top: 0.89em; }
+.work .question .next { margin-top: 0.89em; max-width: 36em; }
 
 /* The rows under it */
 .work .work-rows { margin-top: 1.67em; }

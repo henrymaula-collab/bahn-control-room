@@ -6,7 +6,7 @@ import assert from "node:assert/strict"
 import test from "node:test"
 import type { Case } from "@/lib/control-room/types"
 import { DEMO } from "@/lib/demo/scenario"
-import { ontoLiveCase } from "./loop"
+import { ontoLiveCase, recordingFor } from "./loop"
 import { listTraces, readTrace } from "./trace"
 import { plainWords, plainWordsDeep } from "./wording"
 
@@ -42,6 +42,15 @@ test("every demo call-back is recorded, for its own order and option", () => {
       assert.equal(t.outcome, "resolved")
     }
   }
+})
+
+test("carry-out replays the call-back for the chosen option, and never a first look", () => {
+  assert.equal(recordingFor("CD-420442", { optionKey: "pause_gig" })?.runId, DEMO.round2.callbacks.pause_gig)
+  assert.equal(recordingFor("CD-420442", { optionKey: "ask_customer_for_release" })?.runId, DEMO.round2.callbacks.ask_customer_for_release)
+  assert.equal(recordingFor("CD-420458", { optionKey: "pause_gig" })?.runId, DEMO.round1.callbacks.pause_gig)
+  // CD-420516 has a recorded first look only: deciding it carries nothing out in replay mode.
+  assert.equal(recordingFor("CD-420516", { optionKey: "keep_slot" }), undefined)
+  assert.ok(recordingFor("CD-420516")?.runId.startsWith("run-cd-420516-"))
 })
 
 const step = (at: string, kind: Case["agentSteps"][number]["kind"], summary: string) => ({ at, kind, summary })

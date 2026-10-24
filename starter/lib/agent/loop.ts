@@ -15,7 +15,7 @@ import { mockTurn } from "./mock-policy"
 import { firstMessage, SYSTEM_PROMPT, type CallbackBrief } from "./prompt"
 import { getStore, type StoredRun } from "./store"
 import { apiToolDefinitions, executeTool, TOOL_DESCRIPTIONS, TOOL_NAMES, TOOL_SHAPES, type RunContext } from "./tools"
-import { listTraces, readTrace, TraceWriter, type TraceLine } from "./trace"
+import { listTraces, readTrace, TraceWriter, type TraceLine, type TraceSummary } from "./trace"
 import { audioUrlFor } from "./voices"
 import { plainWordsDeep } from "./wording"
 import { agentSdk } from "./sdk"
@@ -376,15 +376,22 @@ export async function replayTrace(file: string, opts: ReplayOptions = {}): Promi
 
 /** The newest recorded run for this order; real-model traces before mock ones. */
 export async function replayLatest(orderRef: string, opts: RunOptions = {}): Promise<RunResult> {
-  const traces = listTraces().filter((t) => t.orderRef.toUpperCase() === orderRef.toUpperCase() && t.outcome !== "unfinished" && t.outcome !== "error")
-  // Carrying out a decision replays a recorded call-back run, for the option the person chose
-  // when one was recorded; a first look replays a first run.
-  const kind = traces.filter((t) => (opts.callback ? t.runId.includes("-cb-") : !t.runId.includes("-cb-")))
-  const sameOption = opts.callback ? kind.filter((t) => t.optionKey === opts.callback!.optionKey) : kind
-  const pool = sameOption.length ? sameOption : kind.length ? kind : traces
-  const pick = pool.find((t) => t.provider === "api") ?? pool.find((t) => t.provider === "claude-code") ?? pool[0]
-  if (!pick) throw new Error(`No recorded run for ${orderRef}. Set CR_AGENT_PROVIDER=claude-code, api or mock to run the agent.`)
+  const pick = recordingFor(orderRef, opts.callback)
+  if (!pick) throw new Error(`No recorded ${opts.callback ? "call-back" : "run"} for ${orderRef}. Set CR_AGENT_PROVIDER=claude-code, api or mock to run the agent.`)
   return replayTrace(pick.file, { onStep: opts.onStep, ontoLive: Boolean(opts.callback) })
+}
+
+/**
+ * The recording replay mode plays for an order. Carrying out a decision replays a recorded call-back,
+ * for the option the person chose when one was recorded; a first look replays a first run. A first
+ * look is never replayed as a call-back: it would put a decided case back to waiting.
+ */
+export function recordingFor(orderRef: string, callback?: Pick<CallbackBrief, "optionKey">): TraceSummary | undefined {
+  const traces = listTraces().filter((t) => t.orderRef.toUpperCase() === orderRef.toUpperCase() && t.outcome !== "unfinished" && t.outcome !== "error")
+  const kind = traces.filter((t) => (callback ? t.runId.includes("-cb-") : !t.runId.includes("-cb-")))
+  const sameOption = callback ? kind.filter((t) => t.optionKey === callback.optionKey) : kind
+  const pool = callback ? (sameOption.length ? sameOption : kind) : kind.length ? kind : traces
+  return pool.find((t) => t.provider === "api") ?? pool.find((t) => t.provider === "claude-code") ?? pool[0]
 }
 
 /** Replay every recorded run (or one order's), oldest first, into the store. */

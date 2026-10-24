@@ -4,6 +4,8 @@ import Link from "next/link"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react"
 import type { WorkLists, WorkRow } from "@/lib/control-room/types-v3"
+import { useLab, useLabExtra } from "../_lab/context"
+import { keepQuery } from "../_lab/slots"
 import { lookOf, lookQuery } from "../tasks/look"
 import { Icon } from "./icons"
 
@@ -32,6 +34,11 @@ type Others = { rows: WorkRow[]; times: RowTime; href: (id: string) => string; s
 const OthersContext = createContext<Others>({ rows: [], times: {}, href: (id) => `/tasks/${id}`, show: false })
 export const useOtherTasks = () => useContext(OthersContext)
 
+/** Needs you as the frame knows it, for the lab's `needs` parts: every row, where you are, the neighbours. */
+export type NeedsYou = { rows: WorkRow[]; current: string; index: number; prev?: WorkRow; next?: WorkRow; times: RowTime; href: (id: string) => string; look: string }
+const NeedsContext = createContext<NeedsYou>({ rows: [], current: "", index: -1, times: {}, href: (id) => `/tasks/${id}`, look: "menu" })
+export const useNeedsYou = () => useContext(NeedsContext)
+
 const typing = (t: EventTarget | null) => {
   const el = t as HTMLElement | null
   return !!el && (!!el.closest("input, textarea, select, [contenteditable], dialog") || el.isContentEditable)
@@ -44,10 +51,21 @@ export function WorkFrame({ lists, times, children }: { lists: WorkLists; times:
   const router = useRouter()
   const look = lookOf(params?.get("tasks"))
   const query = lookQuery(look)
-  const href = useCallback((id: string) => `/tasks/${id}${query}`, [query])
+  // The lab's ?v= and ?many= travel with every move between cases (none: exactly v4's query).
+  const keep = keepQuery(params, query)
+  const href = useCallback((id: string) => `/tasks/${id}${keep}`, [keep])
+  const lab = useLab()
+  const Top = useLabExtra("needs", "Top")
+  const Around = useLabExtra("needs", "Around")
   const current = decodeURIComponent(path.split("/")[2] ?? "")
   const [base, setBase] = useState<PanelKind | null>("situation")
-  const [open, setOpenRaw] = useState<PanelKind | null>("situation")
+  // Lab ?panel=: the panel open on the first case (chat, email, situation or none).
+  const labPanel = lab.panel === "none" ? null : lab.panel
+  const [open, setOpenRaw] = useState<PanelKind | null>(lab.panel ? labPanel! : "situation")
+  // It stays on the case the page opened on (a ref, not a one-shot: dev StrictMode runs effects twice).
+  const firstCase = useRef(current)
+  const here = useRef(current)
+  here.current = current
   const [slot, setSlot] = useState<HTMLDivElement | null>(null)
   const listRef = useRef<HTMLDivElement>(null)
 
@@ -57,7 +75,13 @@ export function WorkFrame({ lists, times, children }: { lists: WorkLists; times:
   const next = index >= 0 ? rows[index + 1] : rows[0]
 
   const setOpen = useCallback((o: PanelKind | null) => setOpenRaw(o ?? base), [base])
-  const reset = useCallback((b: PanelKind | null) => (setBase(b), setOpenRaw(b)), [])
+  const reset = useCallback(
+    (b: PanelKind | null) => {
+      setBase(b)
+      setOpenRaw(lab.panel && here.current === firstCase.current ? (labPanel ?? null) : b)
+    },
+    [lab.panel, labPanel],
+  )
 
   // Keyboard: J and K walk Needs you; arrows move between rows, Enter opens; Escape closes the chat or the message.
   useEffect(() => {
@@ -90,30 +114,40 @@ export function WorkFrame({ lists, times, children }: { lists: WorkLists; times:
     () => ({ rows: rows.filter((r) => r.caseId !== current), times, href, show: look === "menu" }),
     [rows, current, times, href, look],
   )
+  const needs = useMemo(
+    () => ({ rows, current, index, prev, next, times, href, look }),
+    [rows, current, index, prev, next, times, href, look],
+  )
   // The panel's room is kept from the first paint, so the card does not jump when it slides in.
   const withPanel = !!current && !!open
+  const detail = (
+    <div className="detail">
+      {look === "switcher" && <Switcher rows={rows} index={index} next={next} times={times} href={href} />}
+      {Top && <Top />}
+      {children}
+    </div>
+  )
 
   return (
     <PanelContext.Provider value={panel}>
       <OthersContext.Provider value={others}>
-        <div className={`work look-${look}${withPanel ? " has-panel" : ""}`}>
-          {look === "column" && (
-            <div className="list" ref={listRef}>
-              <Rows rows={rows} current={current} times={times} href={href} />
-            </div>
-          )}
-          <div className="detail">
-            {look === "switcher" && <Switcher rows={rows} index={index} next={next} times={times} href={href} />}
-            {children}
+        <NeedsContext.Provider value={needs}>
+          <div className={`work look-${look}${withPanel ? " has-panel" : ""}`}>
+            {look === "column" && (
+              <div className="list" ref={listRef}>
+                <Rows rows={rows} current={current} times={times} href={href} />
+              </div>
+            )}
+            {Around ? <Around>{detail}</Around> : detail}
+            <div ref={setSlot} style={{ display: "contents" }} />
           </div>
-          <div ref={setSlot} style={{ display: "contents" }} />
-        </div>
+        </NeedsContext.Provider>
       </OthersContext.Provider>
     </PanelContext.Provider>
   )
 }
 
-function Rows({ rows, current, times, href, role }: { rows: WorkRow[]; current: string; times: RowTime; href: (id: string) => string; role?: "menu" }) {
+export function Rows({ rows, current, times, href, role }: { rows: WorkRow[]; current: string; times: RowTime; href: (id: string) => string; role?: "menu" }) {
   if (!rows.length) return null
   return (
     <ul className="rows-list" role={role}>

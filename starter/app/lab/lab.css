@@ -1,0 +1,20 @@
+/* The night lab gallery: a tool, plain on purpose. */
+.lab { max-width: 1100px; margin: 0 auto; padding: 40px 24px 120px; font-family: var(--font-geist), system-ui, sans-serif; color: #12110e; background: #fffef7; font-size: 15px; line-height: 1.5; }
+.lab code { font-family: var(--font-geist-mono), ui-monospace, monospace; font-size: 0.9em; background: #f1eee6; padding: 1px 5px; border-radius: 4px; }
+.lab-head h1 { font-size: 28px; margin: 0 0 8px; font-weight: 600; }
+.lab-head p { color: #726958; margin: 0 0 16px; max-width: 70ch; }
+.lab-nav { display: flex; flex-wrap: wrap; gap: 6px 14px; padding-bottom: 16px; border-bottom: 1px solid #e6e1d6; }
+.lab-nav a { color: #423d33; text-decoration: none; }
+.lab-nav a[aria-current="page"] { color: #12110e; font-weight: 600; }
+.lab-slot { margin-top: 40px; }
+.lab-slot h2 { font-size: 22px; font-weight: 600; margin: 0 0 12px; }
+.lab-slot h2 span { font-size: 15px; font-weight: 400; color: #726958; margin-left: 8px; }
+.lab-variant { border-top: 1px solid #eeeae1; padding: 16px 0; display: grid; grid-template-columns: minmax(220px, 300px) 1fr; gap: 24px; }
+.lab-variant-head h3 { font-size: 17px; font-weight: 600; margin: 0 0 6px; }
+.lab-links { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 4px 12px; }
+.lab-links a { color: #12110e; }
+.lab-warn { display: block; color: #a13342; font-size: 13px; margin-bottom: 6px; }
+.lab-md h4 { font-size: 15px; font-weight: 600; margin: 0 0 6px; }
+.lab-md p, .lab-md ul { margin: 0 0 8px; color: #423d33; }
+.lab-md ul { padding-left: 18px; }
+@media (max-width: 720px) { .lab-variant { grid-template-columns: 1fr; gap: 8px; } }

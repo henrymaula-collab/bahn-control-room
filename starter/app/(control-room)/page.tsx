@@ -10,6 +10,7 @@ import { OverviewLooks, type Look, type Quote } from "./_ui/overview-looks"
 import { OverviewView } from "./_ui/overview-view"
 import { inNorthernEurope } from "./_ui/regions"
 import { currentPersonId } from "./_ui/session"
+import { labState, labWork } from "./_lab/server"
 
 export const metadata: Metadata = { title: "Overview" }
 
@@ -21,7 +22,10 @@ export default async function OverviewPage({ searchParams }: { searchParams: Sea
   const personId = await currentPersonId()
   const [all, desk] = await Promise.all([getOverview(personId), getDesk(personId)])
   // Northern Europe only (see regions.ts); the key's counts follow the dots on the map.
-  const data = { ...all, cars: all.cars.filter(inNorthernEurope) }
+  // Night lab: ?many= pads the person's task rows (none: unchanged).
+  const lab = await labState()
+  const needYou = lab.many || lab.rule ? (await labWork(personId, { needYou: all.needYou, agentWorking: [], doneToday: [] })).needYou : all.needYou
+  const data = { ...all, needYou, cars: all.cars.filter(inNorthernEurope) }
   // ?map=dark is Bahn's asphalt map; ?map=positron or ?map=liberty the raw OpenFreeMap styles.
   const look: MapLook = sp.map === "dark" || sp.map === "positron" || sp.map === "liberty" ? sp.map : "bahn"
   // ?look=a|b|c picks the website layout (DEFAULT_LOOK otherwise); ?look=v3 is the calm v3 panel.

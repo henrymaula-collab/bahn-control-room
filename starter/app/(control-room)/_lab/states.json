@@ -1,0 +1,54 @@
+{
+  "_doc": "Photographable states per slot. path + params (+ v=<slot>:<nn> added per variant) is the in-context URL; person is the cr-person cookie; map: true waits for tiles; click: a CSS selector clicked before the shot. Read by /lab and research/scratch-lab/shots.mjs. Owned by track F.",
+  "needs": [
+    { "state": "closed", "person": "aino", "path": "/tasks/case-ord-00458-agent", "params": {}, "note": "Aino's 3 tasks, nothing opened" },
+    { "state": "three", "person": "aino", "path": "/tasks/case-ord-00458-agent", "params": { "others": "open" }, "note": "Aino's 3 tasks, the list open (useLab().others)" },
+    { "state": "many12", "person": "aino", "path": "/tasks/case-ord-00458-agent", "params": { "many": "12", "others": "open" }, "note": "12 tasks, the list open" },
+    { "state": "many40", "person": "aino", "path": "/tasks/case-ord-00458-agent", "params": { "many": "40", "others": "open" }, "note": "40 tasks, the list open" },
+    { "state": "after", "person": "aino", "path": "/tasks/case-ord-00458-agent", "params": { "decided": "1" }, "note": "the moment after a yes, where the next task comes from" }
+  ],
+  "card": [
+    { "state": "ferrari", "person": "aino", "path": "/tasks/case-ord-00458-agent", "params": {}, "note": "Ferrari Roma, email suggestion, new kind" },
+    { "state": "volvo", "person": "aino", "path": "/tasks/case-ord-00516-agent", "params": {}, "note": "Volvo V60, the 156-character headline" },
+    { "state": "bmw", "person": "aino", "path": "/tasks/case-ord-00593-car_not_ready", "params": {}, "note": "BMW M4, the most urgent deadline" }
+  ],
+  "welcome": [
+    { "state": "aino", "person": "aino", "path": "/", "params": {}, "map": true, "note": "Aino, 3 tasks" },
+    { "state": "many12", "person": "aino", "path": "/", "params": { "many": "12" }, "map": true, "note": "12 tasks" },
+    { "state": "none", "person": "kaisa", "path": "/", "params": {}, "map": true, "note": "Kaisa, nothing for her" }
+  ],
+  "chat": [
+    { "state": "opener", "person": "aino", "path": "/tasks/case-ord-00458-agent", "params": { "panel": "chat" }, "note": "the panel just opened: opener and kind line" },
+    { "state": "thread", "person": "aino", "path": "/tasks/case-ord-00458-agent", "params": { "panel": "chat", "chat": "thread" }, "note": "two real questions and answers" },
+    { "state": "thinking", "person": "aino", "path": "/tasks/case-ord-00458-agent", "params": { "panel": "chat", "chat": "thinking" }, "note": "a third question, the agent mid-answer" },
+    { "state": "offer", "person": "aino", "path": "/tasks/case-ord-00458-agent", "params": { "panel": "chat", "chat": "offer" }, "note": "the carry-out offer: Send the email / Not now" }
+  ],
+  "decide": [
+    { "state": "email", "person": "aino", "path": "/tasks/case-ord-00458-agent", "params": { "panel": "email" }, "note": "the email preview before Send" },
+    { "state": "after", "person": "aino", "path": "/tasks/case-ord-00458-agent", "params": { "decided": "1" }, "note": "right after the yes (nothing saved)" },
+    { "state": "volvo-after", "person": "aino", "path": "/tasks/case-ord-00516-agent", "params": { "decided": "1" }, "note": "after a yes on a case without an email" }
+  ],
+  "situation": [
+    { "state": "ferrari", "person": "aino", "path": "/tasks/case-ord-00458-agent", "params": {}, "map": true, "note": "Ferrari Roma, Hamburg to a private address" },
+    { "state": "bmw", "person": "aino", "path": "/tasks/case-ord-00593-car_not_ready", "params": {}, "map": true, "note": "BMW M4" }
+  ],
+  "map": [
+    { "state": "aino", "person": "aino", "path": "/", "params": {}, "map": true, "note": "the Overview as Aino opens it" },
+    { "state": "pin", "person": "aino", "path": "/", "params": {}, "map": true, "click": "button.pin[data-order=\"ord-00458\"]", "note": "the Ferrari's red pin clicked: its card" }
+  ],
+  "menu": [
+    { "state": "overview", "person": "aino", "path": "/", "params": {}, "map": true, "note": "the menu on the Overview" },
+    { "state": "tasks", "person": "aino", "path": "/tasks/case-ord-00458-agent", "params": {}, "note": "the menu on Your tasks" }
+  ],
+  "rows": [
+    { "state": "ferrari", "person": "aino", "path": "/tasks/case-ord-00458-agent", "params": {}, "note": "the rows closed" },
+    { "state": "why", "person": "aino", "path": "/tasks/case-ord-00458-agent", "params": { "why": "open" }, "note": "Why it came to you open" },
+    { "state": "sheet", "person": "aino", "path": "/tasks/case-ord-00458-agent", "params": { "sheet": "open" }, "note": "the Other options sheet open" },
+    { "state": "volvo", "person": "aino", "path": "/tasks/case-ord-00516-agent", "params": {}, "note": "a known kind (the kind line says where it stands)" }
+  ],
+  "rule": [
+    { "state": "proposal", "person": "kaisa", "path": "/tasks/rule-kind-facts_disagree_open_gig-pause_gig", "params": { "rule": "1" }, "reset": true, "note": "Kaisa meets the agent's proposal" },
+    { "state": "evidence", "person": "kaisa", "path": "/tasks/rule-kind-facts_disagree_open_gig-pause_gig", "params": { "rule": "1", "why": "open" }, "reset": true, "note": "the evidence open (useLab().why)" },
+    { "state": "on", "person": "kaisa", "path": "/tasks/rule-kind-facts_disagree_open_gig-pause_gig", "params": { "rule": "1", "rulestate": "on" }, "reset": true, "note": "just turned on (nothing saved)" }
+  ]
+}

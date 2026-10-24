@@ -119,6 +119,7 @@ export function CarMap({ cars, red, lift, look, pad, padPhone, focus, controls =
         el.type = "button"
         // Dots only: no car names on the map (Henry, 24 Oct); the card says which car.
         el.className = "pin dot-only"
+        el.dataset.order = c.orderId // night lab: shots open a pin by order id
         el.setAttribute("aria-label", `${c.vehicle}, ${c.from}, needs a person`)
         el.innerHTML = `<span class="dot dot-red"></span><span class="label"></span>`
         el.querySelector(".label")!.textContent = info?.vehicle ?? c.vehicle

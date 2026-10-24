@@ -11,9 +11,10 @@ import { answerFor, questionFor } from "./ask"
 import { Icon } from "./icons"
 import { SendPreview } from "./send-preview"
 import { Keep } from "./text"
+import { useLab, useLabExtra, useLabPart } from "../_lab/context"
 import { usePanel } from "./work-frame"
 
-interface Props {
+export interface QuestionProps {
   variant: "desk" | "case"
   caseId: string
   due?: { text: string; now: boolean }
@@ -31,24 +32,29 @@ interface Props {
   children?: React.ReactNode // the desk's one disclosure, rendered on the server
 }
 
-type Done = { optionId: string; personName: string; timeWords: string; why?: string }
+export type Done = { optionId: string; personName: string; timeWords: string; why?: string }
 
 const helsinkiTime = (iso: string) =>
   new Date(iso).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit", hourCycle: "h23", timeZone: "Europe/Helsinki" })
 
-/** One decision as a question, with the agent's suggestion as the single filled button. */
-export function Question(props: Props) {
+/** Everything a decision card needs besides its look: the save, the sheet, the email preview, the done state.
+ *  Today's Question uses it; a lab card variant (slot `card`) calls it with the same props. */
+export function useQuestion(props: QuestionProps) {
   const { variant, caseId, suggestion, alternatives } = props
   const router = useRouter()
+  const lab = useLab()
   const [pending, start] = useTransition()
-  const [done, setDone] = useState<Done | null>(props.existing ?? null)
+  // Lab ?decided=1: the moment right after a yes to the suggestion, with nothing saved.
+  const [done, setDone] = useState<Done | null>(
+    props.existing ?? (lab.decided ? { optionId: suggestion.id, personName: props.personName, timeWords: "12:04" } : null),
+  )
   // Decided elsewhere (a yes in the chat beside it): the refreshed page brings the decision in.
   const existing = props.existing
   useEffect(() => {
     if (existing) setDone((d) => d ?? existing)
   }, [existing])
   const [error, setError] = useState<string | null>(null)
-  const [sheetOpen, setSheetOpen] = useState(false)
+  const [sheetOpen, setSheetOpen] = useState(lab.sheet)
   const all = [suggestion, ...alternatives]
   const draftOf = (o: Option): Draft | undefined => props.drafts[o.id] ?? o.draft
   // A suggestion that sends something shows the message first, as the side panel (Your tasks only).
@@ -77,27 +83,34 @@ export function Question(props: Props) {
     })
   }
 
+  /** The primary button: opens the message when the suggestion sends one, saves otherwise. */
+  const onPrimary = () => (preview ? panel.setOpen(panel.open === "email" ? null : "email") : save(suggestion))
+  const chosen = done ? (all.find((o) => o.id === done.optionId) ?? suggestion) : undefined
+  return { all, draftOf, panel, primary, preview, pending, error, done, chosen, sheetOpen, setSheetOpen, save, onPrimary }
+}
+
+/** One decision as a question, with the agent's suggestion as the single filled button. */
+export function Question(props: QuestionProps) {
+  const { caseId, suggestion, alternatives } = props
+  const q = useQuestion(props)
+  const { draftOf, panel, primary, preview, pending, error, done } = q
+  const Preview = useLabPart("decide", "SendPreview", SendPreview)
+  // The moment after a decision: a needs variant may own it (what comes next), else decide's, else today's.
+  const NeedsDone = useLabExtra("needs", "Done")
+  const DecideDone = useLabPart("decide", "Done", DecisionDone)
+  const DoneView = NeedsDone ?? DecideDone
+  const Sheet = useLabPart("rows", "OptionsSheet", OptionsSheet)
+
   if (done) {
-    const option = all.find((o) => o.id === done.optionId) ?? suggestion
     return (
-      <section className="question" aria-live="polite">
-        <p className="m due">
-          Decided by {done.personName} at {done.timeWords}
-        </p>
-        <h1 className="l what">
-          <Keep text={props.headline} />
-        </h1>
-        <p className="l ask">{option.label}.</p>
-        <p className="m quiet context">
-          {option.effect}
-          {done.why && option.id !== suggestion.id ? ` The reason goes to ${props.leadName} before the agent learns from it.` : ""}
-        </p>
-        <div className="answers">
-          <Link href={props.nextHref ?? "/tasks"} className="btn btn-secondary">
-            {props.nextHref ? "Next case" : "Back to your tasks"}
-          </Link>
-        </div>
-      </section>
+      <DoneView
+        headline={props.headline}
+        option={q.chosen ?? suggestion}
+        suggestion={suggestion}
+        done={done}
+        leadName={props.leadName}
+        nextHref={props.nextHref}
+      />
     )
   }
 
@@ -116,12 +129,12 @@ export function Question(props: Props) {
           disabled={pending}
           aria-expanded={preview ? panel.open === "email" : undefined}
           aria-controls={preview ? "email" : undefined}
-          onClick={() => (preview ? panel.setOpen(panel.open === "email" ? null : "email") : save(suggestion))}
+          onClick={q.onPrimary}
         >
           {answerFor(suggestion, draftOf(suggestion))}
         </button>
         {alternatives.length > 0 && (
-          <button type="button" className="btn btn-plain" disabled={pending} onClick={() => setSheetOpen(true)}>
+          <button type="button" className="btn btn-plain" disabled={pending} onClick={() => q.setSheetOpen(true)}>
             Other options
           </button>
         )}
@@ -130,33 +143,79 @@ export function Question(props: Props) {
       {error && <p className="m now" style={{ marginTop: 12 }}>{error}</p>}
       {props.children}
       {preview && (
-        <SendPreview
+        <Preview
           draft={preview}
           subject={props.subject}
           verb={answerFor(suggestion, preview)}
           pending={pending}
           error={error}
-          onSend={(edited) => save(suggestion, undefined, edited)}
+          onSend={(edited: string | undefined) => q.save(suggestion, undefined, edited)}
           returnFocus={() => primary.current?.focus()}
         />
       )}
-      <OptionsSheet
-        open={sheetOpen}
-        onClose={() => setSheetOpen(false)}
+      <Sheet
+        open={q.sheetOpen}
+        onClose={() => q.setSheetOpen(false)}
         options={alternatives}
         draftOf={draftOf}
-        whyChoices={(o) => props.whyChoices[o.id] ?? o.whyChoices ?? []}
+        whyChoices={(o: Option) => props.whyChoices[o.id] ?? o.whyChoices ?? []}
         leadName={props.leadName}
         pending={pending}
         error={error}
-        onDecide={save}
+        onDecide={q.save}
       />
     </section>
   )
 }
 
+/** Props of the done state (slot `decide`, part `Done`). */
+export type DoneProps = {
+  headline: string
+  option: Option // what was chosen
+  suggestion: Option // what the agent suggested
+  done: Done
+  leadName: string
+  nextHref?: string // the next case, kept with the lab's params
+}
+
+/** Right after a decision: who decided when, what was chosen, what happens now, the way on. */
+export function DecisionDone({ headline, option, suggestion, done, leadName, nextHref }: DoneProps) {
+  return (
+    <section className="question" aria-live="polite">
+      <p className="m due">
+        Decided by {done.personName} at {done.timeWords}
+      </p>
+      <h1 className="l what">
+        <Keep text={headline} />
+      </h1>
+      <p className="l ask">{option.label}.</p>
+      <p className="m quiet context">
+        {option.effect}
+        {done.why && option.id !== suggestion.id ? ` The reason goes to ${leadName} before the agent learns from it.` : ""}
+      </p>
+      <div className="answers">
+        <Link href={nextHref ?? "/tasks"} className="btn btn-secondary">
+          {nextHref ? "Next case" : "Back to your tasks"}
+        </Link>
+      </div>
+    </section>
+  )
+}
+
 /** Other options in one sheet: pick a step, see what it changes, then one tap on the reason decides. */
-function OptionsSheet({
+export type OptionsSheetProps = {
+  open: boolean
+  onClose: () => void
+  options: Option[]
+  draftOf: (o: Option) => Draft | undefined
+  whyChoices: (o: Option) => string[]
+  leadName: string
+  pending: boolean
+  error: string | null
+  onDecide: (o: Option, why?: string) => void
+}
+
+export function OptionsSheet({
   open,
   onClose,
   options,

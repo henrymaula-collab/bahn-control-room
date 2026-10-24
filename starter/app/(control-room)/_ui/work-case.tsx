@@ -10,6 +10,7 @@ import type { KeyFact, Situation, Stop } from "@/lib/control-room/types-v3"
 import { CaseChat, useChatThread } from "./case-chat"
 import { Icon } from "./icons"
 import { RouteMap } from "./route-map"
+import { useLab, useLabPart } from "../_lab/context"
 import { useOtherTasks, usePanel } from "./work-frame"
 
 /**
@@ -36,21 +37,53 @@ export function CaseRows({
   const talk = useRef<HTMLButtonElement>(null)
   const { thread, missing } = useChatThread(caseId, personId)
   const hasSituation = !!situation
+  const List = useLabPart("rows", "Rows", CaseRowsList)
+  const Situation = useLabPart("situation", "SituationPanel", SituationPanel)
+  const Chat = useLabPart("chat", "ChatPanel", ChatPanel)
 
   // Each case opens on its situation; a case without one has no panel.
   useEffect(() => reset(hasSituation ? "situation" : null), [caseId, hasSituation, reset])
 
   return (
+    <>
+      <List
+        thread={thread}
+        missing={missing}
+        why={why}
+        whyTitle={whyTitle}
+        chatOpen={open === "chat"}
+        onTalk={() => setOpen(open === "chat" ? null : "chat")}
+        talkRef={talk}
+      />
+      {situation && slot && createPortal(<Situation situation={situation} open={open === "situation"} now={now} />, slot)}
+      {!missing &&
+        slot &&
+        createPortal(
+          <Chat key={caseId} thread={thread} personId={personId} open={open === "chat"} now={now} onClose={() => (setOpen(null), talk.current?.focus())} />,
+          slot,
+        )}
+    </>
+  )
+}
+
+/** Props of the rows under the card (slot `rows`, part `Rows`). */
+export type CaseRowsListProps = {
+  thread: ChatThread | null // null while it loads
+  missing: boolean // no conversation for this case: no "Talk it through"
+  why: KeyFact[]
+  whyTitle?: string // "Why it came to you"; undefined when nobody is asked
+  chatOpen: boolean
+  onTalk: () => void // opens or closes the conversation panel
+  talkRef: React.Ref<HTMLButtonElement> // focus comes back here when the chat closes
+}
+
+/** The disclosure rows: Talk it through, Why it came to you, then the needs slot's row (Other tasks). */
+export function CaseRowsList({ thread, missing, why, whyTitle, chatOpen, onTalk, talkRef }: CaseRowsListProps) {
+  const lab = useLab()
+  return (
     <div className="rows work-rows">
       {!missing && (
-        <button
-          ref={talk}
-          type="button"
-          className="row-link"
-          aria-expanded={open === "chat"}
-          aria-controls="chat"
-          onClick={() => setOpen(open === "chat" ? null : "chat")}
-        >
+        <button ref={talkRef} type="button" className="row-link" aria-expanded={chatOpen} aria-controls="chat" onClick={onTalk}>
           <span className="row-text">
             <span className="m title">Talk it through</span>
             {/* Where this kind of case stands, so a known kind can be decided without opening. Hidden while the panel says it. */}
@@ -62,7 +95,7 @@ export function CaseRows({
         </button>
       )}
       {whyTitle && why.length > 0 && (
-        <details className="row">
+        <details className="row" open={lab.why || undefined}>
           <summary>
             <span className="m title">{whyTitle}</span>
             <span className="chev">
@@ -74,25 +107,25 @@ export function CaseRows({
           </div>
         </details>
       )}
-      <OtherTasks />
-      {situation && slot && createPortal(<SituationPanel situation={situation} open={open === "situation"} now={now} />, slot)}
-      {!missing &&
-        slot &&
-        createPortal(
-          <ChatPanel key={caseId} thread={thread} personId={personId} open={open === "chat"} now={now} onClose={() => (setOpen(null), talk.current?.focus())} />,
-          slot,
-        )}
+      <NeedsRow />
     </div>
   )
 }
 
+/** The needs slot's row under the card (today: Other tasks). Rows variants render it where it belongs. */
+export function NeedsRow() {
+  const Row = useLabPart("needs", "Row", OtherTasks)
+  return <Row />
+}
+
 /** "Other tasks  2 ›": the person's other Needs-you cases, opened in place like Why it came to you:
  *  the car, the place under it in grey, the decide-by time on the right (red within the hour). */
-function OtherTasks() {
+export function OtherTasks() {
   const { rows, times, href, show } = useOtherTasks()
+  const lab = useLab()
   if (!show || rows.length === 0) return null
   return (
-    <details className="row others">
+    <details className="row others" open={lab.others || undefined}>
       <summary>
         <span className="m title">Other tasks</span>
         <span className="m count num">{rows.length}</span>
@@ -121,7 +154,7 @@ function OtherTasks() {
 }
 
 /** What "Talk it through ›" opens: the agent's opener is already there, the field at the bottom. */
-function ChatPanel({
+export function ChatPanel({
   thread,
   personId,
   open,
@@ -148,7 +181,7 @@ function ChatPanel({
 }
 
 /** Label and value, label grey, value black, never a sentence. */
-function Facts({ facts }: { facts: KeyFact[] }) {
+export function Facts({ facts }: { facts: KeyFact[] }) {
   return (
     <dl className="kv m">
       {facts.map((f) => (
@@ -171,7 +204,7 @@ function when(stop: Stop, now: string): string | undefined {
 }
 
 /** The situation, beside the card by default: the car, the route, both ends, who it waits on, the few facts that decide it. */
-function SituationPanel({ situation: s, open, now }: { situation: Situation; open: boolean; now: string }) {
+export function SituationPanel({ situation: s, open, now }: { situation: Situation; open: boolean; now: string }) {
   // Who it waits on first, then the engine's facts. Say nothing twice: a booked pickup or delivery
   // time is already under its stop above, and the engine's Driver row ("Gig posted at EUR 456") wins.
   const shown = (stop: Stop) => stop.booked && !!stop.window

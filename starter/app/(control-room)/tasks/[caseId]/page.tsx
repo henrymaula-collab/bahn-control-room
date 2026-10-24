@@ -1,10 +1,12 @@
 import type { Metadata } from "next"
-import { notFound } from "next/navigation"
-import { getWork, getWorkCase } from "@/lib/control-room/client"
+import { notFound, redirect } from "next/navigation"
+import { getSignedIn, getWork, getWorkCase } from "@/lib/control-room/client"
 import { clock } from "@/lib/control-room/format"
 import type { Case } from "@/lib/control-room/types"
 import { dueFor } from "../../_ui/lines"
-import { Question } from "../../_ui/question"
+import { LabQuestion, LabRuleCard } from "../../_lab/mounts"
+import { isRuleItem, labWork, ruleProposal } from "../../_lab/server"
+import { keepQuery, PAD_ORDER_PREFIX } from "../../_lab/slots"
 import { currentPersonId } from "../../_ui/session"
 import { Keep } from "../../_ui/text"
 import { CaseRows } from "../../_ui/work-case"
@@ -22,9 +24,24 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
 /** One case in Your tasks: flow 1's decision card, then two rows, The situation and Why it came to you. */
 export default async function WorkCasePage({ params, searchParams }: { params: Params; searchParams: Search }) {
   const { caseId } = await params
-  const look = lookQuery((await searchParams).tasks)
+  const sp = await searchParams
+  // The look's query plus the lab's ?v=, ?many=, ?rule= (none: exactly v4's).
+  const lab = new URLSearchParams(Object.entries(sp).flatMap(([k, v]) => (typeof v === "string" ? [[k, v]] : [])))
+  const look = keepQuery(lab, lookQuery(sp.tasks))
   const personId = await currentPersonId()
-  const [w, lists] = await Promise.all([getWorkCase(decodeURIComponent(caseId), personId), getWork(personId)])
+  // Night lab: a ?many= padding row for a red order without a case opens the order.
+  if (caseId.startsWith(PAD_ORDER_PREFIX)) redirect(`/orders/${encodeURIComponent(caseId.slice(PAD_ORDER_PREFIX.length))}`)
+  const lists = await labWork(personId, await getWork(personId))
+  // Night lab, slot rule: the agent's trust-rule proposal as an item in a shift lead's Your tasks.
+  if (isRuleItem(caseId)) {
+    const proposal = await ruleProposal()
+    if (!proposal) notFound()
+    const at = lists.needYou.findIndex((r) => r.caseId === caseId)
+    const nextId = lists.needYou[at + 1]?.caseId
+    const me = (await getSignedIn(personId)).person
+    return <LabRuleCard proposal={proposal} personName={me.name} nextHref={nextId ? `/tasks/${nextId}${look}` : undefined} />
+  }
+  const w = await getWorkCase(decodeURIComponent(caseId), personId)
   if (!w) notFound()
 
   const { detail, extras } = w
@@ -41,7 +58,7 @@ export default async function WorkCasePage({ params, searchParams }: { params: P
   return (
     <div className="detail-inner">
       {asks ? (
-        <Question
+        <LabQuestion
           key={c.id}
           variant="case"
           caseId={c.id}

@@ -1,11 +1,13 @@
 "use client"
 
 import { useRouter } from "next/navigation"
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react"
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react"
 import { readChatEvents } from "@/lib/control-room/chat-sse"
 import { gateWords, knowledgeWords } from "@/lib/control-room/chat-words"
 import { clock, day, onDay } from "@/lib/control-room/format"
 import type { CaseKnowledge, ChatAction, ChatMessage, ChatThread, ChatToolStep } from "@/lib/control-room/types-chat"
+import { useLab } from "../_lab/context"
+import { FIXTURE_OFFER, FIXTURE_THINKING, fixtureMessages } from "../_lab/fixtures"
 import { decide } from "../actions"
 import { AgentMark } from "./agent-mark"
 import { Icon } from "./icons"
@@ -37,7 +39,11 @@ export function useChatThread(caseId: string, personId: string) {
       live = false
     }
   }, [caseId, personId])
-  return { thread, missing }
+  // Lab ?chat=thread|thinking|offer: the fixture conversation on CD-420458 (no API call).
+  const chat = useLab().chat
+  const fixture = thread ? fixtureMessages(thread.caseId, chat) : null
+  const shown = useMemo(() => (thread && fixture ? { ...thread, messages: fixture } : thread), [thread, fixture])
+  return { thread: shown, missing }
 }
 
 type Live = { steps: ChatToolStep[]; text: string }
@@ -50,6 +56,16 @@ export function CaseChat({ thread, personId, now, focus }: { thread: ChatThread 
   const [live, setLive] = useState<Live | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [offer, setOffer] = useState<Offer | null>(null)
+  // Lab ?chat=thinking|offer: once the thread is in, the fixture's live turn or offer (CD-420458 only).
+  const lab = useLab().chat
+  const seeded = useRef(false)
+  useEffect(() => {
+    if (!thread || seeded.current) return
+    seeded.current = true
+    if (!fixtureMessages(thread.caseId, lab)) return
+    if (lab === "thinking") setLive(FIXTURE_THINKING.live)
+    if (lab === "offer") setOffer({ after: FIXTURE_OFFER.answer.id, action: FIXTURE_OFFER.action, state: "open" })
+  }, [thread, lab])
   const router = useRouter()
   const [draft, setDraft] = useState("")
   // The answer to a spoken question is read aloud as it streams (one id per answer; a new id stops the old one).

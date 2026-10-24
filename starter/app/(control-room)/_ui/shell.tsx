@@ -5,11 +5,12 @@ import { usePathname } from "next/navigation"
 import { Icon, type IconName } from "./icons"
 import { BahnLogo } from "./logo"
 import { archivoItalic } from "./shell-fonts"
+import { useLabExtra, useLabPart } from "../_lab/context"
 import { PersonSwitcher } from "./person-switcher"
 
 type P = { id: string; name: string; desk: string; avatar: string }
 
-const SECTIONS: { href: string; label: string; icon: IconName | "history" }[] = [
+export const SECTIONS: { href: string; label: string; icon: IconName | "history" }[] = [
   { href: "/", label: "Overview", icon: "map" },
   { href: "/tasks", label: "Your tasks", icon: "inbox" },
   { href: "/history", label: "History", icon: "history" },
@@ -19,11 +20,14 @@ const SECTIONS: { href: string; label: string; icon: IconName | "history" }[] = 
   { href: "/team", label: "Team", icon: "users" },
 ]
 
-const sectionOf = (path: string) =>
+export const sectionOf = (path: string) =>
   SECTIONS.find((s) => (s.href === "/" ? path === "/" : path === s.href || path.startsWith(`${s.href}/`))) ?? SECTIONS[0]
 
 /** One fixed frame: the side menu, a slim header with the page name, the page. It never moves between sections. */
-export function Shell({ person, people, needYou, children }: { person: P; people: P[]; needYou: number; children: React.ReactNode }) {
+/** Props of the frame (slot `menu`, part `Shell`). */
+export type ShellProps = { person: P; people: P[]; needYou: number; children: React.ReactNode }
+
+export function Shell({ person, people, needYou, children }: ShellProps) {
   const path = usePathname() ?? "/"
   const here = sectionOf(path)
   return (
@@ -51,6 +55,7 @@ export function Shell({ person, people, needYou, children }: { person: P; people
             </Link>
           ))}
         </nav>
+        <NeedsMenu />
         <div className="side-foot">
           <PersonSwitcher current={person} people={people} />
         </div>
@@ -65,9 +70,14 @@ export function Shell({ person, people, needYou, children }: { person: P; people
   )
 }
 
+/** The needs slot's place in the side menu, under the sections (empty today). Menu variants render it too. */
+export function NeedsMenu() {
+  const Menu = useLabExtra("needs", "Menu")
+  return Menu ? <Menu /> : null
+}
 
 /** History: lucide "history" (ISC), a clock turning back, at the menu's 1.75 stroke. */
-function HistoryIcon() {
+export function HistoryIcon() {
   return (
     <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" focusable="false">
       <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />

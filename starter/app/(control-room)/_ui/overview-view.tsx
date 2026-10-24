@@ -3,7 +3,8 @@
 import Link from "next/link"
 import { useLayoutEffect, useRef, useState } from "react"
 import { minutesUntil, NOW_WINDOW_MINUTES, when } from "@/lib/control-room/format"
-import type { Overview } from "@/lib/control-room/types-v3"
+import type { Overview, WorkRow } from "@/lib/control-room/types-v3"
+import { useLabPart } from "../_lab/context"
 import { CarMap, type RedInfo } from "./car-map"
 import { Icon } from "./icons"
 import type { MapLook } from "./map-style"
@@ -36,10 +37,13 @@ export function OverviewView({ data, red, look, firstName }: { data: Overview; r
   const agentWorking = data.cars.filter((c) => c.state === "agent_working").length
   const onPlan = data.cars.length - needsPerson - agentWorking
   const tasks = data.needYou
+  const MapView = useLabPart("map", "CarMap", CarMap)
+  const Pin = useLabPart("map", "PinCard", PinCard)
+  const Panel = useLabPart("welcome", "WelcomePanel", WelcomePanel)
 
   return (
     <div className={`overview overview-${look}`}>
-      <CarMap
+      <MapView
         cars={data.cars}
         red={red}
         lift={lift}
@@ -47,9 +51,37 @@ export function OverviewView({ data, red, look, firstName }: { data: Overview; r
         pad={{ top: 56, bottom: 56, left: padLeft, right: 48 }}
         minZoom={3.3} // Northern Europe, never half the globe when the panel leaves little room
         padPhone={{ top: 440, bottom: 24, left: 24, right: 24 }}
-        card={(orderId, close) => <PinCard info={red[orderId]} close={close} />}
+        card={(orderId: string, close: () => void) => <Pin info={red[orderId]} close={close} />}
       />
-      <section ref={panel} className="float float-me" aria-label="Today">
+      <Panel
+        panelRef={panel}
+        firstName={firstName}
+        tasks={tasks}
+        now={data.now}
+        counts={{ onPlan, agentWorking, needsPerson }}
+        lift={lift}
+        setLift={setLift}
+      />
+    </div>
+  )
+}
+
+/** Props of the welcome panel (slot `welcome`, part `WelcomePanel`). */
+export type WelcomePanelProps = {
+  panelRef: React.Ref<HTMLElement> // the map keeps its cars beside this box: put it on the panel's outer element
+  firstName: string
+  tasks: WorkRow[] // the person's Needs you (?many= pads it)
+  now: string // the room's clock, ISO
+  counts: { onPlan: number; agentWorking: number; needsPerson: number } // the key follows the dots on the map
+  lift: string | null // an order id hovered here lifts its pin on the map
+  setLift: (orderId: string | null) => void
+}
+
+/** A welcome, the person's tasks, the colours in words. */
+export function WelcomePanel({ panelRef, firstName, tasks, now, counts, lift, setLift }: WelcomePanelProps) {
+  const { onPlan, agentWorking, needsPerson } = counts
+  return (
+      <section ref={panelRef} className="float float-me" aria-label="Today">
         <h1 className="welcome">Welcome back to <em>Bahn Express</em>, {firstName}.</h1>
 
         <div className="me-tasks">
@@ -62,7 +94,7 @@ export function OverviewView({ data, red, look, firstName }: { data: Overview; r
           {tasks.length > 0 && (
             <ul className="red-rows">
               {tasks.map((r) => {
-                const due = r.decideBy ? minutesUntil(r.decideBy, data.now) <= NOW_WINDOW_MINUTES : false
+                const due = r.decideBy ? minutesUntil(r.decideBy, now) <= NOW_WINDOW_MINUTES : false
                 return (
                   <li key={r.caseId}>
                     <Link
@@ -75,7 +107,7 @@ export function OverviewView({ data, red, look, firstName }: { data: Overview; r
                     >
                       <span className="v">{r.vehicle}</span>
                       <span className="p">{r.place}</span>
-                      {r.decideBy && <time className={due ? "now" : undefined}>{when(r.decideBy, data.now)}</time>}
+                      {r.decideBy && <time className={due ? "now" : undefined}>{when(r.decideBy, now)}</time>}
                     </Link>
                   </li>
                 )
@@ -102,7 +134,6 @@ export function OverviewView({ data, red, look, firstName }: { data: Overview; r
           </p>
         </div>
       </section>
-    </div>
   )
 }
 

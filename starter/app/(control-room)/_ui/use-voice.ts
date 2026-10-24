@@ -362,7 +362,7 @@ export function useVoice(options: UseVoiceOptions = {}): Voice {
         return
       }
       transcriptAt.current = performance.now()
-      setTimings({ recordedMs: Math.round(recordedMs), sttMs: Math.round(transcriptAt.current - (speechEndAt.current ?? t0)), answerWaitMs: undefined, ttsFirstAudioMs: undefined, roundTripMs: undefined })
+      setTimings({ recordedMs: Math.round(recordedMs), sttMs: Math.round(transcriptAt.current - (speechEndAt.current ?? t0)) })
       setState("idle")
       opts.current.onTranscript?.(text)
     } catch (e) {
@@ -380,6 +380,8 @@ export function useVoice(options: UseVoiceOptions = {}): Voice {
     const rec = recorder.current
     if (rec && rec.state === "recording") {
       speechEndAt.current = performance.now()
+      timingsRef.current = {} // a new question: the last one's numbers no longer apply
+      setTimingsRaw({})
       setState("transcribing")
       rec.stop()
     }

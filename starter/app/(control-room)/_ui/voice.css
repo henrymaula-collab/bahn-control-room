@@ -4,7 +4,7 @@
    Writing it down: the ring breathes like the agent's dot. No pills, no colour for state
    beyond ink and the agent's green. */
 
-.voice { display: inline-flex; align-items: center; gap: 10px; min-width: 0; }
+.voice { display: inline-flex; align-items: center; gap: 14px; min-width: 0; }
 
 .voice-button {
   --voice-level: 0;
@@ -30,8 +30,8 @@
 .voice-button[data-state="starting"],
 .voice-button[data-state="listening"] { background: var(--ink); color: var(--page); }
 .voice-button[data-state="listening"] .voice-ring {
-  opacity: calc(0.10 + var(--voice-level) * 0.16);
-  transform: scale(calc(1.08 + var(--voice-level) * 0.42));
+  opacity: calc(0.08 + var(--voice-level) * 0.12);
+  transform: scale(calc(1.06 + var(--voice-level) * 0.26));
   transition: opacity 90ms linear;
 }
 
@@ -41,11 +41,11 @@
 .voice-button[data-state="speaking"] { background: var(--raise); color: var(--ink); }
 .voice-button[data-state="speaking"] .voice-ring {
   background: var(--green);
-  opacity: calc(0.12 + var(--voice-level) * 0.22);
-  transform: scale(calc(1.04 + var(--voice-level) * 0.36));
+  opacity: calc(0.12 + var(--voice-level) * 0.2);
+  transform: scale(calc(1.04 + var(--voice-level) * 0.26));
 }
 
-@keyframes voice-breathe { 0% { transform: scale(1); opacity: .22; } 70%, 100% { transform: scale(1.7); opacity: 0; } }
+@keyframes voice-breathe { 0% { transform: scale(1); opacity: .22; } 70%, 100% { transform: scale(1.5); opacity: 0; } }
 
 .voice-word { font-size: var(--size-s); color: var(--ink-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
 .voice-word.voice-error { color: var(--ink); white-space: normal; }

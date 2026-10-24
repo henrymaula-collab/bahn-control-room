@@ -228,7 +228,7 @@ export function CarMap({ cars, red, lift, look, pad, padPhone, focus, controls =
 
   return (
     <>
-      <div ref={box} className={`map map-${look}`} role="region" aria-label="Map of the cars on the road today" />
+      <div ref={box} className={`map map-${look}`} data-lab-map="" role="region" aria-label="Map of the cars on the road today" />
       {open && createPortal(card(open.orderId, hide), open.el)}
     </>
   )

@@ -70,5 +70,5 @@ export function RouteMap({ from, to }: { from: LatLng; to: LatLng }) {
     }
   }, [from.lat, from.lng, to.lat, to.lng])
 
-  return <div ref={box} className="route-map" role="img" aria-label="Route from the pickup place (A) to the delivery (B)" />
+  return <div ref={box} className="route-map" data-lab-map="" role="img" aria-label="Route from the pickup place (A) to the delivery (B)" />
 }

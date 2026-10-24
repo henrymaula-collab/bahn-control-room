@@ -31,6 +31,8 @@ export type Flag = {
   tier: Tier
   /** Plain sentence in Bahn's words. */
   label: string
+  /** The record's own name, when it has one ("Ferry sold out", "Vehicle warning"): the map's red reason. */
+  short?: string
   /** Where the fact comes from, e.g. "alerts:alert-x123". */
   source: string
   at?: string
@@ -104,13 +106,13 @@ function rulesFor(order: OrderWorld, ctx: Context): Flag[] {
     const severe = alert.severity === "high" || alert.severity === "critical"
     if (alert.status === "OPEN") {
       flags.push({
-        code: "ALERT_OPEN", tier: severe ? "person" : "agent",
+        code: "ALERT_OPEN", tier: severe ? "person" : "agent", short: label(alert.signal),
         label: `Open alert: ${label(alert.signal)}. ${alert.summary}`, source: ref("alerts", alert.id), at: alert.triggeredAt,
       })
     } else if (alert.status === "ACKNOWLEDGED") {
       const owner = bundle.dir.title(alert.details.owner)
       flags.push({
-        code: "ALERT_OWNED", tier: severe ? "person" : "agent",
+        code: "ALERT_OWNED", tier: severe ? "person" : "agent", short: label(alert.signal),
         label: `${label(alert.signal)}: owned by ${owner ?? "no one recorded"}, not resolved.`, source: ref("alerts", alert.id),
         at: str(alert.details.acknowledged_at) ?? alert.triggeredAt,
       })
@@ -119,7 +121,7 @@ function rulesFor(order: OrderWorld, ctx: Context): Flag[] {
   for (const row of rows(bundle, "incidents")) {
     if (str(row.details.resolved_at)) continue
     flags.push({
-      code: "INCIDENT", tier: "person", label: `Incident: ${label(str(row.details.kind))}. ${str(row.details.reported_symptom) ?? ""}`.trim(),
+      code: "INCIDENT", tier: "person", short: label(str(row.details.kind)), label: `Incident: ${label(str(row.details.kind))}. ${str(row.details.reported_symptom) ?? ""}`.trim(),
       source: ref("incidents", row.id), at: str(row.details.opened_at) ?? undefined,
     })
   }
@@ -131,7 +133,7 @@ function rulesFor(order: OrderWorld, ctx: Context): Flag[] {
     const high = str(row.details.priority) === "high"
     const tier: Tier = overdue || (high && dueIn !== null && dueIn < 24) ? "person" : "agent"
     flags.push({
-      code: overdue ? "WORK_OVERDUE" : "WORK_OPEN", tier,
+      code: overdue ? "WORK_OVERDUE" : "WORK_OPEN", tier, short: label(str(row.details.kind)),
       label: `${label(str(row.details.kind))}${overdue ? `: was due ${fmtDateTime(due)}` : due ? `: due ${fmtDateTime(due)}` : ""}.`,
       source: ref("work_items", row.id), at: due ?? undefined,
     })

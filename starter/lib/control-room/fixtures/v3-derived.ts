@@ -8,7 +8,7 @@
 import { along, carAt, cityEntry, placePosition } from "../geo"
 import type { Case, OpsPerson, TrackRecord } from "../types"
 import type { CarState, CaseV3Extras, KeyFact, LatLng, MapCar, Overview, PositionSource, Situation, Stop, WorkLists, WorkRow } from "../types-v3"
-import { TYPE_FACT, brand, firstName, keyFacts, shortPlace, waitingText, yoursText } from "../v3"
+import { TYPE_FACT, brand, firstName, keyFacts, nextLine, shortPlace, waitingText, yoursText } from "../v3"
 import type { Endpoint, OrderSummary } from "../views"
 import { dayTime } from "../vocab"
 
@@ -73,6 +73,8 @@ const BRANDS = ["Velantora", "Calverona", "Arvelano", "Kervalin", "Tervavio", "M
 const VEHICLES = ["Volvo V60", "Toyota RAV4", "BMW i4", "Audi Q8 e-tron", "Mercedes-Benz GLC", "Skoda Enyaq", "Volkswagen ID.4", "Tesla Model Y", "Porsche Taycan", "Kia EV6", "Ford Kuga", "Peugeot 3008"]
 const QUIET = 380
 const UNCASED_RED = 6
+/** Why the made-up red cars without a case are red, in the engine's words (../v3.ts redReason). */
+const UNCASED_REASONS = ["Ferry sold out", "Vehicle warning", "No driver for the pickup", "Customer waiting for an answer", "Driver may not reach the pickup", "Cancelled, money still open"]
 
 function pickCity(random: () => number): [string, string] {
   const total = CITIES.reduce((sum, [, , w]) => sum + w, 0)
@@ -113,6 +115,7 @@ function madeUpCars(): FixtureCar[] {
       positionSource: red ? "at_pickup" : where,
       from: `${fromBrand} ${fromCity}`,
       to: toCity,
+      ...(red ? { reason: UNCASED_REASONS[(i - QUIET) % UNCASED_REASONS.length] } : {}),
       onRoad: !red && (where === "tracking" || where === "estimated"),
     })
   }
@@ -137,6 +140,7 @@ export function fixtureOverview(now: string, cases: Case[], orders: Record<strin
       to: order.delivery.placeName === "Private address" ? order.delivery.city : order.delivery.placeName,
       caseId: c.id,
       nextAt: c.status === "waiting_for_person" ? c.decideBy : order.delivery.window?.end,
+      ...(c.status === "waiting_for_person" ? { reason: keyFacts(c, null).find((f) => f.label === "Stopped")?.value ?? "Needs a person" } : {}),
       onRoad: false,
     }]
   })
@@ -214,5 +218,6 @@ export function fixtureCaseExtras(c: Case, order: OrderSummary | undefined, peop
     }),
     facts: facts.slice(0, 5),
   }
-  return { why: keyFacts(c, yours), situation }
+  const next = nextLine(c)
+  return { why: keyFacts(c, yours), situation, ...(next ? { next } : {}) }
 }

@@ -237,16 +237,22 @@
 /* ---------- The default Overview (Henry, 24 Oct): v3's map edge to edge, no header row,
    one big panel for the person: a welcome, their tasks, the map's key. ---------- */
 .main:has(.overview) .top { display: none; }
-.float-me { top: 16px; left: 16px; width: 420px; padding: 28px 28px 16px; border-radius: 24px; }
+.float-me { top: 16px; left: 16px; width: min(840px, calc(100% - 32px)); max-height: calc(100% - 32px); overflow: auto; padding: 48px 52px 28px; border-radius: 32px; }
 .float-me .welcome {
   font-family: "Owners Wide", var(--font-archivo), var(--font); font-stretch: 125%; font-variation-settings: "wdth" 125;
-  font-size: 30px; line-height: 36px; font-weight: 600; letter-spacing: -0.2px; text-wrap: balance;
+  font-size: 56px; line-height: 64px; font-weight: 600; letter-spacing: -0.4px; text-wrap: balance;
 }
-.float-me .me-tasks { margin-top: 24px; }
-.float-me .tasks-today { width: 100%; justify-content: space-between; height: 52px; padding: 0 18px 0 22px; font-family: var(--font); font-size: 17px; line-height: 24px; }
-.float-me .red-rows { margin: 10px -10px 0; }
-.float-me .red-row { padding: 9px 10px; }
-.float-me .key { margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--press); }
+.float-me .me-tasks { margin-top: 40px; }
+.float-me .tasks-today { width: 100%; justify-content: space-between; height: 92px; padding: 0 32px 0 40px; font-family: var(--font); font-size: 30px; line-height: 40px; }
+.float-me .tasks-today svg { width: 32px; height: 32px; }
+.float-me .red-rows { margin: 16px -16px 0; }
+.float-me .red-row { padding: 14px 16px; border-radius: 16px; column-gap: 24px; }
+.float-me .red-row .v { font-size: 28px; line-height: 36px; }
+.float-me .red-row .p { font-size: 22px; line-height: 28px; }
+.float-me .red-row time { font-size: 24px; line-height: 36px; }
+.float-me .key { margin-top: 24px; padding-top: 24px; gap: 8px; border-top: 1px solid var(--press); }
+.float-me .state { grid-template-columns: 14px minmax(0, 1fr) auto; column-gap: 16px; font-size: 22px; line-height: 32px; }
+.float-me .state .dot { width: 14px; height: 14px; }
 
 /* Dots only on the map: a red pin is a red dot with a ring; its card names the car. */
 .pin.dot-only, .pin.dot-only:hover, .pin.dot-only.lift { width: 15px; height: 15px; padding: 0; border-radius: 50%; justify-content: center; }
@@ -260,6 +266,13 @@
 .map-dark .maplibregl-ctrl-attrib a { color: #a09786 !important; }
 
 @media (max-width: 860px) {
-  .float-me { left: 8px; right: 8px; width: auto; padding: 20px 20px 12px; }
+  .float-me { left: 8px; right: 8px; width: auto; max-height: none; padding: 20px 20px 12px; border-radius: 24px; }
   .float-me .welcome { font-size: 24px; line-height: 30px; }
+  .float-me .me-tasks { margin-top: 20px; }
+  .float-me .tasks-today { height: 52px; padding: 0 18px 0 22px; font-size: 17px; line-height: 24px; }
+  .float-me .tasks-today svg { width: 18px; height: 18px; }
+  .float-me .red-row .v { font-size: 16px; line-height: 22px; }
+  .float-me .red-row .p, .float-me .red-row time { font-size: 13px; line-height: 18px; }
+  .float-me .state { grid-template-columns: 8px minmax(0, 1fr) auto; column-gap: 10px; font-size: 13px; line-height: 20px; }
+  .float-me .state .dot { width: 8px; height: 8px; }
 }

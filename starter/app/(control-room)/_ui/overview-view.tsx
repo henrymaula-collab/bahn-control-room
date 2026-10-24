@@ -27,7 +27,7 @@ export function OverviewView({ data, red, look, firstName }: { data: Overview; r
         red={red}
         lift={lift}
         look={look}
-        pad={{ top: 56, bottom: 56, left: 16 + 420 + 56, right: 72 }}
+        pad={{ top: 56, bottom: 56, left: 16 + 840 + 32, right: 48 }} // the panel is 840 px (Henry, 24 Oct)
         padPhone={{ top: 440, bottom: 24, left: 24, right: 24 }}
         card={(orderId, close) => <PinCard info={red[orderId]} close={close} />}
       />

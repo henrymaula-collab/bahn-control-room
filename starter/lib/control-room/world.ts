@@ -50,6 +50,8 @@ export type World = {
   operators: Row[]
   /** Shared reference data (city-to-terminal road estimates), keyed by id. */
   roadEstimates: Map<string, Record<string, unknown>>
+  /** Ferry terminals (name, city, country), keyed by id, for routes that cross the sea. */
+  ferryTerminals: Map<string, { id: string; name: string; city: string; country: string }>
 }
 
 function placeFor(addressId: string, siteId: string | null, addressMap: Map<string, PlaceRow>, siteMap: Map<string, SiteRow>): Place {
@@ -244,6 +246,9 @@ export async function loadWorld(): Promise<World> {
     assignmentsByDriver,
     operators: operators as Row[],
     roadEstimates: new Map(shared("terminal_road_estimates").map((row) => [row.id, row.details])),
+    ferryTerminals: new Map(shared("ferry_terminals").map((row) => [row.id, {
+      id: row.id, name: String(row.details.name ?? row.id), city: String(row.details.city ?? ""), country: String(row.details.country ?? ""),
+    }])),
   }
 }
 

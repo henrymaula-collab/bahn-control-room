@@ -5,7 +5,7 @@ import { fail } from "../../_util"
 export const runtime = "nodejs"
 export const dynamic = "force-dynamic"
 
-/** GET /api/cr/cases/:id -> { case, order, routedTo, lessons, calls, agentRuns, check, derived } */
+/** GET /api/cr/cases/:id -> { case, order, routedTo, lessons, calls, agentRuns, check, derived, why, situation } */
 export async function GET(_request: Request, context: { params: Promise<{ id: string }> }) {
   const { id } = await context.params
   const detail = await getCaseDetail(id)

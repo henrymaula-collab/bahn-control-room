@@ -14,6 +14,7 @@ import {
 } from "./store"
 import type { Case, Decision, Lesson, OpsPerson, OrderCheck } from "./types"
 import { CASE_TYPE_WORDS, caseTypeWords } from "./vocab"
+import { caseExtras, findPerson, overview, workLists } from "./v3"
 import { type World, loadWorld, worldNow } from "./world"
 
 const OPEN: Case["status"][] = ["waiting_for_person", "agent_working"]
@@ -40,6 +41,13 @@ export async function buildState(): Promise<EngineState> {
     loadWorld(), listPeople(), listDecisions(), listLessons(), listTrustRules(), listStoredCases(),
   ])
   const now = worldNow(world)
+  // Contract: every option says what changes. Agent cases can store an option with no
+  // change at all (keep the slot, call again); it reads as "nothing changes".
+  for (const c of stored) {
+    for (const option of [c.suggestion, ...c.alternatives]) {
+      if (option && !option.changes?.length) option.changes = [{ kind: "none", detail: "Nothing changes on the order" }]
+    }
+  }
   const storedOrders = new Set(stored.map((c) => c.orderId))
   // First pass: checks from the data alone, to know which derived cases need a person.
   const firstChecks = computeOrderChecks(world, stored)
@@ -90,16 +98,16 @@ export function quietLine(state: EngineState) {
   }
 }
 
-export async function getDesk(personId: string) {
-  const state = await buildState()
+export async function getDesk(personId: string, given?: EngineState) {
+  const state = given ?? await buildState()
   const person = state.people.find((candidate) => candidate.id === personId) ?? null
   if (!person) return null
   const mine = state.cases.filter((c) => c.routedTo?.personId === personId && c.status === "waiting_for_person").sort(byUrgency)
   return { person, focus: mine[0] ?? null, queue: mine.slice(1), quiet: quietLine(state) }
 }
 
-export async function getCaseDetail(id: string) {
-  const state = await buildState()
+export async function getCaseDetail(id: string, given?: EngineState) {
+  const state = given ?? await buildState()
   const c = state.cases.find((candidate) => candidate.id === id)
   if (!c) return null
   const order = state.world.byId.get(c.orderId)
@@ -120,7 +128,23 @@ export async function getCaseDetail(id: string) {
     agentRuns,
     check: state.checks.find((check) => check.orderId === c.orderId) ?? null,
     derived: state.derivedIds.has(c.id),
+    // v3 (types-v3.ts CaseV3Extras): key facts and the situation panel.
+    ...(caseExtras(state, c) ?? { why: [], situation: null }),
   }
+}
+
+/** GET /api/cr/overview: every car active today on the map, the counts, and this person's cases. */
+export async function getOverview(personId: string, given?: EngineState) {
+  const state = given ?? await buildState()
+  const person = findPerson(state.people, personId)
+  return person ? overview(state, person) : null
+}
+
+/** GET /api/cr/work: Needs you, Agent working, Done today for one person. */
+export async function getWork(personId: string, given?: EngineState) {
+  const state = given ?? await buildState()
+  const person = findPerson(state.people, personId)
+  return person ? workLists(state, person) : null
 }
 
 /** "Learned from Aino's decision on 24 Oct": who and when, for each lesson. */
@@ -194,8 +218,8 @@ export async function reviewLessonById(id: string, accept: boolean, personId: st
   return next
 }
 
-export async function getLead() {
-  const state = await buildState()
+export async function getLead(given?: EngineState) {
+  const state = given ?? await buildState()
   const counts = countChecks(state.checks)
   const live = state.decisions.filter((row) => !row.synthetic)
   const openCases = state.cases.filter((c) => c.status === "waiting_for_person")

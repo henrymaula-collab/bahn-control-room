@@ -21,11 +21,13 @@
 .lab-situation-06 .p6-map { height: max(120px, calc(8 * var(--type-subhead))); margin: 0.2em 0 0.4em; }
 .lab-situation-06 .p6-rows { list-style: none; margin: 0; padding: 0; }
 .lab-situation-06 .p6-rows li {
-  display: grid; grid-template-columns: calc(1.4 * var(--type-subhead)) minmax(0, 1fr) auto; column-gap: 0.65em; align-items: center;
+  display: flex; flex-wrap: wrap; column-gap: 0.65em; align-items: center;
   padding: 0.5em 0; border-bottom: 1px solid rgb(18 17 14 / 0.07);
 }
-.lab-situation-06 .p6-place { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.lab-situation-06 .p6-time { white-space: nowrap; font-variant-numeric: tabular-nums; color: var(--ink-2); }
+/* The time wraps under a long place (the Volvo) instead of cutting it to "Velantora Hel…" (RV5). */
+.lab-situation-06 .p6-rows li > :first-child { flex: none; width: calc(1.4 * var(--type-subhead)); }
+.lab-situation-06 .p6-place { flex: 1 1 auto; min-width: 0; }
+.lab-situation-06 .p6-time { margin-left: auto; white-space: nowrap; font-variant-numeric: tabular-nums; color: var(--ink-2); }
 .lab-situation-06 .p6-kv > div { display: grid; grid-template-columns: max(96px, calc(150 * var(--cr-u, 1px))) minmax(0, 1fr); column-gap: 0.9em; padding: 0.5em 0; border-bottom: 1px solid rgb(18 17 14 / 0.07); }
 .lab-situation-06 .p6-kv dt { color: var(--ink-2); }
 .lab-situation-06 .p6-kv .is-block dd { font-weight: 600; }

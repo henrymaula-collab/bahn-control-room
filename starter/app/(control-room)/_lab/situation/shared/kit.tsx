@@ -244,9 +244,45 @@ export function LabMap({ from, to, leg = "line", muted = false, labels, cluster 
             if (l.type === "fill" && /(park|wood|grass|landcover|landuse)/.test(l.id)) m.setPaintProperty(l.id, "fill-opacity", 0.35)
           }
         }
+        // A city name may step to another side of its point (reviewer RV5: with only the keep-out
+        // below, "Helsinki" and "Turku" vanished from the BMW's map and B named no city anywhere).
+        // With callouts (09) the callouts name the places; a city name would only run under them.
+        for (const id of ["label_city", "label_city_all", "label_city_capital", "label_city_capital_all"]) {
+          if (!m.getLayer(id)) continue
+          if (labels) {
+            m.setLayoutProperty(id, "visibility", "none")
+            continue
+          }
+          m.setLayoutProperty(id, "text-variable-anchor", ["bottom", "top", "right", "left"])
+          m.setLayoutProperty(id, "text-radial-offset", 1.5)
+        }
         // An invisible symbol under each pin, placed first, so a city name under a pin yields
         // instead of running through it ("H(A)nki").
-        m.addSource("lab-keepout", { type: "geojson", data: { type: "FeatureCollection", features: (merged ? [[(a[0] + b[0]) / 2, (a[1] + b[1]) / 2] as [number, number]] : [a, b]).map((c) => ({ type: "Feature", properties: {}, geometry: { type: "Point", coordinates: c } })) } })
+        // The attribution's (i) is a DOM button the labels cannot see: keep its corner free too, so a
+        // name pushed below a pin steps to the side instead of under the (i) ("Helsi(i)").
+        const keep: [number, number][] = merged ? [[(a[0] + b[0]) / 2, (a[1] + b[1]) / 2]] : [a, b]
+        if (attribution === "bottom-right" && !interactive && box.current) {
+          const c = m.unproject([box.current.clientWidth - 22, box.current.clientHeight - 22])
+          keep.push([c.lng, c.lat])
+        }
+        // ...and its edges, so no name is drawn half off the map ("Hamb", "Helsi" at the foot).
+        if (!interactive && box.current) {
+          const w = box.current.clientWidth
+          const h = box.current.clientHeight
+          const at = (x: number, y: number) => {
+            const c = m!.unproject([x, y])
+            keep.push([c.lng, c.lat])
+          }
+          for (let x = 0; x <= w; x += 20) {
+            at(x, 2)
+            at(x, h - 2)
+          }
+          for (let y = 0; y <= h; y += 20) {
+            at(2, y)
+            at(w - 2, y)
+          }
+        }
+        m.addSource("lab-keepout", { type: "geojson", data: { type: "FeatureCollection", features: keep.map((c) => ({ type: "Feature", properties: {}, geometry: { type: "Point", coordinates: c } })) } })
         m.addLayer({
           id: "lab-keepout",
           type: "symbol",
@@ -304,7 +340,8 @@ export function LabMap({ from, to, leg = "line", muted = false, labels, cluster 
           t.className = `s-callout s-callout-${side}`
           t.innerHTML = `<b></b>${lab[1] ? "<i></i>" : ""}`
           t.querySelector("b")!.textContent = lab[0]
-          if (lab[1]) t.querySelector("i")!.textContent = lab[1]
+          // Never break a time range at its dash ("11:00–" / "16:00"): a word joiner on each side (RV5).
+          if (lab[1]) t.querySelector("i")!.textContent = lab[1].replace(/–/g, "\u2060–\u2060")
           el.appendChild(t)
         }
         add(at as [number, number], el)

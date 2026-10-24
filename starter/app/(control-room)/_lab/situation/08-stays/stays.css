@@ -21,7 +21,7 @@
 
 /* The strip: the panel's own column, its top edge, the car and the blocker in one line. */
 .lab-situation-08.s8-strip {
-  position: absolute; top: 0; right: 0; z-index: 12; width: var(--panel); height: var(--s8-h, 52px);
+  position: absolute; top: 0; right: 0; z-index: 10; width: var(--panel); height: var(--s8-h, 52px);
   display: flex; align-items: center; gap: 0.75em; padding: 0 max(20px, calc(28 * var(--cr-u, 1px)));
   border: 0; border-bottom: 1px solid rgb(18 17 14 / 0.08); background: var(--page); color: var(--ink);
   box-shadow: -1px 0 0 rgb(18 17 14 / 0.06), -12px 0 32px rgb(18 17 14 / 0.06);
@@ -39,7 +39,9 @@
 .lab-situation-08 .s8-chev svg { width: 1.2em; height: 1.2em; }
 
 .work:has(.lab-situation-08.s8-strip) { --s8-h: max(48px, calc(3.2 * var(--type-subhead))); }
-.work:has(.lab-situation-08.s8-strip) .panel.open:not(.lab-situation-08) { top: var(--s8-h); }
+/* Only the chat and the email move down (reviewer RV5): another slot's panel over the situation, such
+   as needs 11's list (z-index 11), keeps its place and covers the strip, which sits at the panels' 10. */
+.work:has(.lab-situation-08.s8-strip) .panel.open:is(#chat, #email) { top: var(--s8-h); }
 
 @media (prefers-reduced-motion: no-preference) {
   .lab-situation-08 .p8-leg, .lab-situation-08.s8-strip { transition: background-color 150ms var(--s-ease); }

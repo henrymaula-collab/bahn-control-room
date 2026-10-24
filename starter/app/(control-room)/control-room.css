@@ -19,9 +19,33 @@
   --font: var(--font-geist), "Geist", system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-mono: var(--font-geist-mono), "Geist Mono", ui-monospace, Menlo, monospace;
 
-  --size-l: 28px;
-  --size-m: 16px;
-  --size-s: 13px;
+  /* One type ramp for the whole app (design/TYPE_SCALE.md, Henry 24 Oct 20:44: "follow Apple's
+     practice"). Apple's iOS text styles times one factor: k = 1 at 1512 x 800 (Apple's sizes:
+     Body 17), 1.65 at 2560 x 1300 (the approved Overview). k follows --cr-u (shell.css), so the
+     type scales with the frame and never goes under Apple's defaults. The side menu (chrome)
+     grows more gently, 1 to 1.2, as macOS sizes its sidebar apart from the content. */
+  --type-k:  clamp(1px, calc(2.09 * var(--cr-u) - 0.44px), 1.65px);
+  --type-kc: clamp(1px, calc(0.643 * var(--cr-u) + 0.557px), 1.2px);
+
+  --type-display:  calc(34 * var(--type-k));  --lh-display:  1.14;  --track-display:  -0.007em; /* Owners Wide: the approved Overview's own leading */
+  --type-title1:   calc(28 * var(--type-k));  --lh-title1:   1.214; --track-title1:   -0.02em;
+  --type-title2:   calc(22 * var(--type-k));  --lh-title2:   1.273; --track-title2:   -0.01em;
+  --type-headline: calc(17 * var(--type-k));  --lh-headline: 1.294; --track-headline: -0.01em;
+  --type-body:     calc(17 * var(--type-k));  --lh-body:     1.294;
+  --type-subhead:  calc(15 * var(--type-k));  --lh-subhead:  1.333;
+  --type-menu:     calc(15 * var(--type-kc)); --lh-menu:     1.333;
+  --type-menu-sub: calc(13 * var(--type-kc)); --lh-menu-sub: 1.385;
+  --type-caption2: 11px; /* map attribution only: Apple's floor */
+
+  /* Two weights: regular and semibold. 500 is gone (Apple: "avoid light font weights"; only the
+     preferred action is bold). */
+  --weight-regular: 400;
+  --weight-strong:  600;
+
+  /* The old three, pointed at the ramp, so every page moves with it. */
+  --size-l: var(--type-title1);
+  --size-m: var(--type-body);
+  --size-s: var(--type-subhead);
 
   --column: 600px;
   --ease: cubic-bezier(.2, 0, 0, 1);
@@ -45,7 +69,7 @@ body {
   color: var(--ink);
   font-family: var(--font);
   font-size: var(--size-m);
-  line-height: 24px;
+  line-height: var(--lh-body);
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }
@@ -61,10 +85,11 @@ time, .num { font-variant-numeric: tabular-nums; }
 .mono { font-family: var(--font-mono); font-size: var(--size-s); }
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 
-/* The three sizes. Weight and tone do the rest. */
-.l { font-size: var(--size-l); line-height: 36px; letter-spacing: -0.45px; }
-.m { font-size: var(--size-m); line-height: 24px; }
-.s { font-size: var(--size-s); line-height: 18px; color: var(--ink-2); }
+/* The three sizes. Weight and tone do the rest. Leading as Apple's ratios, never px, so it
+   scales with the size. */
+.l { font-size: var(--size-l); line-height: var(--lh-title1); letter-spacing: var(--track-title1); }
+.m { font-size: var(--size-m); line-height: var(--lh-body); }
+.s { font-size: var(--size-s); line-height: var(--lh-subhead); color: var(--ink-2); }
 .strong { font-weight: 600; }
 .quiet { color: var(--ink-2); }
 /* Red text = a deadline within the hour or an error, semibold so it reads as danger (Henry,
@@ -86,7 +111,7 @@ body { background: var(--raise); }
 .nav a {
   display: flex; align-items: center; gap: 10px;
   height: 32px; padding: 0 10px; border-radius: 8px;
-  font-size: var(--size-s); line-height: 18px; font-weight: 500; color: var(--ink);
+  font-size: var(--type-menu); line-height: var(--lh-menu); font-weight: 400; color: var(--ink);
   transition: background-color 150ms var(--ease);
 }
 .nav a svg { color: var(--ink-2); flex: none; }
@@ -102,7 +127,7 @@ body { background: var(--raise); }
   background: var(--page); box-shadow: 0 0 0 1px rgb(18 17 14 / 0.06);
 }
 .top { flex: none; height: 48px; padding: 0 20px; display: flex; align-items: center; }
-.top-title { font-size: var(--size-s); line-height: 18px; font-weight: 500; }
+.top-title { font-size: var(--type-menu); line-height: var(--lh-menu); font-weight: 600; }
 .page { position: relative; flex: 1; min-height: 0; overflow: auto; }
 
 /* The person on shift, bottom of the menu. A demo switch shaped like an account menu. */
@@ -113,7 +138,7 @@ body { background: var(--raise); }
 }
 .person-button:hover { background: rgb(18 17 14 / 0.045); }
 .person-button svg { color: var(--ink-2); }
-.person-name { display: flex; flex-direction: column; font-size: var(--size-s); line-height: 18px; font-weight: 500; }
+.person-name { display: flex; flex-direction: column; font-size: var(--type-menu); line-height: var(--lh-menu); font-weight: 400; }
 .person-name .s { font-weight: 400; }
 .menu {
   position: absolute; left: 0; right: 0; bottom: calc(100% + 6px); z-index: 30;
@@ -121,7 +146,7 @@ body { background: var(--raise); }
 }
 .menu-item {
   width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 12px;
-  padding: 8px 10px; border-radius: 8px; font-size: var(--size-s); line-height: 18px; font-weight: 500;
+  padding: 8px 10px; border-radius: 8px; font-size: var(--type-menu); line-height: var(--lh-menu); font-weight: 400;
 }
 .menu-item:hover { background: var(--raise); }
 .menu-item .s { margin-left: 6px; font-weight: 400; }
@@ -142,20 +167,20 @@ body { background: var(--raise); }
 @keyframes breathe { 0% { transform: scale(1); opacity: .35; } 70%, 100% { transform: scale(2.6); opacity: 0; } }
 
 /* ---------- The question ---------- */
-.question .due { font-weight: 500; color: var(--ink-2); }
-.question .due.now { color: var(--now); font-weight: 600; }
+.question .due { font-size: var(--type-subhead); line-height: var(--lh-subhead); font-weight: 600; color: var(--ink-2); }
+.question .due.now { color: var(--now); }
 .question .what { margin-top: 8px; font-weight: 600; }
-.question .ask { font-weight: 400; }
+.question .ask { font-size: var(--type-title2); line-height: var(--lh-title2); letter-spacing: var(--track-title2); font-weight: 400; }
 .question .context { margin-top: 12px; }
 .answers { margin-top: 32px; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
 
 .btn {
   display: inline-flex; align-items: center; justify-content: center; gap: 6px;
   min-height: 44px; padding: 0 22px; border-radius: 999px;
-  font-weight: 500; white-space: nowrap;
+  font-weight: 400; white-space: nowrap;
   transition: background-color 150ms var(--ease), color 150ms var(--ease);
 }
-.btn-primary { background: var(--ink); color: var(--page); }
+.btn-primary { background: var(--ink); color: var(--page); font-weight: 600; letter-spacing: var(--track-headline); }
 .btn-primary:hover { background: var(--bx-color-grey-900); }
 .btn-secondary { background: var(--raise); color: var(--ink); }
 .btn-secondary:hover { background: var(--press); }
@@ -163,7 +188,7 @@ body { background: var(--raise); }
 .btn-plain:hover { background: var(--raise); }
 .btn:disabled { opacity: .5; cursor: default; }
 .btn-small { min-height: 36px; padding: 0 16px; }
-.link { color: var(--ink-2); font-weight: 500; display: inline-flex; align-items: center; gap: 2px; border-radius: 8px; }
+.link { color: var(--ink-2); font-weight: 400; display: inline-flex; align-items: center; gap: 2px; border-radius: 8px; }
 .link:hover { color: var(--ink); }
 
 /* ---------- Disclosure: a label that says what is inside, a chevron ---------- */
@@ -174,7 +199,7 @@ details > summary::-webkit-details-marker { display: none; }
 .inline-disclosure { margin-top: 20px; }
 .inline-disclosure > summary {
   display: inline-flex; align-items: center; gap: 2px;
-  color: var(--ink-2); font-weight: 500; padding: 4px 6px; margin-left: -6px; border-radius: 8px;
+  color: var(--ink-2); font-weight: 400; padding: 4px 6px; margin-left: -6px; border-radius: 8px;
 }
 .inline-disclosure > summary:hover { color: var(--ink); }
 .inline-disclosure > summary svg,
@@ -190,7 +215,7 @@ details > summary::-webkit-details-marker { display: none; }
   padding: 12px 16px; margin: 0 -16px; border-radius: 14px;
 }
 .row > summary:hover, .row-link:hover { background: var(--raise); }
-.row > summary .title, .row-link .title { font-weight: 500; }
+.row > summary .title, .row-link .title { font-weight: 400; }
 .row > summary .chev, .row-link .chev { color: var(--ink-2); display: inline-flex; }
 .row[open] > summary .chev { transform: rotate(90deg); }
 .row > .body { padding: 8px 0 28px; }
@@ -206,8 +231,8 @@ details > summary::-webkit-details-marker { display: none; }
 
 /* ---------- Sheet: Other options and the one-tap why (one sheet at a time) ---------- */
 dialog.sheet {
-  width: min(560px, calc(100vw - 32px));
-  max-height: min(760px, calc(100vh - 64px));
+  width: min(calc(33 * var(--type-body)), calc(100vw - 32px));
+  max-height: min(calc(45 * var(--type-body)), calc(100vh - 64px));
   padding: 0; border: 0; border-radius: 24px;
   background: var(--page); color: var(--ink);
   overflow: auto;
@@ -221,13 +246,13 @@ dialog.sheet[open] { animation: sheet-in 260ms var(--ease-open); }
 .sheet-body { padding: 12px 28px 28px; }
 .sheet-body .option { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 16px; align-items: center; width: 100%; padding: 14px 16px; margin: 0 -16px; width: calc(100% + 32px); border-radius: 14px; }
 .sheet-body .option:hover { background: var(--raise); }
-.sheet-body .option .title { font-weight: 500; }
+.sheet-body .option .title { font-weight: 400; }
 .sheet-body .option .chev { color: var(--ink-2); }
 .changes { display: flex; flex-direction: column; gap: 6px; margin-top: 12px; }
 .reasons { display: flex; flex-direction: column; gap: 8px; margin-top: 14px; }
 .reason { width: 100%; padding: 12px 18px; border-radius: 16px; background: var(--raise); text-align: left; transition: background-color 150ms var(--ease); }
 .reason:hover { background: var(--press); }
-.reason.other { background: none; padding: 8px 18px; color: var(--ink-2); font-weight: 500; }
+.reason.other { background: none; padding: 8px 18px; color: var(--ink-2); font-weight: 400; }
 .reason.other:hover { background: var(--raise); color: var(--ink); }
 .text-input {
   width: 100%; min-height: 48px; padding: 12px 16px; border-radius: 14px;
@@ -260,7 +285,7 @@ dialog.sheet[open] { animation: sheet-in 260ms var(--ease-open); }
 }
 .float .total { font-weight: 600; }
 .states { margin-top: 10px; display: flex; flex-direction: column; gap: 4px; }
-.state { display: grid; grid-template-columns: 8px minmax(0, 1fr) auto; align-items: center; column-gap: 10px; font-size: var(--size-s); line-height: 20px; }
+.state { display: grid; grid-template-columns: 8px minmax(0, 1fr) auto; align-items: center; column-gap: 10px; font-size: var(--size-s); line-height: var(--lh-subhead); }
 .state .n { color: var(--ink-2); }
 .float .need { margin: 18px -10px 0; }
 .float .need-head { display: flex; align-items: center; gap: 2px; padding: 6px 10px; border-radius: 10px; font-weight: 600; }
@@ -270,9 +295,9 @@ dialog.sheet[open] { animation: sheet-in 260ms var(--ease-open); }
 .red-rows { display: flex; flex-direction: column; }
 .red-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: 12px; padding: 7px 10px; border-radius: 10px; }
 .red-row:hover, .red-row.lift { background: var(--raise); }
-.red-row .v { font-size: var(--size-m); line-height: 22px; }
-.red-row .p { grid-column: 1; font-size: var(--size-s); line-height: 18px; color: var(--ink-2); }
-.red-row time { grid-row: 1; grid-column: 2; font-size: var(--size-s); line-height: 22px; color: var(--ink-2); }
+.red-row .v { font-size: var(--size-m); line-height: var(--lh-body); }
+.red-row .p { grid-column: 1; font-size: var(--size-s); line-height: var(--lh-subhead); color: var(--ink-2); }
+.red-row time { grid-row: 1; grid-column: 2; font-size: var(--size-s); line-height: calc(var(--lh-body) * var(--size-m)); color: var(--ink-2); }
 .red-row time.now { color: var(--now); }
 
 /* Map marks. Green dots are a map layer; the agent's cars and the red pins are elements. */
@@ -282,7 +307,7 @@ dialog.sheet[open] { animation: sheet-in 260ms var(--ease-open); }
   display: inline-flex; align-items: center; gap: 6px; cursor: pointer;
   height: 26px; padding: 0 10px 0 8px; border-radius: 999px;
   background: var(--page); color: var(--ink); box-shadow: 0 1px 3px rgb(18 17 14 / 0.18), 0 0 0 1px rgb(18 17 14 / 0.05);
-  font-family: var(--font); font-size: var(--size-s); line-height: 18px; font-weight: 500; white-space: nowrap;
+  font-family: var(--font); font-size: var(--size-s); line-height: var(--lh-subhead); font-weight: 400; white-space: nowrap;
   transition: background-color 150ms var(--ease), color 150ms var(--ease);
 }
 .pin .dot { width: 9px; height: 9px; }
@@ -302,9 +327,9 @@ dialog.sheet[open] { animation: sheet-in 260ms var(--ease-open); }
 .pin-card .head { display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: 12px; }
 .pin-card .head .v { grid-row: 1; grid-column: 1; }
 .pin-card .head .p { grid-row: 2; grid-column: 1; }
-.pin-card .head time { grid-row: 1; grid-column: 2; line-height: 24px; }
+.pin-card .head time { grid-row: 1; grid-column: 2; line-height: calc(var(--lh-body) * var(--size-m)); }
 .pin-card .q { margin-top: 10px; }
-.pin-card .go { margin: 8px 0 0 -8px; padding: 4px 8px; border-radius: 8px; font-weight: 500; display: inline-flex; align-items: center; gap: 2px; }
+.pin-card .go { margin: 8px 0 0 -8px; padding: 4px 8px; border-radius: 8px; font-weight: 400; display: inline-flex; align-items: center; gap: 2px; }
 .pin-card .go:hover { background: var(--raise); }
 .pin-card .go svg { color: var(--ink-2); }
 
@@ -312,7 +337,7 @@ dialog.sheet[open] { animation: sheet-in 260ms var(--ease-open); }
 .maplibregl-ctrl-group { border-radius: 12px !important; background: var(--page) !important; box-shadow: var(--shadow-float) !important; overflow: hidden; }
 .maplibregl-ctrl-group button { width: 34px !important; height: 34px !important; }
 .maplibregl-ctrl-group button + button { border-top: 0 !important; }
-.maplibregl-ctrl-attrib { font-family: var(--font); font-size: 11px; background: rgb(255 254 247 / 0.8) !important; }
+.maplibregl-ctrl-attrib { font-family: var(--font); font-size: var(--type-caption2); background: rgb(255 254 247 / 0.8) !important; }
 .maplibregl-ctrl-attrib a { color: var(--ink-2) !important; }
 
 /* ---------- Your tasks: the quiet list, the card, the situation ---------- */
@@ -327,7 +352,7 @@ dialog.sheet[open] { animation: sheet-in 260ms var(--ease-open); }
 .tabs { position: sticky; top: 0; z-index: 2; display: flex; gap: 2px; padding: 0 0 10px; background: var(--page); }
 .tab {
   padding: 5px 8px; border-radius: 8px; white-space: nowrap;
-  font-size: var(--size-s); line-height: 18px; font-weight: 500; color: var(--ink-2);
+  font-size: var(--size-s); line-height: var(--lh-subhead); font-weight: 400; color: var(--ink-2);
 }
 .tab:hover { color: var(--ink); }
 .tab[aria-selected="true"] { color: var(--ink); background: var(--raise); }
@@ -339,17 +364,17 @@ dialog.sheet[open] { animation: sheet-in 260ms var(--ease-open); }
 }
 .wrow:hover { background: rgb(18 17 14 / 0.03); }
 .wrow[aria-current="true"] { background: var(--raise); }
-.wrow .v { font-size: var(--size-m); line-height: 22px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.wrow .p { grid-column: 1; font-size: var(--size-s); line-height: 18px; color: var(--ink-2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.wrow time { grid-row: 1; grid-column: 2; font-size: var(--size-s); line-height: 22px; color: var(--ink-2); }
+.wrow .v { font-size: var(--size-m); line-height: var(--lh-body); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.wrow .p { grid-column: 1; font-size: var(--size-s); line-height: var(--lh-subhead); color: var(--ink-2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.wrow time { grid-row: 1; grid-column: 2; font-size: var(--size-s); line-height: calc(var(--lh-body) * var(--size-m)); color: var(--ink-2); }
 .wrow time.now { color: var(--now); }
-.list-empty { padding: 9px 10px; font-size: var(--size-s); line-height: 18px; color: var(--ink-2); }
+.list-empty { padding: 9px 10px; font-size: var(--size-s); line-height: var(--lh-subhead); color: var(--ink-2); }
 
 .detail { position: relative; min-width: 0; overflow: auto; padding: 56px 64px 64px; }
 .detail-inner { max-width: var(--column); }
 .question .next { margin-top: 12px; }
 .work-rows { margin-top: 40px; }
-.state-line { display: flex; align-items: center; gap: 8px; color: var(--ink-2); font-weight: 500; }
+.state-line { display: flex; align-items: center; gap: 8px; color: var(--ink-2); font-weight: 400; }
 
 /* The situation: slides in from the right; the list makes room, the decision stays. */
 .panel {
@@ -361,26 +386,30 @@ dialog.sheet[open] { animation: sheet-in 260ms var(--ease-open); }
 }
 .panel.open { transform: none; visibility: visible; transition: transform 200ms var(--ease), visibility 0s; }
 .panel-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
-.panel-head .close { width: 32px; height: 32px; margin: -4px -8px 0 0; display: inline-flex; align-items: center; justify-content: center; border-radius: 8px; color: var(--ink-2); }
+.panel h2.strong { font-size: var(--type-headline); line-height: var(--lh-headline); letter-spacing: var(--track-headline); }
+.panel-head .close svg { width: max(18px, calc(1.06 * var(--type-headline))); height: max(18px, calc(1.06 * var(--type-headline))); }
+.panel-head .close { width: max(32px, calc(1.9 * var(--type-headline))); height: max(32px, calc(1.9 * var(--type-headline))); margin: -4px -8px 0 0; display: inline-flex; align-items: center; justify-content: center; border-radius: 8px; color: var(--ink-2); }
 .panel-head .close:hover { background: var(--raise); color: var(--ink); }
 .route-map { position: relative; height: 196px; margin-top: 16px; border-radius: 14px; overflow: hidden; background: #f4f2ec; }
 .stops { margin-top: 20px; display: flex; flex-direction: column; gap: 14px; }
-.stop { display: grid; grid-template-columns: 20px minmax(0, 1fr); column-gap: 10px; }
+.stop { display: grid; grid-template-columns: calc(1.4 * var(--type-subhead)) minmax(0, 1fr); column-gap: 0.7em; }
 .stop .mark {
-  width: 20px; height: 20px; border-radius: 50%; margin-top: 2px;
+  width: calc(1.4 * var(--type-subhead)); height: calc(1.4 * var(--type-subhead)); border-radius: 50%;
+  margin-top: calc((var(--lh-subhead) - 1.4) / 2 * var(--type-subhead));
   display: inline-flex; align-items: center; justify-content: center;
-  font-size: var(--size-s); line-height: 1; font-weight: 600; color: var(--page);
+  font-size: var(--type-subhead); line-height: 1; font-weight: 600; color: var(--page);
 }
-.mark-a { background: var(--route-from); }
+/* The pickup marker: Bahn's orange with the letter in ink (6.55:1; birch on orange was 2.85:1). */
+.mark-a { background: var(--route-from); color: var(--ink); }
 .mark-b { background: var(--ink); }
 .stop .s { margin-top: 1px; }
 .panel .kv { margin-top: 24px; }
-.panel .open-order { margin: 24px 0 0 -8px; padding: 6px 8px; border-radius: 8px; font-weight: 500; display: inline-flex; align-items: center; gap: 2px; }
+.panel .open-order { margin: 24px 0 0 -8px; padding: 6px 8px; border-radius: 8px; font-weight: 400; display: inline-flex; align-items: center; gap: 2px; }
 .panel .open-order:hover { background: var(--raise); }
 .panel .open-order svg { color: var(--ink-2); }
 .route-pin {
-  width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
-  font-family: var(--font); font-size: var(--size-s); font-weight: 600; color: var(--page); box-shadow: 0 0 0 2px var(--page);
+  width: calc(1.47 * var(--type-subhead)); height: calc(1.47 * var(--type-subhead)); border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  font-family: var(--font); font-size: var(--type-subhead); line-height: 1; font-weight: 600; color: var(--page); box-shadow: 0 0 0 2px var(--page);
 }
 
 /* The empty list: one sentence, one way on. */

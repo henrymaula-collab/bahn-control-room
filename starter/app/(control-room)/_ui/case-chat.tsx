@@ -196,7 +196,8 @@ export function CaseChat({ thread, personId, now, focus }: { thread: ChatThread 
             setDraft(e.target.value)
             const el = e.currentTarget
             el.style.height = "auto"
-            el.style.height = `${Math.min(el.scrollHeight, 120)}px`
+            // The field grows with its text up to its CSS max-height (seven lines of the ramp's body).
+            el.style.height = `${el.scrollHeight}px`
           }}
           onKeyDown={(e) => {
             // Escape leaves the field; a second Escape closes the panel (work-frame).

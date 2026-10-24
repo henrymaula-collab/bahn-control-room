@@ -15,9 +15,9 @@
 .work {
   --panel: max(360px, calc(600 * var(--cr-u, 1px)));
   --list: max(220px, calc(320 * var(--cr-u, 1px)));
-  /* The list's small type grows on a laptop (13 to 15 px, 16 to 17 px) and stays as it was at 2560. */
-  --list-m: clamp(16px, calc(19.4px - 0.133vw), 17px);
-  --list-s: clamp(13px, calc(18.4px - 0.21vw), 15px);
+  /* The list's rows on the ramp (design/TYPE_SCALE.md): the car at body, place and time at subhead. */
+  --list-m: var(--type-body);
+  --list-s: var(--type-subhead);
 }
 .work.look-menu, .work.look-switcher { grid-template-columns: minmax(0, 1fr); }
 .work.look-column { grid-template-columns: var(--list) minmax(0, 1fr); }
@@ -28,13 +28,13 @@
 /* The Needs you list (column, and the switcher's menu) */
 .work .list { padding: calc(16 * var(--cr-u, 1px)) 12px 24px; }
 .work .wrow { padding: 10px 12px; }
-.work .wrow .v { font-size: var(--list-m); line-height: calc(var(--list-m) + 6px); }
-.work .wrow .p { font-size: var(--list-s); line-height: calc(var(--list-s) + 5px); }
-.work .wrow time { font-size: var(--list-s); line-height: calc(var(--list-m) + 6px); }
+.work .wrow .v { font-size: var(--list-m); line-height: var(--lh-body); }
+.work .wrow .p { font-size: var(--list-s); line-height: var(--lh-subhead); }
+.work .wrow time { font-size: var(--list-s); line-height: calc(var(--lh-body) * var(--list-m)); }
 
 /* ?tasks=switcher: one slim row above the card, the menu under the car's name. */
-.work .switcher { position: relative; display: flex; align-items: center; gap: 4px; margin-bottom: max(16px, calc(36 * var(--cr-u, 1px))); font-size: var(--list-m); line-height: 24px; }
-.switch-car, .switch-next { display: inline-flex; align-items: center; gap: 4px; padding: 6px 10px; border-radius: 10px; font-weight: 500; }
+.work .switcher { position: relative; display: flex; align-items: center; gap: 4px; margin-bottom: max(16px, calc(36 * var(--cr-u, 1px))); font-size: var(--list-m); line-height: var(--lh-body); }
+.switch-car, .switch-next { display: inline-flex; align-items: center; gap: 4px; padding: 6px 10px; border-radius: 10px; font-weight: 400; }
 .switch-car { margin-left: -10px; }
 .switch-car svg, .switch-next svg { color: var(--ink-2); }
 .switch-car:hover, .switch-car[aria-expanded="true"], .switch-next:hover { background: var(--raise); }
@@ -50,47 +50,50 @@
   .work .detail { container-type: inline-size; }
 }
 .work .detail {
-  /* The card's type, easy to tune (Henry, 20:44: the situation and the question as two blocks).
-     --card-measure: the headline's measure in its own size (25.5 em, about 56 characters), so the
-     longest headline today (156 characters) keeps to three lines.
-     --card-head: the situation, bold: the card's width holds one measure; never above 54 px
-     (the 2560 x 1300 size).
-     --card-ask: the question, one step smaller, regular weight, ink. */
-  --card-measure: 25.5;
-  --card-head: clamp(18px, min(calc(100cqw / var(--card-measure)), calc(54 * var(--cr-u, 1px))), 54px);
-  --card-ask: max(17px, calc(var(--card-head) * 0.8));
+  /* The card's type on the ramp (design/TYPE_SCALE.md; Henry, 20:44: "all the same weight, hard to
+     read"): the situation Title 1 semibold, the question Title 2 regular, one Apple step apart.
+     --card-measure: the situation's measure in its own size (24 em, about 48 characters: three
+     lines for the longest headline).
+     --card-head: Title 1 (28 at 1512 x 800, 46 at 2560 x 1300); in a card narrower than one
+     measure it steps down so the headline keeps to three lines.
+     --card-ask: Title 2, the same 22:28 step under it, regular weight, ink.
+     The rest of the card: body (buttons, rows) and subhead (deadline, the line under the buttons). */
+  --card-measure: 24;
+  --card-head: max(18px, min(var(--type-title1), calc(100cqw / var(--card-measure))));
+  --card-ask: calc(var(--card-head) * 22 / 28);
   --size-l: var(--card-head);
-  --size-m: clamp(17px, calc(24 * var(--cr-u, 1px)), 24px);
-  --size-s: clamp(15px, calc(18 * var(--cr-u, 1px)), 18px);
-  --column: calc(var(--card-measure) * var(--card-head));
+  --size-m: var(--type-body);
+  --size-s: var(--type-subhead);
+  --column: calc(32 * var(--card-ask));
   overflow: hidden auto;
   padding: max(28px, calc(56 * var(--cr-u, 1px))) max(28px, calc(64 * var(--cr-u, 1px)));
 }
 .work.has-panel .detail { padding-left: max(24px, calc(40 * var(--cr-u, 1px))); padding-right: max(24px, calc(40 * var(--cr-u, 1px))); }
 .work.look-switcher .detail { padding-top: max(16px, calc(28 * var(--cr-u, 1px))); }
-.work .detail-inner { font-size: var(--size-m); line-height: 1.5; }
-.work .detail .l { line-height: calc(var(--size-l) + 6px); letter-spacing: -0.0225em; }
-.work .detail .m { line-height: 1.5; }
-.work .detail .s { line-height: 1.5; }
+.work .detail-inner { font-size: var(--size-m); line-height: var(--lh-body); }
+.work .detail .l { line-height: var(--lh-title1); letter-spacing: var(--track-title1); }
+.work .detail .m { line-height: var(--lh-body); }
+.work .detail .s { line-height: var(--lh-subhead); }
 
 /* No panel: the card in the middle. With a panel: the card sits against it, the spare room to the left. */
 .work .detail-inner { margin-inline: auto; }
 .work.has-panel .detail-inner { margin-inline: auto 0; }
 
 /* The card. Air in em, so it scales with the type. */
-.work .question .what { margin-top: 0.185em; max-width: calc(var(--card-measure) * 1em); }
-/* The question: its own paragraph, a clear gap under the situation (0.7 of its line). */
+.work .question .due { font-size: var(--size-s); line-height: var(--lh-subhead); }
+.work .question .what { margin-top: 0.2em; max-width: calc(var(--card-measure) * 1em); }
+/* The question: its own block, 1 em of its size under the situation, sitting on its answer. */
 .work .detail .question .ask {
-  max-width: 27em; /* about 60 characters */
-  margin-top: calc(0.7 * (var(--card-head) + 6px));
-  font-size: var(--card-ask); line-height: calc(var(--card-ask) + 8px); font-weight: 400;
-  letter-spacing: -0.015em;
+  max-width: 32em; /* about 65 characters: two lines */
+  margin-top: 1em;
+  font-size: var(--card-ask); line-height: var(--lh-title2); font-weight: 400;
+  letter-spacing: var(--track-title2);
 }
 .work .question .context { margin-top: 0.667em; }
-.work .answers { margin-top: 1.5em; gap: 0.5em; }
-.work .answers .btn { min-height: max(44px, calc(2.5 * var(--size-m))); padding: 0 1.25em; font-size: var(--size-m); }
+.work .answers { margin-top: calc(24 / 17 * 1em); gap: 0.5em; }
+.work .answers .btn { min-height: max(44px, calc(2.6 * var(--size-m))); padding: 0 1.25em; font-size: var(--size-m); }
 .work .answers .btn-plain { padding: 0 0.92em; }
-.work .question .next { margin-top: 0.89em; max-width: 36em; }
+.work .question .next { margin-top: 0.8em; max-width: 40em; }
 
 /* The rows under it */
 .work .work-rows { margin-top: 1.67em; }
@@ -101,24 +104,19 @@
 .work .detail .row > .body { padding: 0.5em 0 1.33em; }
 .work .detail .kv { grid-template-columns: 9.17em minmax(0, 1fr); column-gap: 0.83em; row-gap: 0.58em; }
 
-/* The side panels: width and air from the unit, type at the base sizes. */
-.work .situation-panel { padding: max(14px, calc(18 * var(--cr-u, 1px))) max(20px, calc(28 * var(--cr-u, 1px))) 24px; }
+/* The side panels: width and air from the unit, type on the ramp. The situation: the car at
+   headline, everything else at subhead (labels grey, values ink). */
+.work .situation-panel { --size-m: var(--type-subhead); padding: max(14px, calc(18 * var(--cr-u, 1px))) max(20px, calc(28 * var(--cr-u, 1px))) 24px; }
+.work .situation-panel .stops { gap: 0.9em; margin-top: 1.3em; font-size: var(--type-subhead); }
+.work .situation-panel .kv { row-gap: 0.6em; margin-top: 1.5em; font-size: var(--type-subhead); }
+.work .situation-panel .open-order { margin-top: 1.5em; }
+.work .situation-panel .open-order svg { width: 1.2em; height: 1.2em; }
 .work .panel .kv { grid-template-columns: max(104px, calc(168 * var(--cr-u, 1px))) minmax(0, 1fr); }
 .work .route-map { height: max(150px, calc(196 * var(--cr-u, 1px))); }
 
 
-/* The Other options sheet sits inside the card but keeps the base sizes. */
-.work .detail dialog.sheet {
-  --size-l: 28px;
-  --size-m: 16px;
-  --size-s: 13px;
-  font-size: var(--size-m);
-  line-height: 24px;
-}
-.work .detail dialog.sheet .l { line-height: 36px; letter-spacing: -0.45px; }
-.work .detail dialog.sheet .m { line-height: 24px; }
-.work .detail dialog.sheet .s { line-height: 18px; }
-.work .detail dialog.sheet .chev svg { width: 18px; height: 18px; }
+/* The Other options sheet sits inside the card and takes the same ramp: body and subhead. */
+.work .detail dialog.sheet { font-size: var(--size-m); line-height: var(--lh-body); }
 
 /* Narrow screens keep the base layout. */
 @media (max-width: 860px) {
@@ -139,7 +137,7 @@
 .send-head { flex: none; align-items: center; padding: max(12px, calc(16 * var(--cr-u, 1px))) max(20px, calc(28 * var(--cr-u, 1px))) 4px; }
 .send-head .close { margin: 0 -8px 0 0; }
 .send-body { flex: 1; min-height: 0; overflow: hidden auto; overflow-wrap: break-word; padding: 12px max(20px, calc(28 * var(--cr-u, 1px))) 24px; }
-.panel .send-meta { grid-template-columns: 80px minmax(0, 1fr); column-gap: 16px; row-gap: 6px; margin: 0 0 20px; padding-bottom: 16px; border-bottom: 1px solid rgb(18 17 14 / 0.08); }
+.panel .send-meta { font-size: var(--type-subhead); line-height: var(--lh-subhead); grid-template-columns: 5.3em minmax(0, 1fr); column-gap: 1em; row-gap: 0.4em; margin: 0 0 20px; padding-bottom: 16px; border-bottom: 1px solid rgb(18 17 14 / 0.08); }
 .send-meta .quiet { color: var(--ink-2); }
 .send-text { white-space: pre-wrap; }
 .send-edit { width: 100%; min-height: min(470px, 55vh); padding: 12px 14px; border-radius: 12px; resize: vertical; white-space: pre-wrap; }

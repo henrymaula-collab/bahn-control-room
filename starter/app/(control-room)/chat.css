@@ -1,5 +1,7 @@
 /* "Talk it through": the conversation with the agent beside a decision.
-   Same discipline as control-room.css: sizes 16 and 13 only, ink and one grey,
+   Same discipline as control-room.css: two steps of the ramp (body for the words and the field,
+   subhead for steps and the kind line; the title at headline), so the chat grows with the card
+   beside it instead of staying at 16/13 px (design/TYPE_SCALE.md). Ink and one grey,
    no bubbles for the agent (its words sit on the page like the card's), the
    person's words in one soft block, no chips, no dots between facts. The agent's
    mark breathes while it works, like an agent's car on the map. */
@@ -11,7 +13,7 @@
 .chat { flex: 1; min-height: 0; display: flex; flex-direction: column; }
 .chat-log {
   flex: 1; min-height: 0; overflow: hidden auto; overscroll-behavior: contain; overflow-wrap: break-word;
-  display: flex; flex-direction: column; gap: 24px;
+  display: flex; flex-direction: column; gap: calc(1.4 * var(--type-body));
   padding: 12px max(20px, calc(28 * var(--cr-u, 1px))) max(20px, calc(28 * var(--cr-u, 1px)));
 }
 
@@ -30,8 +32,10 @@
 
 /* A turn by the agent: a byline (mark, steps), then its words */
 .turn.agent { display: flex; flex-direction: column; }
-.byline { display: flex; align-items: center; gap: 8px; min-height: 20px; font-weight: 500; color: var(--ink-2); }
-.words { display: flex; flex-direction: column; gap: 12px; margin-top: 10px; }
+.byline { display: flex; align-items: center; gap: 0.55em; min-height: 1.333em; font-weight: 400; color: var(--ink-2); }
+.byline .amark { width: 1.333em !important; height: 1.333em !important; }
+.byline .amark svg { width: 62%; height: 62%; }
+.words { display: flex; flex-direction: column; gap: 0.7em; margin-top: 0.6em; font-size: var(--type-body); }
 
 .steps > summary { width: fit-content; margin: -2px -8px -2px -2px; padding: 2px 8px 2px 2px; border-radius: 999px; }
 .steps > summary:hover { background: var(--raise); color: var(--ink); }
@@ -39,10 +43,10 @@
 .steps[open] > summary svg:last-child { transform: rotate(90deg); }
 .steps > .step-lines { margin-top: 10px; }
 
-.step-lines { display: flex; flex-direction: column; gap: 6px; padding-left: 28px; }
+.step-lines { display: flex; flex-direction: column; gap: 0.4em; padding-left: 1.9em; font-size: var(--type-subhead); }
 .byline + .step-lines { margin-top: 8px; }
 .step { display: flex; align-items: center; gap: 8px; animation: step-in 260ms var(--ease-open) both; }
-.step-state { width: 14px; height: 14px; flex: none; display: inline-flex; align-items: center; justify-content: center; color: var(--ink-2); }
+.step-state { width: 1em; height: 1em; flex: none; display: inline-flex; align-items: center; justify-content: center; color: var(--ink-2); }
 .spin {
   width: 11px; height: 11px; border-radius: 50%;
   border: 1.5px solid rgb(18 17 14 / 0.16); border-top-color: var(--ink-2);
@@ -62,13 +66,13 @@
 
 /* A turn by the person: their words, right, in one soft block */
 .turn.person { display: flex; justify-content: flex-end; }
-.said { max-width: 86%; padding: 10px 16px; border-radius: 18px; background: var(--raise); }
+.said { max-width: 86%; padding: 0.6em 0.95em; border-radius: 1.06em; background: var(--raise); }
 .said .via { display: inline-flex; margin-left: 8px; vertical-align: -2px; color: var(--ink-2); }
 
 /* What the agent knows about this kind: one quiet line under the opener */
 /* Two lines, always: the kind (grey), then where it stands (ink) */
 .knowledge { display: flex; flex-direction: column; align-items: flex-start; color: var(--ink-2); }
-.knowledge .state { display: inline-flex; align-items: center; gap: 2px; color: var(--ink); font-weight: 500; }
+.knowledge .state { display: inline-flex; align-items: center; gap: 2px; color: var(--ink); font-weight: 600; }
 .turn.agent + .knowledge, .turn.agent + .knowledge-more { margin-top: -8px; }
 .knowledge-more > summary { width: fit-content; margin: -4px 0 -4px -8px; padding: 4px 8px; border-radius: 10px; transition: background-color 150ms var(--ease); }
 .knowledge-more > summary:hover { background: rgb(18 17 14 / 0.035); }
@@ -79,7 +83,7 @@
 .row-link .row-text { display: flex; flex-direction: column; min-width: 0; }
 .row-link .row-text .sub { color: var(--ink-2); }
 .row-link[aria-expanded="true"] .row-text .sub { display: none; }
-.precedents { display: flex; flex-direction: column; gap: 16px; margin-top: 14px; }
+.precedents { display: flex; flex-direction: column; gap: 1em; margin-top: 0.9em; }
 .precedents .m { margin-top: 2px; }
 .precedents .s + .s, .precedents .m + .s { margin-top: 2px; }
 .gate { margin-top: 16px; }
@@ -89,22 +93,26 @@
 /* The field: type, talk, send */
 .composer {
   flex: none; display: flex; align-items: flex-end; gap: 4px;
-  margin: 0 max(12px, calc(16 * var(--cr-u, 1px))) max(12px, calc(16 * var(--cr-u, 1px))); padding: 6px 6px 6px 18px;
-  border-radius: 24px; background: var(--raise);
+  margin: 0 max(12px, calc(16 * var(--cr-u, 1px))) max(12px, calc(16 * var(--cr-u, 1px))); padding: 6px 6px 6px calc(1.06 * var(--type-body));
+  border-radius: calc(var(--composer-ctl) / 2 + 6px); background: var(--raise);
+  --composer-ctl: max(36px, calc(2.12 * var(--type-body)));
   transition: box-shadow 150ms var(--ease);
 }
 .composer:focus-within { box-shadow: 0 0 0 1px rgb(18 17 14 / 0.22); }
 .composer textarea {
-  flex: 1; min-width: 0; min-height: 36px; max-height: 120px; padding: 6px 0;
+  flex: 1; min-width: 0; min-height: var(--composer-ctl); max-height: calc(7 * var(--type-body)); padding: calc((var(--composer-ctl) - var(--lh-body) * var(--type-body)) / 2) 0;
   border: 0; outline: none; resize: none; background: none; color: var(--ink);
+  font-size: var(--type-body); line-height: var(--lh-body);
 }
 .composer textarea::placeholder { color: var(--ink-2); opacity: 1; }
 .composer .voice, .composer .send {
-  width: 36px; height: 36px; flex: none; border-radius: 50%;
+  width: var(--composer-ctl); height: var(--composer-ctl); flex: none; border-radius: 50%;
   display: inline-flex; align-items: center; justify-content: center;
   transition: background-color 150ms var(--ease), color 150ms var(--ease);
 }
 .composer .voice { color: var(--ink); }
+.composer .voice-button { width: var(--composer-ctl); height: var(--composer-ctl); }
+.composer .voice-icon, .composer .send svg { width: calc(0.5 * var(--composer-ctl)); height: calc(0.5 * var(--composer-ctl)); }
 .composer .voice:hover:not(:disabled) { background: var(--press); }
 .composer .voice:disabled { color: var(--ink-2); opacity: .55; cursor: default; }
 .composer .send { background: var(--ink); color: var(--page); }
@@ -129,19 +137,22 @@
 .turn-group { display: contents; }
 .chat-offer { margin-top: -10px; display: flex; flex-direction: column; gap: 8px; }
 .chat-offer-buttons { display: flex; flex-wrap: wrap; gap: 8px; }
-.chat-offer .btn { min-height: 40px; padding: 0 18px; }
+.chat-offer .btn { min-height: max(40px, calc(2.35 * var(--type-body))); padding: 0 1.06em; }
 .chat-offer .btn-plain { padding: 0 14px; }
 .chat-offer .btn:disabled { opacity: .5; }
 .chat-offer .chat-error { margin-top: 0; }
 .offer-done .byline span { display: inline-flex; align-items: center; gap: 4px; }
 /* The message the option sends, shown before the yes: a few lines, then "Read it all". */
-.chat-draft { display: flex; flex-direction: column; gap: 6px; padding: 12px 14px; border-radius: 12px; background: var(--raise); }
+.chat-draft { display: flex; flex-direction: column; gap: 0.35em; padding: 0.7em 0.82em; border-radius: 0.7em; background: var(--raise); }
 .chat-draft .s { color: var(--ink-2); }
 .chat-draft .draft-text { white-space: pre-line; }
 .chat-draft .draft-text.clamped { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 4; line-clamp: 4; overflow: hidden; }
-.chat-draft .read-all { align-self: flex-start; display: inline-flex; align-items: center; gap: 2px; margin: 0 -6px; padding: 2px 6px; border-radius: 999px; color: var(--ink); font-weight: 500; }
+.chat-draft .read-all { align-self: flex-start; display: inline-flex; align-items: center; gap: 2px; margin: 0 -6px; padding: 2px 6px; border-radius: 999px; color: var(--ink); font-weight: 400; }
 .chat-draft .read-all:hover { background: var(--press); }
 
-/* The dev-only feedback tool (app/layout.tsx, development only) waits at the top right, clear of
-   the send button, the voice button and the panels' close button. Its own default is bottom right. */
-agentation-toolbar.agentation-aside { top: 16px; right: 76px; bottom: auto; }
+/* The dev-only feedback tool (app/layout.tsx, development only) rests in the side menu's empty
+   space, at its right edge just above the person block, where it covers no control at any window
+   size (not the situation panel's corner, not the chat's close or send button). Its box is 337 px
+   wide and opens leftwards from the button, so on a laptop the opened toolbar runs a little past
+   the window's left edge; drag it if a hidden control is needed. Its own default is bottom right. */
+agentation-toolbar.agentation-aside { top: auto; left: auto; right: calc(100vw - var(--side, 300px) + 12 * var(--cr-su, 1px)); bottom: calc(100 * var(--cr-su, 1px)); }

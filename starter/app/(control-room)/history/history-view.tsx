@@ -257,6 +257,15 @@ export function HistoryView({ view, initial }: { view: View; initial: HistorySta
   )
 }
 
+/** The reason as the person gave it, in quotes. A reason the learning loop wrote about the person
+ *  ("Aino chose to release the driver ...") is a summary, not their words: no quotes, and when the
+ *  viewer is that person it reads "You chose to ...". The stored text stays as it is. */
+function Reason({ text, name, mine }: { text: string; name: string; mine: boolean }) {
+  const own = name && text.startsWith(`${name} `) ? text.slice(name.length + 1) : null
+  if (own === null) return <>“{text}”</>
+  return <>{mine ? `You ${own}` : text}</>
+}
+
 function Record({ row, now, me, lead, onClose }: { row: HistoryRow; now: string; me: string; lead: boolean; onClose: () => void }) {
   const mine = row.by.id === me
   const agent = row.by.id === "agent"
@@ -290,7 +299,7 @@ function Record({ row, now, me, lead, onClose }: { row: HistoryRow; now: string;
         {!agent && (
           <>
             <dt>Reason</dt>
-            <dd>{row.reason ? `“${row.reason}”` : <span className="hist-quiet">No reason given</span>}</dd>
+            <dd>{row.reason ? <Reason text={row.reason} name={row.by.name} mine={mine} /> : <span className="hist-quiet">No reason given</span>}</dd>
           </>
         )}
         <dt>Decided by</dt>

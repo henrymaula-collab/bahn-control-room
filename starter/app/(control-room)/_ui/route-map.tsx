@@ -50,13 +50,15 @@ export function RouteMap({ from, to }: { from: LatLng; to: LatLng }) {
           },
         }, firstLabel)
       })
-      for (const [at, letter, colour] of [
-        [a, "A", "#fd6a31"],
-        [b, "B", "#12110e"],
+      // The pickup letter in ink on Bahn's orange (6.55:1); birch on orange was 2.85:1.
+      for (const [at, letter, colour, ink] of [
+        [a, "A", "#fd6a31", "#12110e"],
+        [b, "B", "#12110e", "#fffef7"],
       ] as const) {
         const el = document.createElement("div")
         el.className = "route-pin"
         el.style.background = colour
+        el.style.color = ink
         el.textContent = letter
         el.setAttribute("aria-hidden", "true")
         new ml.Marker({ element: el }).setLngLat(at as [number, number]).addTo(m)

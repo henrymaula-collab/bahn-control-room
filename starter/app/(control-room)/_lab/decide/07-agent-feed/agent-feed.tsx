@@ -179,7 +179,12 @@ export function AgentFeedDone({ headline, option, done, nextHref }: DoneProps) {
     rows.push({ state: "live", text: `The agent calls ${place}`, sub: "To tell them what was decided" })
     for (const p of agentPlan(option)) rows.push({ state: "next", text: p })
   }
-  if (back.count && !back.count.differ) rows.push({ state: "done", text: `${back.count.kind}, ${back.count.line}`, sub: back.count.first ? "The first answer to this kind. The agent learns from it." : "The agent learns from every answer." })
+  // The kind's count moved at the decision: it sits with the other done lines, before what is still to come
+  // (RV4: a tick after an open ring read as out of order).
+  if (back.count && !back.count.differ) {
+    const at = rows.findIndex((r) => r.state !== "done")
+    rows.splice(at < 0 ? rows.length : at, 0, { state: "done", text: `${back.count.kind}, ${back.count.line}`, sub: back.count.first ? "The first answer to this kind. The agent learns from it." : "The agent learns from every answer." })
+  }
   return (
     <section className="question lab-decide-07 f7-done" aria-live="polite">
       <p className="m due">

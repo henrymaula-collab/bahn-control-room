@@ -21,10 +21,12 @@
   width: 1.25em; height: 1.25em; margin-top: 0.04em; border-radius: 50%;
   display: inline-flex; align-items: center; justify-content: center; position: relative;
 }
-.lab-decide-07 .is-done .f7-mark { background: var(--ink); color: var(--page); }
-.lab-decide-07 .is-live .f7-mark { box-shadow: inset 0 0 0 2px var(--ink); }
-.lab-decide-07 .is-live .f7-mark::after { content: ""; width: 0.45em; height: 0.45em; border-radius: 50%; background: var(--ink); }
-.lab-decide-07 .is-next .f7-mark { box-shadow: inset 0 0 0 1.5px rgb(18 17 14 / 0.22); }
+/* RV4: plain marks, not form controls: a tick for done (Zendesk's log line), one small ink dot that
+   breathes for the line at work, a small grey dot for what is to come (a ring with a dot read as a radio). */
+.lab-decide-07 .is-done .f7-mark { color: var(--ink); background: var(--page); }
+.lab-decide-07 .is-done .f7-mark svg { width: 1em; height: 1em; stroke-width: 2.4; }
+.lab-decide-07 .is-live .f7-mark::after { content: ""; width: 0.5em; height: 0.5em; border-radius: 50%; background: var(--ink); }
+.lab-decide-07 .is-next .f7-mark::after { content: ""; width: 0.38em; height: 0.38em; border-radius: 50%; background: rgb(18 17 14 / 0.25); }
 .lab-decide-07 .f7-words { display: flex; flex-direction: column; min-width: 0; }
 .lab-decide-07 .f7-text { color: var(--ink); }
 .lab-decide-07 .is-next .f7-text { color: var(--ink-2); }
@@ -38,10 +40,10 @@
 
 @media (prefers-reduced-motion: no-preference) {
   .lab-decide-07 .is-live .f7-mark::before {
-    content: ""; position: absolute; inset: 0; border-radius: 50%; box-shadow: 0 0 0 2px var(--ink);
+    content: ""; position: absolute; inset: 0.375em; border-radius: 50%; background: var(--ink);
     animation: lab-decide-07-breathe 2.4s cubic-bezier(0.2, 0, 0.2, 1) infinite;
   }
-  @keyframes lab-decide-07-breathe { 0% { transform: scale(1); opacity: 0.35; } 70%, 100% { transform: scale(1.9); opacity: 0; } }
+  @keyframes lab-decide-07-breathe { 0% { transform: scale(1); opacity: 0.3; } 70%, 100% { transform: scale(2.6); opacity: 0; } }
   .lab-decide-07 .f7-row { animation: lab-decide-07-row 260ms cubic-bezier(0.2, 0, 0, 1) both; }
   .lab-decide-07 .f7-row:nth-child(2) { animation-delay: 90ms; }
   .lab-decide-07 .f7-row:nth-child(3) { animation-delay: 180ms; }

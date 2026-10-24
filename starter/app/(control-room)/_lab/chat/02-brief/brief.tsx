@@ -6,7 +6,7 @@
 
 import type { ChatMessage, ChatThread, ChatToolStep } from "@/lib/control-room/types-chat"
 import { andList, newsOf, runningWords, sourcesOf, stepSentence, useChatCore, useFollow, type Offer } from "../core"
-import { AgentMark, Composer, Icon, KindLine, Paras, PanelFrame } from "../parts"
+import { AgentMark, Composer, Icon, KindLine, Paras, PanelFrame, OfferMessage } from "../parts"
 import "./brief.css"
 
 type Props = { thread: ChatThread | null; personId: string; open: boolean; now: string; onClose: () => void }
@@ -141,6 +141,7 @@ function OfferCard({ offer, onYes, onNo }: { offer: Offer; onYes: () => void; on
           {recipient(offer) && <p className="lc-card-kicker">{recipient(offer)}</p>}
           <p className="lc-card-title">{a.label}</p>
           {a.next && <p className="lc-card-body">Then {a.next.replace(/^The agent/, "the agent")}</p>}
+          <OfferMessage offer={offer} />
           <div className="lc-card-foot">
             <button type="button" className="btn btn-plain" disabled={offer.state === "saving"} onClick={onNo}>
               Not now

@@ -14,7 +14,7 @@ import { createPortal } from "react-dom"
 import type { ChatMessage, ChatThread, ChatToolStep } from "@/lib/control-room/types-chat"
 import { usePanel } from "../../../_ui/work-frame"
 import { runningWords, shortOpener, stepSentence, useChatCore, useFollow, type Offer } from "../core"
-import { AgentMark, Composer, Icon, Paras } from "../parts"
+import { AgentMark, Composer, Icon, Paras, OfferMessage } from "../parts"
 import "./inline.css"
 import "../base.css"
 
@@ -71,6 +71,21 @@ function InlineBox({ thread, personId, onClose }: { thread: ChatThread | null; p
   const box = useRef<HTMLDivElement>(null)
   const follow = useFollow([core.messages.length, core.live?.text, core.live?.steps.length, core.offer?.state])
   const [earlier, setEarlier] = useState(false)
+
+  // The box is low in Henry's window: when the agent's offer arrives, the log shows its buttons whole
+  // (RV4: at 1330x680 and 125 % they sat under the field), even if the question scrolls up a little.
+  const offerOpen = core.offer?.state === "open" ? core.offer.after : null
+  useEffect(() => {
+    if (!offerOpen) return
+    const t = setTimeout(() => {
+      const log = follow.ref.current
+      const o = log?.querySelector<HTMLElement>(".lc-offer")
+      if (!log || !o) return
+      const over = o.getBoundingClientRect().bottom + 8 - log.getBoundingClientRect().bottom
+      if (over > 0) log.scrollTop += over
+    }, 50)
+    return () => clearTimeout(t)
+  }, [offerOpen, follow.ref])
 
   // Bring the whole box into view, without moving the card more than needed. Checked again while the
   // card above settles (fonts, the thread arriving), never after the person starts reading.
@@ -220,6 +235,7 @@ function OfferRow({ offer, onYes, onNo }: { offer: Offer; onYes: () => void; onN
   const saving = offer.state === "saving"
   return (
     <div className="lc-offer">
+      <OfferMessage offer={offer} />
       <div className="lc-offer-buttons">
         <button type="button" className="btn btn-primary" disabled={saving} onClick={onYes}>
           {offer.action.label}

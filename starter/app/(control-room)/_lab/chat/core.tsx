@@ -3,7 +3,8 @@
 // Shared logic for every `chat` variant: a copy of today's CaseChat state (_ui/case-chat.tsx), so the
 // variants differ in structure and interaction, never in behaviour. Asking streams the answer over
 // SSE (POST /api/cr/cases/:id/chat); the agent's offer is the case's own option, and the yes goes
-// the same way as the card's button (the decide action), with the conversation's summary as the reason.
+// the same way as the card's button: a suggestion that sends a message opens it in the email panel
+// first (Send there decides); any other option is decided here with the conversation's summary as the reason.
 // Lab states: ?chat=thread|thinking|offer (fixtures, CD-420458), ?chat=offer&decided=1 (the moment
 // after the yes, nothing saved), ?voice=listening|speaking (a voice state held still for a shot).
 
@@ -14,18 +15,44 @@ import { clock } from "@/lib/control-room/format"
 import type { ChatAction, ChatMessage, ChatThread, ChatToolStep } from "@/lib/control-room/types-chat"
 import { decide } from "../../actions"
 import type { SpeakInput } from "../../_ui/voice-button"
+import { usePanel } from "../../_ui/work-frame"
 import { useLab } from "../context"
 import { FIXTURE_OFFER, FIXTURE_THINKING, fixtureMessages } from "../fixtures"
 
 export type Live = { steps: ChatToolStep[]; text: string }
 export type OfferState = "open" | "saving" | "done" | "failed"
-/** The agent's offer under its answer: open until the person taps, then the line of what happened. */
-export type Offer = { after: string; action: ChatAction; state: OfferState; line?: string; at?: string }
+/**
+ * The agent's offer under its answer: open until the person taps, then the line of what happened.
+ * `read`: where its message is read before it goes: "panel" = the card's email panel (the suggestion's
+ * own draft), "here" = in the chat, above the buttons (any other option that sends a message).
+ */
+export type Offer = { after: string; action: ChatAction; state: OfferState; line?: string; at?: string; read?: "panel" | "here" }
 
 /** What happens now, after the yes (the head above it already says it was decided, and when). */
 const doneLine = (a: ChatAction) => a.next ?? `${a.label}.`
 
 const chatUrl = (caseId: string) => `/api/cr/cases/${encodeURIComponent(caseId)}/chat`
+
+/** The case's suggestion: its id and whether it sends a message (read once per case, kept for the page). */
+type Suggestion = { id: string; sends: boolean } // sends: it has a draft, so the card shows the email first
+const suggestions = new Map<string, Promise<Suggestion | null>>()
+function suggestionOf(caseId: string): Promise<Suggestion | null> {
+  let p = suggestions.get(caseId)
+  if (!p) {
+    p = fetch(`/api/cr/cases/${encodeURIComponent(caseId)}`, { cache: "no-store" })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => {
+        const s = d?.case?.suggestion
+        if (!s?.id) return null
+        // The same test as the card's own button (useQuestion: a suggestion with a draft opens the email first).
+        return { id: String(s.id), sends: !!s.draft?.text }
+      })
+      .catch(() => null)
+    p.then((s) => s ?? suggestions.delete(caseId))
+    suggestions.set(caseId, p)
+  }
+  return p
+}
 
 const upsert = (steps: ChatToolStep[], step: ChatToolStep) =>
   steps.some((s) => s.id === step.id) ? steps.map((s) => (s.id === step.id ? step : s)) : [...steps, step]
@@ -43,6 +70,7 @@ export function useChatCore(thread: ChatThread | null, personId: string) {
   const abort = useRef<AbortController | null>(null)
   const router = useRouter()
   const lab = useLab()
+  const panel = usePanel()
 
   useEffect(() => setMessages(thread?.messages ?? []), [thread])
   useEffect(() => () => abort.current?.abort(), [])
@@ -50,12 +78,14 @@ export function useChatCore(thread: ChatThread | null, personId: string) {
   // Lab: once the thread is in, the fixture's live turn or offer (CD-420458 only). Keyed to the case
   // (dev StrictMode runs effects twice; a one-shot ref would be used up).
   const seededFor = useRef("")
+  const seededOffer = useRef("") // the fixture offer's answer id: its yes never saves
   useEffect(() => {
     if (!thread || seededFor.current === thread.caseId) return
     seededFor.current = thread.caseId
     if (!fixtureMessages(thread.caseId, lab.chat)) return
     if (lab.chat === "thinking") setLive(FIXTURE_THINKING.live)
     if (lab.chat === "offer") {
+      seededOffer.current = FIXTURE_OFFER.answer.id
       const a = FIXTURE_OFFER.action
       setOffer(
         lab.decided
@@ -113,10 +143,44 @@ export function useChatCore(thread: ChatThread | null, personId: string) {
     [thread, live, personId],
   )
 
-  // The person's yes: the same decision path as the card's button, then the card shows it decided.
+  // The person's yes. Henry's rule: a message is always read before it goes. When the yes is the
+  // card's own suggestion and it sends an email or a message, the tap opens that message in the email
+  // panel (the same preview as the card's button, slot `decide`: To, the full text, In English, Send,
+  // Edit, Cancel, the undo window); the Send there is the decision. Anything else is decided here.
+  const readIn = useCallback(
+    async (caseId: string, action: ChatAction): Promise<"panel" | "here" | undefined> => {
+      const s = await suggestionOf(caseId)
+      if (s && s.id === action.optionId && s.sends && panel.slot) return "panel"
+      return action.draft ? "here" : undefined
+    },
+    [panel.slot],
+  )
+  // Where an open offer's message is read, known before the tap.
+  const offerKey = offer && offer.state === "open" && !offer.read ? offer.after : null
+  useEffect(() => {
+    if (!thread || !offerKey || !offer) return
+    let live = true
+    readIn(thread.caseId, offer.action).then((read) => {
+      if (live && read) setOffer((o) => (o && o.after === offerKey && !o.read ? { ...o, read } : o))
+    })
+    return () => {
+      live = false
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [thread, offerKey, readIn])
+
   const confirm = useCallback(async () => {
     if (!thread || !offer || offer.state === "saving" || offer.state === "done") return
     const { action } = offer
+    if ((offer.read ?? (await readIn(thread.caseId, action))) === "panel") {
+      panel.setOpen("email")
+      return
+    }
+    // A lab photo state (?chat=offer) never saves: the yes shows the moment after, as ?decided=1 does.
+    if (seededOffer.current === offer.after) {
+      setOffer({ ...offer, state: "done", line: doneLine(action), at: "12:04" })
+      return
+    }
     setOffer({ ...offer, state: "saving" })
     try {
       const d = await decide({ id: `dec-${thread.caseId}-${Date.now().toString(36)}`, caseId: thread.caseId, optionId: action.optionId, why: action.summary })
@@ -125,7 +189,7 @@ export function useChatCore(thread: ChatThread | null, personId: string) {
     } catch {
       setOffer({ ...offer, state: "failed" })
     }
-  }, [thread, offer, router])
+  }, [thread, offer, router, panel, readIn])
 
   const dismiss = useCallback(() => setOffer((o) => (o && o.state !== "done" && o.state !== "saving" ? null : o)), [])
 

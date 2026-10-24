@@ -9,7 +9,7 @@
 import { useState } from "react"
 import type { ChatMessage, ChatThread, ChatToolStep } from "@/lib/control-room/types-chat"
 import { runningWords, shortOpener, useChatCore, useFollow, type Offer } from "../core"
-import { AgentMark, Composer, Icon, KindLine, Paras, PanelFrame } from "../parts"
+import { AgentMark, Composer, Icon, KindLine, Paras, PanelFrame, OfferMessage } from "../parts"
 import "./replies.css"
 
 type Props = { thread: ChatThread | null; personId: string; open: boolean; now: string; onClose: () => void }
@@ -141,6 +141,7 @@ function Replies({ offer, onYes, onNo }: { offer: Offer; onYes: () => void; onNo
   const saving = offer.state === "saving"
   return (
     <div className="lc-replies">
+      <OfferMessage offer={offer} />
       <button type="button" className="lc-reply is-yes" disabled={saving} onClick={onYes}>
         {saving ? "Sending" : offer.action.label}
       </button>

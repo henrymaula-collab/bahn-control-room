@@ -59,6 +59,13 @@
 :where(.lab-chat-base) .lc-offer-buttons { display: flex; flex-wrap: wrap; gap: 8px; }
 :where(.lab-chat-base) .lc-offer .btn { min-height: max(40px, calc(2.35 * var(--type-body))); padding: 0 1.06em; font-size: var(--type-body); }
 :where(.lab-chat-base) .lc-error { font-size: var(--type-subhead); line-height: var(--lh-subhead); color: var(--now); }
+/* An option's message read in the chat before the yes (not the card's own email: that opens in its panel) */
+:where(.lab-chat-base) .lc-out { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; margin-bottom: 4px; padding: 0.8em 0.95em; border-radius: 12px; background: var(--raise); }
+:where(.lab-chat-base) .lc-out-to { font-size: var(--type-subhead); line-height: var(--lh-subhead); color: var(--ink-2); }
+:where(.lab-chat-base) .lc-out-text { white-space: pre-line; color: var(--ink); }
+:where(.lab-chat-base) .lc-out-text.is-clamped { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 4; overflow: hidden; }
+:where(.lab-chat-base) .lc-out-all { display: inline-flex; align-items: center; gap: 2px; margin-left: -6px; padding: 2px 6px; border-radius: 8px; font-size: var(--type-subhead); line-height: var(--lh-subhead); color: var(--ink-2); transition: background-color 120ms var(--ease), color 120ms var(--ease); }
+:where(.lab-chat-base) .lc-out-all:hover { background: var(--press); color: var(--ink); }
 
 /* The field: type, talk, send */
 :where(.lab-chat-base) .lc-composer {

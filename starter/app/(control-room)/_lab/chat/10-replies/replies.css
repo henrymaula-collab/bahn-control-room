@@ -32,6 +32,7 @@
 .lab-chat-10 .lc-reply:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
 .lab-chat-10 .lc-reply:disabled { opacity: 0.55; cursor: default; }
 .lab-chat-10 .lc-replies .lc-error { flex-basis: 100%; text-align: right; }
+.lab-chat-10 .lc-replies .lc-out { flex-basis: 100%; }
 
 /* The person's words: right, one soft block */
 .lab-chat-10 .lc-person p { border-bottom-right-radius: 0.35em; }

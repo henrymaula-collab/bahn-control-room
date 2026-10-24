@@ -10,7 +10,7 @@ import { knowledgeWords } from "@/lib/control-room/chat-words"
 import { lcFirst } from "@/lib/control-room/format"
 import type { ChatMessage, ChatThread, ChatToolStep } from "@/lib/control-room/types-chat"
 import { linesOf, runningWords, sentencesOf, shortOpener, useChatCore, useFollow, type Offer } from "../core"
-import { AgentMark, Composer, Icon, KindLine, PanelFrame } from "../parts"
+import { AgentMark, Composer, Icon, KindLine, PanelFrame, OfferMessage } from "../parts"
 import "./answer-first.css"
 
 type Props = { thread: ChatThread | null; personId: string; open: boolean; now: string; onClose: () => void }
@@ -120,6 +120,7 @@ function AgentAnswer({ m, offer, onYes, onNo }: { m: ChatMessage; offer: Offer |
       <Answer lead={lead} rest={rest} steps={m.toolSteps}>
         {offer && offer.state !== "done" && (
           <div className="lc-offer">
+            <OfferMessage offer={offer} />
             <div className="lc-offer-buttons">
               <button type="button" className="btn btn-primary" disabled={offer.state === "saving"} onClick={onYes}>
                 {offer.action.label}

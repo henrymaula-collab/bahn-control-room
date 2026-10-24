@@ -8,7 +8,7 @@
 import { useEffect, useRef } from "react"
 import type { ChatMessage, ChatThread, ChatToolStep } from "@/lib/control-room/types-chat"
 import { runningWords, shortOpener, stepSentence, useChatCore, useFollow, type Offer } from "../core"
-import { AgentMark, Composer, Icon, KindLine, Paras, PanelFrame } from "../parts"
+import { AgentMark, Composer, Icon, KindLine, Paras, PanelFrame, OfferMessage } from "../parts"
 import "./approve.css"
 
 type Props = { thread: ChatThread | null; personId: string; open: boolean; now: string; onClose: () => void }
@@ -108,6 +108,7 @@ function Approval({ offer, onYes, onNo }: { offer: Offer; onYes: () => void; onN
         {offer.action.label}?
       </p>
       {offer.action.next && <p className="lc-approve-next">Then {offer.action.next.replace(/^The agent/, "the agent")}</p>}
+      <OfferMessage offer={offer} />
       <button ref={yes} type="button" className="lc-choice is-yes" disabled={saving} onClick={onYes}>
         <span>{saving ? "Saving" : offer.action.label}</span>
         <kbd aria-label="Enter">↵</kbd>

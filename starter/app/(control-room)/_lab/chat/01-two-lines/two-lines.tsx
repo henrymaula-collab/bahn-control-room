@@ -7,7 +7,7 @@
 import { useState } from "react"
 import type { ChatMessage, ChatThread, ChatToolStep } from "@/lib/control-room/types-chat"
 import { runningWords, shortOpener, stepSentence, useChatCore, useFollow, type Offer } from "../core"
-import { AgentMark, Composer, Icon, KindLine, Paras, PanelFrame } from "../parts"
+import { AgentMark, Composer, Icon, KindLine, Paras, PanelFrame, OfferMessage } from "../parts"
 import "./two-lines.css"
 
 type Props = { thread: ChatThread | null; personId: string; open: boolean; now: string; onClose: () => void }
@@ -176,6 +176,7 @@ function OfferRow({ offer, onYes, onNo }: { offer: Offer; onYes: () => void; onN
   const saving = offer.state === "saving"
   return (
     <div className="lc-offer">
+      <OfferMessage offer={offer} />
       <div className="lc-offer-buttons">
         <button type="button" className="btn btn-primary" disabled={saving} onClick={onYes}>
           {offer.action.label}

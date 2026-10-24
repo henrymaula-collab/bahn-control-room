@@ -10,7 +10,7 @@ import type { ChatMessage, ChatThread, ChatToolStep } from "@/lib/control-room/t
 import { useVoice, type Voice } from "../../../_ui/use-voice"
 import { VoiceButton } from "../../../_ui/voice-button"
 import { newsOf, runningWords, turnTime, useChatCore, useFollow, useVoiceDemo, type Offer } from "../core"
-import { AgentMark, Composer, Icon, KindLine, Paras, PanelFrame } from "../parts"
+import { AgentMark, Composer, Icon, KindLine, Paras, PanelFrame, OfferMessage } from "../parts"
 import "./voice.css"
 
 type Props = { thread: ChatThread | null; personId: string; open: boolean; now: string; onClose: () => void }
@@ -162,6 +162,7 @@ function OfferOnScreen({ offer, onYes, onNo }: { offer: Offer; onYes: () => void
   const saving = offer.state === "saving"
   return (
     <div className="lc-offer">
+      <OfferMessage offer={offer} />
       <div className="lc-offer-buttons">
         <button type="button" className="btn btn-primary" disabled={saving} onClick={onYes}>
           {offer.action.label}

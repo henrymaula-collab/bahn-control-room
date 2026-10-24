@@ -10,7 +10,8 @@ import { AgentMark } from "../../_ui/agent-mark"
 import { Icon } from "../../_ui/icons"
 import type { Voice } from "../../_ui/use-voice"
 import { VoiceButton } from "../../_ui/voice-button"
-import { linesOf, useField, type ChatCore } from "./core"
+import { useState } from "react"
+import { linesOf, useField, type ChatCore, type Offer } from "./core"
 import "./base.css"
 
 /** The agent's words, one paragraph per line it wrote. */
@@ -133,6 +134,37 @@ export function KindLine({ k, now, className = "lc-kind" }: { k: CaseKnowledge; 
       </ul>
       <p className="lc-gate">{gateWords(k)}</p>
     </details>
+  )
+}
+
+/**
+ * The message an offer sends, read before the yes, when it is not the card's own email (that one opens
+ * in the email panel on the tap, see core.tsx `confirm`). Today's OfferDraft: who it goes to, the text,
+ * a few lines until "Read it all", then the English.
+ */
+export function OfferMessage({ offer }: { offer: Offer }) {
+  const [all, setAll] = useState(false)
+  const d = offer.action.draft
+  if (!d || offer.read !== "here" || offer.state === "done") return null
+  const long = d.text.length > 220 || d.text.split("\n").length > 4
+  const translated = !!d.translation && d.language !== "en"
+  return (
+    <div className="lc-out">
+      <p className="lc-out-to">To {d.to}</p>
+      <p className={`lc-out-text${all || !long ? "" : " is-clamped"}`}>{d.text}</p>
+      {all && translated && (
+        <>
+          <p className="lc-out-to">In English</p>
+          <p className="lc-out-text">{d.translation}</p>
+        </>
+      )}
+      {!all && (long || translated) && (
+        <button type="button" className="lc-out-all" onClick={() => setAll(true)}>
+          Read it all
+          <Icon name="chevron-right" size={14} />
+        </button>
+      )}
+    </div>
   )
 }
 

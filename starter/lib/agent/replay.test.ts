@@ -65,7 +65,7 @@ test("a recorded call-back lands on the live case: its own steps, facts and stat
     facts: [...live.facts, { id: "f-call", statement: "s2", source: { kind: "pickup_place", at: "2026-10-21T09:26:00.000Z" }, strength: "stated" }],
     agentSteps: [
       read, step("2026-10-21T08:49:00.000Z", "propose", "Stopped here and suggested: a."), step("2026-10-24T18:47:01.000Z", "propose", "Sofie decided: a. The agent carries it out."),
-      step("2026-10-21T09:26:02.000Z", "call", "Called the pickup place."), step("2026-10-21T09:34:39.000Z", "message", "Carried out the decision."),
+      step("2026-10-21T09:26:02.000Z", "call", "Called the pickup place."), step("2026-10-21T09:34:39.000Z", "message", "Carried out the decision: Sofie chose: B. Why: the recording's own reason."),
     ],
   })
   const merged = ontoLiveCase(live, recorded, "2026-10-21T09:25:00.000Z")
@@ -74,7 +74,7 @@ test("a recorded call-back lands on the live case: its own steps, facts and stat
   assert.equal(merged.routedTo?.personId, "p-sofie")
   assert.deepEqual(merged.facts.map((f) => f.id), ["f1", "f-call"])
   assert.deepEqual(merged.agentSteps.map((s) => s.summary), [
-    "Read the order.", "Stopped here and suggested: b.", "Sofie decided: b. The agent carries it out.", "Called the pickup place.", "Carried out the decision.",
+    "Read the order.", "Stopped here and suggested: b.", "Sofie decided: b. The agent carries it out.", "Called the pickup place.", "Carried out the decision: Sofie chose: B.",
   ])
   // Carrying it out twice changes nothing.
   assert.deepEqual(ontoLiveCase(merged, recorded, "2026-10-21T09:25:00.000Z"), merged)

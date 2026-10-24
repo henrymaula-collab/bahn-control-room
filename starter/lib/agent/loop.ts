@@ -296,7 +296,11 @@ export function ontoLiveCase(live: Case, recorded: Case, startedAt: string): Cas
   const key = (s: Case["agentSteps"][number]) => `${s.at}|${s.kind}|${s.summary}`
   const have = new Set(live.agentSteps.map(key))
   // The run's own steps start at its start time; earlier ones are the case as it was when recorded.
-  const added = recorded.agentSteps.filter((s) => s.at >= startedAt && !decidedStep(s) && !have.has(key(s)))
+  // The recorded why belongs to the recording's decision; the live one is in the case record.
+  const added = recorded.agentSteps
+    .filter((s) => s.at >= startedAt && !decidedStep(s))
+    .map((s) => (s.kind === "message" ? { ...s, summary: s.summary.replace(/^(Carried out the decision: [\s\S]*?)\. Why: [\s\S]*$/, "$1.") } : s))
+    .filter((s) => !have.has(key(s)))
   return {
     ...live,
     status: recorded.status,

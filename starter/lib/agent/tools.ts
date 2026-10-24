@@ -642,7 +642,8 @@ async function carryOut(ctx: RunContext, a: z.infer<z.ZodObject<typeof TOOL_SHAP
   if (extra.length) return fail(`Needs a person: the person approved ${[...approved].join(", ") || "no change"}, not ${extra.map((c) => c.kind).join(", ")}. Bring the new change to a person with propose_case.`)
   const existing = ctx.snap.cases.find((c) => c.id === brief.caseId)
   const now = ctx.clock.now()
-  step(ctx, "message", `Carried out the decision: ${brief.decisionText}`)
+  // The why stays with the decision (case record, History); the step names what was carried out.
+  step(ctx, "message", `Carried out the decision: ${brief.decisionText.replace(/\. Why: [\s\S]*$/, ".")}`)
   if (existing) {
     const callFacts = ctx.calls.flatMap((c) => c.factIds).map((id) => ctx.registry.get(id)).filter((f): f is Fact => Boolean(f))
     const updated: Case = {

@@ -1,8 +1,8 @@
 "use client"
 
 // needs 09: Other tasks opens in place, grouped by time (Things 3's Today / This Evening, Lightfield's
-// grouped tasks). The first group is open; every later group is one row with its count, so 37 tasks
-// take about ten rows. Opening scrolls the list into view: at Henry's Safari size the card fills the
+// grouped tasks). The first group is open; a later group of more than four folds into one row with
+// its count, so 37 tasks take about eighteen rows. Opening scrolls the list into view: at Henry's Safari size the card fills the
 // column and a list under it would open below the fold.
 
 import Link from "next/link"
@@ -11,7 +11,7 @@ import type { WorkRow } from "@/lib/control-room/types-v3"
 import { useLab } from "../../context"
 import { Icon } from "../../../_ui/icons"
 import { useOtherTasks } from "../../../_ui/work-frame"
-import { byTime, moveFocus, type RowTimes } from "./groups"
+import { byTime, moveFocus, timeIn, type RowTimes } from "./groups"
 import "./time-groups.css"
 
 /** Scroll the card column just enough to show the opened list, never past its own row. */
@@ -27,7 +27,7 @@ function reveal(el: HTMLElement | null, smooth: boolean) {
   })
 }
 
-function Rows({ rows, times, href }: { rows: WorkRow[]; times: RowTimes; href: (id: string) => string }) {
+function Rows({ rows, times, href, group }: { rows: WorkRow[]; times: RowTimes; href: (id: string) => string; group: string }) {
   return (
     <ul className="rows-list">
       {rows.map((r) => {
@@ -37,7 +37,7 @@ function Rows({ rows, times, href }: { rows: WorkRow[]; times: RowTimes; href: (
             <Link href={href(r.caseId)} className="wrow n09-one">
               <span className="v">{r.vehicle}</span>
               <span className="p">{r.place}</span>
-              {t && <time className={t.now ? "now" : undefined}>{t.text}</time>}
+              {t && <time className={t.now ? "now" : undefined}>{timeIn(t.text, group)}</time>}
             </Link>
           </li>
         )
@@ -60,6 +60,7 @@ export function TimeGroups() {
   if (!show || rows.length === 0) return null
   const groups = byTime(rows, times)
   const few = rows.length <= 5 // a handful: every group open
+  const folds = (n: number, i: number) => !few && i > 0 && n > 4 // only a big later group folds to a count
 
   return (
     <details
@@ -77,10 +78,10 @@ export function TimeGroups() {
       </summary>
       <div className="body n09-body" ref={list} onKeyDown={(e) => moveFocus(e, list.current, "a.wrow, summary")}>
         {groups.map((g, i) =>
-          few || i === 0 ? (
+          !folds(g.rows.length, i) ? (
             <section key={g.key} className="n09-group" aria-label={g.title}>
               {groups.length > 1 && <h3 className="n09-head">{g.title}</h3>}
-              <Rows rows={g.rows} times={times} href={href} />
+              <Rows rows={g.rows} times={times} href={href} group={g.key} />
             </section>
           ) : (
             <details key={g.key} className="n09-later" onToggle={(e) => e.currentTarget.open && reveal(e.currentTarget, true)}>
@@ -91,7 +92,7 @@ export function TimeGroups() {
                   <Icon name="chevron-right" size={18} />
                 </span>
               </summary>
-              <Rows rows={g.rows} times={times} href={href} />
+              <Rows rows={g.rows} times={times} href={href} group={g.key} />
             </details>
           ),
         )}

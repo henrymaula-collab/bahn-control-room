@@ -4,15 +4,18 @@
 // place of the situation, the way "Talk it through ›" opens the chat (Apple HIG: "use a panel if
 // people need to repeatedly provide input and observe results"). It stays open while you move
 // between cases, the one you are on highlighted (HIG lists: a list that drives navigation keeps its
-// row selected). Closing it brings the situation back.
+// row selected). Closing it brings the situation back. Right after a decision the panel turns to the
+// list by itself, the decided case marked, because the situation of a settled case is no longer the
+// next thing to read; the card's own "Next case" stays the one default.
 
 import Link from "next/link"
 import { createContext, useContext, useEffect, useMemo, useRef, useState } from "react"
 import type { WorkRow } from "@/lib/control-room/types-v3"
-import { useLab } from "../../context"
+import { useLab, useLabPart } from "../../context"
 import { Icon } from "../../../_ui/icons"
+import { DecisionDone, type DoneProps } from "../../../_ui/question"
 import { useNeedsYou, useOtherTasks, usePanel } from "../../../_ui/work-frame"
-import { byTime, moveFocus } from "./groups"
+import { byTime, moveFocus, timeIn } from "./groups"
 import "./list-panel.css"
 
 type ListPanel = { open: boolean; setOpen: (o: boolean) => void }
@@ -75,7 +78,7 @@ export function ListPanelAround({ children }: { children: React.ReactNode }) {
               {groups.length > 1 && <h3 className="n11-group-head">{g.title}</h3>}
               <ul className="rows-list">
                 {g.rows.map((r) => (
-                  <Row key={r.caseId} r={r} here={r.caseId === current} decided={lab.decided && r.caseId === current} t={times[r.caseId]} href={href} />
+                  <Row key={r.caseId} r={r} here={r.caseId === current} decided={lab.decided && r.caseId === current} t={times[r.caseId]} href={href} group={g.key} />
                 ))}
               </ul>
             </section>
@@ -86,13 +89,13 @@ export function ListPanelAround({ children }: { children: React.ReactNode }) {
   )
 }
 
-function Row({ r, here, decided, t, href }: { r: WorkRow; here: boolean; decided: boolean; t?: { text: string; now: boolean }; href: (id: string) => string }) {
+function Row({ r, here, decided, t, href, group }: { r: WorkRow; here: boolean; decided: boolean; t?: { text: string; now: boolean }; href: (id: string) => string; group: string }) {
   return (
     <li>
       <Link href={href(r.caseId)} className="wrow" aria-current={here ? "true" : undefined}>
         <span className="v">{r.vehicle}</span>
         <span className="p">{r.place}</span>
-        {decided ? <span className="n11-decided">Decided</span> : t && <time className={t.now ? "now" : undefined}>{t.text}</time>}
+        {decided ? <span className="n11-decided">Decided</span> : t && <time className={t.now ? "now" : undefined}>{timeIn(t.text, group)}</time>}
       </Link>
     </li>
   )
@@ -119,4 +122,12 @@ export function ListPanelRow() {
       </span>
     </button>
   )
+}
+
+/** Part Done: the decide slot's moment after a decision (today's DecisionDone), and the list opens beside it. */
+export function ListPanelDone(props: DoneProps) {
+  const { setOpen } = useContext(Ctx)
+  const D = useLabPart("decide", "Done", DecisionDone)
+  useEffect(() => setOpen(true), []) // eslint-disable-line react-hooks/exhaustive-deps
+  return <D {...props} />
 }

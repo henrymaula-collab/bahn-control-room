@@ -12,7 +12,7 @@ import type { WorkRow } from "@/lib/control-room/types-v3"
 import { useLab, useMenuNeeds } from "../../context"
 import { keepQuery } from "../../slots"
 import { useOtherTasks } from "../../../_ui/work-frame"
-import { groupOf, type RowTimes } from "./groups"
+import { groupOf, timeIn, type RowTimes } from "./groups"
 import "./go-to-task.css"
 
 const OPEN = "lab-needs-10-open"
@@ -115,12 +115,12 @@ export function GoToTask() {
 
   // Grouped by time; a lone group needs no name.
   let i = -1
-  const groups: { title: string; rows: WorkRow[] }[] = []
+  const groups: { key: string; title: string; rows: WorkRow[] }[] = []
   for (const r of found) {
     const g = groupOf(times[r.caseId])
     const last = groups[groups.length - 1]
     if (last && last.title === g.title) last.rows.push(r)
-    else groups.push({ title: g.title, rows: [r] })
+    else groups.push({ key: g.key, title: g.title, rows: [r] })
   }
 
   return (
@@ -178,7 +178,7 @@ export function GoToTask() {
                   <span className="n10-place">
                     <Mark text={r.place} q={q} />
                   </span>
-                  {t && <time className={t.now ? "n10-now" : undefined}>{t.text}</time>}
+                  {t && <time className={t.now ? "n10-now" : undefined}>{timeIn(t.text, g.key)}</time>}
                   <span className="n10-enter" aria-hidden="true">
                     ↵
                   </span>

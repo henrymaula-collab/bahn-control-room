@@ -12,7 +12,7 @@ import { createContext, useContext, useEffect, useMemo, useRef, useState } from 
 import { useLab } from "../../context"
 import { Icon } from "../../../_ui/icons"
 import { useNeedsYou, useOtherTasks, usePanel } from "../../../_ui/work-frame"
-import { byTime, moveFocus } from "./groups"
+import { byTime, moveFocus, timeIn } from "./groups"
 import "./queue-overview.css"
 
 type Mode = { list: boolean; setList: (on: boolean) => void }
@@ -52,7 +52,7 @@ export function QueueOverviewAround({ children }: { children: React.ReactNode })
     if (!list) return
     const el = box.current?.querySelector<HTMLElement>('a[aria-current="true"]') ?? box.current?.querySelector<HTMLElement>("a.n14-row")
     el?.scrollIntoView({ block: "nearest" })
-    el?.focus({ preventScroll: true })
+    box.current?.focus({ preventScroll: true }) // the arrows work at once, from the case you came from
   }, [list])
 
   const back = () => {
@@ -70,11 +70,20 @@ export function QueueOverviewAround({ children }: { children: React.ReactNode })
             className="n14-view"
             aria-label="Your tasks"
             ref={box}
+            tabIndex={-1}
             onKeyDown={(e) => {
               if (e.key === "Escape") {
                 e.stopPropagation()
                 back()
-              } else moveFocus(e, box.current, "a.n14-row")
+                return
+              }
+              const from = box.current?.querySelector<HTMLElement>('a[aria-current="true"]')
+              if (document.activeElement === box.current && from && (e.key === "ArrowDown" || e.key === "ArrowUp")) {
+                e.preventDefault()
+                from.focus()
+                return
+              }
+              moveFocus(e, box.current, "a.n14-row")
             }}
           >
             <div className="n14-inner">
@@ -121,7 +130,7 @@ export function QueueOverviewAround({ children }: { children: React.ReactNode })
                             {mine && lab.decided ? (
                               <span className="n14-time">Decided</span>
                             ) : (
-                              <time className={t?.now ? "n14-time n14-now" : "n14-time"}>{t?.text ?? "No set time"}</time>
+                              <time className={t?.now ? "n14-time n14-now" : "n14-time"}>{t ? timeIn(t.text, g.key) : "No set time"}</time>
                             )}
                           </Link>
                         </li>

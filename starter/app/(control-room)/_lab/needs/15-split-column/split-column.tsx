@@ -10,7 +10,7 @@ import Link from "next/link"
 import { useEffect, useMemo, useRef } from "react"
 import { useLab } from "../../context"
 import { useNeedsYou, usePanel } from "../../../_ui/work-frame"
-import { byTime, moveFocus } from "./groups"
+import { byTime, moveFocus, timeIn } from "./groups"
 import "./split-column.css"
 
 /** Part Around: a list column beside the card (the card keeps its own column and scroll). */
@@ -45,7 +45,7 @@ export function SplitColumn({ children }: { children: React.ReactNode }) {
                       {here && lab.decided ? (
                         <span className="n15-time">Decided</span>
                       ) : (
-                        t && <time className={t.now ? "n15-time n15-now" : "n15-time"}>{t.text}</time>
+                        t && <time className={t.now ? "n15-time n15-now" : "n15-time"}>{timeIn(t.text, g.key)}</time>
                       )}
                     </Link>
                   </li>

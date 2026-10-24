@@ -45,3 +45,6 @@ export function moveFocus(e: React.KeyboardEvent, root: HTMLElement | null, sele
   links[to].focus()
   links[to].scrollIntoView({ block: "nearest" })
 }
+
+/** The time without what the group's name already says: under "Tomorrow", "07:00". */
+export const timeIn = (text: string, key: string) => (key === "tomorrow" ? text.replace(/^tomorrow\s+/i, "") : text)

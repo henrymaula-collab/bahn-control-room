@@ -10,6 +10,7 @@
   padding: max(calc(28 * var(--type-kf)), calc(48 * var(--cr-u, 1px))) max(calc(24 * var(--type-kf)), calc(56 * var(--cr-u, 1px))) 48px;
   font-size: var(--type-body); line-height: var(--lh-body);
 }
+.lab-needs-14 .n14-view:focus { outline: none; }
 .lab-needs-14 .n14-inner { max-width: calc(52 * var(--type-body)); margin: 0 auto; }
 
 .lab-needs-14 .n14-top { display: flex; align-items: flex-end; justify-content: space-between; gap: 1em 1.5em; flex-wrap: wrap; margin-bottom: 1.2em; }

@@ -70,27 +70,6 @@
   font-style: italic; font-stretch: 100%; font-variation-settings: "wdth" 100; font-weight: 400;
 }
 
-/* The person's tasks nested under Your tasks (Henry, 24 Oct 20:40), like mailboxes in Mail:
-   indented to the menu's labels, the car on the first line, the place under it in grey, the
-   decide-by time on the right (red within the hour, .now). The open case carries the
-   highlight; Your tasks then keeps only its word. Same unit as the menu, so it scales too. */
-.nav-sub { display: flex; flex-direction: column; gap: calc(2 * var(--cr-su)); margin: calc(2 * var(--cr-su)) 0 calc(6 * var(--cr-su)); }
-.nav .nav-task {
-  height: auto; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 0 calc(10 * var(--cr-su)); align-items: baseline;
-  padding: calc(7 * var(--cr-su)) calc(14 * var(--cr-su)) calc(8 * var(--cr-su)) calc(50 * var(--cr-su));
-  border-radius: calc(12 * var(--cr-su)); font-weight: 400;
-}
-/* Type from the ramp's chrome steps (design/TYPE_SCALE.md): the car at menu, place and time at menu-sub. */
-.nav-task .v { grid-row: 1; grid-column: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: var(--type-menu); line-height: var(--lh-menu); }
-.nav-task .p { grid-row: 2; grid-column: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: var(--type-menu-sub); line-height: var(--lh-menu-sub); color: var(--ink-2); }
-.nav-task time { grid-row: 1; grid-column: 2; font-size: var(--type-menu-sub); line-height: calc(var(--lh-menu) * var(--type-menu)); color: var(--ink-2); }
-.nav-task time.now { color: var(--now); }
-/* The selected row (press, #e2ded4) lifts its second line and count to ink, as Apple's selected
-   sidebar rows do: grey on press was 4.03:1, ink is 14.06:1. Red stays red (5.10:1). */
-.nav a[aria-current="page"] .count,
-.nav-task[aria-current="page"] .p,
-.nav-task[aria-current="page"] time:not(.now) { color: var(--ink); }
-.nav-more .p { grid-row: 1; }
-.nav a[aria-current="page"]:has(+ .nav-sub .nav-task[aria-current="page"]) { background: none; }
-
-@media (max-width: 860px) { .nav-sub { display: none; } }
+/* The selected menu row (press, #e2ded4) lifts its count to ink, as Apple's selected sidebar rows
+   do: grey on press was 4.03:1, ink is 14.06:1. */
+.nav a[aria-current="page"] .count { color: var(--ink); }

@@ -10,7 +10,7 @@ import type { KeyFact, Situation, Stop } from "@/lib/control-room/types-v3"
 import { CaseChat, useChatThread } from "./case-chat"
 import { Icon } from "./icons"
 import { RouteMap } from "./route-map"
-import { usePanel } from "./work-frame"
+import { useOtherTasks, usePanel } from "./work-frame"
 
 /**
  * Under the decision: "Talk it through ›" opens the conversation with the agent as the side
@@ -74,6 +74,7 @@ export function CaseRows({
           </div>
         </details>
       )}
+      <OtherTasks />
       {situation && slot && createPortal(<SituationPanel situation={situation} open={open === "situation"} now={now} />, slot)}
       {!missing &&
         slot &&
@@ -82,6 +83,40 @@ export function CaseRows({
           slot,
         )}
     </div>
+  )
+}
+
+/** "Other tasks  2 ›": the person's other Needs-you cases, opened in place like Why it came to you:
+ *  the car, the place under it in grey, the decide-by time on the right (red within the hour). */
+function OtherTasks() {
+  const { rows, times, href, show } = useOtherTasks()
+  if (!show || rows.length === 0) return null
+  return (
+    <details className="row others">
+      <summary>
+        <span className="m title">Other tasks</span>
+        <span className="m count num">{rows.length}</span>
+        <span className="chev">
+          <Icon name="chevron-right" size={18} />
+        </span>
+      </summary>
+      <div className="body">
+        <ul className="rows-list">
+          {rows.map((r) => {
+            const t = times[r.caseId]
+            return (
+              <li key={r.caseId}>
+                <Link href={href(r.caseId)} className="wrow">
+                  <span className="v">{r.vehicle}</span>
+                  <span className="p">{r.place}</span>
+                  {t && <time className={t.now ? "now" : undefined}>{t.text}</time>}
+                </Link>
+              </li>
+            )
+          })}
+        </ul>
+      </div>
+    </details>
   )
 }
 

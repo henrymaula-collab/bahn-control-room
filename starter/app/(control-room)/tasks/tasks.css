@@ -116,6 +116,15 @@
 .work .detail .chev svg { width: 1em; height: 1em; }
 .work .detail .row > .body { padding: 0.5em 0 1.33em; }
 .work .detail .kv { grid-template-columns: 9.17em minmax(0, 1fr); column-gap: 0.83em; row-gap: 0.58em; }
+/* Other tasks: the count in grey before the chevron; the rows open in place, their text on the
+   same left edge as the row titles, the time on the right edge above the chevron. */
+.work .detail .row.others > summary { grid-template-columns: minmax(0, 1fr) auto auto; }
+.work .detail .row.others .count { color: var(--ink-2); font-variant-numeric: tabular-nums; }
+.work .detail .row.others > .body { padding: 0.17em 0 1em; }
+.work .detail .others .rows-list { gap: 0; }
+.work .detail .others .wrow { column-gap: 0.83em; margin: 0 -0.83em; padding: 0.5em 0.83em; border-radius: 0.75em; }
+.work .detail .others .wrow:hover { background: var(--raise); }
+.work .detail .others .wrow time { padding-right: calc(1em + 0.83em); }
 
 /* The side panels: width and air from the unit, type on the ramp. The situation: the car at
    headline, everything else at subhead (labels grey, values ink). */

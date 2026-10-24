@@ -4,10 +4,9 @@ import "./chat.css"
 import "./shell.css"
 import { cookies } from "next/headers"
 import { dataSource, getSignedIn, getWork } from "@/lib/control-room/client"
-import { minutesUntil, NOW_WINDOW_MINUTES, when } from "@/lib/control-room/format"
 import { avatarOf, jobTitle } from "@/lib/control-room/people-look"
 import { currentPersonId } from "./_ui/session"
-import { type NavTask, Shell } from "./_ui/shell"
+import { Shell } from "./_ui/shell"
 
 // The platform: one fixed frame (side menu, header) around every section.
 export default async function ControlRoomLayout({ children }: { children: React.ReactNode }) {
@@ -16,15 +15,6 @@ export default async function ControlRoomLayout({ children }: { children: React.
   const extraRows = dataSource() === "fixtures" ? Math.min(400, Number((await cookies()).get("cr-rows")?.value ?? 0) || 0) : 0
   const [signedIn, work] = await Promise.all([getSignedIn(personId), getWork(personId, { extraRows })])
   const me = signedIn.person
-  // The same rows the count comes from, nested under Your tasks in the side menu; the time in
-  // red within the hour, as in the task list (tasks/layout.tsx).
-  const now = signedIn.asOf
-  const tasks: NavTask[] = work.needYou.map((r) => ({
-    caseId: r.caseId,
-    vehicle: r.vehicle,
-    place: r.place,
-    time: r.decideBy ? { text: when(r.decideBy, now), now: minutesUntil(r.decideBy, now) <= NOW_WINDOW_MINUTES } : undefined,
-  }))
   return (
     <>
       {/* Safari's page zoom: WebKit resolves vw/vh in font-size against the unzoomed window but
@@ -36,7 +26,6 @@ export default async function ControlRoomLayout({ children }: { children: React.
         person={{ id: me.id, name: me.name, desk: jobTitle(me), avatar: avatarOf(me) }}
         people={signedIn.people.filter((p) => p.onShift).map((p) => ({ id: p.id, name: p.name, desk: jobTitle(p), avatar: avatarOf(p) }))}
         needYou={work.needYou.length}
-        tasks={tasks}
       >
         {children}
       </Shell>

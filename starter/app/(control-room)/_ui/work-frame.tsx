@@ -26,6 +26,12 @@ type Panel = {
 const PanelContext = createContext<Panel>({ open: null, setOpen: () => {}, reset: () => {}, slot: null })
 export const usePanel = () => useContext(PanelContext)
 
+/** The person's other Needs-you cases, for the card's "Other tasks" row (Henry, 24 Oct 21:45: the
+ *  side menu keeps only "Your tasks N"). Off in ?tasks=switcher and ?tasks=column, which show the list. */
+type Others = { rows: WorkRow[]; times: RowTime; href: (id: string) => string; show: boolean }
+const OthersContext = createContext<Others>({ rows: [], times: {}, href: (id) => `/tasks/${id}`, show: false })
+export const useOtherTasks = () => useContext(OthersContext)
+
 const typing = (t: EventTarget | null) => {
   const el = t as HTMLElement | null
   return !!el && (!!el.closest("input, textarea, select, [contenteditable], dialog") || el.isContentEditable)
@@ -80,23 +86,29 @@ export function WorkFrame({ lists, times, children }: { lists: WorkLists; times:
   }, [router, href, next, prev, index, open, base])
 
   const panel = useMemo(() => ({ open, setOpen, reset, slot }), [open, setOpen, reset, slot])
+  const others = useMemo(
+    () => ({ rows: rows.filter((r) => r.caseId !== current), times, href, show: look === "menu" }),
+    [rows, current, times, href, look],
+  )
   // The panel's room is kept from the first paint, so the card does not jump when it slides in.
   const withPanel = !!current && !!open
 
   return (
     <PanelContext.Provider value={panel}>
-      <div className={`work look-${look}${withPanel ? " has-panel" : ""}`}>
-        {look === "column" && (
-          <div className="list" ref={listRef}>
-            <Rows rows={rows} current={current} times={times} href={href} />
+      <OthersContext.Provider value={others}>
+        <div className={`work look-${look}${withPanel ? " has-panel" : ""}`}>
+          {look === "column" && (
+            <div className="list" ref={listRef}>
+              <Rows rows={rows} current={current} times={times} href={href} />
+            </div>
+          )}
+          <div className="detail">
+            {look === "switcher" && <Switcher rows={rows} index={index} next={next} times={times} href={href} />}
+            {children}
           </div>
-        )}
-        <div className="detail">
-          {look === "switcher" && <Switcher rows={rows} index={index} next={next} times={times} href={href} />}
-          {children}
+          <div ref={setSlot} style={{ display: "contents" }} />
         </div>
-        <div ref={setSlot} style={{ display: "contents" }} />
-      </div>
+      </OthersContext.Provider>
     </PanelContext.Provider>
   )
 }

@@ -21,8 +21,8 @@
 /* The map */
 :where(.lab-situation-base) .s-map { position: relative; height: max(150px, calc(10 * var(--type-subhead))); border-radius: 14px; overflow: hidden; background: #f4f2ec; }
 :where(.lab-situation-base) .s-map .maplibregl-ctrl-attrib { font-size: var(--type-caption2); }
+/* No position here: MapLibre's .maplibregl-marker is absolute (a relative pin stacked B under A's height). */
 :where(.lab-situation-base) .s-pin {
-  position: relative;
   width: calc(1.47 * var(--type-subhead)); height: calc(1.47 * var(--type-subhead)); border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
   font-family: var(--font); font-size: var(--type-subhead); line-height: 1; font-weight: 600;

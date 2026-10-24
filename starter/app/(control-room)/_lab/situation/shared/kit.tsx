@@ -198,8 +198,16 @@ export function LabMap({ from, to, leg = "line", muted = false, labels, cluster 
       // then above and below, so the route keeps the map's width (BMW, Helsinki to Turku).
       const dx = Math.abs(a[0] - b[0])
       const dy = Math.abs(a[1] - b[1]) / Math.cos((((a[1] + b[1]) / 2) * Math.PI) / 180)
-      const across = !!labels && dx > 2 * dy
-      const p = padding ?? (labels ? (across ? { top: 86, bottom: 86, left: 96, right: 96 } : { top: 44, bottom: 44, left: 150, right: 150 }) : 44)
+      const w = box.current.clientWidth
+      const h = box.current.clientHeight
+      // A narrow map (Henry's Safari) has no room beside the pins: callouts go above and below.
+      const across = !!labels && (dx > 2 * dy || w < 340)
+      const want = padding ?? (labels ? (across ? { top: 86, bottom: 86, left: 96, right: 96 } : { top: 44, bottom: 44, left: 150, right: 150 }) : 44)
+      // Never more padding than the box has room for (Henry's Safari: a 290 px map took 300 px of
+      // side padding and fell back to the whole world): keep at least 60 x 40 px for the route.
+      const pw = typeof want === "number" ? { top: want, bottom: want, left: want, right: want } : want
+      const k = Math.min(1, (w - 60) / Math.max(1, pw.left + pw.right), (h - 40) / Math.max(1, pw.top + pw.bottom))
+      const p = { top: Math.max(8, pw.top * k), bottom: Math.max(8, pw.bottom * k), left: Math.max(8, pw.left * k), right: Math.max(8, pw.right * k) }
       m = new ml.Map({
         container: box.current,
         style,

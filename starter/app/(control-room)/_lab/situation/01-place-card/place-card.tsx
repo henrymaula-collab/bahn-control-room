@@ -10,8 +10,8 @@ export function PlaceCardSituation({ situation: s, open, now }: SituationProps) 
   const blocker = blockerOf(s)
   const strip = [
     ...(blocker ? [blocker] : []),
-    { label: "Driver", value: factOf(s, "Driver")! },
-    { label: "Apart", value: distanceWords(s) },
+    { label: "Driver", value: s.driver ?? factOf(s, "Driver")! }, // a name when booked: "Yara", not "Booked, Yara"
+    { label: "Distance", value: distanceWords(s) },
   ]
   return (
     <Panel nn="01" open={open}>

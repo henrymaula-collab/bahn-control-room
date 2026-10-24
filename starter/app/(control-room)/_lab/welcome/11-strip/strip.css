@@ -37,6 +37,3 @@
 }
 .lab-welcome-11-legend p { display: inline-flex; align-items: center; gap: calc(8 * var(--type-k)); white-space: nowrap; }
 .lab-welcome-11-legend .c { color: var(--ink-2); font-variant-numeric: tabular-nums; }
-/* A narrow map (Henry's Safari at 125 %) keeps the sentence whole by dropping its deadline;
-   the pill and the rows still carry it. Measured against the Overview (container-type: size). */
-@container (max-width: 940px) { .lab-welcome-11 .by { display: none; } }

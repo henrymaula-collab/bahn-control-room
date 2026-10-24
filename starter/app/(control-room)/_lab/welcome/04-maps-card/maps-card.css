@@ -10,10 +10,10 @@
 }
 .lab-welcome-04 > * { flex: none; }
 .lab-welcome-04 .lw-display { font-size: var(--type-title2); line-height: 1.18; }
-.lab-welcome-04 .sub { margin-top: calc(6 * var(--type-k)); font-size: var(--type-body); line-height: var(--lh-body); color: var(--ink-2); }
+.lab-welcome-04 .lw04-sub { margin-top: calc(6 * var(--type-k)); font-size: var(--type-body); line-height: var(--lh-body); color: var(--ink-2); }
 
 /* Apple's inset grouped list: one raised group, hairlines between rows, a mark at the left. */
-.lab-welcome-04 .list { margin-top: calc(18 * var(--type-k)); border-radius: calc(14 * var(--type-k)); background: var(--page); box-shadow: 0 0 0 1px rgb(18 17 14 / 0.06); overflow: hidden; }
+.lab-welcome-04 .lw04-list { margin-top: calc(18 * var(--type-k)); border-radius: calc(14 * var(--type-k)); background: var(--page); box-shadow: 0 0 0 1px rgb(18 17 14 / 0.06); overflow: hidden; }
 .lab-welcome-04 .item {
   display: grid; grid-template-columns: calc(8 * var(--type-k)) minmax(0, 1fr) auto; column-gap: calc(12 * var(--type-k)); align-items: center;
   padding: calc(9 * var(--type-k)) calc(14 * var(--type-k)); transition: background-color 100ms var(--lw-ease);

@@ -70,7 +70,7 @@ export function Listen({ panelRef, firstName, tasks, now, counts, lift, setLift 
 
   return (
     <section ref={ref} className="lab-welcome lab-welcome-10 lw-panel" aria-label="Today">
-      <div className="top">
+      <div className="lw10-head">
         <p className="date">{dayTitle(now)}</p>
         {can && (
           <button type="button" className={`listen${reading !== null ? " on" : ""}`} onClick={play} aria-pressed={reading !== null}>

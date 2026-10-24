@@ -51,3 +51,4 @@
   .lab-welcome-12.pre, .lab-welcome-12.run { background: var(--page); box-shadow: var(--lw-shadow); }
   .lab-welcome-12.pre > *, .lab-welcome-12.run .after, .lab-welcome-12.run .lw-display { opacity: 1; animation: none; }
 }
+.lab-welcome-12-veil.done { display: none; }

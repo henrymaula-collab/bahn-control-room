@@ -20,12 +20,12 @@ export function MapsCard({ panelRef, firstName, tasks, now, counts, lift, setLif
     <>
       <section ref={ref} className="lab-welcome lab-welcome-04 lw-panel" aria-label="Today">
         <h1 className="lw-display">Welcome back, {firstName}.</h1>
-        <p className="sub">
+        <p className="lw04-sub">
           {tasks.length ? `${word(tasks.length)} ${plural(tasks.length, "car needs", "cars need")} you.` : "Nothing needs you right now."}
         </p>
 
         {tasks.length > 0 && (
-          <ul className="list">
+          <ul className="lw04-list">
             {shown.map((r) => (
               <li key={r.caseId}>
                 <Link href={keep(`/tasks/${r.caseId}`)} className={`item${lift === r.orderId ? " lift" : ""}`} {...liftOn(r.orderId, setLift)}>

@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useLayoutEffect, useRef, useState } from "react"
 import type { WelcomePanelProps } from "../../../_ui/overview-view"
 import { Icon } from "../../../_ui/icons"
 import { dayOf, isNow, liftOn, n, plural, useBoth, useFit, useKeep, when, word } from "../shared"
@@ -22,6 +22,25 @@ export function Strip({ panelRef, firstName, tasks, now, counts, lift, setLift }
   const line = !tasks.length
     ? `${firstName}, nothing needs you right now.`
     : `${firstName}, ${word(tasks.length, true)} ${plural(tasks.length, "car needs", "cars need")} you`
+  // A narrow map (Henry's Safari at 125 %) keeps the sentence whole by dropping its deadline; the
+  // pill and the rows still carry it. Measured, not a container query: WebKit's page zoom skews those.
+  const h1 = useRef<HTMLHeadingElement>(null)
+  const [short, setShort] = useState(false)
+  useLayoutEffect(() => {
+    const el = h1.current
+    if (el && !short && el.scrollWidth > el.clientWidth + 1) setShort(true)
+  })
+  useEffect(() => {
+    const room = h1.current?.closest(".overview")
+    if (!room) return
+    let w = (room as HTMLElement).offsetWidth
+    const ro = new ResizeObserver(() => {
+      if ((room as HTMLElement).offsetWidth !== w) (w = (room as HTMLElement).offsetWidth), setShort(false)
+    })
+    ro.observe(room)
+    document.fonts?.ready.then(() => setShort(false)).catch(() => {})
+    return () => ro.disconnect()
+  }, [])
   useEffect(() => {
     if (!open) return
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && setOpen(false)
@@ -34,9 +53,9 @@ export function Strip({ panelRef, firstName, tasks, now, counts, lift, setLift }
       {/* The map keeps its cars beside a zero-width box: the strip floats over the map's top edge. */}
       <span ref={panelRef as React.Ref<HTMLSpanElement>} className="lab-welcome lab-welcome-11-room" aria-hidden="true" />
       <section className="lab-welcome lab-welcome-11 lw-panel" aria-label="Today">
-        <h1 className="lw-display">
+        <h1 ref={h1} className="lw-display">
           {line}
-          {tasks.length > 0 && allToday && last && <span className="by"> by {when(last, now)}</span>}
+          {tasks.length > 0 && allToday && last && !short && <span className="by"> by {when(last, now)}</span>}
           {tasks.length > 0 && "."}
           {!tasks.length && <span className="calm"> The agent is on {n(counts.agentWorking)}.</span>}
         </h1>

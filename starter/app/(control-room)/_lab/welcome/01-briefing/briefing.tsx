@@ -27,7 +27,7 @@ export function Briefing({ panelRef, firstName, tasks, now, counts, lift, setLif
   return (
     <section ref={ref} className="lab-welcome lab-welcome-01 lw-panel" aria-label="Today">
       <h1 className="lw-display">
-        Welcome back, {firstName}. <span className="fact">{fact}</span>
+        Welcome back, {firstName}. <span className="lw01-fact">{fact}</span>
       </h1>
 
       {first && (

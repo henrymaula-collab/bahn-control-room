@@ -8,7 +8,7 @@
   display: flex; flex-direction: column;
 }
 .lab-welcome-10 > * { flex: none; }
-.lab-welcome-10 .top { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: calc(36 * var(--type-k)); margin-bottom: calc(14 * var(--cr-u)); }
+.lab-welcome-10 .lw10-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: calc(36 * var(--type-k)); margin-bottom: calc(14 * var(--cr-u)); }
 .lab-welcome-10 .date { font-size: var(--type-subhead); line-height: var(--lh-subhead); color: var(--ink-2); }
 /* Listen: Bahn's grey pill, the secondary button; while reading, three bars move. */
 .lab-welcome-10 .listen {

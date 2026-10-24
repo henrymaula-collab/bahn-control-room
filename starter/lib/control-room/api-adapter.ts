@@ -143,26 +143,18 @@ export async function apiWorkCase(get: Fetch, id: string, personId: string): Pro
     get<(ApiCaseDetail & Partial<CaseV3Extras>) | null>(`/api/cr/cases/${encodeURIComponent(id)}`),
   ])
   if (!d || !d.case) return null
-  const detail = await caseDetailFrom(get, d, people, personId)
+  const detail = caseDetailFrom(d, people, personId)
   const extras = d.situation ? { why: d.why ?? [], situation: d.situation, ...(d.next ? { next: d.next } : {}) } : null
   return { detail, extras }
 }
 
-async function caseDetailFrom(get: Fetch, d: ApiCaseDetail, people: OpsPerson[], personId: string): Promise<CaseDetail> {
+function caseDetailFrom(d: ApiCaseDetail, people: OpsPerson[], personId: string): CaseDetail {
   const person = resolvePerson(people, personId)
   const c = d.case
   const options = [c.suggestion, ...c.alternatives]
   // The agent writes its own likely reasons and the message each option would send; the generic ones fill the gaps.
   const whyChoices = Object.fromEntries(options.map((o) => [o.id, o.whyChoices?.length ? o.whyChoices : whyFor(o.id)]))
   const drafts = Object.fromEntries(options.filter((o) => o.draft).map((o) => [o.id, o.draft!]))
-  // Where this case sits in its owner's queue, for Previous and Next.
-  let queue: CaseDetail["queue"]
-  if (c.status === "waiting_for_person" && c.routedTo?.personId) {
-    const desk = await get<ApiDesk>(`/api/cr/desk?person=${encodeURIComponent(c.routedTo.personId)}`)
-    const ids = [desk.focus, ...desk.queue].filter((x): x is Case => !!x).map((x) => x.id)
-    const i = ids.indexOf(c.id)
-    if (i >= 0) queue = { index: i + 1, total: ids.length, prevId: ids[i - 1], nextId: ids[i + 1] }
-  }
   const decision = d.decision ?? undefined
   return {
     asOf: d.check?.checkedAt ?? c.createdAt,
@@ -178,7 +170,7 @@ async function caseDetailFrom(get: Fetch, d: ApiCaseDetail, people: OpsPerson[],
     whyChoices,
     decision,
     decidedBy: decision ? people.find((p) => p.id === decision.personId) : undefined,
-    queue,
+    // No `queue` here: Your tasks walks its own list (WorkLists), so the desk is not read again per card.
   }
 }
 

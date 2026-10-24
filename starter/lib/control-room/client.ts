@@ -7,6 +7,7 @@
 // flag must not need any change in the screens.
 
 import { headers } from "next/headers"
+import { cache } from "react"
 import { apiCase, apiDecide, apiDesk, apiLead, apiOverview, apiWork, apiWorkCase, resolvePerson } from "./api-adapter"
 import type { Decision, Lesson, OpsPerson, TrustRule } from "./types"
 import type { CaseV3Extras, Overview, WorkLists } from "./types-v3"
@@ -25,7 +26,16 @@ async function base(): Promise<string> {
   return `${h.get("x-forwarded-proto") ?? "http"}://${host}`
 }
 
+/** One read per path per request: the shell, Your tasks' list and the card ask for the same people and lists. */
+const getOnce = cache(async (url: string): Promise<unknown> => {
+  const res = await fetch(url, { cache: "no-store", headers: { "content-type": "application/json" } })
+  if (res.status === 404) return null
+  if (!res.ok) throw new Error(`GET ${url} failed with ${res.status}`)
+  return res.json()
+})
+
 async function api<T>(path: string, init?: RequestInit): Promise<T> {
+  if (!init) return (await getOnce(`${await base()}${path}`)) as T
   const res = await fetch(`${await base()}${path}`, {
     cache: "no-store",
     ...init,
@@ -34,6 +44,18 @@ async function api<T>(path: string, init?: RequestInit): Promise<T> {
   if (res.status === 404) return null as T
   if (!res.ok) throw new Error(`${init?.method ?? "GET"} ${path} failed with ${res.status}`)
   return (await res.json()) as T
+}
+
+/** Who is signed in, who else is on the team, and the room's clock: what the frame needs, in two reads. */
+export async function getSignedIn(personId: string): Promise<{ person: OpsPerson; people: OpsPerson[]; asOf: string }> {
+  if (dataSource() === "api") {
+    const people = await api<OpsPerson[]>("/api/cr/people")
+    const person = resolvePerson(people, personId)
+    const desk = await api<{ quiet: { checkedAt: string } } | null>(`/api/cr/desk?person=${encodeURIComponent(person.id)}`)
+    return { person, people, asOf: desk?.quiet.checkedAt ?? new Date().toISOString() }
+  }
+  const desk = fixtures.deskView(personId)
+  return { person: desk.person, people: desk.people, asOf: desk.asOf }
 }
 
 export async function getDesk(personId: string, opts: { extraRows?: number } = {}): Promise<DeskView> {

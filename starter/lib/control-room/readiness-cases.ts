@@ -379,7 +379,10 @@ function decideBy(s: Signals, now: string): string | undefined {
   const expires = str(s.publishedOffer?.details.expires_at)
   if (expires) candidates.push(expires)
   const future = candidates.filter((value) => value > now).sort()
-  return future[0] ?? candidates.sort()[0]
+  if (future[0] || !candidates.length) return future[0]
+  // Every planned moment has passed and the case is still open (e.g. the driver is at the
+  // pickup place now): it needs a person within half an hour, not "was due" hours ago.
+  return new Date(Math.ceil((Date.parse(now) + 30 * 60_000) / 300_000) * 300_000).toISOString()
 }
 
 export function caseIdFor(orderId: string, type: CaseType) {

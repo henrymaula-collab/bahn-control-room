@@ -156,6 +156,56 @@ function carState(check: OrderCheckResult | undefined): CarState {
   return "on_plan"
 }
 
+// ---- Why a car is red ----
+
+/** What a check found, in a few of Bahn's words. Alerts, incidents and tasks bring their own name. */
+const FLAG_WORDS: Record<string, string> = {
+  EMPTY_PICKUP: "Car not found at pickup",
+  H12_CANCELLED_COST_OPEN: "Cancelled, money still open",
+  H2_FERRY_CUTOFF_AT_RISK: "Ferry check-in at risk",
+  H4b_IMPORT_NO_TRAVEL_BOOKED: "No travel booked for the driver",
+  H3_PICKUP_SOON_NO_DRIVER: "No driver for the pickup",
+  H3b_DRAFT_SLOT_SOON: "Order still being prepared",
+  H4_POSITIONING_NOT_EVIDENCED: "Driver may not reach the pickup",
+  H9_POSITIONING_IGNORES_INTERVENING_DUTY: "Driver has a gig in between",
+  H6_DELIVERY_SOON_NO_RECEIVER: "No receiver on file",
+  H1_STALE_TRACKING_NO_ALERT: "No recent position",
+  PROPOSAL_FAILED: "Agent action failed",
+  CUSTOMER_WAITING: "Customer waiting for an answer",
+  WAITING_ON_CUSTOMER: "Waiting for the customer",
+  PROPOSAL_PENDING: "Agent suggestion waiting",
+  H13_OPEN_INBOX_THREAD: "Message with no owner",
+}
+/** Most telling first: a named alert or incident, then what the checks found, then open tasks and messages. */
+const REASON_ORDER = [
+  "ALERT_OPEN", "ALERT_OWNED", "INCIDENT", "EMPTY_PICKUP", "H12_CANCELLED_COST_OPEN", "H2_FERRY_CUTOFF_AT_RISK",
+  "H4b_IMPORT_NO_TRAVEL_BOOKED", "H3_PICKUP_SOON_NO_DRIVER", "H3b_DRAFT_SLOT_SOON", "H4_POSITIONING_NOT_EVIDENCED",
+  "H9_POSITIONING_IGNORES_INTERVENING_DUTY", "H6_DELIVERY_SOON_NO_RECEIVER", "H1_STALE_TRACKING_NO_ALERT", "PROPOSAL_FAILED",
+  "CUSTOMER_WAITING", "WAITING_ON_CUSTOMER", "WORK_OVERDUE", "WORK_OPEN", "PROPOSAL_PENDING", "H13_OPEN_INBOX_THREAD",
+]
+
+const sentence = (text: string) => text.charAt(0).toUpperCase() + text.slice(1)
+
+/**
+ * Why a red car is red, short ("Ferry sold out"): the case's own stop when it has one,
+ * else the most telling of the order check's person-tier findings. Undefined for other cars.
+ */
+export function redReason(check: OrderCheckResult | undefined, linked: Case | undefined): string | undefined {
+  if (check?.state !== "needs_person") return undefined
+  if (linked) {
+    const stopped = keyFacts(linked, null).find((f) => f.label === "Stopped")?.value
+    if (stopped) return stopped
+  }
+  const flags = check.flags.filter((f) => f.tier === "person")
+  for (const code of REASON_ORDER) {
+    const flag = flags.find((f) => f.code === code)
+    if (!flag) continue
+    if (flag.short) return sentence(code === "WORK_OVERDUE" ? `${flag.short} overdue` : flag.short)
+    if (FLAG_WORDS[code]) return FLAG_WORDS[code]
+  }
+  return flags[0]?.short ? sentence(flags[0].short) : "Needs a person"
+}
+
 function placeTo(place: Place): string {
   return place.site ? place.name : place.city || place.name
 }
@@ -185,6 +235,7 @@ export function mapCars(state: EngineState): (MapCar & { phase: Phase })[] {
       to: placeTo(order.delivery),
       caseId: linked?.id,
       nextAt: waiting && linked?.decideBy ? linked.decideBy : phase === "delivered" ? undefined : estimatedDelivery(order.bundle),
+      reason: redReason(check, linked),
       phase,
     })
   }
@@ -441,7 +492,29 @@ export function situation(state: EngineState, c: Case): Situation | null {
   }
 }
 
+/**
+ * The one line under the primary button: what the agent does after a yes. Taken from the
+ * suggestion's effect: the first sentence where the agent acts, preferring one after the
+ * opening sentence (that one usually restates the button), with "it" read as the agent
+ * ("When the release arrives, the agent checks it ..."). Never the person's own step
+ * ("A person sends ..."). None when the effect has no agent step, or nobody is asked any more.
+ */
+export function nextLine(c: Pick<Case, "status" | "suggestion">): string | undefined {
+  if (c.status !== "waiting_for_person") return undefined
+  const parts = c.suggestion.effect
+    .split(/(?<=[.;])\s+/)
+    .map((p) => p.replace(/;$/, ".").trim().replace(/^((?:after a yes|once [^,]+|when [^,]+|if [^,]+), )?it (?=[a-z])/i, (_m, lead) => `${lead ?? ""}the agent `))
+    .filter(Boolean)
+  const acts = (p: string) => /\bthe agent\b/i.test(p) && !/^(a person|you)\b/i.test(p)
+  const agent = parts.slice(1).find(acts) ?? (acts(parts[0] ?? "") ? parts[0] : undefined)
+  if (!agent) return undefined
+  const line = sentence(agent)
+  return /[.!?]$/.test(line) ? line : `${line}.`
+}
+
 export function caseExtras(state: EngineState, c: Case): CaseV3Extras | null {
   const s = situation(state, c)
-  return s ? { why: whyFacts(state, c), situation: s } : null
+  if (!s) return null
+  const next = nextLine(c)
+  return { why: whyFacts(state, c), situation: s, ...(next ? { next } : {}) }
 }

@@ -25,9 +25,9 @@ const typing = (t: EventTarget | null) => {
   return !!el && (!!el.closest("input, textarea, select, [contenteditable], dialog") || el.isContentEditable)
 }
 
-/** Work: the quiet list on the left, the chosen case on the right, the situation panel over the list. */
+/** Your tasks: the quiet list on the left, the chosen case on the right, the situation panel over the list. */
 export function WorkFrame({ lists, times, children }: { lists: WorkLists; times: RowTime; children: React.ReactNode }) {
-  const path = usePathname() ?? "/work"
+  const path = usePathname() ?? "/tasks"
   const router = useRouter()
   const current = decodeURIComponent(path.split("/")[2] ?? "")
   const home: ListKey = (TABS.find((t) => lists[t.key].some((r) => r.caseId === current))?.key ?? "needYou") as ListKey
@@ -53,8 +53,8 @@ export function WorkFrame({ lists, times, children }: { lists: WorkLists; times:
         setOpen(false)
         return
       }
-      if (e.key === "j" && next) router.push(`/work/${next.caseId}`)
-      if (e.key === "k" && prev) router.push(`/work/${prev.caseId}`)
+      if (e.key === "j" && next) router.push(`/tasks/${next.caseId}`)
+      if (e.key === "k" && prev) router.push(`/tasks/${prev.caseId}`)
       if (e.key === "ArrowDown" || e.key === "ArrowUp") {
         const links = [...(listRef.current?.querySelectorAll<HTMLAnchorElement>("a.wrow") ?? [])]
         if (!links.length || open) return
@@ -76,7 +76,7 @@ export function WorkFrame({ lists, times, children }: { lists: WorkLists; times:
     <PanelContext.Provider value={panel}>
       <div className={`work${open ? " with-panel" : ""}`}>
         <div className="list" ref={listRef} aria-hidden={open || undefined}>
-          <div className="tabs" role="tablist" aria-label="Work">
+          <div className="tabs" role="tablist" aria-label="Your tasks">
             {TABS.map((t) => (
               <button key={t.key} type="button" role="tab" className="tab" aria-selected={tab === t.key} onClick={() => setTab(t.key)}>
                 {t.label}
@@ -112,7 +112,7 @@ function WalkLink({ row, icon, label }: { row?: WorkRow; icon: "chevron-up" | "c
       </span>
     )
   return (
-    <Link href={`/work/${row.caseId}`} aria-label={label} title={label}>
+    <Link href={`/tasks/${row.caseId}`} aria-label={label} title={label}>
       <Icon name={icon} size={18} />
     </Link>
   )
@@ -126,7 +126,7 @@ function Rows({ rows, current, times, empty }: { rows: WorkRow[]; current: strin
         const t = times[r.caseId]
         return (
           <li key={r.caseId}>
-            <Link href={`/work/${r.caseId}`} className="wrow" aria-current={r.caseId === current ? "true" : undefined}>
+            <Link href={`/tasks/${r.caseId}`} className="wrow" aria-current={r.caseId === current ? "true" : undefined}>
               <span className="v">{r.vehicle}</span>
               <span className="p">{r.place}</span>
               {t && <time className={t.now ? "now" : undefined}>{t.text}</time>}

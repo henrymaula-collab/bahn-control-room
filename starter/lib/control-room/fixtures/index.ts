@@ -220,9 +220,22 @@ export function overview(personId?: string): Overview {
   return fixtureOverview(ROOM_NOW, store().cases, ORDERS, person(personId))
 }
 
-export function workLists(personId?: string): WorkLists {
-  return fixtureWorkLists(store().cases, ORDERS, person(personId))
+/** `extraRows` (cookie cr-rows) adds copies to Needs you, to check that a long list stays calm. */
+export function workLists(personId?: string, opts: { extraRows?: number } = {}): WorkLists {
+  const lists = fixtureWorkLists(store().cases, ORDERS, person(personId))
+  if (!opts.extraRows || !lists.needYou.length) return lists
+  const pool = lists.needYou
+  const copies = Array.from({ length: opts.extraRows }, (_, i) => ({
+    ...pool[i % pool.length]!,
+    caseId: `${pool[i % pool.length]!.caseId}-copy-${i + 1}`,
+    decideBy: new Date(Date.parse(ROOM_NOW) + (65 + i * 47) * 60_000).toISOString(),
+  }))
+  const needYou = [...pool, ...copies].sort((a, b) => (a.decideBy ?? "9999").localeCompare(b.decideBy ?? "9999"))
+  return { ...lists, needYou }
 }
+
+/** The copies in a long list open their original case. */
+export const baseCaseId = (id: string) => id.replace(/-copy-\d+$/, "")
 
 export function caseExtras(id: string): CaseV3Extras | null {
   const c = store().cases.find((candidate) => candidate.id === id)

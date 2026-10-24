@@ -177,8 +177,11 @@ export async function getCaseDetail(id: string, given?: EngineState) {
   const order = state.world.byId.get(c.orderId)
   const [calls, agentRuns] = await Promise.all([listCalls({ caseId: c.id }), listAgentRuns({ caseId: c.id })])
   const usedLessons = state.lessons.filter((lesson) => c.lessonIdsUsed?.includes(lesson.id))
+  // The decision a person took on this case, newest first (a case is decided once; a later one wins).
+  const taken = c.status === "decided" || c.status === "done" ? state.decisions.filter((row) => row.caseId === c.id && !row.synthetic).at(-1) : undefined
   return {
     case: c,
+    decision: taken ? { ...taken.data, at: taken.data.at ?? taken.at } : null,
     order: order ? {
       id: order.id, reference: order.reference, lane: order.bundle.order.lane, status: order.bundle.order.status,
       customer: order.customer,
@@ -195,8 +198,8 @@ export async function getCaseDetail(id: string, given?: EngineState) {
     // v4 learning loop: the kind of case and what people decided on it before.
     kind: { key: kindOf(c), label: kindDef(kindOf(c)).label },
     knowledge: knowledgeFor(loopInput(state), c),
-    // v3 (types-v3.ts CaseV3Extras): key facts and the situation panel.
-    ...(caseExtras(state, c) ?? { why: [], situation: null }),
+    // v3 (types-v3.ts CaseV3Extras): key facts, the situation panel, the line under the button.
+    ...(caseExtras(state, c) ?? { why: [], situation: null, next: undefined }),
   }
 }
 

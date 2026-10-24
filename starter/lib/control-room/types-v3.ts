@@ -1,4 +1,4 @@
-// Contract for the v3 platform (Overview map, Work lists, the situation panel).
+// Contract for the v3 platform (Overview map, Your tasks lists, the situation panel).
 // The engine serves these shapes; the UI builds on fixtures of the same shapes.
 // Words in every string follow design/BAHN-VOCABULARY.md.
 import type { CaseStatus } from "./types";
@@ -23,11 +23,12 @@ export interface MapCar {
   positionSource: PositionSource;
   from: string; // pickup place, Bahn's words ("Calverona Hamburg")
   to: string; // delivery city or place
-  caseId?: string; // set when state is needs_person; opens the case in Work
+  caseId?: string; // set whenever the order has a case; a red car's case opens in Your tasks
   nextAt?: string; // ISO; decideBy for red cars, estimated delivery otherwise
+  reason?: string; // red cars only: why, in a few of Bahn's words ("Ferry sold out", "Release document missing")
 }
 
-/** One row in the Work list and in the Overview panel. */
+/** One row in the Your tasks list. */
 export interface WorkRow {
   caseId: string;
   orderId: string;
@@ -88,4 +89,7 @@ export interface Situation {
 export interface CaseV3Extras {
   why: KeyFact[]; // at most 3: Stopped, Needs, Yours
   situation: Situation;
+  /** One line under the primary button: what the agent does after a yes ("The agent then calls the
+   *  pickup place back on Thursday ..."). Only while the case waits for a person, and only when true. */
+  next?: string;
 }

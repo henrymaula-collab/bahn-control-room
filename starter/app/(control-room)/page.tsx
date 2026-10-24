@@ -1,6 +1,5 @@
 import type { Metadata } from "next"
-import { getCase } from "@/lib/control-room/client"
-import { getOverview } from "@/lib/control-room/client-v3"
+import { getCase, getOverview } from "@/lib/control-room/client"
 import { minutesUntil, NOW_WINDOW_MINUTES, when } from "@/lib/control-room/format"
 import { questionFor } from "./_ui/ask"
 import type { RedInfo } from "./_ui/car-map"
@@ -32,6 +31,7 @@ export default async function OverviewPage({ searchParams }: { searchParams: Sea
           place: c.caseId || c.from === c.to ? c.from : `${c.from} to ${c.to}`,
           // Without a case there is no decide-by time; a bare clock would be read as one.
           time: undefined as string | undefined,
+          reason: c.reason,
           now: false,
           mine: false,
         }

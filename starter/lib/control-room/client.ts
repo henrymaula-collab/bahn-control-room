@@ -7,7 +7,8 @@
 // flag must not need any change in the screens.
 
 import { headers } from "next/headers"
-import { apiCase, apiCaseExtras, apiDecide, apiDesk, apiLead, apiOverview, apiWork, resolvePerson } from "./api-adapter"
+import { cache } from "react"
+import { apiCase, apiDecide, apiDesk, apiLead, apiOverview, apiWork, apiWorkCase, resolvePerson } from "./api-adapter"
 import type { Decision, Lesson, OpsPerson, TrustRule } from "./types"
 import type { CaseV3Extras, Overview, WorkLists } from "./types-v3"
 import type { CaseDetail, DeskView, LeadView } from "./views"
@@ -25,7 +26,16 @@ async function base(): Promise<string> {
   return `${h.get("x-forwarded-proto") ?? "http"}://${host}`
 }
 
+/** One read per path per request: the shell, Your tasks' list and the card ask for the same people and lists. */
+const getOnce = cache(async (url: string): Promise<unknown> => {
+  const res = await fetch(url, { cache: "no-store", headers: { "content-type": "application/json" } })
+  if (res.status === 404) return null
+  if (!res.ok) throw new Error(`GET ${url} failed with ${res.status}`)
+  return res.json()
+})
+
 async function api<T>(path: string, init?: RequestInit): Promise<T> {
+  if (!init) return (await getOnce(`${await base()}${path}`)) as T
   const res = await fetch(`${await base()}${path}`, {
     cache: "no-store",
     ...init,
@@ -34,6 +44,18 @@ async function api<T>(path: string, init?: RequestInit): Promise<T> {
   if (res.status === 404) return null as T
   if (!res.ok) throw new Error(`${init?.method ?? "GET"} ${path} failed with ${res.status}`)
   return (await res.json()) as T
+}
+
+/** Who is signed in, who else is on the team, and the room's clock: what the frame needs, in two reads. */
+export async function getSignedIn(personId: string): Promise<{ person: OpsPerson; people: OpsPerson[]; asOf: string }> {
+  if (dataSource() === "api") {
+    const people = await api<OpsPerson[]>("/api/cr/people")
+    const person = resolvePerson(people, personId)
+    const desk = await api<{ quiet: { checkedAt: string } } | null>(`/api/cr/desk?person=${encodeURIComponent(person.id)}`)
+    return { person, people, asOf: desk?.quiet.checkedAt ?? new Date().toISOString() }
+  }
+  const desk = fixtures.deskView(personId)
+  return { person: desk.person, people: desk.people, asOf: desk.asOf }
 }
 
 export async function getDesk(personId: string, opts: { extraRows?: number } = {}): Promise<DeskView> {
@@ -51,22 +73,27 @@ export async function getLead(personId: string): Promise<LeadView> {
   return fixtures.leadView(personId)
 }
 
-/** v3 Overview: every car active today, the counts, and this person's cases (types-v3.ts). */
+/** Overview: every car active today, the counts, and this person's cases (types-v3.ts). */
 export async function getOverview(personId: string): Promise<Overview> {
-  if (dataSource() === "api") return apiOverview(api, personId)
+  // The engine takes "aino" or "p-aino"; an unknown cookie falls back to someone on shift, as the desk does.
+  if (dataSource() === "api") return (await apiOverview(api, personId)) ?? apiOverview(api, await apiPersonId(personId))
   return fixtures.overview(personId)
 }
 
-/** v3 Work: Needs you, Agent working, Done today for one person. */
-export async function getWork(personId: string): Promise<WorkLists> {
-  if (dataSource() === "api") return apiWork(api, personId)
-  return fixtures.workLists(personId)
+/** Your tasks: Needs you, Agent working, Done today for one person. `extraRows` is fixture-only (a long-list check). */
+export async function getWork(personId: string, opts: { extraRows?: number } = {}): Promise<WorkLists> {
+  if (dataSource() === "api") return (await apiWork(api, personId)) ?? (await apiWork(api, await apiPersonId(personId))) ?? { needYou: [], agentWorking: [], doneToday: [] }
+  return fixtures.workLists(personId, opts)
 }
 
-/** v3 case extras: "Why it came to you" key facts and "The situation" panel. */
-export async function getCaseExtras(caseId: string): Promise<CaseV3Extras | null> {
-  if (dataSource() === "api") return apiCaseExtras(api, caseId)
-  return fixtures.caseExtras(caseId)
+/** A case as Your tasks shows it: the detail, plus why it came to you, the situation and the line under the button. */
+export type WorkCase = { detail: CaseDetail; extras: CaseV3Extras | null }
+
+export async function getWorkCase(id: string, personId: string): Promise<WorkCase | null> {
+  if (dataSource() === "api") return apiWorkCase(api, id, personId)
+  const base = fixtures.baseCaseId(id)
+  const detail = fixtures.caseDetail(base, personId)
+  return detail ? { detail, extras: fixtures.caseExtras(base) } : null
 }
 
 /** Saves a decision, once, with the "why" when the person gave one. */

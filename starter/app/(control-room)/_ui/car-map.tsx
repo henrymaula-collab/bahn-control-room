@@ -7,7 +7,7 @@ import { createPortal } from "react-dom"
 import type { MapCar } from "@/lib/control-room/types-v3"
 import { WORKER_URL, loadStyle, type MapLook } from "./map-style"
 
-/** What a red pin's card says. With a case: its one question and the way to Work. Without one
+/** What a red pin's card says. With a case: its one question and the way to Your tasks. Without one
  *  (the order check is red but no case exists yet): the order, one tap away. Keyed by order id. */
 export type RedInfo = {
   orderId: string
@@ -17,6 +17,7 @@ export type RedInfo = {
   time?: string
   now: boolean
   question?: string
+  reason?: string // why it is red, when there is no case to ask ("Ferry sold out")
   mine: boolean
   owner?: string
 }

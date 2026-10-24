@@ -80,8 +80,8 @@ export function Question(props: Props) {
           {done.why && option.id !== suggestion.id ? ` The reason goes to ${props.leadName} before the agent learns from it.` : ""}
         </p>
         <div className="answers">
-          <Link href={props.nextHref ?? "/work"} className="btn btn-secondary">
-            {props.nextHref ? "Next case" : "Back to Work"}
+          <Link href={props.nextHref ?? "/tasks"} className="btn btn-secondary">
+            {props.nextHref ? "Next case" : "Back to your tasks"}
           </Link>
         </div>
       </section>

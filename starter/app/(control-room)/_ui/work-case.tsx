@@ -81,11 +81,14 @@ function SituationPanel({ situation: s, open, now, onClose }: { situation: Situa
     if (open) close.current?.focus({ preventScroll: true })
   }, [open])
 
+  // Who it waits on first, then the engine's facts. Say nothing twice: a booked pickup or delivery
+  // time is already under its stop above, and the engine's Driver row ("Gig posted at EUR 456") wins.
+  const shown = (stop: Stop) => stop.booked && !!stop.window
   const facts: KeyFact[] = [
-    { label: "Driver", value: s.driver ?? "Not booked" },
     ...(s.waitingOn ? [s.waitingOn] : []),
-    ...s.facts,
+    ...s.facts.filter((f) => !(f.label === "Pickup" && shown(s.pickup)) && !(f.label === "Delivery" && shown(s.delivery))),
   ]
+  if (!facts.some((f) => f.label === "Driver")) facts.push({ label: "Driver", value: s.driver ?? "Not booked" })
 
   return (
     <aside id="situation" className={`panel${open ? " open" : ""}`} aria-label="The situation" aria-hidden={!open}>

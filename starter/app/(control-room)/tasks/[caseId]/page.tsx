@@ -1,7 +1,8 @@
 import type { Metadata } from "next"
 import { notFound } from "next/navigation"
-import { getWork, getWorkCase } from "@/lib/control-room/client-v3"
+import { getWork, getWorkCase } from "@/lib/control-room/client"
 import { clock } from "@/lib/control-room/format"
+import type { Case } from "@/lib/control-room/types"
 import { dueFor } from "../../_ui/lines"
 import { Question } from "../../_ui/question"
 import { currentPersonId } from "../../_ui/session"
@@ -13,10 +14,10 @@ type Params = Promise<{ caseId: string }>
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
   const { caseId } = await params
   const w = await getWorkCase(caseId, await currentPersonId())
-  return { title: w ? `${w.detail.card.order.vehicle}, Work` : "Work" }
+  return { title: w ? `${w.detail.card.order.vehicle}, Your tasks` : "Your tasks" }
 }
 
-/** One case in Work: flow 1's decision card, then two rows, The situation and Why it came to you. */
+/** One case in Your tasks: flow 1's decision card, then two rows, The situation and Why it came to you. */
 export default async function WorkCasePage({ params }: { params: Params }) {
   const { caseId } = await params
   const personId = await currentPersonId()
@@ -49,7 +50,7 @@ export default async function WorkCasePage({ params }: { params: Params }) {
           whyChoices={detail.whyChoices}
           leadName={lead?.name ?? "The shift lead"}
           personName={detail.person.name}
-          nextHref={nextId ? `/work/${nextId}` : undefined}
+          nextHref={nextId ? `/tasks/${nextId}` : undefined}
           next={extras?.next}
           existing={
             detail.decision
@@ -71,7 +72,7 @@ export default async function WorkCasePage({ params }: { params: Params }) {
           <h1 className="l what">
             <Keep text={c.headline} />
           </h1>
-          <p className="l ask quiet">{c.status === "agent_working" ? c.agentSteps.at(-1)?.summary : c.suggestion.effect}</p>
+          {agentLine(c) && <p className="l ask quiet">{agentLine(c)}</p>}
         </section>
       )}
 
@@ -83,4 +84,23 @@ export default async function WorkCasePage({ params }: { params: Params }) {
       />
     </div>
   )
+}
+
+const wordsOf = (text: string) => text.toLowerCase().match(/[\p{L}\d:]+/gu) ?? []
+
+/**
+ * The grey line under the headline when nobody is asked: what the agent does or did, from the
+ * suggestion's effect. Never a repeat of the headline (a sentence whose words are mostly in it)
+ * and never a rule's internal id.
+ */
+function agentLine(c: Case): string | undefined {
+  const head = new Set(wordsOf(c.headline))
+  const kept = c.suggestion.effect
+    .split(/(?<=\.)\s+/)
+    .filter((sentence) => !/\brule-[\w-]+/.test(sentence))
+    .filter((sentence) => {
+      const w = wordsOf(sentence)
+      return w.length > 0 && w.filter((x) => head.has(x)).length / w.length < 0.7
+    })
+  return kept.join(" ").trim() || undefined
 }

@@ -26,7 +26,8 @@ export async function POST(request: Request) {
   try {
     const res = await carryOutDecision(c, decision, routeProvider(input.provider))
     const lesson = (await listLessons()).find((l) => l.fromDecisionIds.includes(decision.id))
-    appendTrace(res.traceFile, [{ type: "decision", decision }, ...(lesson ? [{ type: "lesson" as const, lesson }] : [])])
+    // A live run gets the decision and lesson appended to its new trace; a replay leaves the recording alone.
+    if (res.run.mode !== "replay") appendTrace(res.traceFile, [{ type: "decision", decision }, ...(lesson ? [{ type: "lesson" as const, lesson }] : [])])
     return NextResponse.json({ run: res.run, case: res.case ?? null, calls: res.calls, handover: res.handover })
   } catch (e) {
     return fail(e instanceof Error ? e.message : String(e), 500)

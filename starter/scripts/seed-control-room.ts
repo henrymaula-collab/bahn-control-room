@@ -168,6 +168,9 @@ async function main() {
   const lessons: Lesson[] = []
   const types = Object.keys(LESSON_TEXT)
   for (const [index, type] of types.entries()) {
+    // No seeded lesson for missing release documents (was lesson-seed-3, an accepted lesson at
+    // the pickup place of the live demo): the demo learns that lesson live, from a person's decision.
+    if (type === "readiness.release_document_missing") continue
     const today = derived.find((c) => c.type === type && c.placeId)
     let fromHistory = decisions.filter((row) => row.caseType === type && (!today || row.placeId === today.placeId))
     if (!fromHistory.length && today?.placeId) {

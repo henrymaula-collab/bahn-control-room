@@ -7,8 +7,9 @@
 // flag must not need any change in the screens.
 
 import { headers } from "next/headers"
-import { apiCase, apiDecide, apiDesk, apiLead, resolvePerson } from "./api-adapter"
+import { apiCase, apiCaseExtras, apiDecide, apiDesk, apiLead, apiOverview, apiWork, resolvePerson } from "./api-adapter"
 import type { Decision, Lesson, OpsPerson, TrustRule } from "./types"
+import type { CaseV3Extras, Overview, WorkLists } from "./types-v3"
 import type { CaseDetail, DeskView, LeadView } from "./views"
 import * as fixtures from "./fixtures"
 
@@ -48,6 +49,24 @@ export async function getCase(id: string, personId: string): Promise<CaseDetail 
 export async function getLead(personId: string): Promise<LeadView> {
   if (dataSource() === "api") return apiLead(api, personId)
   return fixtures.leadView(personId)
+}
+
+/** v3 Overview: every car active today, the counts, and this person's cases (types-v3.ts). */
+export async function getOverview(personId: string): Promise<Overview> {
+  if (dataSource() === "api") return apiOverview(api, personId)
+  return fixtures.overview(personId)
+}
+
+/** v3 Work: Needs you, Agent working, Done today for one person. */
+export async function getWork(personId: string): Promise<WorkLists> {
+  if (dataSource() === "api") return apiWork(api, personId)
+  return fixtures.workLists(personId)
+}
+
+/** v3 case extras: "Why it came to you" key facts and "The situation" panel. */
+export async function getCaseExtras(caseId: string): Promise<CaseV3Extras | null> {
+  if (dataSource() === "api") return apiCaseExtras(api, caseId)
+  return fixtures.caseExtras(caseId)
 }
 
 /** Saves a decision, once, with the "why" when the person gave one. */

@@ -28,6 +28,8 @@ export function scaleChecks(world: World, now: string, count = Number(process.en
   const random = rng(20261024)
   const customers = [...world.customers.values()]
   const places = [...world.places.values()].filter((place) => place.city)
+  // Make and model as they appear on real orders, so a made-up dot reads like a real car.
+  const vehicles = [...new Set(world.orders.flatMap((order) => order.bundle.items.map((item) => `${item.vehicle.make} ${item.vehicle.model}`)))].sort()
   const out: OrderCheckResult[] = []
   for (let i = 0; i < count; i++) {
     const stage = STAGES[Math.floor(random() * STAGES.length)]!
@@ -37,6 +39,8 @@ export function scaleChecks(world: World, now: string, count = Number(process.en
     const to = places[Math.floor(random() * places.length)]!
     const customer = customers[Math.floor(random() * customers.length)]!
     const id = `scale-${String(i + 1).padStart(4, "0")}`
+    // Map fields draw from their own stream, so the fields above stay exactly as they were.
+    const extra = rng(20261024 + 7919 * (i + 1))
     out.push({
       orderId: id,
       reference: `CD-43${String(1000 + i).padStart(4, "0")}`,
@@ -49,6 +53,11 @@ export function scaleChecks(world: World, now: string, count = Number(process.en
       syntheticCustomer: customer.name,
       syntheticFrom: from.city,
       syntheticTo: to.city,
+      syntheticStatus: stage.status,
+      syntheticFromId: from.id,
+      syntheticToId: to.id,
+      syntheticVehicle: vehicles.length ? vehicles[Math.floor(extra() * vehicles.length)]! : "Car",
+      syntheticProgress: Math.round((0.08 + extra() * 0.84) * 1000) / 1000,
     })
   }
   return out

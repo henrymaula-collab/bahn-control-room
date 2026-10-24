@@ -13,7 +13,7 @@ export const CALLS: Call[] = [
     language: "de",
     startedAt: today("11:36"),
     outcome: "answered",
-    audioUrl: "/calls/call-458.mp3",
+    audioUrl: "/calls/call-9x56kmpv1.mp3",
     factIds: ["f458-1", "f458-2"],
     turns: [
       {

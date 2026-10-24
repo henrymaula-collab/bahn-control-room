@@ -11,7 +11,8 @@ import { countChecks } from "../lib/control-room/checks"
 import { closeCrDb, crDb } from "../lib/control-room/db"
 import { scaleChecks } from "../lib/control-room/scale"
 import { crCases, crDecisions, crLessons } from "../lib/control-room/schema"
-import { buildState, decide, getDesk, getLead, refreshTrustRules, setTrustRule } from "../lib/control-room/service"
+import { buildState, decide, getCaseDetail, getDesk, getLead, getOverview, getWork, refreshTrustRules, setTrustRule } from "../lib/control-room/service"
+import { inEurope } from "../lib/control-room/geo"
 import { listTrustRules, saveTrustRule } from "../lib/control-room/store"
 
 const results: string[] = []
@@ -53,7 +54,9 @@ async function main() {
 
   // 3. No order ids in engine code (reseed-safe)
   const dir = join(process.cwd(), "lib", "control-room")
-  for (const file of readdirSync(dir).filter((name) => name.endsWith(".ts") && !name.includes(".test.") && name !== "types.ts")) {
+  // The shape files (contract and view types) name the hero order in example comments; engine code must not.
+  const contract = new Set(["types.ts", "types-v3.ts", "views.ts"])
+  for (const file of readdirSync(dir).filter((name) => name.endsWith(".ts") && !name.includes(".test.") && !contract.has(name))) {
     const text = readFileSync(join(dir, file), "utf8")
     assert.ok(!/\bord-\d{5}\b|\bCD-4\d{5}\b/.test(text), `${file} must not name an order`)
   }
@@ -68,7 +71,10 @@ async function main() {
   ok(`desks: ${state.people.length} people`)
 
   // 5. Decision round trip, then clean up
-  const target = waiting[0]
+  // Prefer a derived case: an agent's stored case belongs to the live demo. If only agent cases
+  // wait, the stored row is put back exactly as it was afterwards.
+  const target = waiting.find((c) => state.derivedIds.has(c.id)) ?? waiting[0]
+  const [storedBefore] = target ? await crDb.select().from(crCases).where(eq(crCases.id, target.id)) : []
   if (target) {
     const result = await decide({ caseId: target.id, personId: target.routedTo!.personId, optionId: target.alternatives[0]!.id, why: "Smoke test" })
     assert.ok(!("error" in result), "decision recorded")
@@ -80,7 +86,8 @@ async function main() {
       assert.notEqual(after.checks.find((check) => check.orderId === target.orderId)?.state, "needs_person")
       await crDb.delete(crDecisions).where(eq(crDecisions.id, result.decision.id))
       await crDb.delete(crLessons).where(eq(crLessons.id, result.lesson.id))
-      if (state.derivedIds.has(target.id)) await crDb.delete(crCases).where(eq(crCases.id, target.id))
+      if (storedBefore) await crDb.update(crCases).set({ status: storedBefore.status, routedTo: storedBefore.routedTo, updatedAt: storedBefore.updatedAt, data: storedBefore.data }).where(eq(crCases.id, target.id))
+      else await crDb.delete(crCases).where(eq(crCases.id, target.id))
       await refreshTrustRules()
     }
     ok(`decision: ${target.id} decided, lesson proposed, order left the board; cleaned up`)
@@ -110,19 +117,58 @@ async function main() {
   assert.ok(lead.coverage.length > 0 && lead.money.line.startsWith("EUR"))
   ok(`lead: ${lead.trustRules.length} trust rule(s), ${lead.lessons.accepted.length} accepted / ${lead.lessons.proposed.length} proposed lessons, coverage gaps: ${lead.coverage.filter((c) => c.onlyOne).map((c) => c.label).join(", ") || "none"}`)
 
+  // 8b. v3 views: the map, Work lists and case extras agree with the desk and the lead
+  {
+    const v3 = await buildState()
+    const v3Lead = await getLead(v3)
+    for (const person of v3.people) {
+      const overview = (await getOverview(person.id, v3))!
+      const work = (await getWork(person.id, v3))!
+      const desk = (await getDesk(person.id, v3))!
+      assert.equal(overview.counts.needsPerson, v3Lead.today.needsPerson, "red cars = lead today.needsPerson")
+      assert.equal(overview.counts.agentWorking, v3Lead.today.agentWorking, "agent cars = lead today.agentWorking")
+      assert.equal(work.needYou.length, (desk.focus ? 1 : 0) + desk.queue.length, `${person.id}: Needs you = the desk`)
+      assert.ok(overview.cars.every((car) => inEurope(car.position)), "every car inside Europe")
+    }
+    for (const c of v3.cases) {
+      const detail = (await getCaseDetail(c.id, v3))!
+      assert.ok(detail.why.length <= 3 && detail.situation && detail.situation.facts.length <= 5, `${c.id}: why <= 3, facts <= 5`)
+    }
+    const overview = (await getOverview(v3.people[0]!.id, v3))!
+    ok(`v3: ${overview.counts.carsToday} cars on the map (${overview.counts.needsPerson} need a person, ${overview.counts.agentWorking} agent working), counts agree with desk and lead`)
+  }
+
   // 9. HTTP, when a server is running
   const base = process.env.APP_URL
   if (base) {
     const person = state.people[0]!.id
     const anyCase = state.cases[0]!.id
-    for (const path of ["/api/cr/people", `/api/cr/desk?person=${person}`, `/api/cr/cases/${anyCase}`, "/api/cr/lead", "/api/cr/orders/checks"]) {
+    const json: Record<string, unknown> = {}
+    for (const path of ["/api/cr/people", `/api/cr/desk?person=${person}`, `/api/cr/cases/${anyCase}`, "/api/cr/lead", "/api/cr/orders/checks", `/api/cr/overview?person=${person}`, `/api/cr/work?person=${person}`]) {
       const response: Response = await fetch(`${base}${path}`)
       assert.equal(response.status, 200, `${path} -> ${response.status}`)
-      await response.json()
+      json[path] = await response.json()
+    }
+    // The v3 routes agree with the lead and the desk over HTTP too.
+    const httpOverview = json[`/api/cr/overview?person=${person}`] as { counts: { needsPerson: number; agentWorking: number; needYou: number }; cars: unknown[] }
+    const httpLead = json["/api/cr/lead"] as { today: { needsPerson: number; agentWorking: number } }
+    const httpDesk = json[`/api/cr/desk?person=${person}`] as { focus: unknown; queue: unknown[] }
+    const httpWork = json[`/api/cr/work?person=${person}`] as { needYou: unknown[] }
+    const httpCase = json[`/api/cr/cases/${anyCase}`] as { why?: unknown[]; situation?: { facts: unknown[] } }
+    assert.equal(httpOverview.counts.needsPerson, httpLead.today.needsPerson)
+    assert.equal(httpOverview.counts.agentWorking, httpLead.today.agentWorking)
+    assert.equal(httpOverview.counts.needYou, (httpDesk.focus ? 1 : 0) + httpDesk.queue.length)
+    assert.equal(httpWork.needYou.length, httpOverview.counts.needYou)
+    assert.ok(Array.isArray(httpCase.why) && httpCase.why.length <= 3 && httpCase.situation && httpCase.situation.facts.length <= 5)
+    for (const path of ["/api/cr/overview", "/api/cr/work"]) {
+      const missing: Response = await fetch(`${base}${path}`)
+      assert.equal(missing.status, 400, `${path} without ?person -> ${missing.status}`)
+      const unknown: Response = await fetch(`${base}${path}?person=nobody`)
+      assert.equal(unknown.status, 404, `${path}?person=nobody -> ${unknown.status}`)
     }
     const bad: Response = await fetch(`${base}/api/cr/decisions`, { method: "POST", body: "{}" })
     assert.equal(bad.status, 400)
-    ok(`http: every GET route answers 200 at ${base}; bad POST answers 400`)
+    ok(`http: every GET route answers 200 at ${base} (overview ${httpOverview.cars.length} cars); v3 counts agree with lead and desk; bad POST and missing person answer 400/404`)
   }
 
   void inArray

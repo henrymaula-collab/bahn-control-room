@@ -4,6 +4,7 @@
 
 import type { Call, Case, Decision, Lesson, OpsPerson, OrderCheck, TrackRecord, TrustRule } from "./types"
 import { euro } from "./format"
+import type { CaseV3Extras, Overview, WorkLists } from "./types-v3"
 import type { CaseCard, CaseDetail, DeskView, LeadView, OrderSummary } from "./views"
 import { whyFor } from "./why"
 
@@ -209,4 +210,21 @@ export async function apiDecide(post: Fetch, d: Omit<Decision, "at">): Promise<D
     body: JSON.stringify({ caseId: d.caseId, personId: d.personId, optionId: d.optionId, editedDetail: d.editedDetail, why: d.why }),
   })
   return res.decision
+}
+
+// ---- v3 (types-v3.ts): the engine serves these shapes as they are ----
+
+export async function apiOverview(get: Fetch, personId: string): Promise<Overview> {
+  return get<Overview>(`/api/cr/overview?person=${encodeURIComponent(personId)}`)
+}
+
+export async function apiWork(get: Fetch, personId: string): Promise<WorkLists> {
+  return get<WorkLists>(`/api/cr/work?person=${encodeURIComponent(personId)}`)
+}
+
+/** The case detail carries `why` and `situation` next to its other fields. */
+export async function apiCaseExtras(get: Fetch, caseId: string): Promise<CaseV3Extras | null> {
+  const d = await get<(ApiCaseDetail & Partial<CaseV3Extras>) | null>(`/api/cr/cases/${encodeURIComponent(caseId)}`)
+  if (!d || !d.situation) return null
+  return { why: d.why ?? [], situation: d.situation }
 }

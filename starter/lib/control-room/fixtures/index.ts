@@ -10,6 +10,8 @@ import { ROOM_NOW, today } from "./clock"
 import { CASE_TYPE_ROWS, EVIDENCE, LESSON_SOURCES, LESSONS, MONEY, RULE_DISPLAY, TODAY_STATS, TRACK_RECORDS, TRUST_RULES } from "./learning"
 import { ORDERS } from "./orders"
 import { PEOPLE } from "./people"
+import type { CaseV3Extras, Overview, WorkLists } from "../types-v3"
+import { fixtureCaseExtras, fixtureOverview, fixtureWorkLists } from "./v3-derived"
 
 interface Store {
   cases: Case[]
@@ -210,4 +212,19 @@ export function reviewLesson(id: string, action: "accept" | "retire" | "edit", p
   if (action === "retire") l.status = "retired"
   l.reviewedBy = personId
   return l
+}
+
+// ---- v3 shapes (types-v3.ts), built from the same store ----
+
+export function overview(personId?: string): Overview {
+  return fixtureOverview(ROOM_NOW, store().cases, ORDERS, person(personId))
+}
+
+export function workLists(personId?: string): WorkLists {
+  return fixtureWorkLists(store().cases, ORDERS, person(personId))
+}
+
+export function caseExtras(id: string): CaseV3Extras | null {
+  const c = store().cases.find((candidate) => candidate.id === id)
+  return c ? fixtureCaseExtras(c, ORDERS[c.orderId], PEOPLE, TRACK_RECORDS) : null
 }

@@ -48,6 +48,12 @@ export type OrderCheckResult = OrderCheck & {
   syntheticCustomer?: string
   syntheticFrom?: string
   syntheticTo?: string
+  /** For the Overview map (made-up orders only): order status, place ids, car, share of the way driven. */
+  syntheticStatus?: string
+  syntheticFromId?: string
+  syntheticToId?: string
+  syntheticVehicle?: string
+  syntheticProgress?: number
 }
 
 const LIVE = new Set(["ASSIGNED", "IN_PROGRESS"])

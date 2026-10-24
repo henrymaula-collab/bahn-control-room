@@ -1,0 +1,38 @@
+/* needs 09: time groups in place. Every rule under .lab-needs-09 (the lab bundles all variants). */
+
+/* The group's name: small, grey, sentence case, the shared fact said once (Lightfield, Things). */
+.lab-needs-09 .n09-head {
+  margin: 0.9em 0 0.2em;
+  font-size: var(--type-subhead); line-height: var(--lh-subhead); font-weight: 600; color: var(--ink-2);
+}
+.lab-needs-09 .n09-group:first-child .n09-head { margin-top: 0.3em; }
+
+/* A later group closed: one row, its name, the count in grey, the chevron on the card's edge. */
+.lab-needs-09 .n09-later { margin-top: 0.15em; }
+.lab-needs-09 .n09-later > summary {
+  display: grid; grid-template-columns: minmax(0, 1fr) auto auto; align-items: center; column-gap: 0.83em;
+  padding: 0.5em 0.83em; margin: 0 -0.83em; border-radius: 0.75em;
+  font-size: var(--type-body); line-height: var(--lh-body);
+}
+.lab-needs-09 .n09-later > summary:hover { background: var(--raise); }
+.lab-needs-09 .n09-later-title { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.lab-needs-09 .n09-count { color: var(--ink-2); font-variant-numeric: tabular-nums; }
+.lab-needs-09 .n09-chev { display: inline-flex; color: var(--ink-2); }
+.lab-needs-09 .n09-chev svg { width: 1em; height: 1em; }
+.lab-needs-09 .n09-later[open] > summary { color: var(--ink-2); }
+.lab-needs-09 .n09-later[open] > summary .n09-chev svg { transform: rotate(90deg); }
+.lab-needs-09 .n09-later > .rows-list { padding-bottom: 0.4em; }
+
+@media (prefers-reduced-motion: no-preference) {
+  .lab-needs-09 .n09-chev svg { transition: transform 200ms cubic-bezier(0.2, 0, 0, 1); }
+  .lab-needs-09 .n09-later > summary, .lab-needs-09 .wrow { transition: background-color 100ms cubic-bezier(0.2, 0, 0, 1); }
+  .lab-needs-09[open] > .n09-body, .lab-needs-09 .n09-later[open] > .rows-list { animation: lab-needs-09-in 150ms cubic-bezier(0.2, 0, 0, 1); }
+}
+@keyframes lab-needs-09-in { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
+
+/* One line per task (Lightfield's rows): the car, its pickup place in grey beside it, the time on the
+   right. 37 tasks read as a list, not a stack of cards. */
+.lab-needs-09 .wrow.n09-one { grid-template-columns: auto minmax(0, 1fr) auto; align-items: baseline; padding-block: 0.36em; }
+.lab-needs-09 .wrow.n09-one .v { grid-column: 1; grid-row: 1; }
+.lab-needs-09 .wrow.n09-one .p { grid-column: 2; grid-row: 1; line-height: var(--lh-body); }
+.lab-needs-09 .wrow.n09-one time { grid-column: 3; grid-row: 1; }

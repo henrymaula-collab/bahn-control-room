@@ -1,0 +1,34 @@
+/* needs 11: the list as the side panel. Every rule under .lab-needs-11 (the lab bundles all variants).
+   The panel takes today's .panel (place, width, slide); it sits over the situation while open. */
+
+.lab-needs-11.n11-panel { z-index: 11; display: flex; flex-direction: column; padding: 0; overflow: hidden; }
+.lab-needs-11 .n11-head { flex: none; padding: max(14px, calc(18 * var(--cr-u, 1px))) max(20px, calc(28 * var(--cr-u, 1px))) 6px; }
+.lab-needs-11 .n11-count { margin-left: 0.25em; font-weight: 400; color: var(--ink-2); font-variant-numeric: tabular-nums; }
+
+.lab-needs-11 .n11-list {
+  flex: 1 1 auto; min-height: 0; overflow: hidden auto; overscroll-behavior: contain;
+  padding: 0 calc(max(20px, calc(28 * var(--cr-u, 1px))) - 12px) 24px;
+}
+/* The group's name stays at the top while its rows scroll under it (sticky, on the page colour). */
+.lab-needs-11 .n11-group-head {
+  position: sticky; top: 0; z-index: 1; margin: 0; padding: 0.75em 12px 0.3em; background: var(--page);
+  font-size: var(--type-subhead); line-height: var(--lh-subhead); font-weight: 600; color: var(--ink-2);
+}
+.lab-needs-11 .rows-list { gap: 0; }
+.lab-needs-11 .wrow { border-radius: 10px; }
+.lab-needs-11 .wrow:hover { background: rgb(18 17 14 / 0.04); }
+.lab-needs-11 .wrow[aria-current="true"] { background: var(--raise); }
+.lab-needs-11 .wrow[aria-current="true"] .p { color: var(--ink); }
+.lab-needs-11 .n11-decided { grid-row: 1; grid-column: 2; font-size: var(--type-subhead); line-height: calc(var(--lh-body) * var(--type-body)); color: var(--ink-2); }
+
+/* The opener under the card: like Talk it through, tinted while its panel is open. */
+.lab-needs-11.n11-row-link { grid-template-columns: minmax(0, 1fr) auto auto; }
+.lab-needs-11 .n11-row-count { color: var(--ink-2); font-variant-numeric: tabular-nums; }
+.lab-needs-11.n11-row-link[aria-expanded="true"] { background: var(--raise); }
+
+@media (prefers-reduced-motion: no-preference) {
+  .lab-needs-11 .wrow { transition: background-color 100ms cubic-bezier(0.2, 0, 0, 1); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .lab-needs-11.n11-panel, .lab-needs-11.n11-panel.open { transition: none; }
+}

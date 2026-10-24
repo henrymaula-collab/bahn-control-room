@@ -1,0 +1,36 @@
+/* needs 13: bundles by pickup place, in place. Every rule under .lab-needs-13. */
+
+.lab-needs-13 .n13-head {
+  margin: 0.9em 0 0.2em;
+  font-size: var(--type-subhead); line-height: var(--lh-subhead); font-weight: 600; color: var(--ink-2);
+}
+.lab-needs-13 .n13-body > section:first-child .n13-head { margin-top: 0.3em; }
+.lab-needs-13 .n13-list { display: flex; flex-direction: column; margin: 0; padding: 0; list-style: none; }
+
+/* One line per task or per place: the name, a grey word beside it, the time where today's rows have it. */
+.lab-needs-13 .n13-row,
+.lab-needs-13 .n13-bundle > summary {
+  display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: baseline; column-gap: 0.6em;
+  padding: 0.36em 0.83em; margin: 0 -0.83em; border-radius: 0.75em; color: var(--ink);
+  font-size: var(--type-body); line-height: var(--lh-body);
+}
+.lab-needs-13 .n13-row { padding-right: calc(0.83em + 1em + 0.83em); outline-offset: -2px; }
+.lab-needs-13 .n13-bundle > summary { grid-template-columns: auto minmax(0, 1fr) auto 1em; column-gap: 0.6em; }
+.lab-needs-13 .n13-bundle > summary > time, .lab-needs-13 .n13-bundle > summary > span:nth-child(3) { margin-right: 0.23em; }
+.lab-needs-13 .n13-row:hover, .lab-needs-13 .n13-bundle > summary:hover { background: var(--raise); }
+.lab-needs-13 .n13-car { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.lab-needs-13 .n13-place { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: var(--type-subhead); color: var(--ink-2); }
+.lab-needs-13 time { font-size: var(--type-subhead); color: var(--ink-2); font-variant-numeric: tabular-nums; }
+.lab-needs-13 time.now { color: var(--now); font-weight: 600; }
+.lab-needs-13 .n13-chev { display: inline-flex; align-self: center; color: var(--ink-2); }
+.lab-needs-13 .n13-chev svg { width: 1em; height: 1em; }
+.lab-needs-13 .n13-bundle[open] > summary .n13-chev svg { transform: rotate(90deg); }
+/* The cars of an opened place, set in under its name: the place is said once, in the row above. */
+.lab-needs-13 .n13-inner { padding: 0 0 0.3em 1.2em; }
+
+@media (prefers-reduced-motion: no-preference) {
+  .lab-needs-13 .n13-chev svg { transition: transform 200ms cubic-bezier(0.2, 0, 0, 1); }
+  .lab-needs-13 .n13-row, .lab-needs-13 .n13-bundle > summary { transition: background-color 100ms cubic-bezier(0.2, 0, 0, 1); }
+  .lab-needs-13[open] > .n13-body, .lab-needs-13 .n13-bundle[open] > .n13-inner { animation: lab-needs-13-in 150ms cubic-bezier(0.2, 0, 0, 1); }
+}
+@keyframes lab-needs-13-in { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }

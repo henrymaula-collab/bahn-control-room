@@ -1,0 +1,42 @@
+/* needs 15: a list column between the menu and the card (Apple's split view). Every rule under .lab-needs-15. */
+
+.lab-needs-15.n15 {
+  --n15-list: max(calc(196 * var(--type-kf)), calc(320 * var(--cr-u, 1px)));
+  /* The card's type is sized from the room it has: the window less the menu, this column and the panel. */
+  --card-room: calc(var(--cr-vw, 100vw) - var(--side) - 8px - var(--n15-list));
+  min-width: 0; min-height: 0; display: grid; grid-template-columns: var(--n15-list) minmax(0, 1fr);
+}
+.lab-needs-15.n15.n15-panel { --card-room: calc(var(--cr-vw, 100vw) - var(--side) - 8px - var(--n15-list) - var(--panel)); }
+.lab-needs-15.n15 > .detail { min-height: 0; }
+
+.lab-needs-15 .n15-list {
+  min-height: 0; overflow: hidden auto; overscroll-behavior: contain;
+  /* The first group's name sits level with the card's "Decide by". */
+  padding: calc(max(calc(28 * var(--type-kf)), calc(56 * var(--cr-u, 1px))) - 0.5em) 10px 24px;
+  border-right: 1px solid rgb(18 17 14 / 0.06);
+  font-size: var(--type-subhead); line-height: var(--lh-subhead);
+}
+.lab-needs-15 .n15-head {
+  position: sticky; top: calc(-1 * max(calc(28 * var(--type-kf)), calc(56 * var(--cr-u, 1px))) + 0.5em); z-index: 1;
+  margin: 0; padding: 0.5em 10px 0.3em; background: var(--page);
+  font-size: var(--type-subhead); line-height: var(--lh-subhead); font-weight: 600; color: var(--ink-2);
+}
+.lab-needs-15 section + section .n15-head { padding-top: 1em; }
+.lab-needs-15 .n15-rows { display: flex; flex-direction: column; gap: 1px; margin: 0; padding: 0; list-style: none; }
+
+/* Two lines: the car whole on the first, the place and the time on the second. */
+.lab-needs-15 .n15-row {
+  display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: 8px;
+  padding: 7px 10px; border-radius: 10px; color: var(--ink); outline-offset: -2px;
+}
+.lab-needs-15 .n15-row:hover { background: rgb(18 17 14 / 0.04); }
+.lab-needs-15 .n15-row[aria-current="true"] { background: var(--raise); }
+.lab-needs-15 .n15-car { grid-column: 1 / -1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: var(--type-body); line-height: var(--lh-body); }
+.lab-needs-15 .n15-place { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--ink-2); }
+.lab-needs-15 .n15-row[aria-current="true"] .n15-place { color: var(--ink); }
+.lab-needs-15 .n15-time { color: var(--ink-2); font-variant-numeric: tabular-nums; }
+.lab-needs-15 .n15-time.n15-now { color: var(--now); font-weight: 600; }
+
+@media (prefers-reduced-motion: no-preference) {
+  .lab-needs-15 .n15-row { transition: background-color 100ms cubic-bezier(0.2, 0, 0, 1); }
+}

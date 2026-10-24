@@ -108,3 +108,19 @@ export async function clearThread(caseId: string, personId?: string | null): Pro
   if (personId && !r.ok) return r
   return { ok: true, removed: await chatStore().clear(id, pid) }
 }
+
+/**
+ * For the learning loop's case record ("the chat: ids or a short summary"): the
+ * thread's message ids and what the person asked. Ids are the engine's (case id, "p-aino").
+ */
+export async function chatForCaseRecord(caseId: string, personId: string): Promise<{ messageIds: string[]; turns: number; viaVoice: boolean; summary: string }> {
+  const messages = await chatStore().list(caseId, personId)
+  const asked = messages.filter((m) => m.role === "person" && m.text.trim())
+  const short = (q: string) => (q.length > 80 ? `${q.slice(0, 77).trimEnd()}...` : q)
+  return {
+    messageIds: messages.map((m) => m.id),
+    turns: asked.length,
+    viaVoice: asked.some((m) => m.via === "voice"),
+    summary: asked.length ? `Asked: ${asked.map((m) => short(m.text.trim())).join(" / ")}` : "Decided without talking it through",
+  }
+}

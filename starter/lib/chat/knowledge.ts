@@ -26,7 +26,7 @@ export const KNOWN_FROM = 5
 export interface PastDecision {
   id: string
   caseId: string
-  reference: string // "CD-420458"; empty for the made-up history, which has no order
+  reference: string // the order reference ("CD-4" + five digits); empty for the made-up history, which has no order
   personId: string
   personName: string
   kind: Kind

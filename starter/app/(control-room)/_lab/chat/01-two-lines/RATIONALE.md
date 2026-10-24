@@ -1,0 +1,7 @@
+# chat 01: Two lines, then ask
+
+- References: Input's agent panel (https://nicelydone.club/examples/screens/df85728e-328a-4148-8069-d90b3fdfedfc, `research/premium/visual/shots/chat-07-input-opener-prompt.png`), Graceview's opener with example prompts (https://dribbble.com/shots/26274219-AI-Assistant-Sidebar-Interaction, `research/premium/visual/shots/chat-10-graceview-welcome-examples.png`), Apple HIG Generative AI "offer diverse, predefined example inputs" (https://developer.apple.com/design/human-interface-guidelines/generative-ai, `research/premium/chat-builder/apple-hig-generative-ai.md`).
+- Borrowed: an opener that is short and concrete, and real example questions that ask on a tap (Input, Graceview); from Apple, starting with examples instead of an empty field.
+- Exactly: the opener shows only the agent's own two sentences that matter (what is new, what the suggestion rests on), picked from its text, never rewritten; the first in 600. "Everything the agent said" opens the rest and the kind's record in place. Two questions as plain rows (not chips) until the first question; the running step's own words replace "Thinking".
+- Why for ops: an expert reads two lines and decides from the card; a newer person taps a question instead of inventing one. The opener stops repeating the card's headline and question.
+- Trade-off: the starter questions are written from the case's place name, so they are generic for kinds that need other questions; the full opener is one tap further away than today.

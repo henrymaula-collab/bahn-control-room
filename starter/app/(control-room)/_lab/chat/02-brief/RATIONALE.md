@@ -1,0 +1,7 @@
+# chat 02: The brief, with sources
+
+- References: Intercom Copilot's panel (https://www.intercom.com/helpdesk/copilot, `research/premium/product/shots/chat-04-intercom-copilot-panel.png`), Fin Operator's grey tool line (https://nicelydone.club/examples/screens/b951b923-48ed-41d1-af64-53a69c284b00, `research/premium/visual/shots/chat-01-fin-operator-tool-line.png`).
+- Borrowed from Intercom: the steps collapsed into one grey sentence on top ("Read conversation, searched Linear ›"), a short "What happened" under a plain heading, the source next to the claim, and the draft as a card whose button names the action, with the field below. From Fin: the running tool as one grey line in its own words, not a spinner card.
+- Exactly: "Read the case, the call with Calverona Hamburg and looked up earlier cases of this kind ›"; "What the agent found" shows only the opener's sentences that are news next to the card (what is new, why it came to you, what it rests on); each answer ends with "From Calverona Hamburg in Places and the call with Calverona Hamburg"; the offer card says who it reaches, the option, what happens next and "Nothing happens before you tap."
+- Why for ops: the person checks where a claim comes from without opening anything, and sees exactly what the tap will set off before tapping.
+- Trade-off: one more line per answer (the source), and a white card is the one lifted surface in the panel; the brief is longer than variant 01's two lines.

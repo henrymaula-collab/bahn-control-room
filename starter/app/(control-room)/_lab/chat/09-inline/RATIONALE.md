@@ -1,0 +1,7 @@
+# chat 09: Under the suggestion
+
+- References: Intercom Copilot, the conversation's context gathered in place next to the reply (https://www.intercom.com/helpdesk/copilot, `research/premium/product/shots/chat-04-intercom-copilot-panel.png`); Apple HIG disclosure, content that opens in place under its row (https://developer.apple.com/design/human-interface-guidelines/disclosure-controls, `research/premium/product/raw/pp/hig-disclosure.md`); v4's own placement test (`bilder/v4/chat/placement-*.png`, app-notes/v4-chatui.md "Decisions").
+- Borrowed: the card's own disclosure grammar (Talk it through opens under its row, like Why it came to you), and the situation staying beside the card.
+- Exactly: one box of fixed height (48 % of the window, 240 to 440 px) right under the row, with its own scroll and the field at its foot; only the latest question and answer show, earlier ones fold into "2 questions before this"; the card scrolls only as far as needed to show the box whole; Escape or the fold control closes it. This answers v4's reason for rejecting inline: answers no longer land below the fold and the decision never scrolls away.
+- Why for ops: the conversation is visibly about this decision, and the situation never has to leave to make room for it.
+- Trade-off: at Henry's Safari size the box is short (about 260 px) and the headline's first line scrolls away; adopting it needs the frame to keep the situation open while the chat is inline (one condition in work-case.tsx).

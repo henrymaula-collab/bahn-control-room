@@ -1,0 +1,39 @@
+/* chat 01: Two lines, then ask. Scoped under .lab-chat-01 (the base is in ../base.css). */
+
+/* The opener: the kind in grey beside the mark, then the two sentences that matter */
+.lab-chat-01 .lc-lead { display: flex; flex-direction: column; gap: 0.5em; margin-top: 0.6em; }
+.lab-chat-01 .lc-lead p:first-child { font-weight: 600; letter-spacing: var(--track-headline); }
+.lab-chat-01 .lc-rest { display: flex; flex-direction: column; align-items: flex-start; }
+.lab-chat-01 .lc-rest-body {
+  display: flex; flex-direction: column; gap: 0.5em; margin-top: 0.8em; padding-left: 0.9em;
+  border-left: 2px solid var(--press); font-size: var(--type-subhead); line-height: var(--lh-subhead);
+  animation: lc-in 200ms var(--ease) both;
+}
+.lab-chat-01 .lc-rest-body .lc-kind { margin-top: 0.4em; }
+.lab-chat-01 .lc-more {
+  display: inline-flex; align-items: center; gap: 2px; margin: 0.55em 0 0 -8px; padding: 3px 8px; border-radius: 999px;
+  font-size: var(--type-subhead); line-height: var(--lh-subhead); color: var(--ink-2);
+  transition: background-color 120ms var(--ease), color 120ms var(--ease);
+}
+.lab-chat-01 .lc-more:hover { background: var(--raise); color: var(--ink); }
+.lab-chat-01 .lc-more:focus-visible { outline: 2px solid var(--ink); outline-offset: 1px; }
+
+/* Two questions to start with: rows, not chips; a tap asks */
+.lab-chat-01 .lc-starters { display: flex; flex-direction: column; margin: calc(-0.35 * var(--lc-gap)) 0 0; padding: 0; list-style: none; }
+.lab-chat-01 .lc-starters li + li { border-top: 1px solid rgb(18 17 14 / 0.06); }
+.lab-chat-01 .lc-starters button {
+  width: calc(100% + 20px); margin: 0 -10px; padding: 0.62em 10px; border-radius: 10px;
+  display: flex; align-items: center; justify-content: space-between; gap: 12px; text-align: left;
+  font-size: var(--type-subhead); line-height: var(--lh-subhead); color: var(--ink);
+  transition: background-color 120ms var(--ease);
+}
+.lab-chat-01 .lc-starters button:hover { background: var(--raise); }
+.lab-chat-01 .lc-starters button:focus-visible { outline: 2px solid var(--ink); outline-offset: -2px; }
+.lab-chat-01 .lc-starters svg { flex: none; color: var(--ink-2); }
+.lab-chat-01 .lc-starters li:has(+ li button:hover), .lab-chat-01 .lc-starters li:has(button:hover) + li { border-color: transparent; }
+
+/* After the yes: one line of what happened, under the answer */
+.lab-chat-01 .lc-done { margin-top: 0.9em; display: flex; flex-direction: column; gap: 0.3em; animation: lc-in 200ms var(--ease) both; }
+.lab-chat-01 .lc-done .lc-by { color: var(--ink); font-weight: 600; }
+.lab-chat-01 .lc-done-line { color: var(--ink-2); font-size: var(--type-subhead); line-height: var(--lh-subhead); }
+.lab-chat-01 .lc-live .lc-words { animation: lc-in 200ms var(--ease) both; }

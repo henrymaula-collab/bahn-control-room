@@ -1,0 +1,7 @@
+# chat 06: The offer takes the field's place
+
+- References: Zendesk auto assist, suggestions "appear where the composer would otherwise be" with Approve and dismiss (https://support.zendesk.com/hc/en-us/articles/7051314237466-Using-auto-assist-to-solve-tickets, `research/premium/product/shots/card-04-zendesk-suggestion-composer.png`); Claude in Chrome's permission card, "Allow this action" (Enter), "Decline" (Esc) and a plain limit line (https://support.claude.com/en/articles/12902446-claude-in-chrome-permissions-guide, `research/premium/product/shots/chat-05b-claude-chrome-permission-prompt.png`).
+- Borrowed: the approval in the field's slot (Zendesk); full-width choice rows with their keys and the sentence on what the agent never does alone (Claude in Chrome).
+- Exactly: when the agent offers the option, a card stands where the field was: "Send the email?", what happens next, a dark row "Send the email ↵" (focused, Enter does it), a row "Not now esc" (Escape brings the field back, the panel stays), and "The agent never contacts a customer on its own. Nothing is sent before you choose." After the yes, one line in the conversation ("Decided at 12:04." and what happens next) and the field returns.
+- Why for ops: one key to decide, no hunting for the button under a long answer, and the consequence is read right before the tap.
+- Trade-off: while the card stands, the person cannot type a follow-up without "Not now" first; the card takes about a third of the panel's height at Henry's size.

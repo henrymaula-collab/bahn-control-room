@@ -1,0 +1,42 @@
+/* chat 10: The yes is a reply (Hark's short confirms, Apple Messages' suggested actions, Mutiny's "Done:").
+   Scoped under .lab-chat-10; the base is ../base.css. */
+
+.lab-chat-10 .lc-log { gap: calc(1.05 * var(--type-body)); }
+.lab-chat-10 .lc-turn { gap: calc(1.05 * var(--type-body)); }
+
+/* The agent's message: its mark at the side, the words beside it, no bubble */
+.lab-chat-10 .lc-msg { display: grid; grid-template-columns: calc(1.25 * var(--type-body)) minmax(0, 1fr); column-gap: 0.6em; align-items: start; }
+.lab-chat-10 .lc-msg > .amark { width: calc(1.25 * var(--type-body)) !important; height: calc(1.25 * var(--type-body)) !important; margin-top: calc((var(--lh-body) - 1.25) / 2 * var(--type-body)); }
+.lab-chat-10 .lc-msg > .amark svg { width: 60%; height: 60%; }
+.lab-chat-10 .lc-msg-body { min-width: 0; display: flex; flex-direction: column; gap: 0.5em; }
+.lab-chat-10 .lc-msg-body .lc-words { margin-top: 0; gap: 0.5em; }
+.lab-chat-10 .lc-msg-body .lc-kind { margin-top: 0.3em; }
+.lab-chat-10 .lc-msg.is-done strong { font-weight: 600; }
+.lab-chat-10 .lc-msg.is-done, .lab-chat-10 .lc-person + .lc-msg { animation: lc-in 220ms var(--ease) both; }
+
+/* What the agent read: one grey line, the list on a tap */
+.lab-chat-10 .lc-how { align-self: flex-start; margin: -2px 0 0 -6px; padding: 2px 6px; border-radius: 8px; text-align: left; font-size: var(--type-subhead); line-height: var(--lh-subhead); color: var(--ink-2); transition: background-color 120ms var(--ease), color 120ms var(--ease); }
+.lab-chat-10 .lc-how:hover { background: var(--raise); color: var(--ink); }
+
+/* The possible replies, on the person's side */
+.lab-chat-10 .lc-replies { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; margin-top: calc(-0.35 * var(--type-body)); }
+.lab-chat-10 .lc-reply {
+  min-height: max(38px, calc(2.2 * var(--type-body))); padding: 0 1em; border-radius: 999px;
+  font-size: var(--type-body); line-height: 1; color: var(--ink); background: var(--page);
+  box-shadow: inset 0 0 0 1px rgb(18 17 14 / 0.18);
+  transition: background-color 120ms var(--ease), box-shadow 120ms var(--ease);
+}
+.lab-chat-10 .lc-reply:hover:not(:disabled) { background: var(--raise); box-shadow: inset 0 0 0 1px rgb(18 17 14 / 0.28); }
+.lab-chat-10 .lc-reply.is-yes { background: var(--ink); color: var(--page); font-weight: 600; box-shadow: none; }
+.lab-chat-10 .lc-reply.is-yes:hover:not(:disabled) { background: var(--bx-color-grey-900); }
+.lab-chat-10 .lc-reply:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+.lab-chat-10 .lc-reply:disabled { opacity: 0.55; cursor: default; }
+.lab-chat-10 .lc-replies .lc-error { flex-basis: 100%; text-align: right; }
+
+/* The person's words: right, one soft block */
+.lab-chat-10 .lc-person p { border-bottom-right-radius: 0.35em; }
+
+/* While the agent works: one quiet status line above the field */
+.lab-chat-10 .lc-status { flex: none; display: flex; align-items: center; gap: 0.5em; margin: -4px var(--lc-x) 8px; font-size: var(--type-subhead); line-height: var(--lh-subhead); color: var(--ink-2); }
+.lab-chat-10 .lc-status .amark { width: 1.2em !important; height: 1.2em !important; }
+.lab-chat-10 .lc-status .amark svg { width: 62%; height: 62%; }

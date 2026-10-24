@@ -1,0 +1,94 @@
+/* The `chat` variants' shared base (parts.tsx PanelFrame adds .lab-chat-base next to .lab-chat-NN).
+   Every rule sits under :where(.lab-chat-base), so it weighs one class and any variant rule
+   (.lab-chat-NN ...) wins without !important. Nothing here reaches today's page: .lab-chat-base is
+   only ever on a variant's panel. Same discipline as chat.css: the ramp's body and subhead, ink and
+   one grey, no bubbles for the agent, no chips, no dots between facts. */
+
+:where(.lab-chat-base) { --lc-x: max(20px, calc(28 * var(--cr-u, 1px))); --lc-gap: calc(1.3 * var(--type-body)); --lc-ctl: max(36px, calc(2.12 * var(--type-body))); }
+:where(.lab-chat-base) .lc-head { flex: none; align-items: center; padding: max(12px, calc(16 * var(--cr-u, 1px))) var(--lc-x) 4px; }
+:where(.lab-chat-base) .lc-head .close { margin: 0 -8px 0 0; }
+:where(.lab-chat-base) .lc-log {
+  flex: 1; min-height: 0; overflow: hidden auto; overscroll-behavior: contain; overflow-wrap: break-word;
+  display: flex; flex-direction: column; gap: var(--lc-gap);
+  padding: 12px var(--lc-x) var(--lc-x);
+  font-size: var(--type-body); line-height: var(--lh-body);
+}
+:where(.lab-chat-base) p { margin: 0; }
+
+/* The byline: the agent's mark and a few grey words */
+:where(.lab-chat-base) .lc-by { display: flex; align-items: center; gap: 0.55em; min-height: 1.333em; font-size: var(--type-subhead); line-height: var(--lh-subhead); color: var(--ink-2); font-weight: 400; }
+:where(.lab-chat-base) .lc-by .amark { width: 1.333em !important; height: 1.333em !important; }
+:where(.lab-chat-base) .lc-by .amark svg { width: 62%; height: 62%; }
+:where(.lab-chat-base) .lc-words { display: flex; flex-direction: column; gap: 0.7em; margin-top: 0.6em; }
+:where(.lab-chat-base) .lc-agent, :where(.lab-chat-base) .lc-turn { display: flex; flex-direction: column; }
+
+/* The person's words: right, one soft block */
+:where(.lab-chat-base) .lc-person { display: flex; justify-content: flex-end; }
+:where(.lab-chat-base) .lc-person p { max-width: 86%; padding: 0.6em 0.95em; border-radius: 1.06em; background: var(--raise); }
+:where(.lab-chat-base) .lc-via { display: inline-flex; margin-left: 8px; vertical-align: -2px; color: var(--ink-2); }
+
+/* Steps one tap deep */
+:where(.lab-chat-base) .lc-steps > summary { width: fit-content; max-width: 100%; margin: -2px -8px -2px -2px; padding: 2px 8px 2px 2px; border-radius: 999px; transition: background-color 120ms var(--ease), color 120ms var(--ease); }
+:where(.lab-chat-base) .lc-steps > summary:hover { background: var(--raise); color: var(--ink); }
+:where(.lab-chat-base) .lc-steps > summary > svg { flex: none; margin-left: -4px; transition: transform 200ms var(--ease); }
+:where(.lab-chat-base) .lc-steps[open] > summary > svg { transform: rotate(90deg); }
+:where(.lab-chat-base) .lc-steps-sum { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+:where(.lab-chat-base) .lc-steps ul { display: flex; flex-direction: column; gap: 0.4em; margin-top: 10px; padding-left: 1.9em; font-size: var(--type-subhead); line-height: var(--lh-subhead); color: var(--ink-2); }
+:where(.lab-chat-base) .lc-steps li { display: flex; align-items: center; gap: 8px; }
+
+/* Working words: one soft light passes over the grey */
+:where(.lab-chat-base) .lc-shimmer {
+  background: linear-gradient(90deg, var(--ink-2) 0%, var(--ink-2) 38%, var(--ink) 50%, var(--ink-2) 62%, var(--ink-2) 100%);
+  background-size: 250% 100%; -webkit-background-clip: text; background-clip: text; color: transparent;
+  animation: lc-shimmer 2.2s linear infinite;
+}
+@keyframes lc-shimmer { from { background-position: 100% 0; } to { background-position: 0% 0; } }
+@keyframes lc-in { from { opacity: 0; transform: translateY(3px); } to { opacity: 1; transform: none; } }
+
+/* The kind of case and where it stands */
+:where(.lab-chat-base) .lc-kind { display: flex; flex-direction: column; align-items: flex-start; font-size: var(--type-subhead); line-height: var(--lh-subhead); color: var(--ink-2); }
+:where(.lab-chat-base) .lc-kind-state { display: inline-flex; align-items: center; gap: 2px; color: var(--ink); font-weight: 600; }
+:where(.lab-chat-base) .lc-kind-more > summary { display: flex; flex-direction: column; align-items: flex-start; width: fit-content; margin: -4px 0 -4px -8px; padding: 4px 8px; border-radius: 10px; }
+:where(.lab-chat-base) .lc-kind-more > summary:hover { background: rgb(18 17 14 / 0.035); }
+:where(.lab-chat-base) .lc-precedents { display: flex; flex-direction: column; gap: 1em; margin-top: 0.9em; }
+:where(.lab-chat-base) .lc-p-choice { color: var(--ink); font-size: var(--type-body); line-height: var(--lh-body); }
+:where(.lab-chat-base) .lc-gate { margin-top: 14px; }
+
+/* The offer and the line after the yes */
+:where(.lab-chat-base) .lc-offer { margin-top: 0.9em; display: flex; flex-direction: column; gap: 8px; }
+:where(.lab-chat-base) .lc-offer-buttons { display: flex; flex-wrap: wrap; gap: 8px; }
+:where(.lab-chat-base) .lc-offer .btn { min-height: max(40px, calc(2.35 * var(--type-body))); padding: 0 1.06em; font-size: var(--type-body); }
+:where(.lab-chat-base) .lc-error { font-size: var(--type-subhead); line-height: var(--lh-subhead); color: var(--now); }
+
+/* The field: type, talk, send */
+:where(.lab-chat-base) .lc-composer {
+  flex: none; display: flex; align-items: flex-end; gap: 4px;
+  margin: 0 max(12px, calc(16 * var(--cr-u, 1px))) max(12px, calc(16 * var(--cr-u, 1px))); padding: 6px 6px 6px calc(1.06 * var(--type-body));
+  border-radius: calc(var(--lc-ctl) / 2 + 6px); background: var(--raise);
+  transition: box-shadow 150ms var(--ease);
+}
+:where(.lab-chat-base) .lc-composer:focus-within { box-shadow: 0 0 0 1px rgb(18 17 14 / 0.22); }
+:where(.lab-chat-base) .lc-composer textarea {
+  flex: 1; min-width: 0; min-height: var(--lc-ctl); max-height: calc(7 * var(--type-body)); padding: calc((var(--lc-ctl) - var(--lh-body) * var(--type-body)) / 2) 0;
+  border: 0; outline: none; resize: none; background: none; color: var(--ink); font: inherit;
+  font-size: var(--type-body); line-height: var(--lh-body);
+}
+:where(.lab-chat-base) .lc-composer textarea::placeholder { color: var(--ink-2); opacity: 1; }
+:where(.lab-chat-base) .lc-composer .voice-button, :where(.lab-chat-base) .lc-send {
+  width: var(--lc-ctl); height: var(--lc-ctl); flex: none; border-radius: 50%;
+  display: inline-flex; align-items: center; justify-content: center;
+  transition: background-color 150ms var(--ease), color 150ms var(--ease);
+}
+:where(.lab-chat-base) .lc-composer .voice-button { background: none; }
+:where(.lab-chat-base) .lc-composer .voice-button:hover:not(:disabled) { background: var(--press); }
+:where(.lab-chat-base) .lc-composer .voice-icon, :where(.lab-chat-base) .lc-send svg { width: calc(0.5 * var(--lc-ctl)); height: calc(0.5 * var(--lc-ctl)); }
+:where(.lab-chat-base) .lc-send { background: var(--ink); color: var(--page); }
+:where(.lab-chat-base) .lc-send:disabled { background: var(--press); color: var(--ink-2); cursor: default; }
+
+@media (max-width: 860px) {
+  :where(.lab-chat-base).chat-panel { position: fixed; inset: 0; z-index: 50; width: 100%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  :where(.lab-chat-base) .lc-shimmer { animation: none; color: var(--ink-2); background: none; }
+  :where(.lab-chat-base) * { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; }
+}

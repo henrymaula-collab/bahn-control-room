@@ -1,0 +1,43 @@
+/* chat 05: The answer in one line (Fin's "The gap:", Profound's bold heads, Mutiny's "Done:").
+   Scoped under .lab-chat-05; the base is ../base.css. */
+
+.lab-chat-05 .lc-log { gap: 0; padding-top: 4px; }
+.lab-chat-05 .lc-x { display: flex; flex-direction: column; gap: 0.45em; padding: calc(0.95 * var(--type-body)) 0; }
+.lab-chat-05 .lc-x + .lc-x { border-top: 1px solid rgb(18 17 14 / 0.07); }
+
+/* The question: a small grey line above its answer, no bubble */
+.lab-chat-05 .lc-q { display: flex; align-items: center; gap: 0.5em; font-size: var(--type-subhead); line-height: var(--lh-subhead); color: var(--ink-2); }
+.lab-chat-05 .lc-q .amark { width: 1.2em !important; height: 1.2em !important; }
+.lab-chat-05 .lc-q .amark svg { width: 62%; height: 62%; }
+
+/* The answer: its first sentence in ink at headline weight, the rest grey and folded */
+.lab-chat-05 .lc-answer { display: flex; flex-direction: column; gap: 0.4em; }
+.lab-chat-05 .lc-lead { display: flex; align-items: baseline; gap: 6px; font-size: var(--type-headline); line-height: var(--lh-headline); letter-spacing: var(--track-headline); font-weight: 600; color: var(--ink); }
+.lab-chat-05 .lc-lead svg { flex: none; align-self: center; }
+.lab-chat-05 .lc-rest { display: flex; flex-direction: column; gap: 0.55em; font-size: var(--type-subhead); line-height: var(--lh-subhead); color: var(--ink-2); }
+.lab-chat-05 .lc-rest.is-clamped { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; line-clamp: 3; overflow: hidden; }
+.lab-chat-05 .lc-rest.is-clamped p { display: inline; }
+.lab-chat-05 .lc-rest.is-clamped p + p::before { content: " "; }
+.lab-chat-05 .lc-answer .lc-kind { margin-top: 0.35em; }
+
+/* "More", "Where this comes from": quiet links under the answer */
+.lab-chat-05 .lc-links { display: flex; flex-wrap: wrap; gap: 2px 10px; margin-left: -8px; }
+.lab-chat-05 .lc-links:empty { display: none; }
+.lab-chat-05 .lc-link {
+  display: inline-flex; align-items: center; gap: 2px; padding: 2px 8px; border-radius: 999px;
+  font-size: var(--type-subhead); line-height: var(--lh-subhead); color: var(--ink);
+  transition: background-color 120ms var(--ease);
+}
+.lab-chat-05 .lc-link svg { color: var(--ink-2); }
+.lab-chat-05 .lc-link:hover { background: var(--raise); }
+.lab-chat-05 .lc-link:focus-visible { outline: 2px solid var(--ink); outline-offset: 1px; }
+.lab-chat-05 .lc-src { display: flex; flex-direction: column; gap: 0.3em; margin: 0.1em 0 0; padding-left: 0.9em; border-left: 2px solid var(--press); font-size: var(--type-subhead); line-height: var(--lh-subhead); color: var(--ink-2); list-style: none; animation: lc-in 180ms var(--ease) both; }
+
+/* The answer on its way */
+.lab-chat-05 .lc-doing { display: flex; align-items: center; gap: 0.5em; font-size: var(--type-subhead); line-height: var(--lh-subhead); color: var(--ink-2); }
+.lab-chat-05 .lc-doing .amark { width: 1.2em !important; height: 1.2em !important; }
+.lab-chat-05 .lc-doing .amark svg { width: 62%; height: 62%; }
+
+/* The offer under the answer; after the yes, the same shape: the line in ink, the rest in grey */
+.lab-chat-05 .lc-offer { margin-top: 0.5em; }
+.lab-chat-05 .lc-decided { margin-top: 0.9em; padding-top: 0.9em; border-top: 1px solid rgb(18 17 14 / 0.07); animation: lc-in 200ms var(--ease) both; }

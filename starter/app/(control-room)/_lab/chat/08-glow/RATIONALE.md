@@ -1,0 +1,7 @@
+# chat 08: Lifted, with a light at the edge
+
+- References: Apple Intelligence and Siri, the type-to-Siri prompt in large type and Siri's edge light (https://www.apple.com/apple-intelligence/, `research/premium/chat-builder/shots/apple-siri-conversation.jpg`, `research/premium/chat-builder/shots/apple-siri-orb.jpg`); Untitled UI's AI assistant panel floating beside the page (https://dribbble.com/shots/24565263-AI-assistant-Untitled-UI, `research/premium/visual/shots/chat-09-untitled-ai-side-panel.png`).
+- Borrowed: from Apple, the person's question set large and the glow as the only sign of work; from Untitled UI, the panel as its own rounded surface beside the work instead of a flush column.
+- Exactly: the panel floats 10 px in from the frame, white, 22 px corners, a hairline ring and one soft blur. While the agent works, a soft ring in Bahn's green and the route's orange turns slowly around its edge (3.6 s a turn); while it speaks, the ring breathes in green; at rest it is still. Questions in Title 2, answers at body, the steps as one grey line with the mark.
+- Why for ops: the state of the agent is readable from the corner of the eye while the person reads the card, without a spinner in the text.
+- Trade-off: the glow is decoration that needs restraint (it stops under reduced motion); the floating panel gives up 20 px of width at Henry's size, and the orange is the route's colour borrowed for the agent.

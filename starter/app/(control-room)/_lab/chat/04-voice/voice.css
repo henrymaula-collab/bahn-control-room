@@ -1,0 +1,67 @@
+/* chat 04: Talk, with captions (ElevenLabs' widget, ChatGPT Voice). Scoped under .lab-chat-04. */
+
+.lab-chat-04 .lc-log { gap: calc(1.05 * var(--type-body)); }
+
+/* A transcript: who said it and when, then the words. Earlier turns step back to grey. */
+.lab-chat-04 .lc-tturn { display: flex; flex-direction: column; gap: 0.3em; color: var(--ink-2); font-size: var(--type-subhead); line-height: var(--lh-subhead); transition: color 200ms var(--ease); }
+.lab-chat-04 .lc-tturn.is-focus { color: var(--ink); font-size: var(--type-body); line-height: var(--lh-body); }
+.lab-chat-04 .lc-who { display: flex; align-items: center; gap: 0.45em; font-size: var(--type-subhead); line-height: var(--lh-subhead); color: var(--ink-2); font-weight: 600; }
+.lab-chat-04 .lc-who .amark { width: 1.2em !important; height: 1.2em !important; }
+.lab-chat-04 .lc-who .amark svg { width: 62%; height: 62%; }
+.lab-chat-04 .lc-who time { margin-left: auto; font-weight: 400; font-variant-numeric: tabular-nums; }
+.lab-chat-04 .lc-tturn .lc-words { margin-top: 0; gap: 0.55em; }
+.lab-chat-04 .lc-tturn .lc-kind { margin-top: 0.7em; }
+.lab-chat-04 .lc-doing { font-size: var(--type-subhead); line-height: var(--lh-subhead); color: var(--ink-2); }
+/* While the agent speaks, everything but the answer it reads steps back further */
+.lab-chat-04.is-speaking .lc-tturn:not(.is-focus) { color: rgb(114 105 88 / 0.55); }
+
+/* The dock: one round control, a word under it, typing one tap away */
+.lab-chat-04 .lc-dock {
+  flex: none; position: relative; display: flex; flex-direction: column; align-items: center; gap: 6px;
+  padding: max(10px, calc(14 * var(--cr-u, 1px))) var(--lc-x) max(14px, calc(18 * var(--cr-u, 1px)));
+  border-top: 1px solid rgb(18 17 14 / 0.06);
+}
+.lab-chat-04 .lc-talk { display: flex; align-items: center; gap: 14px; }
+.lab-chat-04 .lc-big .voice-button { --big: max(52px, calc(3.3 * var(--type-body))); width: var(--big); height: var(--big); background: var(--ink); color: var(--page); }
+.lab-chat-04 .lc-big .voice-button:hover:not(:disabled) { background: var(--bx-color-grey-900); }
+.lab-chat-04 .lc-big .voice-icon { width: 42%; height: 42%; }
+.lab-chat-04 .lc-big .voice-button[data-state="speaking"] { background: var(--raise); color: var(--ink); }
+.lab-chat-04 .lc-dock[data-demo] .voice-button[data-state="listening"] { --voice-level: 0.6; }
+.lab-chat-04 .lc-dock[data-demo] .voice-button[data-state="speaking"] { --voice-level: 0.5; }
+.lab-chat-04 .lc-word { font-size: var(--type-subhead); line-height: var(--lh-subhead); color: var(--ink-2); min-height: calc(var(--lh-subhead) * 1em); }
+.lab-chat-04 .lc-keys, .lab-chat-04 .lc-totalk {
+  width: var(--lc-ctl); height: var(--lc-ctl); border-radius: 50%; display: inline-flex; align-items: center; justify-content: center;
+  color: var(--ink-2); transition: background-color 120ms var(--ease), color 120ms var(--ease);
+}
+.lab-chat-04 .lc-keys { position: absolute; left: var(--lc-x); top: 50%; transform: translateY(-50%); margin-left: -8px; }
+.lab-chat-04 .lc-keys:hover, .lab-chat-04 .lc-totalk:hover { background: var(--raise); color: var(--ink); }
+.lab-chat-04 .lc-keys:focus-visible, .lab-chat-04 .lc-totalk:focus-visible { outline: 2px solid var(--ink); outline-offset: 1px; }
+
+/* Level bars beside the control: still at rest, moving while someone talks */
+.lab-chat-04 .lc-bars { display: inline-flex; align-items: center; gap: 3px; height: 22px; opacity: 0; transition: opacity 200ms var(--ease); }
+.lab-chat-04 .lc-bars i { display: block; width: 3px; height: 4px; border-radius: 2px; background: var(--ink); }
+.lab-chat-04 .lc-dock[data-state="listening"] .lc-bars, .lab-chat-04 .lc-dock[data-state="speaking"] .lc-bars { opacity: 1; }
+.lab-chat-04 .lc-dock[data-state="speaking"] .lc-bars i { background: var(--green); }
+.lab-chat-04 .lc-dock[data-state="listening"] .lc-bars i, .lab-chat-04 .lc-dock[data-state="speaking"] .lc-bars i { animation: lc-bar 900ms var(--ease) infinite alternate; }
+.lab-chat-04 .lc-bars i:nth-child(1) { --h: 9px; animation-delay: -120ms !important; }
+.lab-chat-04 .lc-bars i:nth-child(2) { --h: 18px; animation-delay: -480ms !important; }
+.lab-chat-04 .lc-bars i:nth-child(3) { --h: 13px; animation-delay: -260ms !important; }
+.lab-chat-04 .lc-bars i:nth-child(4) { --h: 20px; animation-delay: -640ms !important; }
+.lab-chat-04 .lc-bars i:nth-child(5) { --h: 8px; animation-delay: -60ms !important; }
+@keyframes lc-bar { from { height: 4px; } to { height: var(--h); } }
+
+/* Typing instead: the field, and the way back to talking */
+.lab-chat-04 .lc-typing { flex: none; display: flex; align-items: flex-end; }
+.lab-chat-04 .lc-typing .lc-composer { flex: 1; margin-right: 6px; }
+.lab-chat-04 .lc-totalk { margin: 0 max(12px, calc(16 * var(--cr-u, 1px))) calc(max(12px, calc(16 * var(--cr-u, 1px))) + 6px) 0; }
+
+/* The yes on screen */
+.lab-chat-04 .lc-offer { margin-top: 0.8em; }
+.lab-chat-04 .lc-onscreen { font-size: var(--type-subhead); line-height: var(--lh-subhead); color: var(--ink-2); }
+.lab-chat-04 .lc-done { margin-top: 0.8em; display: flex; flex-direction: column; gap: 0.25em; }
+.lab-chat-04 .lc-done-head { display: flex; align-items: center; gap: 6px; font-weight: 600; }
+.lab-chat-04 .lc-done-line { color: var(--ink-2); font-size: var(--type-subhead); line-height: var(--lh-subhead); }
+
+@media (prefers-reduced-motion: reduce) {
+  .lab-chat-04 .lc-bars i { animation: none !important; height: var(--h); }
+}

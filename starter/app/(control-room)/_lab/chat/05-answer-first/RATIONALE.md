@@ -1,0 +1,7 @@
+# chat 05: The answer in one line
+
+- References: Fin Operator's "The gap:" lead in bold (https://nicelydone.club/examples/screens/b951b923-48ed-41d1-af64-53a69c284b00, `research/premium/visual/shots/chat-01-fin-operator-tool-line.png`), Profound's bold mini-headings (https://nicelydone.club/examples/screens/eaef172a-8c8f-49d0-a9be-37c00a3a0fb3, `research/premium/visual/shots/chat-04-profound-answer-offer.png`), Mutiny's result that starts with "Done:" (https://nicelydone.club/examples/screens/b863a3c4-c19d-4e69-beec-19e32c2db5dc, `research/premium/visual/shots/chat-06-mutiny-done-what-it-will-do.png`).
+- Borrowed: one bold lead that carries the answer, the detail under it in plain text; a result that leads with what happened.
+- Exactly: no bubbles. Each exchange is a section on a hairline: the question as a small grey line, the agent's first sentence in ink at headline weight, the rest grey and folded after three lines ("More"), and "Where this comes from" opening the steps. The yes reads the same way: "Decided at 12:04." in ink, what happens next in grey.
+- Why for ops: an expert scans the bold lines of the whole conversation in seconds; the newer person opens the rest. The answer's first sentence is what the agent is asked to put first.
+- Trade-off: it depends on the agent leading with the answer ("I can do that." is a weak lead); folded text hides detail a person may need, behind one tap.

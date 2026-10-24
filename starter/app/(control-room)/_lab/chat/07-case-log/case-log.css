@@ -1,0 +1,40 @@
+/* chat 07: The conversation as the case record (Zendesk's event line, GitHub's recorded reasons).
+   Scoped under .lab-chat-07; the base is ../base.css. */
+
+.lab-chat-07 .lc-log { gap: calc(0.95 * var(--type-body)); }
+.lab-chat-07 .lc-turn { gap: calc(0.95 * var(--type-body)); }
+
+/* An entry: a small head (who, when), then the words in a quiet block */
+.lab-chat-07 .lc-entry { display: flex; flex-direction: column; gap: 0.35em; }
+.lab-chat-07 .lc-entry-head { display: flex; align-items: center; gap: 0.5em; font-size: var(--type-subhead); line-height: var(--lh-subhead); }
+.lab-chat-07 .lc-entry-head .amark { width: 1.3em !important; height: 1.3em !important; }
+.lab-chat-07 .lc-entry-head .amark svg { width: 60%; height: 60%; }
+.lab-chat-07 .lc-initial { width: 1.3em; height: 1.3em; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; background: var(--press); color: var(--ink); font-size: 0.8em; font-weight: 600; }
+.lab-chat-07 .lc-name { font-weight: 600; color: var(--ink); }
+.lab-chat-07 time { margin-left: auto; color: var(--ink-2); font-variant-numeric: tabular-nums; font-weight: 400; }
+.lab-chat-07 .lc-entry-body { padding-left: calc(1.8 * var(--type-subhead)); }
+.lab-chat-07 .lc-entry-body .lc-words { margin-top: 0; gap: 0.5em; }
+.lab-chat-07 .lc-entry-body .lc-kind { margin-top: 0.7em; }
+.lab-chat-07 .lc-entry.is-person .lc-entry-body p { color: var(--ink); }
+
+/* An event: what the agent did, one grey line with a tick, between the turns */
+.lab-chat-07 .lc-event { display: flex; align-items: flex-start; gap: 0.5em; font-size: var(--type-subhead); line-height: var(--lh-subhead); color: var(--ink-2); }
+.lab-chat-07 .lc-event-icon { flex: none; width: 1.3em; height: calc(var(--lh-subhead) * 1em); display: inline-flex; align-items: center; justify-content: center; color: var(--ink-2); }
+.lab-chat-07 .lc-event-text { min-width: 0; }
+.lab-chat-07 .lc-event time { padding-left: 8px; }
+.lab-chat-07 .lc-spin { width: 11px; height: 11px; border-radius: 50%; border: 1.5px solid rgb(18 17 14 / 0.16); border-top-color: var(--ink-2); animation: lc-spin7 900ms linear infinite; }
+@keyframes lc-spin7 { to { transform: rotate(360deg); } }
+.lab-chat-07 .lc-turn > .lc-event { animation: lc-in 200ms var(--ease) both; }
+
+/* The offer, then the decision as the record's last event */
+.lab-chat-07 .lc-offer { margin: 0; padding-left: calc(1.8 * var(--type-subhead)); }
+.lab-chat-07 .lc-offer-note { font-size: var(--type-subhead); line-height: var(--lh-subhead); color: var(--ink-2); }
+.lab-chat-07 .lc-decision { display: flex; flex-direction: column; gap: 0.3em; padding: 0.75em 0.85em; border-radius: 12px; background: var(--raise); animation: lc-in 200ms var(--ease) both; }
+.lab-chat-07 .lc-decision-head { display: flex; align-items: center; gap: 0.5em; font-size: var(--type-body); line-height: var(--lh-body); font-weight: 600; }
+.lab-chat-07 .lc-decision-head .lc-event-icon { color: var(--ink); height: auto; }
+.lab-chat-07 .lc-decision-head time { font-size: var(--type-subhead); }
+.lab-chat-07 .lc-decision-body { padding-left: 1.8em; font-size: var(--type-subhead); line-height: var(--lh-subhead); color: var(--ink-2); }
+
+@media (prefers-reduced-motion: reduce) {
+  .lab-chat-07 .lc-spin { animation: none; }
+}

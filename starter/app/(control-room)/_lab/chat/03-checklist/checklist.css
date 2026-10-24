@@ -1,0 +1,50 @@
+/* chat 03: The work as a live checklist (Origin's steps, Apple's "say what is happening").
+   Scoped under .lab-chat-03; the base is ../base.css. */
+
+.lab-chat-03 .lc-words { margin-top: 0.55em; gap: 0.5em; }
+.lab-chat-03 > .lc-log > .lc-agent:first-child .lc-words p:first-child { font-weight: 600; }
+.lab-chat-03 .lc-kind { margin-top: calc(-0.55 * var(--lc-gap)); }
+
+/* The rail: a node per step on one thin line */
+.lab-chat-03 .lc-rail { --node: calc(1.1 * var(--type-subhead)); position: relative; display: flex; flex-direction: column; gap: 0.55em; margin: 0.55em 0 0; padding: 0; list-style: none; font-size: var(--type-subhead); line-height: var(--lh-subhead); }
+.lab-chat-03 .lc-rail li { position: relative; display: grid; grid-template-columns: var(--node) minmax(0, 1fr); column-gap: 0.65em; align-items: start; color: var(--ink-2); animation: lc-in 200ms var(--ease) both; }
+.lab-chat-03 .lc-rail li + li::before {
+  content: ""; position: absolute; left: calc(var(--node) / 2 - 0.5px); width: 1px; bottom: calc(100% - (var(--lh-subhead) * 1em - var(--node)) / 2);
+  height: calc(0.55em + (var(--lh-subhead) * 1em - var(--node))); background: var(--press);
+}
+.lab-chat-03 .lc-node {
+  width: var(--node); height: var(--node); margin-top: calc((var(--lh-subhead) * 1em - var(--node)) / 2); border-radius: 50%;
+  display: inline-flex; align-items: center; justify-content: center; box-sizing: border-box;
+  border: 1.5px solid var(--press); color: var(--page); background: var(--page);
+}
+.lab-chat-03 .lc-node svg { width: 70%; height: 70%; }
+.lab-chat-03 .is-done .lc-node { background: var(--ink); border-color: var(--ink); }
+.lab-chat-03 .is-done { color: var(--ink); }
+.lab-chat-03 .is-failed .lc-node { background: var(--now); border-color: var(--now); }
+.lab-chat-03 .is-running .lc-node { border-color: rgb(18 17 14 / 0.16); border-top-color: var(--ink); animation: lc-spin 900ms linear infinite; }
+.lab-chat-03 .is-waiting { color: rgb(114 105 88 / 0.62); }
+@keyframes lc-spin { to { transform: rotate(360deg); } }
+
+/* The live answer under its rail */
+.lab-chat-03 .lc-live > .lc-by { margin-bottom: -0.15em; }
+.lab-chat-03 .lc-live .lc-words { animation: lc-in 200ms var(--ease) both; }
+
+/* A finished answer: "Read 2 things", the rail one tap deep */
+.lab-chat-03 .lc-fold-btn { width: fit-content; margin: -2px -8px -2px -2px; padding: 2px 8px 2px 2px; border-radius: 999px; transition: background-color 120ms var(--ease), color 120ms var(--ease); }
+.lab-chat-03 .lc-fold-btn:hover { background: var(--raise); color: var(--ink); }
+.lab-chat-03 .lc-fold-btn:focus-visible { outline: 2px solid var(--ink); outline-offset: 1px; }
+.lab-chat-03 .lc-fold-btn > svg { margin-left: -4px; transition: transform 200ms var(--ease); }
+.lab-chat-03 .lc-fold-btn[aria-expanded="true"] > svg { transform: rotate(90deg); }
+.lab-chat-03 .lc-fold .lc-rail { margin-left: 0.15em; }
+
+/* After the yes: what was done, and the next step waiting */
+.lab-chat-03 .lc-after { margin-top: 0.9em; }
+.lab-chat-03 .lc-after .lc-rail { font-size: var(--type-body); line-height: var(--lh-body); --node: calc(1.05 * var(--type-body)); }
+.lab-chat-03 .lc-after .lc-node { margin-top: calc((var(--lh-body) * 1em - var(--node)) / 2); }
+.lab-chat-03 .lc-after .lc-rail li + li::before { bottom: calc(100% - (var(--lh-body) * 1em - var(--node)) / 2); height: calc(0.55em + (var(--lh-body) * 1em - var(--node))); }
+.lab-chat-03 .lc-after .is-done { font-weight: 600; }
+.lab-chat-03 .lc-after .is-waiting { color: var(--ink-2); }
+
+@media (prefers-reduced-motion: reduce) {
+  .lab-chat-03 .is-running .lc-node { animation: none; border-color: var(--ink-2); }
+}

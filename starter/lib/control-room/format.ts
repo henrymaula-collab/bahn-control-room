@@ -220,5 +220,23 @@ export function lcFirst(s: string): string {
 
 /** A trust rule as one sentence: "When a pickup place in Germany asks for a storage fee up to €50, accept the fee and confirm the pickup." */
 export function ruleSentence(r: { when: string; then: string }): string {
-  return `When ${lcFirst(r.when)}, ${lcFirst(r.then)}.`
+  const then = lcFirst(r.then.replace(/\.$/, ""))
+  const w = r.when.replace(/\.$/, "")
+  const at = w.match(/^At ([^,]+), (.+)$/)
+  if (at) return `At ${at[1]}, when ${lcFirst(at[2])}, ${then}.`
+  if (/^when /i.test(w)) return `When ${w.slice(5)}, ${then}.`
+  return `When ${lcFirst(w)}, ${then}.`
+}
+
+/** How a kind of case reads inside a sentence: "Only Jonas handles missing release documents." */
+export function caseTypePhrase(type: string): string {
+  const map: Record<string, string> = {
+    "readiness.car_not_ready": "cars that are not ready",
+    "readiness.facts_disagree": "cases where the details disagree",
+    "readiness.no_answer": "pickup places that do not answer",
+    "readiness.release_document_missing": "missing release documents",
+    "readiness.fee_requested": "fee requests",
+    "readiness.keys_or_access": "key and access questions",
+  }
+  return map[type] ?? caseTypeLabel(type).toLowerCase()
 }

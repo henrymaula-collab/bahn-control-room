@@ -52,7 +52,12 @@ export default async function LeadPage({ searchParams }: { searchParams: Search 
             <Stat label="Decided by people" value={count(t.decided)} />
             <Stat label="Handled by the agent alone" value={count(t.handledByAgent)} />
             <Stat label="Waiting for a person" value={count(t.waiting)} />
-            <Stat label="Time to decide, median" value={t.medianMinutesToDecide === null ? "Not enough yet" : String(t.medianMinutesToDecide)} unit={t.medianMinutesToDecide === null ? undefined : "min"} />
+            <Stat
+              label="Time to decide, median"
+              value={t.medianMinutesToDecide === null ? null : String(t.medianMinutesToDecide)}
+              unit="min"
+              empty="Not enough decisions yet"
+            />
           </div>
         </section>
 
@@ -119,7 +124,9 @@ export default async function LeadPage({ searchParams }: { searchParams: Search 
                       ` ${row.learning.map((l) => `${l.person.name} has handled ${l.decided}`).join(", ")}, so the agent sends some of these to ${row.learning.length === 1 ? row.learning[0].person.name : "them"} to learn.`}
                   </p>
                 ) : row.learning.length > 0 ? (
-                  <p className="note">Learning: {row.learning.map((l) => `${l.person.name}, ${l.decided} so far`).join("; ")}.</p>
+                  <p className="note">
+                    Learning: {row.learning.map((l, i) => (i === 0 ? `${l.person.name} has handled ${l.decided}` : `${l.person.name} ${l.decided}`)).join(", ")}.
+                  </p>
                 ) : null}
               </li>
             ))}
@@ -159,14 +166,19 @@ export default async function LeadPage({ searchParams }: { searchParams: Search 
   )
 }
 
-function Stat({ label, value, unit }: { label: string; value: string; unit?: string }) {
+/** A number that says when it cannot be counted yet, instead of guessing. */
+function Stat({ label, value, unit, empty }: { label: string; value: string | null; unit?: string; empty?: string }) {
   return (
     <div className="stat">
       <p className="t-2">{label}</p>
-      <p className="value">
-        {value}
-        {unit && <small>{unit}</small>}
-      </p>
+      {value === null ? (
+        <p className="value-empty">{empty}</p>
+      ) : (
+        <p className="value">
+          {value}
+          {unit && <small>{unit}</small>}
+        </p>
+      )}
     </div>
   )
 }

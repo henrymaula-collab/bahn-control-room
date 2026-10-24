@@ -1,6 +1,7 @@
 // Who can handle which kind of case, counted from past decisions. A count, never
 // a score or a rank: we only say who has handled a kind of case often enough.
 
+import { caseTypePhrase } from "./format"
 import type { OpsPerson, TrackRecord } from "./types"
 
 export const CAN_HANDLE_AT = 3 // decisions of this kind before we say a person can handle it
@@ -36,7 +37,7 @@ export function coverageRows(
     return {
       type: row.type,
       label: row.label,
-      phrase: row.phrase ?? row.label.charAt(0).toLowerCase() + row.label.slice(1),
+      phrase: row.phrase ?? caseTypePhrase(row.type),
       canHandle,
       learning,
       onlyOne: canHandle.length === 1,

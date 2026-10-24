@@ -333,6 +333,7 @@ textarea.text-input { resize: vertical; min-height: 88px; }
 .stat { padding: 22px 24px; }
 .stat + .stat { border-left: 1px solid var(--ops-sunken); }
 .stat .value { margin-top: 6px; font-size: 28px; line-height: 32px; font-weight: 600; letter-spacing: -0.4px; color: var(--ops-ink); font-variant-numeric: tabular-nums; }
+.stat .value-empty { margin-top: 10px; font-size: 15px; line-height: 22px; color: var(--ops-text-2); }
 .stat .value small { font-size: 15px; font-weight: 500; letter-spacing: 0; margin-left: 2px; }
 .rule-panel .t-lead { margin-top: 4px; }
 .rule-panel .evidence-line { margin-top: 12px; }

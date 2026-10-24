@@ -41,7 +41,7 @@ export default async function DeskPage({ searchParams }: { searchParams: Search 
             <DeskIntro desk={desk} />
             <DecisionPanel card={desk.decision} now={now} personName={desk.person.name} leadName={lead?.name ?? "The shift lead"} />
             <Queue cards={desk.queue} now={now} />
-            <Quiet desk={desk} lead="Nothing else needs you." />
+            <Quiet desk={desk} lead={desk.quiet.notChecked > 0 ? "Nothing else needs you so far." : "Nothing else needs you."} />
           </>
         ) : (
           <>
@@ -171,9 +171,11 @@ function Queue({ cards, now }: { cards: CaseCard[]; now: string }) {
 
 function Quiet({ desk, lead }: { desk: DeskView; lead: string }) {
   const q = desk.quiet
-  const rest = `${count(q.ordersChecked)} orders checked at ${clock(q.checkedAt)}.${
-    q.notChecked > 0 ? ` ${count(q.notChecked)} not checked yet.` : ""
-  }`
+  // An order nobody checked is not fine: say how many, never hide them in the count.
+  const rest =
+    q.notChecked > 0
+      ? `${count(q.ordersChecked)} of ${count(q.ordersChecked + q.notChecked)} orders checked at ${clock(q.checkedAt)}. ${count(q.notChecked)} not checked yet.`
+      : `${count(q.ordersChecked)} orders checked at ${clock(q.checkedAt)}.`
   const working = desk.agentWorking.length
   const handled = desk.handledByAgent.length
   const parts: string[] = []

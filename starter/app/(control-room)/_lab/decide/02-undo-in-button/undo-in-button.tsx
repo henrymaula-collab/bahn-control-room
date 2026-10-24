@@ -12,7 +12,7 @@ import { Keep } from "../../../_ui/text"
 import { usePanel } from "../../../_ui/work-frame"
 import { useLab } from "../../context"
 import { type DoneProps, type PreviewProps, recipient, useCaseBack, useCaseId, useDefaultKey } from "../_shared/helpers"
-import { pauseSend, startSend, undoSend, useFrozen, useSendView, useSendWindow, type SendState } from "../_shared/send-window"
+import { pauseSend, startSend, undoSend, useFrozen, useSendView, useSendWindow, type SendState, useSendError } from "../_shared/send-window"
 import { useDraft } from "../_shared/use-draft"
 
 /** A ring that empties as the window runs out (drawn in the button's own colour). */
@@ -35,6 +35,7 @@ function Ring({ win }: { win: SendState }) {
 export function UndoInButtonPreview({ draft, subject, verb, pending, error, onSend, returnFocus }: PreviewProps) {
   const { open, setOpen, slot } = usePanel()
   const caseId = useCaseId()
+  useSendError(caseId, error)
   const frozen = useFrozen()
   const shown = open === "email"
   const close = useRef<HTMLButtonElement>(null)

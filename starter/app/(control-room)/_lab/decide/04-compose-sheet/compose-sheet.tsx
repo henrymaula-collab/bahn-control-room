@@ -9,7 +9,7 @@ import { languageName } from "@/lib/control-room/format"
 import { Icon } from "../../../_ui/icons"
 import { usePanel } from "../../../_ui/work-frame"
 import { agentPlan, type DoneProps, type PreviewProps, recipient, useCaseId, useDefaultKey } from "../_shared/helpers"
-import { pauseSend, startSend, undoSend, useFrozen, useSendView, type SendState } from "../_shared/send-window"
+import { pauseSend, startSend, undoSend, useFrozen, useSendView, type SendState, useSendError } from "../_shared/send-window"
 import { useColumn, useDraft } from "../_shared/use-draft"
 
 /**
@@ -20,6 +20,7 @@ import { useColumn, useDraft } from "../_shared/use-draft"
 export function ComposeSheetPreview({ draft, subject, verb, pending, error, onSend, returnFocus }: PreviewProps) {
   const { open, setOpen } = usePanel()
   const caseId = useCaseId()
+  useSendError(caseId, error)
   const frozen = useFrozen()
   const [shown, setShown] = useState(false)
   const ref = useRef<HTMLDialogElement>(null)

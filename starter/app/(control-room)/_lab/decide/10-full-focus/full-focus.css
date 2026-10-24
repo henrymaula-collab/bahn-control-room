@@ -1,0 +1,78 @@
+/* decide 10: Full focus. Every rule under .lab-decide-10. */
+.lab-decide-10.f10-focus {
+  position: fixed; z-index: 50; display: flex; flex-direction: column; overflow: hidden;
+  background: var(--page); color: var(--ink);
+  font-size: var(--type-body); line-height: var(--lh-body);
+  box-shadow: 0 0 0 1px rgb(18 17 14 / 0.06);
+}
+.lab-decide-10 .f10-top { flex: none; display: flex; align-items: center; justify-content: space-between; padding: 14px 18px 0; }
+.lab-decide-10 .f10-back { display: inline-flex; align-items: center; gap: 2px; min-height: 36px; padding: 0 12px 0 6px; border-radius: 999px; color: var(--ink); transition: background-color 150ms var(--ease); }
+.lab-decide-10 .f10-back:hover { background: var(--raise); }
+.lab-decide-10 .f10-back svg { color: var(--ink-2); }
+.lab-decide-10 .f10-esc { font-size: var(--type-subhead); color: var(--ink-2); padding: 2px 8px; border-radius: 6px; box-shadow: inset 0 0 0 1px rgb(18 17 14 / 0.12); }
+.lab-decide-10 .f10-scroll { flex: 1; min-height: 0; overflow: hidden auto; padding: 8px 24px 24px; }
+
+/* The letter: a reading column, the text one step up the ramp. */
+.lab-decide-10 .f10-letter { max-width: calc(30 * var(--type-title2)); margin: 0 auto; padding-top: max(8px, 3vh); }
+.lab-decide-10 .f10-meta { font-size: var(--type-subhead); line-height: var(--lh-subhead); }
+.lab-decide-10 .f10-q { color: var(--ink-2); }
+.lab-decide-10 .f10-lang { display: flex; align-items: baseline; justify-content: space-between; gap: 1em; margin-top: 0.6em; padding-bottom: 1em; border-bottom: 1px solid rgb(18 17 14 / 0.08); }
+.lab-decide-10 .f10-en { flex: none; margin-right: -8px; padding: 2px 8px; }
+.lab-decide-10 .f10-text { margin-top: 1em; font-size: var(--type-title2); line-height: 1.45; letter-spacing: var(--track-title2); white-space: pre-wrap; }
+.lab-decide-10 .f10-edit {
+  display: block; width: calc(100% + 24px); margin-left: -12px; min-height: 14em; padding: 10px 12px;
+  border: 0; border-radius: 12px; background: var(--raise); color: var(--ink); font-family: inherit; resize: vertical; outline: none;
+}
+.lab-decide-10 .f10-edit:focus-visible { outline: 2px solid var(--ink); outline-offset: 0; }
+.lab-decide-10 .f10-foot { flex: none; padding: 12px 24px 20px; border-top: 1px solid rgb(18 17 14 / 0.06); }
+.lab-decide-10 .f10-actions { display: flex; justify-content: center; gap: 8px; }
+
+/* The Undo strip at the top of the card; the card steps down under it while it shows (only matches
+   while this variant's strip is on the page). */
+body:has(> .lab-decide-10.f10-strip) .work .detail { padding-top: calc(max(calc(28 * var(--type-kf)), calc(56 * var(--cr-u, 1px))) + 44px); transition: padding-top 200ms cubic-bezier(0.2, 0, 0, 1); }
+.lab-decide-10.f10-strip {
+  position: fixed; top: 18px; z-index: 40; transform: translateX(-50%);
+  display: flex; align-items: center; gap: 10px; width: max-content; max-width: min(40em, calc(100vw - 32px));
+  padding: 6px 6px 6px 14px; border-radius: 999px; background: var(--raise); color: var(--ink);
+  font-size: var(--type-subhead); line-height: var(--lh-subhead);
+  box-shadow: 0 0 0 1px rgb(18 17 14 / 0.06), 0 6px 20px rgb(18 17 14 / 0.08);
+  font-variant-numeric: tabular-nums;
+}
+.lab-decide-10.f10-strip button { min-height: 32px; padding: 0 14px; border-radius: 999px; background: var(--ink); color: var(--page); font-weight: 600; }
+
+/* After: the line of what is left, the next one lifted. */
+.lab-decide-10 .f10-receipt { display: flex; align-items: flex-start; gap: 0.55em; max-width: 40em; }
+.lab-decide-10 .f10-tick { flex: none; width: 1.3em; height: 1.3em; margin-top: 0.05em; border-radius: 50%; background: var(--ink); color: var(--page); display: inline-flex; align-items: center; justify-content: center; }
+.lab-decide-10.f10-done .what.f10-left { margin-top: 0.9em; }
+.lab-decide-10 .f10-line { margin-top: 0.8em; max-width: 36em; display: flex; flex-direction: column; gap: 2px; }
+.lab-decide-10 .f10-row {
+  display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: 1em; padding: 0.55em 0.85em; margin: 0 -0.85em;
+  border-radius: 12px; transition: background-color 100ms var(--ease);
+}
+.lab-decide-10 .f10-row:hover { background: var(--raise); }
+.lab-decide-10 .f10-row.is-next { background: var(--raise); }
+.lab-decide-10 .f10-car { grid-column: 1; }
+.lab-decide-10 .f10-place { grid-column: 1; color: var(--ink-2); font-size: var(--type-subhead); line-height: var(--lh-subhead); }
+.lab-decide-10 .f10-row time { grid-column: 2; grid-row: 1; color: var(--ink-2); font-size: var(--type-subhead); }
+.lab-decide-10 .f10-row time.now { color: var(--now); font-weight: 600; }
+.lab-decide-10 .f10-more { margin-top: 0.5em; }
+
+@media (prefers-reduced-motion: no-preference) {
+  .lab-decide-10.f10-focus { animation: lab-decide-10-in 250ms cubic-bezier(0.2, 0, 0, 1); }
+  .lab-decide-10.f10-focus .f10-letter { animation: lab-decide-10-letter 320ms cubic-bezier(0.2, 0, 0, 1) 40ms both; }
+  .lab-decide-10.f10-focus.is-leaving { animation: lab-decide-10-out 250ms cubic-bezier(0.3, 0, 1, 1) both; }
+  .lab-decide-10.f10-focus.is-leaving .f10-letter { animation: lab-decide-10-lift 250ms cubic-bezier(0.3, 0, 1, 1) both; }
+  .lab-decide-10 .f10-text { animation: lab-decide-10-fade 200ms ease-out; }
+  .lab-decide-10.f10-strip { animation: lab-decide-10-strip 240ms cubic-bezier(0.2, 0, 0, 1); }
+  .lab-decide-10 .f10-row { animation: lab-decide-10-row 260ms cubic-bezier(0.2, 0, 0, 1) both; }
+  .lab-decide-10 li:nth-child(2) .f10-row { animation-delay: 60ms; }
+  .lab-decide-10 li:nth-child(3) .f10-row { animation-delay: 120ms; }
+  .lab-decide-10 li:nth-child(4) .f10-row { animation-delay: 180ms; }
+  @keyframes lab-decide-10-in { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes lab-decide-10-out { to { opacity: 0; } }
+  @keyframes lab-decide-10-letter { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+  @keyframes lab-decide-10-lift { to { opacity: 0; transform: translateY(-28px); } }
+  @keyframes lab-decide-10-fade { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes lab-decide-10-strip { from { opacity: 0; transform: translate(-50%, -8px); } to { opacity: 1; transform: translate(-50%, 0); } }
+  @keyframes lab-decide-10-row { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+}

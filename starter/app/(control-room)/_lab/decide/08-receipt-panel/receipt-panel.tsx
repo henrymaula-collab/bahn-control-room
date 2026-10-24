@@ -11,7 +11,7 @@ import { Keep } from "../../../_ui/text"
 import { usePanel } from "../../../_ui/work-frame"
 import { useLab } from "../../context"
 import { agentPlan, type DoneProps, type PreviewProps, recipient, useCaseBack, useCaseId, useDefaultKey } from "../_shared/helpers"
-import { pauseSend, startSend, undoSend, useFrozen, useSendView, useSendWindow } from "../_shared/send-window"
+import { pauseSend, startSend, undoSend, useFrozen, useSendView, useSendWindow, useSendError } from "../_shared/send-window"
 import { useDraft } from "../_shared/use-draft"
 
 /** The receipt as the panel's whole content: a title, one grey sentence, the buttons at the foot. */
@@ -56,6 +56,7 @@ function Receipt({
 export function ReceiptPanelPreview({ draft, subject, verb, pending, error, onSend, returnFocus }: PreviewProps) {
   const { open, setOpen, slot } = usePanel()
   const caseId = useCaseId()
+  useSendError(caseId, error)
   const frozen = useFrozen()
   const shown = open === "email"
   const close = useRef<HTMLButtonElement>(null)

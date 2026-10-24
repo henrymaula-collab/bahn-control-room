@@ -11,6 +11,8 @@ import { SideBySideDone, SideBySidePreview } from "./05-side-by-side/side-by-sid
 import { SendAndNextDone, SendAndNextPreview } from "./06-send-and-next/send-and-next"
 import { AgentFeedDone, AgentFeedPreview } from "./07-agent-feed/agent-feed"
 import { ReceiptPanelDone, ReceiptPanelPreview } from "./08-receipt-panel/receipt-panel"
+import { InterlinearDone, InterlinearPreview } from "./09-interlinear/interlinear"
+import { FullFocusDone, FullFocusPreview } from "./10-full-focus/full-focus"
 
 const variants: SlotRegistry = {
   "00": { slug: "today", title: "Today", parts: { SendPreview, Done: DecisionDone } },
@@ -22,6 +24,8 @@ const variants: SlotRegistry = {
   "06": { slug: "send-and-next", title: "Send and next", parts: { SendPreview: SendAndNextPreview, Done: SendAndNextDone } },
   "07": { slug: "agent-feed", title: "Agent feed", parts: { SendPreview: AgentFeedPreview, Done: AgentFeedDone } },
   "08": { slug: "receipt-panel", title: "Receipt panel", parts: { SendPreview: ReceiptPanelPreview, Done: ReceiptPanelDone } },
+  "09": { slug: "interlinear", title: "Interlinear", parts: { SendPreview: InterlinearPreview, Done: InterlinearDone } },
+  "10": { slug: "full-focus", title: "Full focus", parts: { SendPreview: FullFocusPreview, Done: FullFocusDone } },
 }
 
 export default variants

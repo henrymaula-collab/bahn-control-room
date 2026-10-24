@@ -10,7 +10,7 @@ import { Icon } from "../../../_ui/icons"
 import { Keep } from "../../../_ui/text"
 import { usePanel } from "../../../_ui/work-frame"
 import { agentPlan, type DoneProps, type PreviewProps, recipient, useCaseBack, useCaseId, useDefaultKey } from "../_shared/helpers"
-import { pauseSend, startSend, undoSend, useFrozen, useSendView, useSendWindow, type SendState } from "../_shared/send-window"
+import { pauseSend, startSend, undoSend, useFrozen, useSendView, useSendWindow, type SendState, useSendError } from "../_shared/send-window"
 import { useColumn, useDraft } from "../_shared/use-draft"
 
 /**
@@ -21,6 +21,7 @@ import { useColumn, useDraft } from "../_shared/use-draft"
 export function UndoPillPreview({ draft, subject, verb, pending, error, onSend, returnFocus }: PreviewProps) {
   const { open, setOpen, slot } = usePanel()
   const caseId = useCaseId()
+  useSendError(caseId, error)
   const frozen = useFrozen()
   const shown = open === "email" && !frozen
   const close = useRef<HTMLButtonElement>(null)

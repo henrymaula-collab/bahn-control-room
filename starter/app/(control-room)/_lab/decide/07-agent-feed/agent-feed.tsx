@@ -10,7 +10,7 @@ import { Icon } from "../../../_ui/icons"
 import { Keep } from "../../../_ui/text"
 import { usePanel } from "../../../_ui/work-frame"
 import { agentPlan, type DoneProps, type PreviewProps, recipient, useCaseBack, useCaseId, useDefaultKey } from "../_shared/helpers"
-import { pauseSend, startSend, undoSend, useFrozen, useSendView } from "../_shared/send-window"
+import { pauseSend, startSend, undoSend, useFrozen, useSendView, useSendError } from "../_shared/send-window"
 import { useDraft } from "../_shared/use-draft"
 
 type Row = { state: "done" | "live" | "next"; text: string; sub?: string; undo?: boolean }
@@ -56,6 +56,7 @@ function Log({ rows, onUndo }: { rows: Row[]; onUndo?: () => void }) {
 export function AgentFeedPreview({ draft, subject, verb, pending, error, onSend, returnFocus }: PreviewProps) {
   const { open, setOpen, slot } = usePanel()
   const caseId = useCaseId()
+  useSendError(caseId, error)
   const frozen = useFrozen()
   const shown = open === "email"
   const close = useRef<HTMLButtonElement>(null)

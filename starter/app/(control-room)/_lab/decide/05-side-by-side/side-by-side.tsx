@@ -11,7 +11,7 @@ import { Icon } from "../../../_ui/icons"
 import { Keep } from "../../../_ui/text"
 import { usePanel } from "../../../_ui/work-frame"
 import { agentPlan, type DoneProps, pairs, type PreviewProps, recipient, useCaseId, useDefaultKey } from "../_shared/helpers"
-import { pauseSend, startSend, undoSend, useFrozen, useSendView, type SendState } from "../_shared/send-window"
+import { pauseSend, startSend, undoSend, useFrozen, useSendView, type SendState, useSendError } from "../_shared/send-window"
 import { useDraft } from "../_shared/use-draft"
 
 /**
@@ -22,6 +22,7 @@ import { useDraft } from "../_shared/use-draft"
 export function SideBySidePreview({ draft, subject, verb, pending, error, onSend, returnFocus }: PreviewProps) {
   const { open, setOpen, slot } = usePanel()
   const caseId = useCaseId()
+  useSendError(caseId, error)
   const frozen = useFrozen()
   const shown = open === "email" && frozen !== "wait"
   const close = useRef<HTMLButtonElement>(null)

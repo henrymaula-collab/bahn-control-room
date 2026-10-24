@@ -9,7 +9,7 @@ import { Icon } from "../../../_ui/icons"
 import { Keep } from "../../../_ui/text"
 import { useNeedsYou, usePanel } from "../../../_ui/work-frame"
 import { agentPlan, type DoneProps, type PreviewProps, recipient, useCaseId, useDefaultKey } from "../_shared/helpers"
-import { pauseSend, startSend, undoSend, useFrozen, useSendView } from "../_shared/send-window"
+import { pauseSend, startSend, undoSend, useFrozen, useSendView, useSendError } from "../_shared/send-window"
 import { useDraft } from "../_shared/use-draft"
 
 /**
@@ -20,6 +20,7 @@ import { useDraft } from "../_shared/use-draft"
 export function InlineDraftPreview({ draft, subject, verb, pending, error, onSend, returnFocus }: PreviewProps) {
   const { open, setOpen } = usePanel()
   const caseId = useCaseId()
+  useSendError(caseId, error)
   const frozen = useFrozen()
   const [expanded, setExpanded] = useState(false)
   const d = useDraft(draft, expanded)

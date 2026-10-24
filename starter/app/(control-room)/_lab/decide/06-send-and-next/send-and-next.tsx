@@ -12,7 +12,7 @@ import { Keep } from "../../../_ui/text"
 import { useNeedsYou, usePanel } from "../../../_ui/work-frame"
 import { useLab } from "../../context"
 import { agentPlan, type DoneProps, type PreviewProps, recipient, useCaseId } from "../_shared/helpers"
-import { pauseSend, startSend, undoSend, useSendWindow, WINDOW_S, type SendState } from "../_shared/send-window"
+import { pauseSend, startSend, undoSend, useSendWindow, WINDOW_S, type SendState, useSendError } from "../_shared/send-window"
 import { useDraft } from "../_shared/use-draft"
 
 const PREF = "lab-decide-06-after-send"
@@ -38,6 +38,7 @@ const writePref = (v: "next" | "stay") => {
 export function SendAndNextPreview({ draft, subject, verb, pending, error, onSend, returnFocus }: PreviewProps) {
   const { open, setOpen, slot } = usePanel()
   const caseId = useCaseId()
+  useSendError(caseId, error)
   const router = useRouter()
   const path = usePathname() ?? ""
   const params = useSearchParams()

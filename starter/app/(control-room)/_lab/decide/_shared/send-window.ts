@@ -12,7 +12,7 @@
 // Lab photo states (read by the variants, never posting): ?send=wait (inside the window, frozen at
 // 7 s) and ?send=sent (the window has passed, the agent is at work). See useSendView.
 
-import { useSyncExternalStore } from "react"
+import { useEffect, useSyncExternalStore } from "react"
 import { useSearchParams } from "next/navigation"
 
 export const WINDOW_S = 10
@@ -177,4 +177,20 @@ export function useSendView(caseId: string, who: { name: string; how: string; em
     }
   }
   return live && live.caseId === caseId ? live : null
+}
+
+/** The save failed after the window: forget the "sent" receipt so nothing claims it went. */
+export function forgetSend(caseId: string) {
+  if (state && state.caseId === caseId && state.phase === "sent") {
+    if (clearer) clearTimeout(clearer)
+    state = null
+    emit()
+  }
+}
+
+/** Every preview calls this with the card's error: a failed save never leaves a "sent" receipt. */
+export function useSendError(caseId: string, error: string | null) {
+  useEffect(() => {
+    if (error) forgetSend(caseId)
+  }, [error, caseId])
 }

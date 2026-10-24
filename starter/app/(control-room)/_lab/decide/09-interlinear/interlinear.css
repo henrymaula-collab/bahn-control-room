@@ -1,0 +1,67 @@
+/* decide 09: Interlinear. Every rule under .lab-decide-09. */
+.lab-decide-09.send-panel { display: flex; flex-direction: column; padding: 0; overflow: hidden; }
+.lab-decide-09 .send-head { flex: none; align-items: center; padding: max(12px, calc(16 * var(--cr-u, 1px))) max(20px, calc(28 * var(--cr-u, 1px))) 4px; }
+.lab-decide-09 .send-body { flex: 1; min-height: 0; overflow: hidden auto; overflow-wrap: break-word; padding: 12px max(20px, calc(28 * var(--cr-u, 1px))) 24px; }
+.lab-decide-09 .send-foot { flex: none; padding: 14px max(20px, calc(28 * var(--cr-u, 1px))) max(14px, calc(20 * var(--cr-u, 1px))); border-top: 1px solid rgb(18 17 14 / 0.08); }
+.lab-decide-09 .send-actions { display: flex; align-items: center; gap: 8px; }
+.lab-decide-09 .send-meta { font-size: var(--type-subhead); line-height: var(--lh-subhead); grid-template-columns: 5.3em minmax(0, 1fr); column-gap: 1em; row-gap: 0.4em; margin: 0 0 20px; padding-bottom: 16px; border-bottom: 1px solid rgb(18 17 14 / 0.08); }
+.lab-decide-09 .l9-text { white-space: pre-wrap; }
+.lab-decide-09 .l9-edit { width: 100%; min-height: min(470px, 55vh); padding: 12px 14px; border-radius: 12px; resize: vertical; }
+
+/* In English as an Apple switch at the end of the Language row. */
+.lab-decide-09 .l9-lang { display: flex; align-items: center; justify-content: space-between; gap: 1em; }
+.lab-decide-09 .l9-switch { position: relative; display: inline-flex; align-items: center; gap: 0.5em; color: var(--ink-2); cursor: pointer; }
+.lab-decide-09 .l9-switch input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.lab-decide-09 .l9-track { position: relative; width: 2.3em; height: 1.4em; border-radius: 999px; background: var(--press); transition: background-color 150ms var(--ease); flex: none; }
+.lab-decide-09 .l9-knob { position: absolute; top: 0.15em; left: 0.15em; width: 1.1em; height: 1.1em; border-radius: 50%; background: var(--page); box-shadow: 0 1px 2px rgb(18 17 14 / 0.2); transition: transform 200ms cubic-bezier(0.2, 0, 0, 1); }
+.lab-decide-09 .l9-switch input:checked + .l9-track { background: var(--ink); }
+.lab-decide-09 .l9-switch input:checked + .l9-track .l9-knob { transform: translateX(0.9em); }
+.lab-decide-09 .l9-switch input:focus-visible + .l9-track { outline: 2px solid var(--ink); outline-offset: 2px; }
+
+/* Each German sentence with its English straight under it; a hairline at the left groups the pair. */
+.lab-decide-09 .l9-lines { display: flex; flex-direction: column; gap: 0.75em; }
+.lab-decide-09 .l9-pair { display: flex; flex-direction: column; gap: 0.15em; padding: 0.1em 0 0.1em 0.8em; margin-left: -0.8em; border-left: 2px solid transparent; transition: border-color 150ms var(--ease); }
+.lab-decide-09 .l9-pair:hover { border-left-color: var(--ink); }
+.lab-decide-09 .l9-gloss { color: var(--ink-2); font-size: var(--type-subhead); line-height: var(--lh-subhead); }
+.lab-decide-09 .l9-block { margin-top: 0.8em; }
+.lab-decide-09 .l9-send { gap: 0.55em; }
+.lab-decide-09 .l9-kbd { font: inherit; font-weight: 400; font-size: var(--type-subhead); opacity: 0.6; }
+
+/* The corner toast. */
+.lab-decide-09.l9-toast {
+  position: fixed; right: 20px; bottom: 20px; z-index: 40;
+  display: flex; align-items: center; gap: 12px; width: min(23em, calc(100vw - 40px));
+  padding: 12px 12px 12px 14px; border-radius: 14px; background: var(--page); color: var(--ink);
+  font-size: var(--type-subhead); line-height: var(--lh-subhead);
+  box-shadow: 0 0 0 1px rgb(18 17 14 / 0.06), 0 10px 32px rgb(18 17 14 / 0.14);
+}
+.lab-decide-09 .l9-toast-mark { flex: none; width: 1.6em; height: 1.6em; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; background: var(--ink); color: var(--page); }
+.lab-decide-09 .l9-toast-words { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.lab-decide-09 .l9-toast-title { font-weight: 600; }
+.lab-decide-09 .l9-toast-sub { color: var(--ink-2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.lab-decide-09 .l9-toast-undo {
+  flex: none; display: inline-flex; align-items: center; gap: 6px; min-height: 34px; padding: 0 10px 0 12px;
+  border-radius: 10px; box-shadow: inset 0 0 0 1px rgb(18 17 14 / 0.14); color: var(--ink); font-weight: 600;
+  transition: background-color 150ms var(--ease);
+}
+.lab-decide-09 .l9-toast-undo:hover { background: var(--raise); }
+.lab-decide-09 .l9-toast-undo kbd { font: inherit; font-weight: 400; color: var(--ink-2); }
+
+/* After: the record, label and value, the way History opens a case. */
+.lab-decide-09 .l9-record { margin-top: 1.3em; max-width: 38em; }
+.lab-decide-09 .l9-record > div { display: grid; grid-template-columns: 7.5em minmax(0, 1fr); column-gap: 1em; padding: 0.6em 0; border-top: 1px solid rgb(18 17 14 / 0.08); }
+.lab-decide-09 .l9-record > div:last-child { border-bottom: 1px solid rgb(18 17 14 / 0.08); }
+.lab-decide-09 .l9-record dt { color: var(--ink-2); }
+.lab-decide-09 .l9-record dd { margin: 0; display: flex; flex-direction: column; min-width: 0; }
+.lab-decide-09 .l9-q { color: var(--ink-2); font-size: var(--type-subhead); line-height: var(--lh-subhead); }
+.lab-decide-09 .l9-read { display: inline-flex; align-items: center; gap: 2px; align-self: flex-start; margin-left: -6px; padding: 0 6px; border-radius: 8px; color: var(--ink); }
+.lab-decide-09 .l9-read:hover { background: var(--raise); }
+.lab-decide-09 .l9-read svg { color: var(--ink-2); }
+.lab-decide-09 .l9-sent { margin-top: 0.4em; color: var(--ink-2); font-size: var(--type-subhead); line-height: var(--lh-subhead); white-space: pre-wrap; }
+
+@media (prefers-reduced-motion: no-preference) {
+  .lab-decide-09.l9-toast { animation: lab-decide-09-in 240ms cubic-bezier(0.2, 0, 0, 1); }
+  @keyframes lab-decide-09-in { from { transform: translateY(12px); opacity: 0; } to { transform: none; opacity: 1; } }
+  .lab-decide-09 .l9-gloss { animation: lab-decide-09-gloss 200ms cubic-bezier(0.2, 0, 0, 1) both; }
+  @keyframes lab-decide-09-gloss { from { opacity: 0; transform: translateY(-3px); } to { opacity: 1; transform: none; } }
+}

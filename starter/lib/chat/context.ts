@@ -37,6 +37,30 @@ export interface ChatCaseContext {
   snap: { lessons: Lesson[]; decisions: Decision[]; trustRules: TrustRule[]; cases: Case[] }
   /** Baseline records beyond the dataset (lib/depth): thread, call, note, documents, people, hours, earlier pickups. Null for the demo orders. */
   depth?: CaseDepth | null
+  /** Bahn's notes on a demo pickup place (lib/demo, D1): they win over the baseline's place details. */
+  placeNotes?: Record<string, unknown> | null
+}
+
+/**
+ * lib/demo's overlay: puts the demo orders' hand-made rows into lib/agent's table cache (idempotent),
+ * so the reused read tools see them. Never fails the chat.
+ */
+async function installDemo(): Promise<void> {
+  try {
+    const { installDemoDepth } = await import("@/lib/demo/overlay")
+    installDemoDepth()
+  } catch {
+    // no demo overlay in this build
+  }
+}
+
+async function demoPlaceNotes(placeId: string | null | undefined): Promise<Record<string, unknown> | null> {
+  try {
+    const { placeNotes } = await import("@/lib/demo/overlay")
+    return (placeNotes(placeId) as Record<string, unknown> | null) ?? null
+  } catch {
+    return null
+  }
 }
 
 /** The case's baseline depth (stored row or generated); never fails the chat. */
@@ -128,7 +152,7 @@ export async function engineContext(caseId: string, personId: string): Promise<C
       synthetic: row.synthetic,
     }
   })
-  const [calls, depth] = await Promise.all([listCalls({ caseId: c.id, orderId: c.orderId }), depthOf(c, state.now)])
+  const [calls, depth, placeNotes] = await Promise.all([listCalls({ caseId: c.id, orderId: c.orderId }), depthOf(c, state.now), demoPlaceNotes(c.placeId)])
   const place = (p: { id: string; name: string; city: string; country: string; timezone: string | null } | undefined): ChatPlace =>
     p ? { id: p.id, name: p.name, city: p.city, country: p.country, timezone: p.timezone ?? "Europe/Helsinki" } : { name: "Unknown", city: "", country: "", timezone: "Europe/Helsinki" }
   return {
@@ -154,6 +178,7 @@ export async function engineContext(caseId: string, personId: string): Promise<C
       placeCases: state.cases.filter((x) => !!c.placeId && x.placeId === c.placeId && x.orderId !== c.orderId),
       snap: { lessons: state.lessons, decisions: state.decisions.map((row) => row.data), trustRules: state.rules, cases: state.cases },
       depth,
+      placeNotes,
     },
   }
 }
@@ -251,6 +276,7 @@ export async function fixtureContext(caseId: string, personId: string): Promise<
       placeCases: cases.filter((x) => !!c.placeId && x.placeId === c.placeId && x.orderId !== c.orderId),
       snap: { lessons, decisions: live?.decisions ?? [], trustRules: live?.rules ?? TRUST_RULES, cases },
       depth,
+      placeNotes: await demoPlaceNotes(c.placeId),
     },
   }
 }
@@ -259,6 +285,7 @@ export function fixtureMode(): boolean {
   return process.env.CR_DATA === "fixtures"
 }
 
-export function loadContext(caseId: string, personId: string): Promise<ContextResult> {
+export async function loadContext(caseId: string, personId: string): Promise<ContextResult> {
+  await installDemo()
   return fixtureMode() ? fixtureContext(caseId, personId) : engineContext(caseId, personId)
 }

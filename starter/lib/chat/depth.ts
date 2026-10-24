@@ -29,7 +29,8 @@ export function depthCalls(d: CaseDepth) {
 /** Adds the baseline to one tool's JSON answer. Unknown shapes and errors pass through untouched. */
 export function withDepth(name: string, content: string, ctx: ChatCaseContext): string {
   const d = ctx.depth
-  if (!d) return content
+  const notes = ctx.placeNotes
+  if (!d && !notes) return content
   let out: Record<string, unknown>
   try {
     out = JSON.parse(content) as Record<string, unknown>
@@ -37,6 +38,10 @@ export function withDepth(name: string, content: string, ctx: ChatCaseContext): 
     return content
   }
   if (!out || typeof out !== "object" || "error" in out) return content
+  // lib/demo's notes on a demo pickup place win: then the baseline adds no place details of its own.
+  if (notes && (name === "get_pickup_place" || name === "get_place_history")) out.place_notes = notes
+  if (!d) return JSON.stringify(out)
+  const ownPlace = !notes
   switch (name) {
     case "get_order":
       out.car_details = { colour: d.car.colour, mileage_km: d.car.mileageKm, keys: d.car.keys, condition: d.car.condition }
@@ -47,6 +52,7 @@ export function withDepth(name: string, content: string, ctx: ChatCaseContext): 
       const hours = out.opening_hours
       if (!hours || (typeof hours === "object" && !Object.keys(hours as object).length)) out.opening_hours = d.place.openingHours
       out.hours_source = d.place.hoursSource
+      if (!ownPlace) break
       out.phone = d.place.phone
       out.email = d.place.email
       out.who_answers_the_phone = d.place.answersThePhone
@@ -78,6 +84,7 @@ export function withDepth(name: string, content: string, ctx: ChatCaseContext): 
       out.internal_notes = notesOut(d)
       break
     case "get_place_history":
+      if (!ownPlace) break
       out.earlier_pickups_here = d.earlierPickups.map((p) => ({ when: day(p.when), order: p.reference, car: p.car, driver: p.driver, handed_over_by: p.handedOverBy, how_it_went: p.outcome }))
       out.contacts = d.place.contacts.map(contactOut)
       break

@@ -110,7 +110,8 @@ export function wordBudget(input: Pick<AnswerInput, "via" | "shape"> & { text?: 
 
 const DETAIL_HINT =
   "The person asked for detail: look up what the question touches first, then give the specifics from the records. Names and roles, phone numbers, times, " +
-  "what each message or call said in the writer's own words with the English, what is on file and what is missing. No summary in place of the words; nothing the records do not hold."
+  "what each message or call said in the writer's own words with the English, what is on file and what is missing. No summary in place of the words; nothing the records do not hold. " +
+  "Write it as plain sentences: no numbered or bulleted lists, no bold."
 
 function lastUserText(input: AnswerInput): string {
   const n = wordBudget(input)

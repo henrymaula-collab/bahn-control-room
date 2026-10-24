@@ -5,7 +5,7 @@
 // `npm run db:seed:cr`; read by the chat tools (lib/chat/tools.ts).
 
 /** Bump when the generator's output changes, so stored rows are regenerated on read. */
-export const DEPTH_VERSION = 1
+export const DEPTH_VERSION = 3
 
 export interface DepthMessage {
   id: string

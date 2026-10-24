@@ -56,7 +56,15 @@ const NAMES: Record<Lang, { first: string[]; last: string[] }> = {
   en: { first: ["Sanne", "Daan", "Fleur", "Joris", "Lotte", "Bram", "Noor", "Ruben"], last: ["van Dellen", "de Wilde", "Verhoeckx", "Brandsma", "van Oorschot", "Kuipers", "Dijkhuis", "Mertens"] },
 }
 
-const personName = (r: Rand, lang: Lang) => `${pick(r, NAMES[lang].first)} ${pick(r, NAMES[lang].last)}`
+/** A made-up name whose first and last names are not used yet on this record. */
+function personName(r: Rand, lang: Lang, used: Set<string>): string {
+  const free = (list: string[]) => list.filter((x) => !used.has(x))
+  const first = pick(r, free(NAMES[lang].first).length ? free(NAMES[lang].first) : NAMES[lang].first)
+  const last = pick(r, free(NAMES[lang].last).length ? free(NAMES[lang].last) : NAMES[lang].last)
+  used.add(first)
+  used.add(last)
+  return `${first} ${last}`
+}
 
 const AREA: Record<string, Record<string, string>> = {
   DE: { Hamburg: "40", Berlin: "30", Frankfurt: "69", Munich: "89", München: "89", Cologne: "221", Köln: "221", Stuttgart: "711", Düsseldorf: "211", Hanover: "511", Bremen: "421", Leipzig: "341", _: "30" },
@@ -125,11 +133,12 @@ function deliveryPromise(orderId: string): { at: string; tz: string } | null {
   return w ? { at: String(w.start_at), tz: String(w.timezone ?? "Europe/Helsinki") } : null
 }
 
-function driverLine(order: OrderRow): string {
+/** The gig and the driver, from the dataset. "Not told yet" only when the order has no messages of its own (none to the driver either). */
+function driverLine(order: OrderRow, ownThread: boolean): string {
   const asg = activeAssignment(order.id)
   if (asg && asg.status !== "COMPLETED") {
     const d = driver(str(asg.driver_id))
-    return `Driver ${String(d?.display_name ?? "on the gig")} is booked (fee EUR ${Math.round(Number(asg.fee_cents) / 100)}) and has not been told about this yet.`
+    return `Driver ${String(d?.display_name ?? "on the gig")} is booked (fee EUR ${Math.round(Number(asg.fee_cents) / 100)})${ownThread ? " and has not been told about this yet" : ""}.`
   }
   if (forOrder("market_offers", order.id).some((o) => o.status === "PUBLISHED")) return "The gig is published to drivers; nobody has taken it yet, so no driver needs telling."
   return "No driver is booked yet and the gig is not published, so no driver needs telling."
@@ -155,8 +164,7 @@ const QUIRKS = [
   "Nobody is at the desk over lunch, roughly 12:00 to 12:45.",
   "Driver parking is the visitor bays by the main entrance, 15 minutes at most.",
   "They want the order reference in the subject line of every email.",
-  "Keys come out only after the driver has signed the handover sheet at the desk.",
-  "On Fridays the desk closes an hour before the opening hours say.",
+  "Keys come out only after the driver has signed the handover sheet.",
   "Staff prefer a call the day before a pickup, not on the day itself.",
 ]
 
@@ -262,18 +270,21 @@ function plan(kind: string, privatePlace: boolean, requiresRelease: boolean, has
   }
 }
 
-function noteText(kind: string, place: string, order: OrderRow, slotDayEn: string, amount: string | null): string {
+/** The desk's note. Only the call (always made here) and, when the baseline wrote the thread, its messages are cited. */
+function noteText(kind: string, place: string, order: OrderRow, slotDayEn: string, amount: string | null, ownThread: boolean): string {
+  const fee = `${place} asks for a handling fee${amount ? ` of ${amount}` : ""}`
   const lead: Record<string, string> = {
-    car_not_ready: `${place} could not confirm on the phone this morning that the car will be ready ${slotDayEn}. The customer wants to hear before any date changes.`,
-    keys_or_access: `Nobody at ${place} has named who hands over the keys ${slotDayEn}; they point to the shift plan, which is not made yet.`,
-    no_answer: `${place} has not answered two messages and this morning's call (voicemail left).`,
-    release_document_missing: `The signed release is still not on file. The customer has asked the seller for it, with no date promised.`,
-    seller_hold: `The signed release is still not on file. The customer has asked the seller for it, with no date promised.`,
-    facts_disagree: `${place} says the pickup details on the order do not match their plan; nothing confirmed in writing yet.`,
-    facts_disagree_open_gig: `${place} says the pickup details on the order do not match their plan; nothing confirmed in writing yet.`,
-    fee_requested: `${place} asks for a handling fee${amount ? ` of ${amount}` : ""}; the customer has not answered yet.`,
+    car_not_ready: `${place} could not confirm on the phone this morning that the car will be ready ${slotDayEn}.${ownThread ? " The customer wants to hear before any date changes." : ""}`,
+    keys_or_access: `Nobody at ${place} has named who hands over the keys ${slotDayEn}; on the phone they pointed to the shift plan, which is not made yet.`,
+    no_answer: ownThread ? `${place} has not answered two messages and this morning's call (voicemail left).` : `${place} did not pick up this morning's call (voicemail left).`,
+    release_document_missing: `The signed release is still not on file${ownThread ? "; the customer has asked the seller for it, with no date promised" : ""}.`,
+    seller_hold: `The signed release is still not on file${ownThread ? "; the customer has asked the seller for it, with no date promised" : ""}.`,
+    facts_disagree: `${ownThread ? `${place} says the pickup details on the order do not match their plan; ` : ""}nothing about the pickup point is confirmed in writing yet.`,
+    facts_disagree_open_gig: `${ownThread ? `${place} says the pickup details on the order do not match their plan; ` : ""}nothing about the pickup point is confirmed in writing yet.`,
+    fee_requested: ownThread ? `${fee}; the customer has not answered yet.` : `${fee}.`,
   }
-  return `${lead[kind] ?? `Pickup ${slotDayEn} checked with ${place}.`} ${driverLine(order)}`
+  const text = lead[kind] ?? `Pickup ${slotDayEn} checked with ${place}.`
+  return `${text.charAt(0).toUpperCase()}${text.slice(1)} ${driverLine(order, ownThread)}`
 }
 
 // ---------- the record ----------
@@ -314,9 +325,12 @@ export function generateDepth(input: DepthInput): CaseDepth | null {
   const desk = DESK[mode] ?? (privatePlace ? "the person at the address" : "reception")
 
   // People: the dataset's contact when there is one, else made up in the place's language.
-  const contactName = str(endpoint?.contact_name) ?? personName(r, placeLang)
-  const deputyName = personName(r, placeLang)
-  const custContactName = personName(r, custLang)
+  const used = new Set<string>()
+  const datasetContact = str(endpoint?.contact_name)
+  for (const part of datasetContact?.split(" ") ?? []) used.add(part)
+  const contactName = datasetContact ?? personName(r, placeLang, used)
+  const deputyName = personName(r, placeLang, used)
+  const custContactName = personName(r, custLang, used)
   const placeEmail = site?.pickup_contact_email ?? (str(endpoint?.contact_handle)?.includes("@") ? str(endpoint?.contact_handle)! : email("pickup", placeName))
   const contacts: DepthContact[] = [
     { name: contactName, role: str(endpoint?.contact_role) ?? (privatePlace ? "handover contact at the address" : `contact for Bahn pickups, ${desk}`), phone: phone(r, country, city), email: placeEmail, language: placeLang },
@@ -384,7 +398,7 @@ export function generateDepth(input: DepthInput): CaseDepth | null {
       ...(placeLang !== "en" ? { english: say("en", key, enV) } : {}),
     })),
   }]
-  const notes: DepthNote[] = [{ at: clamp(localIso(today.y, today.m, today.d, "08:35", tz)), by: "Readiness desk, internal note", text: noteText(kind, placeName, order, enV.slotDay, enV.amount) }]
+  const notes: DepthNote[] = [{ at: clamp(localIso(today.y, today.m, today.d, "08:35", tz)), by: "Readiness desk, internal note", text: noteText(kind, placeName, order, enV.slotDay, enV.amount, !hasDatasetThread) }]
 
   // Documents beyond the dataset's own (release document, CMR stay where they are).
   const reg = REG_DOC[country.toUpperCase()] ?? { name: "Registration certificate", detail: "travels with the car" }
@@ -399,6 +413,9 @@ export function generateDepth(input: DepthInput): CaseDepth | null {
       : { name: "Service history", status: "printed book", detail: "Printed service book in the glovebox, per the seller." },
     { name: "Handover protocol", status: "not started", detail: "The driver fills it in the Bahn app at pickup: photos of all four sides, the dashboard and the keys, signed by both sides." },
     { name: "Keys", status: "2 listed", detail: "Two keys listed on the order; the driver counts them at the handover." },
+    ...(site && !requiresRelease && !forOrder("documents", order.id).some((x) => x.kind === "RELEASE_AUTHORITY")
+      ? [{ name: "Release document", status: "not needed here", detail: `${placeName} does not ask for a signed release document${site.release_document_rule ? `; its rule at handover: ${site.release_document_rule}` : ""}.` }]
+      : []),
     ...(crossBorder ? [{ name: "Export papers", status: "not needed", detail: `Pickup in ${country}, delivery in ${String(delivery?.country ?? "")}: both in the EU, so no export papers.` }] : []),
   ]
 

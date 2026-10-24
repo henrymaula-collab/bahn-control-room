@@ -239,6 +239,63 @@ test("no action tool is reachable from the chat", async () => {
   assert.match(ok.content, /Release document/)
 })
 
+// ---------- baseline depth (lib/depth) and the detail budget ----------
+
+test("baseline depth: deterministic, in the place's language with English, before the case, never for a demo order", async () => {
+  const { generateDepth, DEMO_ORDER_REFS } = await import("@/lib/depth/generate")
+  const { missingPhrases } = await import("@/lib/depth/phrases")
+  assert.deepEqual(missingPhrases(), [], "every line exists in every language")
+  const c = { id: "case-ord-00531-car_not_ready", type: "readiness.car_not_ready", createdAt: "2026-10-21T09:00:00.000Z", facts: [] }
+  const a = generateDepth({ order: "CD-420531", case: c, now: c.createdAt })
+  const b = generateDepth({ order: "ord-00531", case: c, now: c.createdAt })
+  assert.ok(a)
+  assert.deepEqual(a, b, "same input, same record")
+  assert.ok(a.messages.length >= 3, "a short thread")
+  assert.ok(a.messages.every((m) => m.language === "da" && m.english), "Danish pickup place and customer, with English")
+  assert.ok(a.messages.some((m) => m.fromKind === "pickup_place" && /klargøring/.test(m.text)), "the pickup place says the car is still being prepared")
+  assert.ok(a.messages.filter((m) => m.fromKind === "pickup_place").every((m) => /\b(cannot|not)\b/.test(m.english ?? "")), "the pickup place confirms nothing: the case stays open")
+  assert.ok(a.calls.length >= 1 && a.notes.length >= 1 && a.documents.length >= 4 && a.earlierPickups.length === 3)
+  assert.ok(a.place.contacts.some((p) => p.name === "Zara Alderfield"), "the dataset's own contact stays the contact")
+  assert.match(a.place.phone, /555 01|55 55 01/, "clearly fictional numbers")
+  const times = [...a.messages.map((m) => m.at), ...a.calls.map((x) => x.startedAt), ...a.notes.map((n) => n.at)]
+  assert.ok(times.every((t) => t < c.createdAt), "everything on file happened before the case")
+  assert.deepEqual([...times].sort(), times, "in order")
+  for (const ref of DEMO_ORDER_REFS) assert.equal(generateDepth({ order: ref, case: c, now: c.createdAt }), null, `${ref} is left to lib/demo`)
+  for (const text of [...a.messages.flatMap((m) => [m.text, m.english ?? ""]), ...a.notes.map((n) => n.text)]) assertPlainWords(text, "baseline")
+})
+
+test("detail: explicit asks get 140 words (70 by voice); everything else keeps 45/90/35", async () => {
+  const { asksForDetail } = await import("./words")
+  const { wordBudget } = await import("./brain")
+  for (const q of ["What exactly did the seller write?", "Tell me everything", "Read me the email", "List the documents", "Who is the contact?", "Vad skrev de?", "Kuka on yhteyshenkilö?", "Was hat der Händler geschrieben?", "Hvem er kontaktpersonen?"])
+    assert.ok(asksForDetail(q), `detail: ${q}`)
+  for (const q of ["Has this happened before?", "Why do you suggest this?", "Can you send the email?", "What happens if we wait?"]) assert.ok(!asksForDetail(q), `not detail: ${q}`)
+  const shape = (experienced: boolean) => ({ experienced }) as Parameters<typeof wordBudget>[0]["shape"]
+  assert.equal(wordBudget({ via: "text", shape: shape(true), text: "Why?" }), 45)
+  assert.equal(wordBudget({ via: "text", shape: shape(false), text: "Why?" }), 90)
+  assert.equal(wordBudget({ via: "voice", shape: shape(false), text: "Why?" }), 35)
+  assert.equal(wordBudget({ via: "text", shape: shape(true), text: "What exactly did they write?" }), 140)
+  assert.equal(wordBudget({ via: "voice", shape: shape(true), text: "Tell me everything" }), 70)
+})
+
+test("the chat's tools carry the baseline in full", async () => {
+  const { generateDepth } = await import("@/lib/depth/generate")
+  const c = { ...sellerHoldCase("case-depth", "site-054", "Vandellora Odense Vest"), orderId: "ord-00531", type: "readiness.car_not_ready" as const }
+  const base = ctxFor(c, [], "p-sofie")
+  const ctx = { ...base, order: { ...base.order, id: "ord-00531", reference: "CD-420531" }, depth: generateDepth({ order: "ord-00531", case: c, now: c.createdAt }) }
+  const run = chatRunContext(ctx)
+  const read = async (name: string) => JSON.parse((await executeChatTool(ctx, name, () => run)).content) as Record<string, unknown>
+  const conv = await read("get_conversations")
+  const msgs = (conv.conversations as { messages: { text: string; english?: string }[] }[]).flatMap((x) => x.messages)
+  for (const m of ctx.depth!.messages) assert.ok(msgs.some((x) => x.text === m.text && x.english === m.english), "every message, whole, with its English")
+  assert.ok(((await read("get_calls")).desk_calls as unknown[]).length >= 1)
+  assert.ok(((await read("get_documents")).other_documents as unknown[]).length >= 4)
+  const place = await read("get_pickup_place")
+  assert.ok(place.phone && (place.contacts as unknown[]).length >= 2 && place.opening_hours)
+  assert.equal(((await read("get_place_history")).earlier_pickups_here as unknown[]).length, 3)
+  assert.ok((await read("get_order")).customer_contact)
+})
+
 // ---------- the route, in fixture mode (no database, no keys) ----------
 
 async function route() {

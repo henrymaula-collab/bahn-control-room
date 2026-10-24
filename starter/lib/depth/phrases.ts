@@ -48,7 +48,7 @@ const en: Book = {
   cWhoLater: () => `Thank you. Whom should we ask this afternoon?`,
   cAskFor: (v) => `Ask for ${v.contact}, who handles your orders.`,
   askKeys: (v) => `Hello, this is the Readiness desk at Bahn about order ${v.ref} (${v.car}), pickup ${v.slot}. Who will hand over the keys to our driver? Please send us a name and a phone number.`,
-  keysUnclear: () => `Hello, the keys are kept at our front desk. The shift plan for that day is not made yet, so I cannot give you a name today. We will send one as soon as the plan is ready.`,
+  keysUnclear: () => `Hello, the shift plan for that day is not made yet, so I cannot tell you today who will hand over the keys. We will send a name as soon as the plan is ready.`,
   keysUnclearPrivate: () => `Hello, it is not decided yet who of us can release the car that day. I will send you a name and a number as soon as I know.`,
   custUpdateKeys: (v) => `Hello ${v.cust}, on order ${v.ref} the pickup place has not yet named who hands over the keys ${v.slotDay}. We are following it up and will tell you before anything changes.`,
   custKeysReply: () => `Thanks. Please make sure the driver does not travel there for nothing.`,
@@ -79,9 +79,9 @@ const en: Book = {
   cAskFee: (v) => `Hello, this is the Readiness desk at Bahn, about the fee on order ${v.ref}. What is it for?`,
   cFeeWhat: () => `It covers moving the car out of our storage for the handover. We need your confirmation in writing.`,
   confirmSlot: (v) => `Hello, this is the Readiness desk at Bahn about order ${v.ref} (${v.car}). Our driver comes ${v.slot}. Is everything set for the handover?`,
-  allSet: () => `Hello, we have the order. The driver should report to our front desk with the order reference.`,
+  allSet: () => `Hello, we have the order. The driver should give the order reference on arrival.`,
   cAskPlan: (v) => `Hello, this is the Readiness desk at Bahn, about order ${v.ref}. Is the handover ${v.slotDay} still as planned?`,
-  cAsPlanned: () => `As far as I know, yes. The driver reports to our front desk.`,
+  cAsPlanned: () => `As far as I know, yes. The driver gives the order reference on arrival.`,
 }
 
 const de: Book = {
@@ -95,7 +95,7 @@ const de: Book = {
   cWhoLater: () => `Danke. Wen sollen wir heute Nachmittag fragen?`,
   cAskFor: (v) => `Fragen Sie nach ${v.contact}, das ist die Ansprechperson für Ihre Aufträge.`,
   askKeys: (v) => `Guten Tag, hier ist der Readiness-Desk von Bahn zum Auftrag ${v.ref} (${v.car}), Abholung ${v.slot}. Wer übergibt unserem Fahrer die Schlüssel? Bitte schicken Sie uns einen Namen und eine Telefonnummer.`,
-  keysUnclear: () => `Guten Tag, die Schlüssel liegen bei uns am Empfang. Der Schichtplan für den Tag steht noch nicht, deshalb kann ich Ihnen heute keinen Namen nennen. Wir schicken ihn, sobald der Plan fertig ist.`,
+  keysUnclear: () => `Guten Tag, der Schichtplan für den Tag steht noch nicht, deshalb kann ich Ihnen heute nicht sagen, wer die Schlüssel übergibt. Wir schicken einen Namen, sobald der Plan fertig ist.`,
   keysUnclearPrivate: () => `Guten Tag, es ist noch nicht entschieden, wer von uns das Fahrzeug an dem Tag freigeben kann. Ich schicke Ihnen Namen und Nummer, sobald ich es weiß.`,
   custUpdateKeys: (v) => `Hallo ${v.cust}, beim Auftrag ${v.ref} hat die Abholstelle noch nicht genannt, wer ${v.slotDay} die Schlüssel übergibt. Wir bleiben dran und melden uns, bevor sich etwas ändert.`,
   custKeysReply: () => `Danke. Bitte sorgen Sie dafür, dass der Fahrer nicht umsonst hinfährt.`,
@@ -126,9 +126,9 @@ const de: Book = {
   cAskFee: (v) => `Guten Tag, hier ist der Readiness-Desk von Bahn, wegen der Gebühr zum Auftrag ${v.ref}. Wofür ist sie?`,
   cFeeWhat: () => `Dafür holen wir das Fahrzeug für die Übergabe aus unserem Lager. Wir brauchen Ihre Bestätigung schriftlich.`,
   confirmSlot: (v) => `Guten Tag, hier ist der Readiness-Desk von Bahn zum Auftrag ${v.ref} (${v.car}). Unser Fahrer kommt ${v.slot}. Ist für die Übergabe alles vorbereitet?`,
-  allSet: () => `Guten Tag, der Auftrag liegt uns vor. Der Fahrer meldet sich bitte mit der Auftragsnummer am Empfang.`,
+  allSet: () => `Guten Tag, der Auftrag liegt uns vor. Der Fahrer nennt bei Ankunft bitte die Auftragsnummer.`,
   cAskPlan: (v) => `Guten Tag, hier ist der Readiness-Desk von Bahn, zum Auftrag ${v.ref}. Bleibt es bei der Übergabe ${v.slotDay}?`,
-  cAsPlanned: () => `Soweit ich weiß, ja. Der Fahrer meldet sich am Empfang.`,
+  cAsPlanned: () => `Soweit ich weiß, ja. Der Fahrer nennt bei Ankunft die Auftragsnummer.`,
 }
 
 const fi: Book = {
@@ -142,7 +142,7 @@ const fi: Book = {
   cWhoLater: () => `Kiitos. Keneltä kysymme iltapäivällä?`,
   cAskFor: (v) => `Yhteyshenkilönne on ${v.contact}, hän hoitaa teidän tilauksenne.`,
   askKeys: (v) => `Hei, täällä Bahnin Readiness-tiimi tilauksesta ${v.ref} (${v.car}), nouto ${v.slot}. Kuka luovuttaa avaimet kuljettajallemme? Lähettäkää meille nimi ja puhelinnumero.`,
-  keysUnclear: () => `Hei, avaimet säilytetään meillä vastaanotossa. Sen päivän vuorolista ei ole vielä valmis, joten en voi antaa nimeä tänään. Lähetämme sen, kun lista on valmis.`,
+  keysUnclear: () => `Hei, sen päivän vuorolista ei ole vielä valmis, joten en voi tänään kertoa, kuka luovuttaa avaimet. Lähetämme nimen heti, kun lista on valmis.`,
   keysUnclearPrivate: () => `Hei, vielä ei ole päätetty, kuka meistä voi luovuttaa auton sinä päivänä. Lähetän nimen ja numeron heti, kun tiedän.`,
   custUpdateKeys: (v) => `Hei ${v.cust}, tilauksen ${v.ref} noutopaikka ei ole vielä kertonut, kuka luovuttaa avaimet ${v.slotDay}. Selvitämme asiaa ja kerromme ennen kuin mikään muuttuu.`,
   custKeysReply: () => `Kiitos. Huolehtikaa, ettei kuljettaja lähde paikalle turhaan.`,
@@ -173,9 +173,9 @@ const fi: Book = {
   cAskFee: (v) => `Hei, täällä Bahnin Readiness-tiimi, soitan tilauksen ${v.ref} maksusta. Mistä se veloitetaan?`,
   cFeeWhat: () => `Siitä, että siirrämme auton varastosta luovutusta varten. Tarvitsemme vahvistuksen kirjallisena.`,
   confirmSlot: (v) => `Hei, täällä Bahnin Readiness-tiimi tilauksesta ${v.ref} (${v.car}). Kuljettajamme tulee ${v.slot}. Onko kaikki valmiina luovutusta varten?`,
-  allSet: () => `Hei, tilaus on meillä. Kuljettaja ilmoittautuu vastaanotossa tilausnumerolla.`,
+  allSet: () => `Hei, tilaus on meillä. Kuljettaja kertoo saapuessaan tilausnumeron.`,
   cAskPlan: (v) => `Hei, täällä Bahnin Readiness-tiimi, soitan tilauksesta ${v.ref}. Pysyykö luovutus ${v.slotDay} ennallaan?`,
-  cAsPlanned: () => `Tietääkseni kyllä. Kuljettaja ilmoittautuu vastaanotossa.`,
+  cAsPlanned: () => `Tietääkseni kyllä. Kuljettaja kertoo saapuessaan tilausnumeron.`,
 }
 
 const da: Book = {
@@ -189,7 +189,7 @@ const da: Book = {
   cWhoLater: () => `Tak. Hvem skal vi spørge i eftermiddag?`,
   cAskFor: (v) => `Spørg efter ${v.contact}, som har jeres ordrer.`,
   askKeys: (v) => `Hej, det er Readiness-desken hos Bahn om ordre ${v.ref} (${v.car}), afhentning ${v.slot}. Hvem udleverer nøglerne til vores chauffør? Send os gerne et navn og et telefonnummer.`,
-  keysUnclear: () => `Hej, nøglerne ligger hos os i receptionen. Vagtplanen for den dag er ikke lagt endnu, så jeg kan ikke give dig et navn i dag. Vi sender det, når planen er klar.`,
+  keysUnclear: () => `Hej, vagtplanen for den dag er ikke lagt endnu, så jeg kan ikke sige i dag, hvem der udleverer nøglerne. Vi sender et navn, så snart planen er klar.`,
   keysUnclearPrivate: () => `Hej, det er endnu ikke afgjort, hvem af os der kan udlevere bilen den dag. Jeg sender navn og nummer, så snart jeg ved det.`,
   custUpdateKeys: (v) => `Hej ${v.cust}, på ordre ${v.ref} har afhentningsstedet endnu ikke oplyst, hvem der udleverer nøglerne ${v.slotDay}. Vi følger op og giver besked, før noget ændres.`,
   custKeysReply: () => `Tak. Sørg for, at chaufføren ikke kører derud forgæves.`,
@@ -220,9 +220,9 @@ const da: Book = {
   cAskFee: (v) => `Hej, det er Readiness-desken hos Bahn, om gebyret på ordre ${v.ref}. Hvad dækker det?`,
   cFeeWhat: () => `At vi flytter bilen ud af vores lager til udleveringen. Vi skal have jeres bekræftelse skriftligt.`,
   confirmSlot: (v) => `Hej, det er Readiness-desken hos Bahn om ordre ${v.ref} (${v.car}). Vores chauffør kommer ${v.slot}. Er alt klar til udleveringen?`,
-  allSet: () => `Hej, vi har ordren. Chaufføren melder sig i receptionen med ordrenummeret.`,
+  allSet: () => `Hej, vi har ordren. Chaufføren oplyser ordrenummeret ved ankomst.`,
   cAskPlan: (v) => `Hej, det er Readiness-desken hos Bahn, om ordre ${v.ref}. Holder udleveringen ${v.slotDay} stadig?`,
-  cAsPlanned: () => `Så vidt jeg ved, ja. Chaufføren melder sig i receptionen.`,
+  cAsPlanned: () => `Så vidt jeg ved, ja. Chaufføren oplyser ordrenummeret ved ankomst.`,
 }
 
 const sv: Book = {
@@ -236,7 +236,7 @@ const sv: Book = {
   cWhoLater: () => `Tack. Vem ska vi fråga i eftermiddag?`,
   cAskFor: (v) => `Fråga efter ${v.contact}, som har hand om era order.`,
   askKeys: (v) => `Hej, det här är Readiness-desken på Bahn om order ${v.ref} (${v.car}), hämtning ${v.slot}. Vem lämnar över nycklarna till vår förare? Skicka gärna ett namn och ett telefonnummer.`,
-  keysUnclear: () => `Hej, nycklarna förvaras hos oss i receptionen. Schemat för den dagen är inte klart än, så jag kan inte ge dig ett namn i dag. Vi skickar det när schemat är klart.`,
+  keysUnclear: () => `Hej, schemat för den dagen är inte klart än, så jag kan inte säga i dag vem som lämnar över nycklarna. Vi skickar ett namn så snart schemat är klart.`,
   keysUnclearPrivate: () => `Hej, det är inte bestämt än vem av oss som kan lämna ut bilen den dagen. Jag skickar namn och nummer så snart jag vet.`,
   custUpdateKeys: (v) => `Hej ${v.cust}, för order ${v.ref} har hämtningsplatsen ännu inte sagt vem som lämnar över nycklarna ${v.slotDay}. Vi följer upp och hör av oss innan något ändras.`,
   custKeysReply: () => `Tack. Se till att föraren inte åker dit i onödan.`,
@@ -267,9 +267,9 @@ const sv: Book = {
   cAskFee: (v) => `Hej, det här är Readiness-desken på Bahn, om avgiften för order ${v.ref}. Vad gäller den?`,
   cFeeWhat: () => `Att vi flyttar bilen ur vårt lager för överlämningen. Vi behöver er bekräftelse skriftligt.`,
   confirmSlot: (v) => `Hej, det här är Readiness-desken på Bahn om order ${v.ref} (${v.car}). Vår förare kommer ${v.slot}. Är allt klart för överlämningen?`,
-  allSet: () => `Hej, vi har ordern. Föraren anmäler sig i receptionen med ordernumret.`,
+  allSet: () => `Hej, vi har ordern. Föraren uppger ordernumret vid ankomst.`,
   cAskPlan: (v) => `Hej, det här är Readiness-desken på Bahn, om order ${v.ref}. Gäller överlämningen ${v.slotDay} fortfarande?`,
-  cAsPlanned: () => `Så vitt jag vet, ja. Föraren anmäler sig i receptionen.`,
+  cAsPlanned: () => `Så vitt jag vet, ja. Föraren uppger ordernumret vid ankomst.`,
 }
 
 const fr: Book = {
@@ -283,7 +283,7 @@ const fr: Book = {
   cWhoLater: () => `Merci. À qui devons-nous demander cet après-midi ?`,
   cAskFor: (v) => `Demandez ${v.contact}, qui suit vos commandes.`,
   askKeys: (v) => `Bonjour, ici le Readiness desk de Bahn au sujet de la commande ${v.ref} (${v.car}), enlèvement ${v.slot}. Qui remettra les clés à notre chauffeur ? Merci de nous envoyer un nom et un numéro de téléphone.`,
-  keysUnclear: () => `Bonjour, les clés sont gardées à notre accueil. Le planning de ce jour-là n'est pas encore fait, je ne peux donc pas vous donner de nom aujourd'hui. Nous vous l'envoyons dès que le planning est prêt.`,
+  keysUnclear: () => `Bonjour, le planning de ce jour-là n'est pas encore fait, je ne peux donc pas vous dire aujourd'hui qui remettra les clés. Nous vous envoyons un nom dès que le planning est prêt.`,
   keysUnclearPrivate: () => `Bonjour, nous n'avons pas encore décidé qui pourra remettre la voiture ce jour-là. Je vous envoie un nom et un numéro dès que je le sais.`,
   custUpdateKeys: (v) => `Bonjour ${v.cust}, pour la commande ${v.ref}, le lieu d'enlèvement n'a pas encore indiqué qui remettra les clés ${v.slotDay}. Nous suivons cela et vous prévenons avant tout changement.`,
   custKeysReply: () => `Merci. Veillez à ce que le chauffeur ne se déplace pas pour rien.`,
@@ -314,9 +314,9 @@ const fr: Book = {
   cAskFee: (v) => `Bonjour, ici le Readiness desk de Bahn, au sujet des frais pour la commande ${v.ref}. À quoi correspondent-ils ?`,
   cFeeWhat: () => `Au déplacement de la voiture hors de notre stock pour la remise. Il nous faut votre confirmation par écrit.`,
   confirmSlot: (v) => `Bonjour, ici le Readiness desk de Bahn au sujet de la commande ${v.ref} (${v.car}). Notre chauffeur vient ${v.slot}. Tout est-il prêt pour la remise ?`,
-  allSet: () => `Bonjour, nous avons bien la commande. Le chauffeur se présente à l'accueil avec le numéro de commande.`,
+  allSet: () => `Bonjour, nous avons bien la commande. Le chauffeur donne le numéro de commande à son arrivée.`,
   cAskPlan: (v) => `Bonjour, ici le Readiness desk de Bahn, au sujet de la commande ${v.ref}. La remise ${v.slotDay} est-elle toujours prévue ?`,
-  cAsPlanned: () => `À ma connaissance, oui. Le chauffeur se présente à l'accueil.`,
+  cAsPlanned: () => `À ma connaissance, oui. Le chauffeur donne le numéro de commande à son arrivée.`,
 }
 
 const BOOKS: Record<Lang, Book> = { en, de, fi, da, sv, fr }

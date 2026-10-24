@@ -1,0 +1,63 @@
+/* decide 05: Side by side. Every rule under .lab-decide-05. */
+.lab-decide-05.send-panel { display: flex; flex-direction: column; padding: 0; overflow: hidden; }
+.lab-decide-05 .send-head { flex: none; align-items: center; padding: max(12px, calc(16 * var(--cr-u, 1px))) max(20px, calc(28 * var(--cr-u, 1px))) 4px; }
+.lab-decide-05 .send-body { flex: 1; min-height: 0; overflow: hidden auto; overflow-wrap: break-word; padding: 12px max(20px, calc(28 * var(--cr-u, 1px))) 24px; }
+.lab-decide-05 .send-foot { flex: none; padding: 14px max(20px, calc(28 * var(--cr-u, 1px))) max(14px, calc(20 * var(--cr-u, 1px))); border-top: 1px solid rgb(18 17 14 / 0.08); }
+.lab-decide-05 .send-actions { display: flex; align-items: center; gap: 8px; }
+.lab-decide-05 .send-meta { font-size: var(--type-subhead); line-height: var(--lh-subhead); grid-template-columns: 5.3em minmax(0, 1fr); column-gap: 1em; row-gap: 0.4em; margin: 0 0 20px; padding-bottom: 16px; border-bottom: 1px solid rgb(18 17 14 / 0.08); }
+.lab-decide-05 .s5-text, .lab-decide-05 .s5-pre { white-space: pre-wrap; }
+.lab-decide-05 .s5-edit { width: 100%; min-height: min(470px, 55vh); padding: 12px 14px; border-radius: 12px; resize: vertical; }
+
+/* The head: In English as a quiet pill beside the close button. */
+.lab-decide-05 .s5-head-end { display: flex; align-items: center; gap: 6px; }
+.lab-decide-05 .s5-toggle {
+  min-height: 32px; padding: 0 12px; border-radius: 999px; background: var(--raise); color: var(--ink);
+  font-size: var(--type-subhead); line-height: var(--lh-subhead); transition: background-color 150ms var(--ease);
+}
+.lab-decide-05 .s5-toggle:hover { background: var(--press); }
+.lab-decide-05 .s5-toggle[aria-pressed="true"] { background: var(--ink); color: var(--page); }
+
+/* Wide: the panel grows over the card to take both languages. */
+.lab-decide-05.send-panel { transition: transform 200ms var(--ease), width 250ms cubic-bezier(0.2, 0, 0, 1), visibility 0s linear 200ms; }
+.lab-decide-05.send-panel.open { transition: transform 200ms var(--ease), width 250ms cubic-bezier(0.2, 0, 0, 1), visibility 0s; }
+.lab-decide-05.is-wide { width: min(calc(var(--panel) * 2), calc(100% - 140px)); z-index: 12; box-shadow: -1px 0 0 rgb(18 17 14 / 0.06), -24px 0 48px rgb(18 17 14 / 0.12); }
+.lab-decide-05 .s5-colhead, .lab-decide-05 .s5-pair { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); column-gap: 1.6em; }
+.lab-decide-05 .s5-colhead { padding-bottom: 0.4em; font-size: var(--type-subhead); line-height: var(--lh-subhead); color: var(--ink-2); }
+.lab-decide-05 .s5-pair { padding: 0.55em 0; border-top: 1px solid rgb(18 17 14 / 0.06); }
+.lab-decide-05 .s5-pair p[lang="en"] { color: var(--ink-2); }
+.lab-decide-05 .s5-pair:hover p[lang="en"] { color: var(--ink); }
+.lab-decide-05 .s5-pair:hover { background: linear-gradient(var(--raise), var(--raise)) padding-box; border-radius: 10px; }
+.lab-decide-05 .s5-note { margin-top: 0.8em; }
+
+/* Undo at the top, as today's receipt toast sits. */
+.lab-decide-05.s5-toast {
+  position: fixed; left: 50%; top: 20px; transform: translateX(-50%); z-index: 40;
+  display: flex; align-items: center; gap: 14px; width: max-content; max-width: min(720px, calc(100vw - 32px));
+  padding: 8px 8px 8px 22px; border-radius: 999px; background: var(--ink); color: var(--page);
+  font-size: var(--type-body); line-height: var(--lh-body);
+  box-shadow: 0 10px 30px rgb(18 17 14 / 0.18);
+}
+.lab-decide-05.s5-toast svg { margin-right: 10px; }
+.lab-decide-05.s5-toast button {
+  min-height: 36px; padding: 0 14px; border-radius: 999px; background: rgb(255 254 247 / 0.14); color: var(--page); font-weight: 600;
+  transition: background-color 150ms var(--ease);
+}
+.lab-decide-05.s5-toast button:hover { background: rgb(255 254 247 / 0.24); }
+.lab-decide-05 .s5-sec { font-weight: 400; opacity: 0.7; font-variant-numeric: tabular-nums; margin-left: 4px; }
+
+/* After: what changed, Flighty's way: the new value, "was" in grey under it. */
+.lab-decide-05 .s5-changes { margin-top: 1.4em; max-width: 36em; border-top: 1px solid rgb(18 17 14 / 0.08); }
+.lab-decide-05 .s5-change { display: grid; grid-template-columns: 7em minmax(0, 1fr); column-gap: 1em; padding: 0.65em 0; border-bottom: 1px solid rgb(18 17 14 / 0.08); }
+.lab-decide-05 .s5-change dt { color: var(--ink-2); }
+.lab-decide-05 .s5-change dd { margin: 0; display: flex; flex-direction: column; }
+.lab-decide-05 .s5-was { color: var(--ink-2); font-size: var(--type-subhead); line-height: var(--lh-subhead); }
+
+@media (prefers-reduced-motion: no-preference) {
+  .lab-decide-05.s5-toast { animation: lab-decide-05-in 240ms cubic-bezier(0.2, 0, 0, 1); }
+  @keyframes lab-decide-05-in { from { transform: translate(-50%, -12px); opacity: 0; } to { transform: translate(-50%, 0); opacity: 1; } }
+  .lab-decide-05 .s5-change { animation: lab-decide-05-row 260ms cubic-bezier(0.2, 0, 0, 1) both; }
+  .lab-decide-05 .s5-change:nth-child(2) { animation-delay: 60ms; }
+  .lab-decide-05 .s5-change:nth-child(3) { animation-delay: 120ms; }
+  .lab-decide-05 .s5-change:nth-child(4) { animation-delay: 180ms; }
+  @keyframes lab-decide-05-row { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+}

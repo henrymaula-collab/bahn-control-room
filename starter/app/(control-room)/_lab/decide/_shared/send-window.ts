@@ -97,14 +97,14 @@ function fire() {
 
 /** Opens the window. `send` is the card's onSend (bound to the edited text); `undo` gives the email back. */
 export function startSend(
-  s: { caseId: string; to: string; how: string; email: boolean; seconds?: number; back?: string },
+  s: { caseId: string; name: string; how: string; email: boolean; seconds?: number; back?: string },
   send: () => void,
   undo?: () => void,
 ) {
   if (state?.phase === "wait") fire() // one window at a time: the earlier one goes now
   if (clearer) clearTimeout(clearer)
   const seconds = s.seconds ?? WINDOW_S
-  state = { ...s, seconds, left: seconds, paused: false, phase: "wait" }
+  state = { caseId: s.caseId, to: s.name, how: s.how, email: s.email, back: s.back, seconds, left: seconds, paused: false, phase: "wait" }
   commit = send
   restore = undo ?? null
   last = Date.now()
@@ -159,13 +159,15 @@ export function useFrozen(): SendPhase | null {
 }
 
 /** The window for this case: the live one, or the frozen lab state built from the draft's recipient. */
-export function useSendView(caseId: string, who: { to: string; how: string; email: boolean }): SendState | null {
+export function useSendView(caseId: string, who: { name: string; how: string; email: boolean }): SendState | null {
   const live = useSendWindow()
   const frozen = useFrozen()
   if (frozen) {
     return {
       caseId,
-      ...who,
+      to: who.name,
+      how: who.how,
+      email: who.email,
       seconds: WINDOW_S,
       left: frozen === "wait" ? 7 : 0,
       paused: false,

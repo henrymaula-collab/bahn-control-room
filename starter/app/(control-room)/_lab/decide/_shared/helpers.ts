@@ -37,7 +37,8 @@ export function sentences(text: string): string[] {
     const next = text.slice(i + 1).match(/^\s+(\S)/)
     if (!next) continue
     if (!/[A-ZÄÖÜÅ"„(]/.test(next[1])) continue
-    if (c === "." && /\d/.test(text[i - 1] ?? "")) continue
+    // A German ordinal ("26. Oktober") is not a sentence end; "13:00." is.
+    if (c === "." && /(^|\s)\d{1,2}$/.test(text.slice(Math.max(0, i - 4), i))) continue
     out.push(text.slice(start, i + 1).trim())
     start = i + 1
   }
@@ -142,7 +143,10 @@ export function useLabDecided() {
 
 /** The planned follow-up, from the option's effect: the sentences about what the agent does. */
 export function agentPlan(o: Option): string[] {
-  return sentences(o.effect).filter((s) => !/^A person sends/i.test(s))
+  return sentences(o.effect)
+    .filter((s) => !/^A person sends/i.test(s))
+    .map((s) => s.replace(/^After a yes,\s*/i, ""))
+    .map((s) => s.charAt(0).toUpperCase() + s.slice(1))
 }
 
 export type { DoneProps } from "../../../_ui/question"

@@ -3,20 +3,23 @@
 // Slot `decide`, shared (not a variant): the draft's local state every preview needs (the English,
 // the edit, the edited text) and the rect of the card's column for things that float over it.
 
+import { useSearchParams } from "next/navigation"
 import { useEffect, useState } from "react"
 import type { Draft } from "@/lib/control-room/views"
 import { recipient } from "./helpers"
 
 export function useDraft(draft: Draft, shown: boolean) {
-  const [english, setEnglish] = useState(false)
+  // Lab photo state ?english=1: the English already shown (how each variant offers the translation).
+  const startEnglish = useSearchParams()?.get("english") === "1"
+  const [english, setEnglish] = useState(startEnglish)
   const [editing, setEditing] = useState(false)
   const [text, setText] = useState(draft.text)
   useEffect(() => {
     if (!shown) {
       setEditing(false)
-      setEnglish(false)
+      if (!startEnglish) setEnglish(false)
     }
-  }, [shown])
+  }, [shown, startEnglish])
   const edited = text.trim() !== draft.text.trim()
   const who = recipient(draft.to)
   return {

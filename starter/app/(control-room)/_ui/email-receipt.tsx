@@ -39,14 +39,12 @@ function Receipt({ win, caseId }: { win: SendWin; caseId: string }) {
   return (
     <aside className="panel send-panel email-receipt open" aria-label={title}>
       <div className="panel-head receipt-head">
-        <span />
+        <h2 className="receipt-title">{title}</h2>
         <button type="button" className="close" aria-label="Close" onClick={close}>
           <Icon name="x" size={18} />
         </button>
       </div>
       <div className="receipt-body" role="status" aria-live="polite">
-        <span className="receipt-rule" aria-hidden="true" />
-        <h2 className="receipt-title">{title}</h2>
         <p className="receipt-line">
           {sentWhat(win)}, at {win.at}.
         </p>

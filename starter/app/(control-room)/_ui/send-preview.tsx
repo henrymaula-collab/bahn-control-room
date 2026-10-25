@@ -99,7 +99,6 @@ export function SendPreview({
       {sending && win ? (
         <>
           <div className="send-body send-window" role="status" aria-live="polite">
-            <span className="receipt-rule" aria-hidden="true" />
             <h3 className="receipt-title">Sending</h3>
             <p className="receipt-line">
               {sentWhat(win)}

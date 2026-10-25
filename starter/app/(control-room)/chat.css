@@ -193,11 +193,13 @@
 
 /* The receipt (lab decide:08, h48): over the panel after a decision in the chat */
 .email-receipt { display: flex; flex-direction: column; padding: 0; overflow: hidden; z-index: 12; background: var(--raise); }
+/* The title in the x row, as the chat's "Talk it through"; the words right under it; the buttons at the foot */
 .receipt-head { flex: none; align-items: center; padding: max(12px, calc(16 * var(--cr-u, 1px))) max(20px, calc(28 * var(--cr-u, 1px))) 4px; }
-.receipt-body { flex: 1; min-height: 0; overflow: hidden auto; display: flex; flex-direction: column; justify-content: center; padding: 12px max(20px, calc(28 * var(--cr-u, 1px))) 12vh; }
+.receipt-head .close { margin: 0 -8px 0 0; }
+.receipt-body { flex: 1; min-height: 0; overflow: hidden auto; display: flex; flex-direction: column; justify-content: flex-start; padding: 4px max(20px, calc(28 * var(--cr-u, 1px))) 24px; }
 .receipt-rule { display: block; height: 1px; margin: 0 calc(-1 * max(20px, calc(28 * var(--cr-u, 1px)))) 1.2em 0; background: linear-gradient(90deg, var(--ink) 0, var(--ink) 2.2em, rgb(18 17 14 / 0.14) 2.2em); }
 .receipt-title { font-size: var(--type-title1); line-height: var(--lh-title1); letter-spacing: var(--track-title1); font-weight: 600; }
-.receipt-line { margin-top: 0.6em; color: var(--ink-2); font-size: var(--type-subhead); line-height: var(--lh-subhead); max-width: 26em; }
+.receipt-line { margin-top: 0; color: var(--ink-2); font-size: var(--type-subhead); line-height: var(--lh-subhead); max-width: 26em; }
 .receipt-more { margin-top: 0.9em; color: var(--ink); font-size: var(--type-subhead); line-height: var(--lh-subhead); max-width: 26em; }
 .receipt-foot { flex: none; display: flex; justify-content: flex-end; gap: 8px; padding: 14px max(20px, calc(28 * var(--cr-u, 1px))) max(14px, calc(20 * var(--cr-u, 1px))); border-top: 1px solid rgb(18 17 14 / 0.06); }
 .receipt-foot .btn-secondary { background: var(--page); box-shadow: 0 0 0 1px rgb(18 17 14 / 0.08); }
@@ -219,4 +221,4 @@
    the window's left edge; drag it if a hidden control is needed. Its own default is bottom right. */
 agentation-toolbar.agentation-aside { top: auto; left: auto; right: calc(100vw - var(--side, 300px) + 12 * var(--cr-su, 1px)); bottom: calc(100 * var(--cr-su, 1px)); }
 /* The email sheet while its send window runs: the receipt's type, Undo at the foot */
-.send-window { display: flex; flex-direction: column; justify-content: center; padding-bottom: 12vh; }
+.send-window { display: flex; flex-direction: column; justify-content: flex-start; }

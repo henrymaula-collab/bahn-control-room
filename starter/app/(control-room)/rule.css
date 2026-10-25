@@ -1,0 +1,88 @@
+/* Kaisa's rule (rule-card.tsx, night lab rule:04) on Know-how. The card takes Your tasks' ramp
+   (tasks/tasks.css .work .detail) so it reads as one more decision card: Title 1 for the kind,
+   Title 2 for the question, body for buttons and rows, subhead for the grey lines. Everything is
+   scoped to .rule-page, so no other page changes. */
+
+.main:has(.rule-page) .top { display: none; }
+.rule-page { height: 100%; }
+
+.rule-page .detail {
+  --card-pad: max(calc(28 * var(--type-kf)), calc(64 * var(--cr-u, 1px)));
+  --card-room: calc(var(--cr-vw, 100vw) - var(--side) - 8px);
+  --card-measure: 24;
+  --card-head: max(calc(18 * var(--type-kf)), min(var(--type-title1), calc((var(--card-room) - 2 * var(--card-pad)) / var(--card-measure))));
+  --card-ask: max(var(--type-body), calc(var(--card-head) * 22 / 28));
+  --size-l: var(--card-head);
+  --size-m: var(--type-body);
+  --size-s: var(--type-subhead);
+  --column: calc(32 * var(--card-ask));
+  height: 100%;
+  overflow: hidden auto;
+  padding: max(calc(28 * var(--type-kf)), calc(56 * var(--cr-u, 1px))) var(--card-pad);
+}
+.rule-page .detail-inner { margin-inline: auto; font-size: var(--size-m); line-height: var(--lh-body); }
+.rule-page .detail .l { line-height: var(--lh-title1); letter-spacing: var(--track-title1); }
+.rule-page .detail .m { line-height: var(--lh-body); }
+.rule-page .detail .s { line-height: var(--lh-subhead); }
+
+.rule-page .question .due { font-size: var(--size-s); line-height: var(--lh-subhead); }
+.rule-page .question .what { margin-top: 0.2em; font-size: var(--size-l); max-width: calc(var(--card-measure) * 1em); }
+.rule-page .detail .question .ask {
+  max-width: 32em; margin-top: 1em;
+  font-size: var(--card-ask); line-height: var(--lh-title2); font-weight: 400; letter-spacing: var(--track-title2);
+}
+.rule-page .answers { margin-top: calc(24 / 17 * 1em); gap: 0.5em; flex-wrap: nowrap; }
+.rule-page .answers .btn { flex: none; white-space: nowrap; min-height: max(44px, calc(2.6 * var(--size-m))); padding: 0 1.25em; font-size: var(--size-m); }
+.rule-page .question .next { margin-top: 0.8em; max-width: 40em; font-size: var(--size-s); color: var(--ink-2); }
+.rule-page .rule-err { margin-top: 0.7em; color: var(--now); }
+
+/* The case waiting now: one quiet block, Today against With the rule in two columns. */
+.rule-card .rule-case {
+  margin-top: 1.3em; padding: 0.9em 1.1em 1em; border-radius: 1em;
+  box-shadow: inset 0 0 0 1px rgb(18 17 14 / 0.1);
+}
+.rule-card .rule-case-head { display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: 1em; }
+.rule-card .rule-car { font-weight: 600; }
+.rule-card .rule-ref { color: var(--ink-2); align-self: center; font-family: var(--font-mono); font-size: var(--size-s); }
+.rule-card .rule-where { grid-column: 1 / -1; color: var(--ink-2); font-size: var(--size-s); line-height: var(--lh-subhead); }
+.rule-card .rule-done .rule-where { color: var(--ink); }
+.rule-card .rule-compare {
+  display: grid; grid-template-columns: 1fr 1fr; column-gap: 1.4em; margin-top: 0.9em; padding-top: 0.9em;
+  border-top: 1px solid rgb(18 17 14 / 0.08); font-size: var(--size-s); line-height: var(--lh-subhead);
+}
+.rule-card .rule-compare > div + div { padding-left: 1.4em; border-left: 1px solid rgb(18 17 14 / 0.08); }
+.rule-card .rule-h { font-weight: 600; margin-bottom: 0.2em; }
+
+/* Why the agent asks: the row, then the people, the one answer that differed, their own words. */
+.rule-page .work-rows { margin-top: 1.67em; }
+.rule-page .detail .row > summary { gap: 0.83em; padding: 0.58em 0.83em; margin: 0 -0.83em; border-radius: 0.75em; }
+.rule-page .detail .row > summary .title { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rule-page .detail .chev svg { width: 1em; height: 1em; }
+.rule-page .detail .row > .body { padding: 0.5em 0 1.33em; }
+.rule-card .rule-sum { display: flex; flex-direction: column; min-width: 0; }
+.rule-card .rule-sum .sub { color: var(--ink-2); font-size: var(--size-s); }
+.rule-card .rule-body { display: flex; flex-direction: column; gap: 0.7em; max-width: 36em; }
+.rule-card .rule-people { display: flex; align-items: center; gap: 0.8em; }
+.rule-card .rule-faces { display: inline-flex; align-items: center; flex: none; }
+.rule-card .rule-face {
+  display: inline-block; flex: none; width: 1.9em; height: 1.9em; border-radius: 50%; object-fit: cover;
+  background: var(--raise); box-shadow: 0 0 0 2px var(--page);
+}
+.rule-card .rule-face + .rule-face { margin-left: -0.45em; }
+.rule-card .rule-quiet { color: var(--ink-2); }
+.rule-card .rule-link {
+  align-self: flex-start; display: inline-flex; align-items: center; gap: 0.15em; margin-left: -0.5em; padding: 0.3em 0.5em; border-radius: 0.6em;
+  color: var(--ink); font-weight: 400; transition: background-color 100ms cubic-bezier(0.2, 0, 0, 1);
+}
+.rule-card .rule-link svg { color: var(--ink-2); width: 1em; height: 1em; }
+.rule-card .rule-link:hover { background: var(--raise); }
+
+@media (prefers-reduced-motion: no-preference) {
+  .rule-card .rule-where { transition: color 200ms cubic-bezier(0.2, 0, 0, 1); }
+}
+
+@media (max-width: 860px) {
+  .rule-page .detail { --size-l: 24px; --size-m: 16px; --size-s: 13px; padding: 32px 16px; }
+  .rule-card .rule-compare { grid-template-columns: minmax(0, 1fr); row-gap: 0.9em; }
+  .rule-card .rule-compare > div + div { padding-left: 0; border-left: 0; }
+}

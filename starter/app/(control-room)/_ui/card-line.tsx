@@ -4,8 +4,7 @@
 // person one decision" step, the room clock and the case's decide-by. No hooks, so the server
 // page builds the data and the client card draws it.
 
-import { hel } from "@/lib/control-room/fixtures/clock"
-import { NOW_WINDOW_MINUTES, clock, dayKey, minutesUntil, when } from "@/lib/control-room/format"
+import { NOW_WINDOW_MINUTES, clock, minutesUntil, when } from "@/lib/control-room/format"
 import type { AgentStep, Case } from "@/lib/control-room/types"
 import { AgentMark } from "./agent-mark"
 
@@ -88,10 +87,8 @@ export function timeLineFor(
   from?: { name: string; avatar?: string; at: string }, // the colleague who sent it on (track N's hand-off)
 ): TimeLine {
   const ping = pingStep(c.agentSteps)
-  // A hand-off carries the wall clock; one after the room clock goes on the room's day at its own time
-  // of day, as History files live decisions (lib/control-room/history.ts), so 12:39 today reads 12:39
-  // on the room's Wed 21 Oct and not as days after the deadline.
-  const fromAt = from && Date.parse(from.at) > Date.parse(roomNow) ? hel(dayKey(roomNow), clock(from.at)) : from?.at
+  // A hand-off is stamped on the room clock (lib/control-room/room-clock.ts), as Now is.
+  const fromAt = from?.at
   // Who brought it here last: the colleague who sent it on, else the agent.
   const pingAt = fromAt ?? ping?.at ?? c.createdAt
   const now = toMinute(Date.parse(pingAt) > Date.parse(roomNow) ? pingAt : roomNow)

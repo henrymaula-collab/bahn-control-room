@@ -44,7 +44,7 @@ export function SendPreview({
   verb: string // "Send the email": the panel's title
   pending: boolean
   error: string | null
-  onSend: (editedText?: string) => void
+  onSend: (editedText?: string) => Promise<string | undefined> | void // the decision's time, for "Sent at"
   returnFocus: () => void
 }) {
   const { open, setOpen, slot } = usePanel()

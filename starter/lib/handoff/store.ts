@@ -54,7 +54,7 @@ export async function sendToColleague(input: { caseId: string; from: string; to:
   if (from.id === to.id) return { error: "Pick a colleague, not yourself", status: 400 as const }
   if (c.status !== "waiting_for_person" || c.routedTo?.personId !== from.id) return { error: "This case is not waiting for you", status: 409 as const }
   const note = input.note?.replace(/\s+/g, " ").trim().slice(0, NOTE_MAX) || undefined
-  const at = new Date().toISOString()
+  const at = state.now // the room clock (room-clock.ts), so the colleague's card reads before the deadline
   const updated: WithHandoffs = {
     ...c,
     routedTo: {

@@ -21,7 +21,8 @@ import type { Case, Decision, Lesson, OpsPerson, OrderCheck } from "./types"
 import type { CaseRecord } from "./types-loop"
 import { CASE_TYPE_WORDS, caseTypeWords } from "./vocab"
 import { caseExtras, findPerson, overview, workLists } from "./v3"
-import { type World, loadWorld, worldNow } from "./world"
+import { roomNow } from "./room-clock"
+import { type World, loadWorld } from "./world"
 
 const OPEN: Case["status"][] = ["waiting_for_person", "agent_working"]
 
@@ -91,7 +92,8 @@ export async function buildState(): Promise<EngineState> {
     loadWorld(), listPeople(), listDecisions(), listCaseRecords(), listLessons(), listTrustRules(), listStoredCases(),
   ])
   const stored = revealHeldBack(storedAll as (Case & HeldBack)[], decisions, people)
-  const now = worldNow(world)
+  // The room clock (room-clock.ts): 12:01 on the room's day plus the time since the last demo reset.
+  const now = await roomNow(world.snapshotAt)
   // Contract: every option says what changes. Agent cases can store an option with no
   // change at all (keep the slot, call again); it reads as "nothing changes".
   for (const c of stored) {
@@ -112,7 +114,9 @@ export async function buildState(): Promise<EngineState> {
     const rule = ruleFor(c, rules)
     if (rule && OPEN.includes(c.status)) {
       c.status = "handled_by_agent"
-      c.agentSteps.push({ at: now, kind: "propose", summary: `Decided under a trust rule: ${rule.then.replace(/^./, (ch) => ch.toLowerCase())}.` })
+      // Decided when the rule came on (room clock), so the time holds still while the room clock runs.
+      const at = rule.changedAt && rule.changedAt > c.createdAt && rule.changedAt <= now ? rule.changedAt : now
+      c.agentSteps.push({ at, kind: "propose", summary: `Decided under a trust rule: ${rule.then.replace(/^./, (ch) => ch.toLowerCase())}.` })
     }
   }
 
@@ -194,6 +198,7 @@ export async function getCaseDetail(id: string, given?: EngineState) {
     calls,
     agentRuns,
     check: state.checks.find((check) => check.orderId === c.orderId) ?? null,
+    now: state.now, // the room clock (room-clock.ts): the card's Now
     derived: state.derivedIds.has(c.id),
     // v4 learning loop: the kind of case and what people decided on it before.
     kind: { key: kindOf(c), label: kindDef(kindOf(c)).label },
@@ -277,7 +282,7 @@ export async function decide(input: DecideInput) {
   const earlier = c.status === "decided"
     ? state.decisions.filter((row) => row.caseId === c.id && !row.synthetic && row.personId === person.id).at(-1)
     : undefined
-  const at = earlier?.at ?? new Date().toISOString()
+  const at = earlier?.at ?? state.now
   const why = input.why ?? (earlier?.optionId === input.optionId ? earlier?.data.why : undefined)
   const editedDetail = input.editedDetail ?? (earlier?.optionId === input.optionId ? earlier?.data.editedDetail : undefined)
   const decision: Decision = {
@@ -308,7 +313,8 @@ export async function decide(input: DecideInput) {
   const order = state.world.byId.get(c.orderId)
   const openedAt = input.openedAt && !Number.isNaN(Date.parse(input.openedAt)) ? input.openedAt : undefined
   const earlierRecord = state.records.find((record) => record.caseId === c.id)
-  const minutes = openedAt ? Math.max(1, Math.round((Date.parse(at) - Date.parse(openedAt)) / 60_000)) : earlierRecord?.minutes
+  // The browser's openedAt is wall time and `at` is room time; both run at the same pace, so the minutes come from the wall clock.
+  const minutes = openedAt ? Math.max(1, Math.round((Date.now() - Date.parse(openedAt)) / 60_000)) : earlierRecord?.minutes
   const chat = input.chat ?? await chatSource({ caseId: c.id, personId: person.id }) ?? earlierRecord?.chat
   const record: CaseRecord = {
     id: `rec-${c.id}`,
@@ -385,7 +391,7 @@ export async function setTrustRule(id: string, status: "on" | "off", personId: s
   const rules = await listTrustRules()
   const rule = rules.find((candidate) => candidate.id === id)
   if (!rule) return null
-  const next: StoredTrustRule = { ...rule, status, changedBy: personId, changedAt: new Date().toISOString() }
+  const next: StoredTrustRule = { ...rule, status, changedBy: personId, changedAt: await roomNow() }
   await saveTrustRule(next)
   return next
 }

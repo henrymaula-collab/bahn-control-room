@@ -4,11 +4,11 @@
 // case, with its case record), plus the cases the agent finished alone under
 // a trust rule. Read-only: nothing here writes to the database.
 //
-// Clock: the room runs on the dataset clock (Wed 21 Oct 2026 12:00 Helsinki,
-// world.ts worldNow); live decisions carry the wall clock (service.ts decide).
-// A live decision made after the room clock is shown on the room's day at its
-// own time of day, so it lands under Today right away, at the same time Your
-// tasks shows ("Decided by Aino at 20:27").
+// Clock: the room runs on the room clock (room-clock.ts: Wed 21 Oct 2026 12:01
+// Helsinki plus the time since the last demo reset), and live decisions are
+// stamped with it (service.ts decide), so they file under Today as they are.
+// A row from before the room clock (an old wall-clock row) still goes on the
+// room's day at its own time of day.
 //
 // Made-up past (synthetic records, CD-41xxxx) has no order behind it. For those
 // rows the car is picked deterministically from the dataset's own vehicle mix,

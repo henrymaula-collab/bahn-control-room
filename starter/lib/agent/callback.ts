@@ -6,6 +6,7 @@
 // records the Decision and proposes the lesson), call carryOutDecision() only.
 
 import type { Case, Decision, Lesson } from "@/lib/control-room/types"
+import { roomNow } from "@/lib/control-room/room-clock"
 import { worldNow } from "./clock"
 import { agentProvider, emptyUsage, type Provider } from "./config"
 import { findOrder } from "./data"
@@ -47,8 +48,8 @@ function briefFor(c: Case, d: Decision): CallbackBrief {
 export async function carryOutDecision(c: Case, d: Decision, provider?: Provider): Promise<RunResult> {
   const order = findOrder(c.orderId)
   if (!order) throw new Error(`No order ${c.orderId}`)
-  // On the dataset clock the callback happens shortly after the case; with CR_CLOCK=real, at the decision time.
-  const startAt = process.env.CR_CLOCK === "real" ? new Date(d.at) : new Date(new Date(c.createdAt).getTime() + 25 * 60_000)
+  // The callback happens now, on the room clock (room-clock.ts; the wall clock with CR_CLOCK=real), never before the decision.
+  const startAt = new Date(Math.max(Date.parse(d.at), Date.parse(await roomNow())))
   return runReadinessAgent(order.reference, { provider, callback: briefFor(c, d), startAt })
 }
 

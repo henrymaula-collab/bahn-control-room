@@ -6,6 +6,7 @@
 
 import { z } from "zod"
 import type { Case, Call, Decision, Lesson } from "@/lib/control-room/types"
+import { roomNow } from "@/lib/control-room/room-clock"
 import { RunClock, worldNow } from "./clock"
 import { agentModel, callModel, claudeCodeEnv, effectiveProvider, emptyUsage, guards, paths, type Provider } from "./config"
 import { findOrder, site } from "./data"
@@ -291,6 +292,20 @@ export interface ReplayOptions {
 
 const decidedStep = (s: Case["agentSteps"][number]) => s.kind === "propose" && / decided: /.test(s.summary)
 
+/** A recorded run moved in time by `ms`: the case's steps and facts from the run's start on, and its calls. */
+export function shiftedRun(recorded: Case, calls: Call[], startedAt: string, ms: number): { case: Case; calls: Call[]; startedAt: string } {
+  const move = (at: string) => (at >= startedAt ? new Date(Date.parse(at) + ms).toISOString() : at)
+  return {
+    case: {
+      ...recorded,
+      agentSteps: recorded.agentSteps.map((s) => ({ ...s, at: move(s.at) })),
+      facts: recorded.facts.map((f) => (f.source?.at ? { ...f, source: { ...f.source, at: move(f.source.at) } } : f)),
+    },
+    calls: calls.map((c) => ({ ...c, startedAt: move(c.startedAt), turns: c.turns.map((t) => ({ ...t, at: move(t.at) })) })),
+    startedAt: move(startedAt),
+  }
+}
+
 /** The recorded call-back's work on top of the live case (see ReplayOptions.ontoLive). */
 export function ontoLiveCase(live: Case, recorded: Case, startedAt: string): Case {
   const key = (s: Case["agentSteps"][number]) => `${s.at}|${s.kind}|${s.summary}`
@@ -346,7 +361,14 @@ export async function replayTrace(file: string, opts: ReplayOptions = {}): Promi
   if (theCase && opts.ontoLive) {
     const live = await store.getCase(theCase.id)
     liveDecision = (await store.listDecisions()).some((d) => d.caseId === theCase!.id)
-    if (live) theCase = ontoLiveCase(live, theCase, head.run.startedAt)
+    if (live) {
+      // The recorded call-back happens now, on the room clock (room-clock.ts): its own steps, facts
+      // and calls move so the run starts at room time, after the decision and not before it.
+      const shift = Date.parse(await roomNow()) - Date.parse(head.run.startedAt)
+      const moved = shiftedRun(theCase, calls, head.run.startedAt, shift)
+      calls.splice(0, calls.length, ...moved.calls)
+      theCase = ontoLiveCase(live, moved.case, moved.startedAt)
+    }
   }
   if (theCase) await store.saveCase(theCase)
   for (const c of calls) await store.saveCall(c)

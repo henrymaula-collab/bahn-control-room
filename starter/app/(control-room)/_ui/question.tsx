@@ -63,11 +63,13 @@ export function Question(props: Props) {
   const primary = useRef<HTMLButtonElement>(null)
   const preview = variant === "case" && !!panel.slot ? draftOf(suggestion) : undefined
 
-  const save = (option: Option, why?: string, editedDetail?: string) => {
+  // Resolves to the decision's own time ("12:05", the room clock), which the send window shows as "Sent at".
+  const save = (option: Option, why?: string, editedDetail?: string) => new Promise<string | undefined>((resolve) => {
     setError(null)
     start(async () => {
       try {
         const d = await decide({ id: `dec-${caseId}-${Date.now().toString(36)}`, caseId, optionId: option.id, why, editedDetail })
+        resolve(helsinkiTime(d.at))
         setSheetOpen(false)
         if (panel.open === "email") panel.setOpen(null)
         if (variant === "desk") {
@@ -80,9 +82,10 @@ export function Question(props: Props) {
         }
       } catch {
         setError("This was not saved. Nothing was sent or booked. Try again.")
+        resolve(undefined)
       }
     })
-  }
+  })
 
   if (done && variant === "case") {
     const option = all.find((o) => o.id === done.optionId) ?? suggestion

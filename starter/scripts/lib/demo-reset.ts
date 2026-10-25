@@ -11,6 +11,8 @@
 //    decided, for Sofie; the fast-forward proposal is suggested, not on.
 // 4. The chat workstream's messages (cr_chat_messages, when the table exists)
 //    are cleared, so every thread starts with its opener.
+// 5. The room clock starts again (lib/control-room/room-clock.ts): live times
+//    from here on are 12:01 plus the wall time since this reset.
 // Deterministic and idempotent: run it twice, get the same rows.
 
 import { sql } from "drizzle-orm"
@@ -19,6 +21,7 @@ import { replayTrace } from "../../lib/agent/loop"
 import { listTraces } from "../../lib/agent/trace"
 import { crDb } from "../../lib/control-room/db"
 import { buildState, getKinds, refreshTrustRules } from "../../lib/control-room/service"
+import { recordReset, roomStart } from "../../lib/control-room/room-clock"
 import { getStoredCase, saveCase } from "../../lib/control-room/store"
 import type { Routing } from "../../lib/control-room/types"
 import { DEMO, round2Case } from "../../lib/demo/scenario"
@@ -48,12 +51,22 @@ export async function demoReset(): Promise<ResetSummary> {
   await initStore("foundation")
   const traces = listTraces()
   const replayed: string[] = []
+  const pings: string[] = []
   for (const runId of DEMO.replay) {
     const trace = traces.find((candidate) => candidate.runId === runId)
     if (!trace) throw new Error(`Recorded run ${runId} is missing from traces/`)
-    await replayTrace(trace.file)
+    const run = await replayTrace(trace.file)
     replayed.push(runId)
+    // When the agent brought the case to a person: the room clock starts just after the latest one.
+    const ping = run.case?.agentSteps.find((step) => step.kind === "propose")?.at
+    if (ping) pings.push(ping)
   }
+
+  // The room clock starts again now (room-clock.ts): 12:01, or just after the agent's latest ping.
+  const [metadata] = (await crDb.execute(sql`SELECT snapshot_at FROM dataset_metadata LIMIT 1`)) as unknown as { snapshot_at: string | Date }[]
+  // The rounds below are stamped with the start itself, not the running clock, so two resets give the same rows.
+  const start = roomStart(metadata ? new Date(metadata.snapshot_at).toISOString() : "2026-10-21T09:00:00.000Z", pings)
+  await recordReset(start)
 
   // 3. Who gets the two rounds, with the counts that say why.
   let state = await buildState()
@@ -70,7 +83,7 @@ export async function demoReset(): Promise<ResetSummary> {
     personId: DEMO.round1.personId,
     why: `New kind of case: nobody has decided a seller hold before. Sent to you because you have decided ${ainoCount} pickup readiness cases${since(DEMO.round1.personId)}${most ? ", the most of anyone on shift" : ""}.`,
     mode: "best_record",
-    at: state.now,
+    at: start,
   }
   const round1 = await getStoredCase(DEMO.round1.caseId)
   if (!round1) throw new Error(`Round 1 case ${DEMO.round1.caseId} was not restored by the replay`)
@@ -81,9 +94,9 @@ export async function demoReset(): Promise<ResetSummary> {
     personId: DEMO.round2.personId,
     why: `Sent to you because you have handled ${sweden} pickup readiness case${sweden === 1 ? "" : "s"} in Sweden${since(DEMO.round2.personId)}, and you speak Swedish.`,
     mode: "best_record",
-    at: state.now,
+    at: start,
   }
-  await saveCase(round2Case(state.world, state.now, round2Routing), "agent")
+  await saveCase(round2Case(state.world, start, round2Routing), "agent")
 
   // 4. Chat threads start from their openers again.
   const chat = await crDb.execute(sql`SELECT to_regclass('public.cr_chat_messages') AS t`) as unknown as { t: string | null }[]

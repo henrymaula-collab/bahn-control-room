@@ -35,6 +35,7 @@ interface ApiCaseDetail {
   calls: Call[]
   check: OrderCheck | null
   decision?: Decision | null // the decision a person took on this case, once decided
+  now?: string // the room clock (room-clock.ts)
 }
 interface ApiLead {
   coverage: { caseType: string; label: string; people: { personId: string; name: string; onShift: boolean; decided: number }[] }[]
@@ -157,7 +158,7 @@ function caseDetailFrom(d: ApiCaseDetail, people: OpsPerson[], personId: string)
   const drafts = Object.fromEntries(options.filter((o) => o.draft).map((o) => [o.id, o.draft!]))
   const decision = d.decision ?? undefined
   return {
-    asOf: d.check?.checkedAt ?? c.createdAt,
+    asOf: d.now ?? d.check?.checkedAt ?? c.createdAt,
     person,
     people,
     card: card(d),

@@ -185,18 +185,24 @@
 .work .cline-now { flex-grow: 2.5; min-width: 3.8em; } /* the hour you have is never a stub */
 .work .cline-stop:last-child { flex: 0 1 auto; padding-right: 0; }
 .work .cline-stop:last-child.cline-then { flex: 1 1 auto; min-width: 6em; } /* Then takes what is left */
+/* One continuous rail (Henry, 10:15: "broken"): each stop's stretch starts under its own mark and runs
+   through the column's gap to just under the next mark, which sits on top of it. */
 .work .cline-rail { position: relative; height: var(--cl-rail); margin-bottom: 0.1em; display: flex; align-items: center; }
+.work .cline-rail > * { position: relative; z-index: 1; }
 .work .cline-stop:not(:last-child) .cline-rail::after {
-  content: ""; position: absolute; top: 50%; left: calc(var(--dotw) + 6px); right: 6px;
-  height: 2px; margin-top: -1px; border-radius: 1px; background: var(--bx-color-grey-300);
+  content: ""; position: absolute; z-index: 0; top: 50%;
+  left: calc(var(--dotw) / 2); right: calc(-1 * var(--cl-gap) - 4px);
+  height: 2px; margin-top: -1px; background: var(--bx-color-grey-300); /* the past: muted */
 }
 .work .cline-agent { --dotw: var(--cl-rail); }
 .work .cline-agent .amark { width: var(--cl-rail) !important; height: var(--cl-rail) !important; }
 .work .cline-agent .amark svg { width: 50%; height: 50%; }
-.work .cline-now .cline-rail::after { background: var(--ink); }
-.work .cline-now.to-red .cline-rail::after { background: linear-gradient(90deg, var(--ink), var(--red)); }
+/* The time left, a little heavier: red-700 within the hour, ink when the deadline is further off. */
+.work .cline-now .cline-rail::after { height: 3px; margin-top: -1.5px; background: var(--ink); }
+.work .cline-now.to-red .cline-rail::after { background: var(--now); }
 .work .cline-due { --dotw: 10px; }
-.work .cline-due:not(:last-child) .cline-rail::after { background: none; height: 0; margin-top: -1px; border-top: 2px dotted var(--bx-color-grey-300); border-radius: 0; }
+/* What follows: dotted, muted, ending under Then's hollow mark. */
+.work .cline-due:not(:last-child) .cline-rail::after { height: 0; margin-top: -1px; background: none; border-top: 2px dotted var(--bx-color-grey-300); }
 .work .cline-dot { display: block; flex: none; width: var(--dotw); height: var(--dotw); border-radius: 50%; box-sizing: border-box; }
 .work .cline-now .cline-dot { background: var(--ink); }
 .work .cline-due .cline-dot { background: var(--page); border: 2px solid var(--ink); }

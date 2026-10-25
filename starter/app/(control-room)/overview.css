@@ -249,14 +249,19 @@
   top: calc(16 * var(--cr-u)); left: calc(16 * var(--cr-u)); right: auto; bottom: auto;
   width: max(calc(360 * var(--type-kf)), min(calc(840 * var(--cr-u)), calc(100cqw - 176px)));
   padding: calc(48 * var(--cr-u)) calc(52 * var(--cr-u)) calc(28 * var(--cr-u));
-  border-radius: calc(32 * var(--cr-u)); overflow: visible; container-type: inline-size;
+  border-radius: calc(32 * var(--cr-u)); container-type: inline-size;
+  /* Never taller than the frame: the rows that do not fit fold into "N more in Your tasks" (useFit). */
+  max-height: calc(100% - 32 * var(--cr-u)); overflow: hidden; display: flex; flex-direction: column;
 }
+.overview .float-me > * { flex: none; }
 .overview .float-me .welcome {
   font-family: "Owners Wide", var(--font-archivo), var(--font); font-stretch: 125%; font-variation-settings: "wdth" 125;
   font-size: max(min(24px, var(--type-display)), min(var(--type-display), 7.6cqi)); line-height: var(--lh-display); font-weight: 600; letter-spacing: var(--track-display); text-wrap: balance;
   overflow-wrap: break-word;
 }
 /* "Bahn Express" in Archivo's true italic, same weight, echoing the "Control room" lockup. */
+/* The day said in the greeting, in two tones: who in ink, what in grey (lab welcome:01). */
+.overview .float-me .welcome .fact { color: var(--ink-2); }
 .overview .float-me .welcome em { font-family: "Owners Wide", var(--font-archivo-italic), var(--font-archivo), var(--font); font-style: italic; font-weight: inherit; }
 .overview .float-me .me-tasks { margin-top: clamp(calc(18 * var(--type-kf)), 5.4cqi, 40px); }
 .overview .float-me .tasks-today {
@@ -275,13 +280,116 @@
 .overview .float-me .red-row .v { font-size: max(min(17px, var(--type-body)), min(var(--type-body), 3.8cqi)); line-height: 1.28; }
 .overview .float-me .red-row .p { font-size: max(min(15px, var(--type-subhead)), min(var(--type-subhead), 3cqi)); line-height: 1.28; }
 .overview .float-me .red-row time { font-size: max(min(15px, var(--type-subhead)), min(var(--type-subhead), 3.26cqi)); line-height: 1.5; }
-.overview .float-me .key { margin-top: clamp(calc(12 * var(--type-kf)), 3cqi, 24px); padding-top: clamp(calc(12 * var(--type-kf)), 3cqi, 24px); gap: clamp(calc(2 * var(--type-kf)), 1cqi, 8px); border-top: 1px solid var(--press); }
-.overview .float-me .state { grid-template-columns: clamp(calc(8 * var(--type-kf)), 1.9cqi, 14px) minmax(0, 1fr) auto; column-gap: clamp(calc(8 * var(--type-kf)), 2cqi, 16px); font-size: max(min(15px, var(--type-subhead)), min(var(--type-subhead), 3cqi)); line-height: 1.45; }
-.overview .float-me .state .dot { width: clamp(calc(8 * var(--type-kf)), 1.9cqi, 14px); height: clamp(calc(8 * var(--type-kf)), 1.9cqi, 14px); }
+/* "N more in Your tasks": the rows that did not fit, one quiet row. */
+.overview .float-me .red-row.more { display: flex; align-items: center; justify-content: space-between; gap: 8px; color: var(--ink-2); font-size: max(min(15px, var(--type-subhead)), min(var(--type-subhead), 3cqi)); line-height: 1.45; }
+.overview .float-me .red-row.more svg { flex: none; }
 
-/* Dots only on the map: a red pin is a red dot with a ring; its card names the car. */
-.pin.dot-only, .pin.dot-only:hover, .pin.dot-only.lift { width: 15px; height: 15px; padding: 0; border-radius: 50%; justify-content: center; }
-.pin.dot-only .label { display: none !important; }
+/* The map's key as one bar (lab welcome:09, Apple's iPhone Storage bar): "On the road today  312 cars",
+   the three colours in proportion with thin seams, a dot legend under it. */
+.overview .float-me .fleet {
+  --fl-text: max(min(15px, var(--type-subhead)), min(var(--type-subhead), 3cqi));
+  margin-top: clamp(calc(12 * var(--type-kf)), 3cqi, 24px); padding-top: clamp(calc(12 * var(--type-kf)), 3cqi, 24px); border-top: 1px solid var(--press);
+}
+.overview .float-me .fleet-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; font-size: var(--fl-text); line-height: 1.45; }
+.overview .float-me .fleet-total { color: var(--ink-2); text-align: right; }
+.overview .float-me .fleet-bar {
+  margin-top: clamp(calc(6 * var(--type-kf)), 1.4cqi, 12px); height: clamp(calc(10 * var(--type-kf)), 1.8cqi, 16px);
+  display: flex; gap: 2px; border-radius: 999px; overflow: hidden; background: var(--raise);
+}
+.overview .float-me .seg { min-width: 6px; flex-basis: 0; transition: opacity 150ms var(--ease); transform-origin: left center; animation: fl-grow 700ms var(--ease-open) both; }
+.overview .float-me .seg-plan { background: var(--green); }
+.overview .float-me .seg-agent { background: var(--bx-color-green-300); position: relative; overflow: hidden; animation-delay: 80ms; }
+.overview .float-me .seg-red { background: var(--red); animation-delay: 160ms; }
+/* The agent's part works: a slow light passes through it, as its cars breathe on the map. */
+.overview .float-me .seg-agent::after {
+  content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, transparent, rgb(255 254 247 / 0.65), transparent);
+  transform: translateX(-100%); animation: fl-pass 2.8s cubic-bezier(.2, 0, .2, 1) 900ms infinite;
+}
+@keyframes fl-grow { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+@keyframes fl-pass { to { transform: translateX(100%); } }
+.overview .float-me .fleet-legend { margin-top: clamp(calc(8 * var(--type-kf)), 1.6cqi, 14px); display: flex; flex-wrap: wrap; gap: calc(4 * var(--type-kf)) clamp(calc(16 * var(--type-kf)), 3cqi, 28px); }
+.overview .float-me .litem { display: inline-flex; align-items: center; gap: clamp(calc(7 * var(--type-kf)), 1.5cqi, 12px); font-size: var(--fl-text); line-height: 1.45; cursor: default; transition: opacity 150ms var(--ease); }
+.overview .float-me .litem .n { color: var(--ink-2); }
+.overview .float-me .litem .dot { width: clamp(calc(8 * var(--type-kf)), 1.6cqi, 12px); height: clamp(calc(8 * var(--type-kf)), 1.6cqi, 12px); }
+/* Hover one part: the others step back (the Finder's storage bar). */
+.overview .float-me .fleet[class*="hot-"] .seg, .overview .float-me .fleet[class*="hot-"] .litem { opacity: .3; }
+.overview .float-me .fleet.hot-plan .seg-plan, .overview .float-me .fleet.hot-plan .litem:nth-child(1),
+.overview .float-me .fleet.hot-agent .seg-agent, .overview .float-me .fleet.hot-agent .litem:nth-child(2),
+.overview .float-me .fleet.hot-red .seg-red, .overview .float-me .fleet.hot-red .litem:nth-child(3) { opacity: 1; }
+
+/* ---------- Red dots (lab map:08, Henry 25 Oct: "the red balls from this are good") ----------
+   A 28 px button around an 11 px red dot with a white ring and a soft red halo. Hover, or a hovered
+   row in the panel, lifts it and shows a small tag (the car and its time); the selected one grows
+   and gets an ink ring. No position here: MapLibre's .maplibregl-marker places it. */
+.pin.rd, .pin.rd:hover, .pin.rd.lift {
+  display: grid; place-items: center; width: 28px; height: 28px; padding: 0; border-radius: 50%;
+  background: transparent; box-shadow: none; color: var(--ink);
+}
+.pin.rd:focus-visible { outline: 2px solid var(--ink); outline-offset: 0; }
+.pin.rd .rd-dot, .pin.rd .rd-halo { grid-area: 1 / 1; border-radius: 50%; pointer-events: none; }
+.pin.rd .rd-dot {
+  width: 11px; height: 11px; background: var(--red);
+  box-shadow: 0 0 0 2px var(--page), 0 1px 3px rgb(18 17 14 / 0.28);
+  transition: transform 150ms var(--ease), box-shadow 150ms var(--ease);
+}
+.pin.rd .rd-halo { width: 24px; height: 24px; background: rgb(253 74 97 / 0.14); transition: transform 200ms var(--ease); }
+.pin.rd:hover .rd-dot, .pin.rd.lift .rd-dot { transform: scale(1.2); }
+.pin.rd.on .rd-dot { transform: scale(1.35); box-shadow: 0 0 0 2px var(--page), 0 0 0 4px var(--ink), 0 3px 8px rgb(18 17 14 / 0.3); }
+.pin.rd.on .rd-halo { transform: scale(1.4); background: rgb(253 74 97 / 0.12); }
+.pin.rd .rd-tag {
+  position: absolute; left: 50%; bottom: calc(100% + 2px); transform: translate(-50%, 4px);
+  display: none; align-items: baseline; gap: 8px; padding: 5px 10px 6px; border-radius: 10px;
+  background: var(--page); color: var(--ink); white-space: nowrap; pointer-events: none;
+  box-shadow: 0 0 0 1px rgb(18 17 14 / 0.06), 0 4px 14px rgb(18 17 14 / 0.12);
+  font-family: var(--font); font-size: var(--type-subhead); line-height: var(--lh-subhead); font-weight: 400;
+}
+.pin.rd .rd-t { color: var(--ink-2); font-variant-numeric: tabular-nums; }
+.pin.rd.now .rd-t { color: var(--now); font-weight: 600; }
+.pin.rd:hover .rd-tag, .pin.rd:focus-visible .rd-tag, .pin.rd.lift .rd-tag { display: inline-flex; animation: rd-tag-in 150ms var(--ease) both; }
+.pin.rd.on .rd-tag { display: none; }
+/* While a card is open no other car's tag appears: the camera move slides dots under a still pointer. */
+.map:has(.pin.rd.on) .pin.rd:not(.lift) .rd-tag { display: none; }
+@keyframes rd-tag-in { from { opacity: 0; transform: translate(-50%, 4px); } to { opacity: 1; transform: translate(-50%, 0); } }
+
+/* ---------- The docked card (lab map:08, combination B): always the map's bottom right corner,
+   only a close button on it (Henry 25 Oct: "only the X to close the view is relevant"). ---------- */
+.map-dock {
+  position: absolute; right: calc(16 * var(--cr-u)); bottom: calc(16 * var(--cr-u)); z-index: 6;
+  width: min(calc(360 * var(--type-k)), 40%); min-width: min(280px, calc(100% - 32px));
+  padding: calc(18 * var(--type-k)) calc(20 * var(--type-k)) calc(20 * var(--type-k)); border-radius: calc(20 * var(--type-k));
+  background: var(--page); color: var(--ink); font-family: var(--font);
+  box-shadow: 0 0 0 1px rgb(18 17 14 / 0.05), 0 2px 4px rgb(18 17 14 / 0.05), 0 16px 40px rgb(18 17 14 / 0.14);
+  animation: map-dock-in 250ms var(--ease-open) both;
+}
+@keyframes map-dock-in { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+.map-dock-x {
+  position: absolute; top: calc(8 * var(--type-k)); right: calc(8 * var(--type-k)); width: 44px; height: 44px;
+  display: grid; place-items: center; border-radius: 50%; color: var(--ink-2);
+  transition: background-color 100ms var(--ease), color 100ms var(--ease);
+}
+.map-dock-x:hover { background: var(--raise); color: var(--ink); }
+.map-dock-x:focus-visible { outline: 2px solid var(--ink); outline-offset: -2px; }
+.dock-card { display: flex; flex-direction: column; align-items: flex-start; }
+.dock-card .dc-r { padding-right: 40px; font-size: var(--type-title2); line-height: var(--lh-title2); letter-spacing: var(--track-title2); font-weight: 600; text-wrap: balance; }
+.dock-card .dc-p { margin-top: calc(4 * var(--type-k)); font-size: var(--type-subhead); line-height: var(--lh-subhead); color: var(--ink-2); }
+.dock-card .dc-due { margin-top: 2px; font-size: var(--type-subhead); line-height: var(--lh-subhead); font-weight: 600; color: var(--ink-2); }
+.dock-card .dc-due.now { color: var(--now); }
+.dock-card .dc-go {
+  margin-top: calc(14 * var(--type-k)); display: inline-flex; align-items: center; gap: 4px;
+  height: max(44px, calc(44 * var(--type-k))); padding: 0 calc(14 * var(--type-k)) 0 calc(20 * var(--type-k));
+  border-radius: 999px; background: var(--ink); color: var(--page);
+  font-size: var(--type-headline); line-height: 1; letter-spacing: var(--track-headline); font-weight: 600; white-space: nowrap;
+  transition: background-color 150ms var(--ease), transform 100ms var(--ease);
+}
+.dock-card .dc-go svg { opacity: 0.7; }
+.dock-card .dc-go:hover { background: var(--bx-color-grey-900); }
+.dock-card .dc-go:active { transform: scale(0.98); }
+.dock-card .dc-go.quiet { background: var(--press); color: var(--ink); }
+.dock-card .dc-go.quiet:hover { background: var(--bx-color-grey-200-sand); }
+
+@media (prefers-reduced-motion: reduce) {
+  .overview .float-me .seg, .overview .float-me .seg-agent::after, .map-dock, .pin.rd .rd-tag { animation: none; }
+}
 
 /* ?map=dark: Bahn's asphalt map. The dots keep their meaning; rings turn dark. */
 .map.map-dark { background: #24211c; }
@@ -292,4 +400,5 @@
 
 @media (max-width: 860px) {
   .overview .float-me { left: 8px; right: 8px; width: auto; border-radius: 24px; }
+  .map-dock { left: 8px; right: 8px; bottom: 8px; width: auto; min-width: 0; }
 }

@@ -1,8 +1,8 @@
 "use client"
 
 import Link from "next/link"
-import { useEffect, useLayoutEffect, useRef, useState } from "react"
-import { minutesUntil, NOW_WINDOW_MINUTES, when } from "@/lib/control-room/format"
+import { useLayoutEffect, useRef, useState } from "react"
+import { when } from "@/lib/control-room/format"
 import type { Overview, WorkRow } from "@/lib/control-room/types-v3"
 import { CarMap, type RedInfo } from "./car-map"
 import { Icon } from "./icons"
@@ -16,7 +16,6 @@ const word = (x: number) => (x < 10 ? WORDS[x] : n(x))
 const plural = (x: number, one: string, many: string) => (x === 1 ? one : many)
 /** Today on the room's clock: `when` prints a bare time for today only. */
 const isToday = (iso: string, now: string) => /^\d/.test(when(iso, now))
-const isNow = (r: WorkRow, now: string) => !!r.decideBy && minutesUntil(r.decideBy, now) <= NOW_WINDOW_MINUTES
 
 type Counts = { onPlan: number; agentWorking: number; needsPerson: number }
 
@@ -32,9 +31,8 @@ function dayFact(tasks: WorkRow[], now: string, agentWorking: number): string {
   return `${cars}, the first by ${first ? when(first, now) : "today"}.`
 }
 
-/** The map edge to edge and one panel for the person: the day in the greeting, their tasks, the cars in one bar. */
+/** The map edge to edge, one panel for the person (the day in the greeting, the first car), the cars in one bar. */
 export function OverviewView({ data, red, look, firstName }: { data: Overview; red: Record<string, RedInfo>; look: MapLook; firstName: string }) {
-  const [lift, setLift] = useState<string | null>(null)
   // The panel narrows with the page; the map keeps its cars beside it, never under it.
   const panel = useRef<HTMLElement>(null)
   const [size, setSize] = useState({ panel: 840, room: 1200 })
@@ -58,17 +56,12 @@ export function OverviewView({ data, red, look, firstName }: { data: Overview; r
   const counts: Counts = { onPlan: data.cars.length - needsPerson - agentWorking, agentWorking, needsPerson }
   const tasks = data.needYou
   const first = tasks[0]
-  // As many rows as fit in the frame; the rest is one row (3, 12 or 40 tasks never run off the page).
-  const fit = useFit(panel, Math.min(tasks.length, 6))
-  const shown = tasks.slice(0, fit)
-  const rest = tasks.length - shown.length
 
   return (
     <div className={`overview overview-${look}`}>
       <CarMap
         cars={data.cars}
         red={red}
-        lift={lift}
         look={look}
         pad={{ top: 56, bottom: 56, left: padLeft, right: 48 }}
         minZoom={3.3} // Northern Europe, never half the globe when the panel leaves little room
@@ -76,46 +69,21 @@ export function OverviewView({ data, red, look, firstName }: { data: Overview; r
         dock
         card={(orderId, close) => <DockCard info={red[orderId]} close={close} />}
       />
+      {/* Only the day and the one way on (Henry 25 Oct: "the card would basically become just this");
+          the rows went, Your tasks and the button already say which car. */}
       <section ref={panel} className="float float-me" aria-label="Today">
         <h1 className="welcome">
           {/* The name in Archivo's true italic, same weight and colour (Henry 25 Oct: "it could slant, so the text gets a bit of contrast"). */}
           Welcome back, <em>{firstName}</em>. <span className="fact">{dayFact(tasks, data.now, agentWorking)}</span>
         </h1>
-
         {first && (
           <div className="me-tasks">
             <TasksTodayCta count={tasks.length} href={`/tasks/${first.caseId}`} size="m" label={`Start with the ${first.vehicle}`} />
-            <ul className="red-rows">
-              {shown.map((r) => (
-                <li key={r.caseId}>
-                  <Link
-                    href={`/tasks/${r.caseId}`}
-                    className={`red-row${lift === r.orderId ? " lift" : ""}`}
-                    onMouseEnter={() => setLift(r.orderId)}
-                    onMouseLeave={() => setLift(null)}
-                    onFocus={() => setLift(r.orderId)}
-                    onBlur={() => setLift(null)}
-                  >
-                    <span className="v">{r.vehicle}</span>
-                    <span className="p">{r.place}</span>
-                    {r.decideBy && <time className={isNow(r, data.now) ? "now" : undefined}>{when(r.decideBy, data.now)}</time>}
-                  </Link>
-                </li>
-              ))}
-              {rest > 0 && (
-                <li>
-                  <Link href="/tasks" className="red-row more">
-                    <span>{n(rest)} more in Your tasks</span>
-                    <Icon name="chevron-right" size={16} />
-                  </Link>
-                </li>
-              )}
-            </ul>
           </div>
         )}
-
-        <FleetBar counts={counts} mine={tasks.length} />
       </section>
+      {/* The cars by state floats over the map's bottom left as a status, no card behind it (Henry 25 Oct). */}
+      <FleetBar counts={counts} mine={tasks.length} />
     </div>
   )
 }
@@ -123,7 +91,8 @@ export function OverviewView({ data, red, look, firstName }: { data: Overview; r
 type Part = "plan" | "agent" | "red"
 
 /** The map's key as one bar (lab welcome:09, Apple's iPhone Storage bar): every car on the road
- *  today, the three colours in proportion, a dot legend under it. Hover a part: the rest step back. */
+ *  today, the three colours in proportion, a dot legend under it. Hover a part: the rest step back.
+ *  It floats on the map's bottom left, legible on the tiles through a halo in the page colour. */
 function FleetBar({ counts, mine }: { counts: Counts; mine: number }) {
   const [hot, setHot] = useState<Part | null>(null)
   const total = counts.onPlan + counts.agentWorking + counts.needsPerson
@@ -133,7 +102,7 @@ function FleetBar({ counts, mine }: { counts: Counts; mine: number }) {
     { id: "red", label: "Needs a person", value: counts.needsPerson, dot: "dot-red" },
   ]
   return (
-    <div className={`fleet${hot ? ` hot-${hot}` : ""}`} aria-label="The map's colours">
+    <div className={`fleet${hot ? ` hot-${hot}` : ""}`} role="group" aria-label="The map's colours">
       <p className="fleet-head">
         <span>On the road today</span>
         <span className="fleet-total num">
@@ -158,46 +127,6 @@ function FleetBar({ counts, mine }: { counts: Counts; mine: number }) {
       </div>
     </div>
   )
-}
-
-/**
- * How many rows fit: starts at `max`, drops one at a time while the panel overflows its own
- * max-height, and starts over when the Overview changes size or the fonts arrive (lab welcome:01).
- */
-function useFit(box: React.RefObject<HTMLElement | null>, max: number, floor = 1): number {
-  const [limit, setLimit] = useState(max)
-  useLayoutEffect(() => setLimit(max), [max])
-  useLayoutEffect(() => {
-    const el = box.current
-    if (!el || limit <= floor) return
-    // WebKit leaves the bottom padding out of scrollHeight: also measure the last child's bottom plus the padding.
-    const kids = [...el.children].filter((k) => getComputedStyle(k).position !== "absolute") as HTMLElement[]
-    const last = kids[kids.length - 1]
-    const bottom = last ? last.offsetTop + last.offsetHeight + (parseFloat(getComputedStyle(el).paddingBottom) || 0) : 0
-    if (el.scrollHeight > el.clientHeight + 1 || bottom > el.clientHeight + 1) setLimit((l) => l - 1)
-  })
-  useEffect(() => {
-    const room = box.current?.parentElement
-    if (!room) return
-    let w = room.offsetWidth
-    let h = room.offsetHeight
-    const ro = new ResizeObserver(() => {
-      if (room.offsetWidth === w && room.offsetHeight === h) return
-      w = room.offsetWidth
-      h = room.offsetHeight
-      setLimit(max)
-    })
-    ro.observe(room)
-    // Again once the display face has loaded: a fallback font's taller lines must not leave rows cut.
-    const again = () => setLimit(max)
-    document.fonts?.ready.then(again).catch(() => {})
-    document.fonts?.addEventListener?.("loadingdone", again)
-    return () => {
-      ro.disconnect()
-      document.fonts?.removeEventListener?.("loadingdone", again)
-    }
-  }, [box, max])
-  return Math.min(limit, max)
 }
 
 /** The docked card (lab map:08, combination B): what stopped first, the way Flighty states a

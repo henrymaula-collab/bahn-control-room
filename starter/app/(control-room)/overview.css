@@ -248,9 +248,9 @@
 .overview .float-me {
   top: calc(16 * var(--cr-u)); left: calc(16 * var(--cr-u)); right: auto; bottom: auto;
   width: max(calc(360 * var(--type-kf)), min(calc(840 * var(--cr-u)), calc(100cqw - 176px)));
-  padding: calc(48 * var(--cr-u)) calc(52 * var(--cr-u)) calc(28 * var(--cr-u));
+  padding: calc(48 * var(--cr-u)) calc(52 * var(--cr-u)) calc(48 * var(--cr-u));
   border-radius: calc(32 * var(--cr-u)); container-type: inline-size;
-  /* Never taller than the frame: the rows that do not fit fold into "N more in Your tasks" (useFit). */
+  /* Only the headline and the black pill now (Henry 25 Oct); never taller than the frame. */
   max-height: calc(100% - 32 * var(--cr-u)); overflow: hidden; display: flex; flex-direction: column;
 }
 .overview .float-me > * { flex: none; }
@@ -271,51 +271,49 @@
 }
 .overview .float-me .tasks-today span { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
 .overview .float-me .tasks-today svg { width: clamp(calc(18 * var(--type-kf)), 4cqi, 32px); height: clamp(calc(18 * var(--type-kf)), 4cqi, 32px); flex: none; }
-.overview .float-me .red-rows { margin: clamp(calc(8 * var(--type-kf)), 2cqi, 16px) calc(-16 * var(--cr-u)) 0; }
-.overview .float-me .red-row { padding: clamp(calc(6 * var(--type-kf)), 1.7cqi, 14px) calc(16 * var(--cr-u)); border-radius: calc(16 * var(--cr-u)); column-gap: calc(24 * var(--cr-u)); }
-/* Type on the ramp (design/TYPE_SCALE.md): display, body, subhead. Each is capped by the panel's
-   own width (cqi, the values Henry approved at 2560 x 1300), so a narrow panel never overflows and
-   2560 x 1300 looks exactly as approved; at 1512 x 800 and below the ramp's own sizes hold (34, 17,
-   15: Apple's defaults are the floor). */
-.overview .float-me .red-row .v { font-size: max(min(17px, var(--type-body)), min(var(--type-body), 3.8cqi)); line-height: 1.28; }
-.overview .float-me .red-row .p { font-size: max(min(15px, var(--type-subhead)), min(var(--type-subhead), 3cqi)); line-height: 1.28; }
-.overview .float-me .red-row time { font-size: max(min(15px, var(--type-subhead)), min(var(--type-subhead), 3.26cqi)); line-height: 1.5; }
-/* "N more in Your tasks": the rows that did not fit, one quiet row. */
-.overview .float-me .red-row.more { display: flex; align-items: center; justify-content: space-between; gap: 8px; color: var(--ink-2); font-size: max(min(15px, var(--type-subhead)), min(var(--type-subhead), 3cqi)); line-height: 1.45; }
-.overview .float-me .red-row.more svg { flex: none; }
 
-/* The map's key as one bar (lab welcome:09, Apple's iPhone Storage bar): "On the road today  312 cars",
-   the three colours in proportion with thin seams, a dot legend under it. */
-.overview .float-me .fleet {
-  --fl-text: max(min(15px, var(--type-subhead)), min(var(--type-subhead), 3cqi));
-  margin-top: clamp(calc(12 * var(--type-kf)), 3cqi, 24px); padding-top: clamp(calc(12 * var(--type-kf)), 3cqi, 24px); border-top: 1px solid var(--press);
+/* ---------- The cars by state, floating on the map's bottom left (Henry 25 Oct: "move it down here
+   so it just floats as a status, with no card behind it"). The map's key as one bar (lab welcome:09,
+   Apple's iPhone Storage bar): "On the road today  312 cars", the three colours in proportion with
+   thin seams, a dot legend under it. Legible on the tiles through a halo in the page colour. ---------- */
+.overview .fleet {
+  --halo: var(--page);
+  position: absolute; z-index: 4; left: calc(28 * var(--cr-u)); bottom: calc(22 * var(--cr-u));
+  /* As wide as the legend on one line; the bar spans it. */
+  width: max-content; max-width: calc(100% - 56 * var(--cr-u)); color: var(--ink);
+  font-family: var(--font); font-size: var(--type-subhead); line-height: var(--lh-subhead);
+  text-shadow: 0 0 1px var(--halo), 0 0 3px var(--halo), 0 0 6px var(--halo), 0 0 10px var(--halo);
 }
-.overview .float-me .fleet-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; font-size: var(--fl-text); line-height: 1.45; }
-.overview .float-me .fleet-total { color: var(--ink-2); text-align: right; }
-.overview .float-me .fleet-bar {
-  margin-top: clamp(calc(6 * var(--type-kf)), 1.4cqi, 12px); height: clamp(calc(10 * var(--type-kf)), 1.8cqi, 16px);
-  display: flex; gap: 2px; border-radius: 999px; overflow: hidden; background: var(--raise);
+.overview .fleet-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; font-weight: 600; }
+.overview .fleet-total { color: var(--ink-2); font-weight: 400; text-align: right; }
+.overview .fleet-bar {
+  margin-top: calc(6 * var(--type-k)); height: calc(10 * var(--type-k));
+  display: flex; gap: 2px; border-radius: 999px; overflow: hidden; background: var(--halo);
+  box-shadow: 0 0 0 2px var(--halo), 0 1px 6px 2px rgb(18 17 14 / 0.08);
 }
-.overview .float-me .seg { min-width: 6px; flex-basis: 0; transition: opacity 150ms var(--ease); transform-origin: left center; animation: fl-grow 700ms var(--ease-open) both; }
-.overview .float-me .seg-plan { background: var(--green); }
-.overview .float-me .seg-agent { background: var(--bx-color-green-300); position: relative; overflow: hidden; animation-delay: 80ms; }
-.overview .float-me .seg-red { background: var(--red); animation-delay: 160ms; }
+.overview .seg { min-width: 6px; flex-basis: 0; transition: opacity 150ms var(--ease); transform-origin: left center; animation: fl-grow 700ms var(--ease-open) both; }
+.overview .seg-plan { background: var(--green); }
+.overview .seg-agent { background: var(--bx-color-green-300); position: relative; overflow: hidden; animation-delay: 80ms; }
+.overview .seg-red { background: var(--red); animation-delay: 160ms; }
 /* The agent's part works: a slow light passes through it, as its cars breathe on the map. */
-.overview .float-me .seg-agent::after {
+.overview .seg-agent::after {
   content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, transparent, rgb(255 254 247 / 0.65), transparent);
   transform: translateX(-100%); animation: fl-pass 2.8s cubic-bezier(.2, 0, .2, 1) 900ms infinite;
 }
 @keyframes fl-grow { from { transform: scaleX(0); } to { transform: scaleX(1); } }
 @keyframes fl-pass { to { transform: translateX(100%); } }
-.overview .float-me .fleet-legend { margin-top: clamp(calc(8 * var(--type-kf)), 1.6cqi, 14px); display: flex; flex-wrap: wrap; gap: calc(4 * var(--type-kf)) clamp(calc(16 * var(--type-kf)), 3cqi, 28px); }
-.overview .float-me .litem { display: inline-flex; align-items: center; gap: clamp(calc(7 * var(--type-kf)), 1.5cqi, 12px); font-size: var(--fl-text); line-height: 1.45; cursor: default; transition: opacity 150ms var(--ease); }
-.overview .float-me .litem .n { color: var(--ink-2); }
-.overview .float-me .litem .dot { width: clamp(calc(8 * var(--type-kf)), 1.6cqi, 12px); height: clamp(calc(8 * var(--type-kf)), 1.6cqi, 12px); }
+.overview .fleet-legend { margin-top: calc(8 * var(--type-k)); display: flex; flex-wrap: wrap; gap: calc(2 * var(--type-k)) calc(18 * var(--type-k)); }
+.overview .litem { display: inline-flex; align-items: center; gap: calc(7 * var(--type-k)); cursor: default; transition: opacity 150ms var(--ease); }
+.overview .litem .n { color: var(--ink-2); font-variant-numeric: tabular-nums; }
+.overview .litem .dot { width: calc(8 * var(--type-k)); height: calc(8 * var(--type-k)); box-shadow: 0 0 0 2px var(--halo); }
 /* Hover one part: the others step back (the Finder's storage bar). */
-.overview .float-me .fleet[class*="hot-"] .seg, .overview .float-me .fleet[class*="hot-"] .litem { opacity: .3; }
-.overview .float-me .fleet.hot-plan .seg-plan, .overview .float-me .fleet.hot-plan .litem:nth-child(1),
-.overview .float-me .fleet.hot-agent .seg-agent, .overview .float-me .fleet.hot-agent .litem:nth-child(2),
-.overview .float-me .fleet.hot-red .seg-red, .overview .float-me .fleet.hot-red .litem:nth-child(3) { opacity: 1; }
+.overview .fleet[class*="hot-"] .seg, .overview .fleet[class*="hot-"] .litem { opacity: .3; }
+.overview .fleet.hot-plan .seg-plan, .overview .fleet.hot-plan .litem:nth-child(1),
+.overview .fleet.hot-agent .seg-agent, .overview .fleet.hot-agent .litem:nth-child(2),
+.overview .fleet.hot-red .seg-red, .overview .fleet.hot-red .litem:nth-child(3) { opacity: 1; }
+/* The credits sit under the zoom buttons as an (i) that opens them, out of the bar's and the card's way. */
+.overview .maplibregl-ctrl-top-right .maplibregl-ctrl-attrib.maplibregl-compact { margin-top: 8px; }
+.overview-dark .fleet { --halo: #24211c; color: var(--page); }
 
 /* ---------- Red dots (lab map:08, Henry 25 Oct: "the red balls from this are good") ----------
    A 28 px button around an 11 px red dot with a white ring and a soft red halo. Hover, or a hovered
@@ -388,7 +386,7 @@
 .dock-card .dc-go.quiet:hover { background: var(--bx-color-grey-200-sand); }
 
 @media (prefers-reduced-motion: reduce) {
-  .overview .float-me .seg, .overview .float-me .seg-agent::after, .map-dock, .pin.rd .rd-tag { animation: none; }
+  .overview .seg, .overview .seg-agent::after, .map-dock, .pin.rd .rd-tag { animation: none; }
 }
 
 /* ?map=dark: Bahn's asphalt map. The dots keep their meaning; rings turn dark. */

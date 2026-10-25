@@ -92,7 +92,8 @@ export function CarMap({ cars, red, lift, look, pad, padPhone, focus, controls =
       m = new ml.Map({
         container: box.current,
         style,
-        // With the card docked bottom right, the credits move bottom left, out of its way.
+        // With the card docked bottom right and the Overview's bar bottom left, the credits move
+        // under the zoom buttons as a closed (i) that opens them.
         attributionControl: dock ? false : { compact: true },
         dragRotate: false,
         pitchWithRotate: false,
@@ -106,7 +107,13 @@ export function CarMap({ cars, red, lift, look, pad, padPhone, focus, controls =
       map.current = m
       m.touchZoomRotate.disableRotation()
       if (controls !== "none") m.addControl(new ml.NavigationControl({ showCompass: false }), controls)
-      if (dock) m.addControl(new ml.AttributionControl({ compact: true }), "bottom-left")
+      if (dock) {
+        m.addControl(new ml.AttributionControl({ compact: true }), "top-right")
+        // MapLibre opens compact credits until the first drag; keep them closed, the (i) opens them.
+        const fold = () => box.current?.querySelector(".maplibregl-ctrl-attrib.maplibregl-compact-show")?.classList.remove("maplibregl-compact-show")
+        m.once("load", fold)
+        m.once("idle", fold)
+      }
 
       m.on("load", () => {
         if (!m) return

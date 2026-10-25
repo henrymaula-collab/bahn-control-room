@@ -10,12 +10,14 @@ import type { KeyFact, Situation, Stop } from "@/lib/control-room/types-v3"
 import { CaseChat, useChatThread } from "./case-chat"
 import { Icon } from "./icons"
 import { RouteMap } from "./route-map"
-import { useOtherTasks, usePanel } from "./work-frame"
+import { SendToColleague, useColleaguePick } from "./send-to-colleague"
+import { usePanel } from "./work-frame"
 
 /**
- * Under the decision: "Talk it through ›" opens the conversation with the agent as the side
- * panel, in place of The situation, which is there by default (Henry, 24 Oct 20:40: the card
- * opens with the situation beside it); "Why it came to you ›" opens in place.
+ * Under the decision, three rows in rows:01's style, each a title and one grey line (Henry, 25 Oct,
+ * h38): "Talk it through ›" opens the conversation with the agent as the side panel, in place of The
+ * situation, which is there by default; "Why it came to you ›" opens in place; "Send to a colleague ›"
+ * opens track N's panel, its grey line the colleague the agent picks. Moving between tasks is the dock's.
  */
 export function CaseRows({
   caseId,
@@ -23,6 +25,7 @@ export function CaseRows({
   situation,
   why,
   whyTitle,
+  canSend = false,
   now,
 }: {
   caseId: string
@@ -30,6 +33,7 @@ export function CaseRows({
   situation?: Situation
   why: KeyFact[]
   whyTitle?: string
+  canSend?: boolean // the case waits for this person: they can send it on
   now: string
 }) {
   const { open, setOpen, reset, slot } = usePanel()
@@ -64,7 +68,10 @@ export function CaseRows({
       {whyTitle && why.length > 0 && (
         <details className="row">
           <summary>
-            <span className="m title">{whyTitle}</span>
+            <span className="row-text">
+              <span className="m title">{whyTitle}</span>
+              <span className="s sub">{whyLine(why)}</span>
+            </span>
             <span className="chev">
               <Icon name="chevron-right" size={18} />
             </span>
@@ -74,7 +81,7 @@ export function CaseRows({
           </div>
         </details>
       )}
-      <OtherTasks />
+      {canSend && <ColleagueRow caseId={caseId} personId={personId} />}
       {situation && slot && createPortal(<SituationPanel situation={situation} open={open === "situation"} now={now} />, slot)}
       {!missing &&
         slot &&
@@ -86,37 +93,36 @@ export function CaseRows({
   )
 }
 
-/** "Other tasks  2 ›": the person's other Needs-you cases, opened in place like Why it came to you:
- *  the car, the place under it in grey, the decide-by time on the right (red within the hour). */
-function OtherTasks() {
-  const { rows, times, href, show } = useOtherTasks()
-  if (!show || rows.length === 0) return null
+/** "Seller hold on the car, needs the customer": the first fact, then the second as a phrase. */
+function whyLine(why: KeyFact[]): string {
+  const [a, b] = why
+  if (!a) return ""
+  return b ? `${a.value}, ${b.label.toLowerCase()} ${b.value.charAt(0).toLowerCase()}${b.value.slice(1)}` : a.value
+}
+
+/** "Send to a colleague ›" (Henry, 25 Oct): the agent's pick on the grey line; track N's panel opens beside the card. */
+function ColleagueRow({ caseId, personId }: { caseId: string; personId: string }) {
+  const { open, setOpen } = usePanel()
+  const pick = useColleaguePick(caseId, personId)
   return (
-    <details className="row others">
-      <summary>
-        <span className="m title">Other tasks</span>
-        <span className="m count num">{rows.length}</span>
+    <>
+      <button
+        type="button"
+        className="row-link"
+        aria-expanded={open === "colleague"}
+        aria-controls="colleague"
+        onClick={() => setOpen(open === "colleague" ? null : "colleague")}
+      >
+        <span className="row-text">
+          <span className="m title">Send to a colleague</span>
+          <span className="s sub">{pick?.short ?? "\u00a0"}</span>
+        </span>
         <span className="chev">
           <Icon name="chevron-right" size={18} />
         </span>
-      </summary>
-      <div className="body">
-        <ul className="rows-list">
-          {rows.map((r) => {
-            const t = times[r.caseId]
-            return (
-              <li key={r.caseId}>
-                <Link href={href(r.caseId)} className="wrow">
-                  <span className="v">{r.vehicle}</span>
-                  <span className="p">{r.place}</span>
-                  {t && <time className={t.now ? "now" : undefined}>{t.text}</time>}
-                </Link>
-              </li>
-            )
-          })}
-        </ul>
-      </div>
-    </details>
+      </button>
+      <SendToColleague caseId={caseId} personId={personId} />
+    </>
   )
 }
 

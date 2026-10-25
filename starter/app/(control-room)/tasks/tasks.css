@@ -116,15 +116,10 @@
 .work .detail .chev svg { width: 1em; height: 1em; }
 .work .detail .row > .body { padding: 0.5em 0 1.33em; }
 .work .detail .kv { grid-template-columns: 9.17em minmax(0, 1fr); column-gap: 0.83em; row-gap: 0.58em; }
-/* Other tasks: the count in grey before the chevron; the rows open in place, their text on the
-   same left edge as the row titles, the time on the right edge above the chevron. */
-.work .detail .row.others > summary { grid-template-columns: minmax(0, 1fr) auto auto; }
-.work .detail .row.others .count { color: var(--ink-2); font-variant-numeric: tabular-nums; }
-.work .detail .row.others > .body { padding: 0.17em 0 1em; }
-.work .detail .others .rows-list { gap: 0; }
-.work .detail .others .wrow { column-gap: 0.83em; margin: 0 -0.83em; padding: 0.5em 0.83em; border-radius: 0.75em; }
-.work .detail .others .wrow:hover { background: var(--raise); }
-.work .detail .others .wrow time { padding-right: calc(1em + 0.83em); }
+/* The rows (rows:01, Henry 25 Oct h38): every row a title and one grey line under it, so most are never opened. */
+.work .detail .row > summary .row-text { display: flex; flex-direction: column; min-width: 0; }
+.work .detail .row-text .sub { color: var(--ink-2); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.work .detail .row[open] > summary .row-text .sub { display: none; }
 
 /* The side panels: width and air from the unit, type on the ramp. The situation: the car at
    headline, everything else at subhead (labels grey, values ink). */
@@ -170,3 +165,100 @@
 .send-foot .now { margin-bottom: 8px; }
 .send-actions { display: flex; align-items: center; gap: 8px; }
 
+
+/* ---- The card's time line (Henry, 25 Oct, h24 + h39): agent, now, decide by, then, left to right
+   on one rail at the top of the card. Each stop: its mark on the rail, its words under it. The rail
+   is grey where it is past, ink to red for the time you have (the map's red within the hour), dotted
+   for what follows. Subhead size, so it fits the card's column in Safari at 125 %. */
+.work .cline {
+  --cl-rail: max(20px, calc(1.45 * var(--size-s)));
+  --cl-gap: 1.8em;
+  list-style: none; margin: 0 0 1.1em; padding: 0;
+  display: flex; align-items: flex-start;
+  max-width: calc(var(--card-measure, 24) * var(--size-l)); /* as wide as the situation under it */
+  font-size: var(--size-s); line-height: var(--lh-subhead);
+}
+/* The spare width goes to the rail, most of it to the hour between now and the deadline. */
+.work .cline-stop { position: relative; flex: 1 0 auto; display: flex; flex-direction: column; padding-right: var(--cl-gap); --dotw: 8px; }
+.work .cline-now { flex-grow: 2.5; min-width: 4.6em; } /* the hour you have is never a stub */
+.work .cline-stop:last-child { flex: 0 1 auto; padding-right: 0; }
+.work .cline-then { min-width: 7em; }
+.work .cline-rail { position: relative; height: var(--cl-rail); display: flex; align-items: center; }
+.work .cline-stop:not(:last-child) .cline-rail::after {
+  content: ""; position: absolute; top: 50%; left: calc(var(--dotw) + 6px); right: 6px;
+  height: 2px; margin-top: -1px; border-radius: 1px; background: var(--bx-color-grey-300);
+}
+.work .cline-agent { --dotw: var(--cl-rail); }
+.work .cline-agent .amark { width: var(--cl-rail) !important; height: var(--cl-rail) !important; }
+.work .cline-agent .amark svg { width: 50%; height: 50%; }
+.work .cline-now .cline-rail::after { background: var(--ink); }
+.work .cline-now.to-red .cline-rail::after { background: linear-gradient(90deg, var(--ink), var(--red)); }
+.work .cline-due { --dotw: 10px; }
+.work .cline-due:not(:last-child) .cline-rail::after { background: none; height: 0; margin-top: -1px; border-top: 2px dotted var(--bx-color-grey-300); border-radius: 0; }
+.work .cline-dot { display: block; flex: none; width: var(--dotw); height: var(--dotw); border-radius: 50%; box-sizing: border-box; }
+.work .cline-now .cline-dot { background: var(--ink); }
+.work .cline-due .cline-dot { background: var(--page); border: 2px solid var(--ink); }
+.work .cline-due.red .cline-dot { background: var(--red); border: 0; box-shadow: 0 0 0 3px var(--bx-color-red-100); }
+.work .cline-then .cline-dot { background: var(--page); border: 2px solid var(--bx-color-grey-300); }
+.work .cline-what { display: flex; flex-direction: column; margin-top: 0.3em; }
+.work .cline-main { color: var(--ink); white-space: nowrap; }
+.work .cline-sub { color: var(--ink-2); }
+.work .cline-agent .cline-main { font-weight: 600; }
+.work .cline-agent .cline-main time { font-weight: 400; color: var(--ink-2); margin-left: 0.15em; }
+.work .cline-due .cline-main { font-weight: 600; }
+.work .cline-due.red .cline-main { color: var(--now); }
+.work .cline-then .cline-sub { text-wrap: pretty; max-width: 22em; }
+.work .cline .num { font-variant-numeric: tabular-nums; }
+
+/* ---- The agent's legwork under the situation (h22): one grey line with a tick, opening to the steps. */
+.work .clegwork { margin-top: 0.55em; font-size: var(--size-s); line-height: var(--lh-subhead); }
+.work .clegwork-line {
+  display: inline-flex; align-items: flex-start; gap: 0.45em; max-width: 100%;
+  margin-left: -0.5em; padding: 0.35em 0.5em; border-radius: 10px;
+  color: var(--ink-2); font-weight: 400; text-align: left;
+  transition: background-color 150ms cubic-bezier(0.2, 0, 0, 1), color 150ms cubic-bezier(0.2, 0, 0, 1);
+}
+.work .clegwork-line:hover, .work .clegwork-line[aria-expanded="true"] { color: var(--ink); background: var(--raise); }
+.work .clegwork-line svg { flex: none; width: 1em; height: 1em; margin-top: 0.17em; }
+.work .clegwork-line > svg { color: var(--green); }
+/* The chevron follows the words, also when they wrap. */
+.work .clegwork-line .clegwork-chev { display: inline-block; margin: 0 0 0 0.3em; vertical-align: -0.14em; }
+.work .clegwork .clog { margin: 0.7em 0 0.4em; max-width: 40em; }
+.work .question .clegwork + .ask { margin-top: 0.75em; }
+
+/* ---- A step log (decide:07, h20): a tick for done, a dot at work, a grey dot to come, a hairline joining them. */
+.work .clog { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.9em; }
+.work .clog-row { position: relative; display: grid; grid-template-columns: 1.25em minmax(0, 1fr) auto; column-gap: 0.75em; align-items: start; }
+.work .clog-row:not(:last-child)::before {
+  content: ""; position: absolute; left: calc(0.625em - 0.5px); top: 1.5em; bottom: -0.9em; width: 1px; background: rgb(18 17 14 / 0.12);
+}
+.work .clog-mark { position: relative; width: 1.25em; height: 1.25em; margin-top: 0.04em; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; }
+.work .is-done .clog-mark { color: var(--ink); background: var(--page); }
+.work .is-done .clog-mark svg { width: 1em; height: 1em; stroke-width: 2.4; }
+.work .is-live .clog-mark::after { content: ""; width: 0.5em; height: 0.5em; border-radius: 50%; background: var(--ink); }
+.work .is-next .clog-mark::after { content: ""; width: 0.38em; height: 0.38em; border-radius: 50%; background: rgb(18 17 14 / 0.25); }
+.work .clog-words { display: flex; flex-direction: column; min-width: 0; }
+.work .clog-text { color: var(--ink); }
+.work .is-next .clog-text { color: var(--ink-2); }
+.work .clog-sub { color: var(--ink-2); }
+.work .clog-at { color: var(--ink-2); font-variant-numeric: tabular-nums; }
+@media (prefers-reduced-motion: no-preference) {
+  .work .is-live .clog-mark::before {
+    content: ""; position: absolute; inset: 0.375em; border-radius: 50%; background: var(--ink);
+    animation: clog-breathe 2.4s cubic-bezier(0.2, 0, 0.2, 1) infinite;
+  }
+  @keyframes clog-breathe { 0% { transform: scale(1); opacity: 0.3; } 70%, 100% { transform: scale(2.6); opacity: 0; } }
+  .work .clog-row { animation: clog-in 260ms cubic-bezier(0.2, 0, 0, 1) both; }
+  .work .clog-row:nth-child(2) { animation-delay: 60ms; }
+  .work .clog-row:nth-child(3) { animation-delay: 120ms; }
+  .work .clog-row:nth-child(4) { animation-delay: 180ms; }
+  .work .clog-row:nth-child(5) { animation-delay: 240ms; }
+  .work .clog-row:nth-child(n + 6) { animation-delay: 300ms; }
+  @keyframes clog-in { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+}
+
+/* ---- After a decision (decide:07, h25/h29): who and when, the log at body size, the black Next case. */
+.work .card-done .due { color: var(--ink-2); font-weight: 600; }
+.work .card-done-log { margin-top: 1.2em; max-width: 36em; }
+.work .card-done-log .clog { font-size: var(--size-m); line-height: var(--lh-body); }
+.work .card-done-log .clog-sub { font-size: var(--size-s); line-height: var(--lh-subhead); }

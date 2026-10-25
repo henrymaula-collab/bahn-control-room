@@ -8,6 +8,10 @@ import type { Option } from "@/lib/control-room/types"
 import type { Draft } from "@/lib/control-room/views"
 import { decide } from "../actions"
 import { answerFor, questionFor } from "./ask"
+import { CardDone } from "./card-done"
+import { CardLegwork } from "./card-legwork"
+import { CardTimeLine, type TimeLine } from "./card-line"
+import type { Legwork } from "./card-log"
 import { Icon } from "./icons"
 import { SendPreview } from "./send-preview"
 import { Keep } from "./text"
@@ -28,6 +32,9 @@ interface Props {
   existing?: { optionId: string; personName: string; timeWords: string; why?: string }
   next?: string // v3: one short line under the primary button, what the agent does next
   subject?: string // the subject line when the suggestion sends an email: "Ferrari Roma, CD-420458"
+  line?: TimeLine // Your tasks: the time line at the top (agent, now, decide by, then) in place of `due`
+  legwork?: Legwork // Your tasks: what the agent did, one line under the situation that opens to every step
+  place?: string // the pickup place, for the log after a decision
   children?: React.ReactNode // the desk's one disclosure, rendered on the server
 }
 
@@ -77,6 +84,21 @@ export function Question(props: Props) {
     })
   }
 
+  if (done && variant === "case") {
+    const option = all.find((o) => o.id === done.optionId) ?? suggestion
+    return (
+      <CardDone
+        caseId={caseId}
+        headline={props.headline}
+        option={option}
+        done={done}
+        note={done.why && option.id !== suggestion.id ? `The reason goes to ${props.leadName} before the agent learns from it.` : undefined}
+        nextHref={props.nextHref}
+        place={props.place}
+      />
+    )
+  }
+
   if (done) {
     const option = all.find((o) => o.id === done.optionId) ?? suggestion
     return (
@@ -103,10 +125,11 @@ export function Question(props: Props) {
 
   return (
     <section className="question" aria-labelledby={`q-${caseId}`}>
-      {props.due && <p className={`m due${props.due.now ? " now" : ""}`}>{props.due.text}</p>}
+      {props.line ? <CardTimeLine line={props.line} /> : props.due && <p className={`m due${props.due.now ? " now" : ""}`}>{props.due.text}</p>}
       <h1 className="l what" id={`q-${caseId}`}>
         <Keep text={props.headline} />
       </h1>
+      {props.legwork && <CardLegwork work={props.legwork} caseId={caseId} />}
       <p className="l ask">{questionFor(suggestion)}</p>
       <div className="answers">
         <button
@@ -126,7 +149,7 @@ export function Question(props: Props) {
           </button>
         )}
       </div>
-      {props.next && <p className="s next">{props.next}</p>}
+      {props.next && !props.line?.then && <p className="s next">{props.next}</p>}
       {error && <p className="m now" style={{ marginTop: 12 }}>{error}</p>}
       {props.children}
       {preview && (

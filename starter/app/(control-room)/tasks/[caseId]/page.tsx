@@ -3,10 +3,13 @@ import { notFound } from "next/navigation"
 import { getWork, getWorkCase } from "@/lib/control-room/client"
 import { clock } from "@/lib/control-room/format"
 import type { Case } from "@/lib/control-room/types"
+import { timeLineFor } from "../../_ui/card-line"
+import { legworkOf } from "../../_ui/card-log"
 import { dueFor } from "../../_ui/lines"
 import { Question } from "../../_ui/question"
 import { currentPersonId } from "../../_ui/session"
 import { Keep } from "../../_ui/text"
+import { nextCase } from "@/lib/handoff/order"
 import { CaseRows } from "../../_ui/work-case"
 import { lookQuery } from "../look"
 
@@ -34,9 +37,8 @@ export default async function WorkCasePage({ params, searchParams }: { params: P
   const owner = detail.people.find((p) => p.id === c.routedTo?.personId)
   const mine = !owner || owner.id === detail.person.id
   const asks = c.status === "waiting_for_person" || !!detail.decision
-  const queue = lists.needYou
-  const at = queue.findIndex((r) => r.caseId === caseId)
-  const nextId = at >= 0 ? queue[at + 1]?.caseId : queue.find((r) => r.caseId !== caseId)?.caseId
+  // Next case: the same order the dock walks (track N, lib/handoff/order.ts).
+  const nextId = nextCase(lists.needYou, { caseId: c.id, decideBy: c.decideBy })?.caseId
 
   return (
     <div className="detail-inner">
@@ -55,6 +57,9 @@ export default async function WorkCasePage({ params, searchParams }: { params: P
           personName={detail.person.name}
           nextHref={nextId ? `/tasks/${nextId}${look}` : undefined}
           next={extras?.next}
+          line={timeLineFor(c, now, extras?.next, mine ? "Sent it to you" : `Sent it to ${owner?.name}`)}
+          legwork={legworkOf(c.agentSteps)}
+          place={extras?.situation?.pickup.place}
           subject={`${detail.card.order.vehicle}, ${detail.card.order.reference}`}
           existing={
             detail.decision
@@ -86,6 +91,7 @@ export default async function WorkCasePage({ params, searchParams }: { params: P
         situation={extras?.situation}
         why={extras?.why ?? []}
         whyTitle={asks ? (mine ? "Why it came to you" : `Why it went to ${owner?.name}`) : undefined}
+        canSend={c.status === "waiting_for_person" && mine && !detail.decision}
         now={now}
       />
     </div>

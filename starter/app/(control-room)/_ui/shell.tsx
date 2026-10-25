@@ -37,8 +37,8 @@ export function Shell({ person, people, needYou, children }: { person: P; people
           </span>
         </Link>
         <nav className="nav">
-          {/* Your tasks keeps only its count (Henry, 24 Oct 21:45: nested rows "don't work when you
-              have many"); the other tasks open from the card's "Other tasks" row (work-case.tsx). */}
+          {/* Your tasks keeps only its count (Henry, 25 Oct, h27: no next-due line, no Needs-you
+              section); moving between tasks is the dock's job, with its Up next list (task-dock.tsx). */}
           {SECTIONS.map((s) => (
             <Link key={s.href} href={s.href} aria-current={s === here ? "page" : undefined}>
               {s.icon === "history" ? <HistoryIcon /> : <Icon name={s.icon} size={16} />}

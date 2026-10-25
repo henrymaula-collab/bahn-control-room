@@ -28,12 +28,6 @@ type Panel = {
 const PanelContext = createContext<Panel>({ open: null, setOpen: () => {}, reset: () => {}, slot: null })
 export const usePanel = () => useContext(PanelContext)
 
-/** The person's other Needs-you cases, for the card's "Other tasks" row (Henry, 24 Oct 21:45: the
- *  side menu keeps only "Your tasks N"). Off in ?tasks=switcher and ?tasks=column, which show the list. */
-type Others = { rows: WorkRow[]; times: RowTime; href: (id: string) => string; show: boolean }
-const OthersContext = createContext<Others>({ rows: [], times: {}, href: (id) => `/tasks/${id}`, show: false })
-export const useOtherTasks = () => useContext(OthersContext)
-
 /**
  * Your tasks in order and where the open case sits in it (lib/handoff/order.ts has the rule).
  * `next` is the case "Next case" opens, also right after the open case left the list.
@@ -118,11 +112,6 @@ export function WorkFrame({ lists, times, children }: { lists: WorkLists; times:
   }, [router, href, next, prev, index, open, base])
 
   const panel = useMemo(() => ({ open, setOpen, reset, slot }), [open, setOpen, reset, slot])
-  const others = useMemo(
-    // The card's "Other tasks" row is replaced by the dock's Up next (Henry, 25 Oct); C removes the row.
-    () => ({ rows: rows.filter((r) => r.caseId !== current), times, href, show: false }),
-    [rows, current, times, href],
-  )
   const needs = useMemo(() => ({ rows, current, prev, next, times, href }), [rows, current, prev, next, times, href])
   // The panel's room is kept from the first paint, so the card does not jump when it slides in.
   const withPanel = !!current && !!open
@@ -131,7 +120,6 @@ export function WorkFrame({ lists, times, children }: { lists: WorkLists; times:
 
   return (
     <PanelContext.Provider value={panel}>
-      <OthersContext.Provider value={others}>
       <NeedsContext.Provider value={needs}>
         <div className={`work look-${look}${withPanel ? " has-panel" : ""}${dock ? " has-dock" : ""}`}>
           {look === "column" && (
@@ -147,7 +135,6 @@ export function WorkFrame({ lists, times, children }: { lists: WorkLists; times:
           <div ref={setSlot} style={{ display: "contents" }} />
         </div>
       </NeedsContext.Provider>
-      </OthersContext.Provider>
     </PanelContext.Provider>
   )
 }

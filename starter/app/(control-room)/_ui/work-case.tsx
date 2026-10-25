@@ -26,6 +26,8 @@ export function CaseRows({
   why,
   whyTitle,
   canSend = false,
+  note,
+  routedWhy,
   now,
 }: {
   caseId: string
@@ -34,6 +36,8 @@ export function CaseRows({
   why: KeyFact[]
   whyTitle?: string
   canSend?: boolean // the case waits for this person: they can send it on
+  note?: { from: string; text: string } // a colleague sent it on with a line: shown once, quoted
+  routedWhy?: string // the routing sentence ("Sent to you because ..."): the first line inside Why it came to you
   now: string
 }) {
   const { open, setOpen, reset, slot } = usePanel()
@@ -70,14 +74,15 @@ export function CaseRows({
           <summary>
             <span className="row-text">
               <span className="m title">{whyTitle}</span>
-              <span className="s sub">{whyLine(why)}</span>
+              {note ? <span className="s sub why-note">{`\u201c${note.text}\u201d`}</span> : <span className="s sub">{whyLine(why)}</span>}
             </span>
             <span className="chev">
               <Icon name="chevron-right" size={18} />
             </span>
           </summary>
           <div className="body">
-            <Facts facts={why} />
+            {routedWhy && !note && <p className="m why-routed">{routedWhy}</p>}
+            <Facts facts={note ? [{ label: note.from, value: `\u201c${note.text}\u201d` }, ...why] : why} />
           </div>
         </details>
       )}

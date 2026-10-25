@@ -197,6 +197,13 @@
 .work .cline-agent { --dotw: var(--cl-rail); }
 .work .cline-agent .amark { width: var(--cl-rail) !important; height: var(--cl-rail) !important; }
 .work .cline-agent .amark svg { width: 50%; height: 50%; }
+/* Sent on by a colleague: their photo in the agent mark's place. */
+.work .cline-avatar, .work .cline-initial { display: block; width: var(--cl-rail); height: var(--cl-rail); border-radius: 50%; object-fit: cover; background: var(--raise); }
+.work .cline-initial { display: inline-flex; align-items: center; justify-content: center; font-size: 0.75em; font-weight: 600; color: var(--ink); }
+/* The colleague's own line, quoted, once: the grey line of "Why it came to you", and first inside it. */
+.work .detail .why-note { color: var(--ink-2); }
+/* Why it came to you, opened: the routing sentence first (the deck quotes it), then the facts. */
+.work .detail .why-routed { max-width: 36em; margin-bottom: 0.75em; text-wrap: pretty; }
 /* The time left, a little heavier: red-700 within the hour, ink when the deadline is further off. */
 .work .cline-now .cline-rail::after { height: 3px; margin-top: -1.5px; background: var(--ink); }
 .work .cline-now.to-red .cline-rail::after { background: var(--now); }

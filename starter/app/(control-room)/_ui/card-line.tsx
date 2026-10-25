@@ -4,12 +4,14 @@
 // person one decision" step, the room clock and the case's decide-by. No hooks, so the server
 // page builds the data and the client card draws it.
 
-import { NOW_WINDOW_MINUTES, clock, minutesUntil, when } from "@/lib/control-room/format"
+import { hel } from "@/lib/control-room/fixtures/clock"
+import { NOW_WINDOW_MINUTES, clock, dayKey, minutesUntil, when } from "@/lib/control-room/format"
 import type { AgentStep, Case } from "@/lib/control-room/types"
 import { AgentMark } from "./agent-mark"
 
 export type TimeLine = {
   agentAt?: string // "12:01": when the agent brought the case to a person
+  from?: { name: string; avatar?: string; at: string } // a colleague sent it on: they are the first stop, at their time
   sentTo: string // "Sent it to you", "Sent it to Sofie"
   due?: { at: string; left?: string; red: boolean; past: boolean }
   then?: { short: string; full: string } // the agent's next step: a few words, and the whole clause for hover
@@ -78,14 +80,26 @@ const toMinute = (iso: string) => new Date(Math.floor(Date.parse(iso) / 60_000) 
  * 12:01 while the room clock reads 12:00, so the line counts from 12:01 ("in 59 min"), and every
  * time on the card (the line, the steps, the deadline) reads in order.
  */
-export function timeLineFor(c: Case, roomNow: string, next: string | undefined, sentTo: string): TimeLine {
+export function timeLineFor(
+  c: Case,
+  roomNow: string,
+  next: string | undefined,
+  sentTo: string,
+  from?: { name: string; avatar?: string; at: string }, // the colleague who sent it on (track N's hand-off)
+): TimeLine {
   const ping = pingStep(c.agentSteps)
-  const pingAt = ping?.at ?? c.createdAt
+  // A hand-off carries the wall clock; one after the room clock goes on the room's day at its own time
+  // of day, as History files live decisions (lib/control-room/history.ts), so 12:39 today reads 12:39
+  // on the room's Wed 21 Oct and not as days after the deadline.
+  const fromAt = from && Date.parse(from.at) > Date.parse(roomNow) ? hel(dayKey(roomNow), clock(from.at)) : from?.at
+  // Who brought it here last: the colleague who sent it on, else the agent.
+  const pingAt = fromAt ?? ping?.at ?? c.createdAt
   const now = toMinute(Date.parse(pingAt) > Date.parse(roomNow) ? pingAt : roomNow)
   const left = c.decideBy ? minutesUntil(c.decideBy, now) : undefined
   const past = left != null && left <= 0
   return {
     agentAt: clock(pingAt),
+    ...(from && fromAt ? { from: { name: from.name, avatar: from.avatar, at: clock(fromAt) } } : {}),
     sentTo,
     due: c.decideBy
       ? {
@@ -107,9 +121,19 @@ export function CardTimeLine({ line }: { line: TimeLine }) {
   const { due } = line
   return (
     <ol className="cline" aria-label="Time line">
-      <Stop cls="cline-agent" mark={<AgentMark size={20} />} sub={line.sentTo}>
-        <span className="cline-strong">Agent</span> <time className="num">{line.agentAt}</time>
-      </Stop>
+      {line.from ? (
+        <Stop
+          cls="cline-agent cline-person"
+          mark={line.from.avatar ? <img className="cline-avatar" src={line.from.avatar} alt="" width={20} height={20} /> : <span className="cline-initial">{line.from.name.charAt(0)}</span>}
+          sub={line.sentTo}
+        >
+          <span className="cline-strong">{line.from.name}</span> <time className="num">{line.from.at}</time>
+        </Stop>
+      ) : (
+        <Stop cls="cline-agent" mark={<AgentMark size={20} />} sub={line.sentTo}>
+          <span className="cline-strong">Agent</span> <time className="num">{line.agentAt}</time>
+        </Stop>
+      )}
       <Stop cls={`cline-now${due?.red ? " to-red" : ""}`}>Now</Stop>
       {due && (
         <Stop cls={`cline-due${due.red ? " red" : ""}`} sub={due.left}>

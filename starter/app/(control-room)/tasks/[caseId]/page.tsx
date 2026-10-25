@@ -38,6 +38,10 @@ export default async function WorkCasePage({ params, searchParams }: { params: P
   const mine = !owner || owner.id === detail.person.id
   const asks = c.status === "waiting_for_person" || !!detail.decision
   // Next case: the same order the dock walks (track N, lib/handoff/order.ts).
+  // Sent on by a colleague (track N's hand-off, kept on the case): they, not the agent, brought it here.
+  const handoff = (c as Case & { handoffs?: { from: string; to: string; note?: string; at: string }[] }).handoffs?.at(-1)
+  const passed = handoff && handoff.to === c.routedTo?.personId ? handoff : undefined
+  const sender = passed ? detail.people.find((p) => p.id === passed.from) : undefined
   const nextId = nextCase(lists.needYou, { caseId: c.id, decideBy: c.decideBy })?.caseId
 
   return (
@@ -57,7 +61,13 @@ export default async function WorkCasePage({ params, searchParams }: { params: P
           personName={detail.person.name}
           nextHref={nextId ? `/tasks/${nextId}${look}` : undefined}
           next={extras?.next}
-          line={timeLineFor(c, now, extras?.next, mine ? "Sent it to you" : `Sent it to ${owner?.name}`)}
+          line={timeLineFor(
+            c,
+            now,
+            extras?.next,
+            mine ? "Sent it to you" : `Sent it to ${owner?.name}`,
+            passed && sender ? { name: sender.name, avatar: sender.avatar, at: passed.at } : undefined,
+          )}
           legwork={legworkOf(c.agentSteps)}
           place={extras?.situation?.pickup.place}
           subject={`${detail.card.order.vehicle}, ${detail.card.order.reference}`}
@@ -92,6 +102,8 @@ export default async function WorkCasePage({ params, searchParams }: { params: P
         why={extras?.why ?? []}
         whyTitle={asks ? (mine ? "Why it came to you" : `Why it went to ${owner?.name}`) : undefined}
         canSend={c.status === "waiting_for_person" && mine && !detail.decision}
+        note={passed?.note && sender ? { from: sender.name, text: passed.note } : undefined}
+        routedWhy={mine && !passed ? c.routedTo?.why : undefined}
         now={now}
       />
     </div>

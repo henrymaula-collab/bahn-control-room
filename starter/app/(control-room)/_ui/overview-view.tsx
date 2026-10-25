@@ -23,12 +23,16 @@ type Counts = { onPlan: number; agentWorking: number; needsPerson: number }
  *  "Three cars need you by 13:00." / "12 cars need you, the first by 12:25." / "Nothing needs you." */
 function dayFact(tasks: WorkRow[], now: string, agentWorking: number): string {
   if (!tasks.length) return agentWorking ? `Nothing needs you. The agent is working on ${n(agentWorking)} ${plural(agentWorking, "car", "cars")}.` : "Nothing needs you."
+  // Mid-sentence: "by tomorrow 07:00", never "by Tomorrow".
+  const at = (iso: string) => when(iso, now, undefined, true)
   const cars = `${word(tasks.length)} ${plural(tasks.length, "car needs", "cars need")} you`
+  // One car has no "first": "One car needs you by 13:00." / "by tomorrow 07:00."
+  if (tasks.length === 1) return tasks[0].decideBy ? `${cars} by ${at(tasks[0].decideBy)}.` : `${cars}.`
   const allToday = tasks.every((r) => r.decideBy && isToday(r.decideBy, now))
   const last = tasks.reduce<string | undefined>((m, r) => (r.decideBy && (!m || r.decideBy > m) ? r.decideBy : m), undefined)
-  if (allToday && last) return `${cars} by ${when(last, now)}.`
+  if (allToday && last) return `${cars} by ${at(last)}.`
   const first = tasks[0].decideBy
-  return `${cars}, the first by ${first ? when(first, now) : "today"}.`
+  return `${cars}, the first by ${first ? at(first) : "today"}.`
 }
 
 /** The map edge to edge, one panel for the person (the day in the greeting, the first car), the cars in one bar. */

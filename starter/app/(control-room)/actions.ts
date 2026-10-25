@@ -2,6 +2,7 @@
 
 import { cookies, headers } from "next/headers"
 import { revalidatePath } from "next/cache"
+import { noteDecision } from "@/lib/chat/service"
 import { dataSource, postDecision, postLessonReview, postTrustRule } from "@/lib/control-room/client"
 import type { TrustRule } from "@/lib/control-room/types"
 import { PERSON_COOKIE, currentPersonId } from "./_ui/session"
@@ -19,6 +20,8 @@ export async function choosePerson(personId: string) {
 export async function decide(input: { id: string; caseId: string; optionId: string; why?: string; editedDetail?: string }) {
   const personId = await currentPersonId()
   const decision = await postDecision({ ...input, personId })
+  // The person's chat thread states the decision at once, so the agent never answers as if nothing went out.
+  await noteDecision(input.caseId, personId).catch((e) => console.warn(`chat note ${input.caseId}: ${e instanceof Error ? e.message : String(e)}`))
   await carryOut(input.caseId)
   return decision
 }

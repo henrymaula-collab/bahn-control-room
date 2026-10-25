@@ -5,7 +5,20 @@ import { useEffect, useRef, useState } from "react"
 import { createPortal } from "react-dom"
 import { languageName } from "@/lib/control-room/format"
 import type { Draft } from "@/lib/control-room/views"
-import { failSend, pauseSend, recipient, sentWhat, sheetClosed, sheetOrigin, startSend, undoSend, useSendWindow } from "./email-send"
+import {
+  editedText,
+  failSend,
+  pauseSend,
+  recipient,
+  sendNow,
+  sentWhat,
+  setEdit,
+  sheetClosed,
+  sheetOrigin,
+  startSend,
+  undoSend,
+  useSendWindow,
+} from "./email-send"
 import { Icon } from "./icons"
 import { usePanel } from "./work-frame"
 
@@ -39,16 +52,27 @@ export function SendPreview({
   const close = useRef<HTMLButtonElement>(null)
   const [english, setEnglish] = useState(false)
   const [editing, setEditing] = useState(false)
-  const [text, setText] = useState(draft.text)
-
   const path = usePathname() ?? ""
   const caseId = decodeURIComponent(path.split("/")[2] ?? "")
+  // The person's edit outlives the sheet (they may ask the agent first, then send from the chat); Cancel drops it.
+  const [text, setTextRaw] = useState(() => editedText(caseId, draft.text) ?? draft.text)
+  const setText = (v: string) => (setTextRaw(v), setEdit(caseId, draft.text, v))
   const win = useSendWindow(caseId)
   const sending = !!win && (win.phase === "wait" || win.phase === "saving")
 
+  // The window this sheet started: if the sheet goes away while it runs (Escape, the close), it sends now.
+  const started = useRef(false)
   useEffect(() => {
     if (shown) close.current?.focus({ preventScroll: true })
-    else (setEditing(false), setEnglish(false), sheetClosed())
+    // Closed any way (Cancel, the close, Escape): the edits go, the agent's draft comes back.
+    else {
+      if (started.current) sendNow()
+      started.current = false
+      setEditing(false)
+      setEnglish(false)
+      sheetClosed()
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [shown])
   // A save that failed after the window: no receipt may claim it went.
   useEffect(() => {
@@ -60,11 +84,23 @@ export function SendPreview({
   const [name, how] = draft.to.split(/,\s*/)
   const foreign = draft.language !== "en"
   const edited = text.trim() !== draft.text.trim()
-  const cancel = () => (setOpen(null), returnFocus())
+  // Closing the sheet while it is sending hides Undo, so the email goes at once (Gmail: dismissing the
+  // undo bar sends); no countdown runs on unseen.
+  // Cancel (and the close) throws the edit away and brings the agent's draft back.
+  const cancel = () => {
+    if (sending && started.current) sendNow()
+    else {
+      setTextRaw(draft.text)
+      setEdit(caseId, draft.text, null)
+    }
+    setOpen(null)
+    returnFocus()
+  }
   const go = () => {
     const out = edited ? text.trim() : undefined
     const r = recipient(draft.to)
     const from = sheetOrigin(caseId)
+    started.current = true
     startSend(
       {
         caseId,

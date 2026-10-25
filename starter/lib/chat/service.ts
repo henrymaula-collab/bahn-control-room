@@ -6,6 +6,7 @@ import type { CaseKnowledge, ChatEvent, ChatMessage, ChatThread } from "@/lib/co
 import { answer, type AnswerInput, chatProvider, type ChatProvider } from "./brain"
 import { loadContext, type ChatCaseContext } from "./context"
 import { cleanCase } from "./clean"
+import { type DecidedMessage, decidedFacts, decidedLine } from "./decided"
 import { directAnswer } from "./direct"
 import { chatIntent } from "./intent"
 import { computeKnowledge } from "./knowledge"
@@ -138,4 +139,27 @@ export async function chatForCaseRecord(caseId: string, personId: string): Promi
     viaVoice: asked.some((m) => m.via === "voice"),
     summary: asked.length ? `Asked: ${asked.map((m) => short(m.text.trim())).join(" / ")}` : "Decided without talking it through",
   }
+}
+
+/**
+ * Right after a decision is saved (actions.ts decide, for the card, the sheet and the chat alike): the
+ * person's thread gets one agent line saying who decided, when, what went out and what comes next, so
+ * the conversation, a reopened panel and the model all read the same settled fact.
+ */
+export async function noteDecision(caseId: string, personId: string): Promise<void> {
+  const r = await loadContext(caseId, personId)
+  if (!r.ok) return
+  const { ctx } = prepare(r.ctx)
+  const f = decidedFacts(ctx)
+  if (!f) return
+  const message: DecidedMessage = {
+    id: messageId("msg-a"),
+    caseId: ctx.case.id,
+    role: "agent",
+    text: decidedLine(f),
+    via: "text",
+    at: new Date(Math.max(Date.parse(f.iso), Date.now())).toISOString(),
+    decided: { at: f.at, by: f.by },
+  }
+  await chatStore().add(message, ctx.person.id)
 }

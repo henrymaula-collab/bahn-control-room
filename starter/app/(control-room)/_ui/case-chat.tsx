@@ -10,7 +10,7 @@ import type { CaseKnowledge, ChatMessage, ChatThread, ChatToolStep } from "@/lib
 import { decide } from "../actions"
 import { AgentMark } from "./agent-mark"
 import { EmailReceipt } from "./email-receipt"
-import { type SendInfo, openedFromChat, pauseSend, recipient, sentWhat, startSend, undoSend, useSendWindow } from "./email-send"
+import { type SendInfo, editedText, openedFromChat, pauseSend, recipient, sendNow, sentWhat, startSend, undoSend, useEdit, useSendWindow } from "./email-send"
 import { Icon } from "./icons"
 import { VoiceButton, type SpeakInput } from "./voice-button"
 import { usePanel } from "./work-frame"
@@ -118,11 +118,14 @@ export function CaseChat({ thread, personId, now, focus }: { thread: ChatThread 
       if (!thread) return
       const info = infoOf(thread.caseId, o.action)
       const decideNow = async () => {
+        // The person's edit from the email sheet goes with it, whichever way they send.
+        const own = editedText(thread.caseId, o.action.draft?.text)
         const d = await decide({
           id: `dec-${thread.caseId}-${Date.now().toString(36)}`,
           caseId: thread.caseId,
           optionId: o.action.optionId,
           why: o.action.summary,
+          ...(own ? { editedDetail: own } : {}),
         })
         const at = clock(d.at)
         setOffer({ ...o, state: "done", at })
@@ -241,6 +244,15 @@ export function CaseChat({ thread, personId, now, focus }: { thread: ChatThread 
 
   const asking = offer && (offer.state === "open" || offer.state === "failed") ? offer : null
   const sending = win && (win.phase === "wait" || win.phase === "saving") && win.origin === "chat" ? win : null
+
+  // Undo lives in this panel: when the panel closes or the case changes while it counts, the email goes
+  // at once rather than on a countdown nobody sees (Gmail: dismissing the undo bar sends).
+  const counting = useRef(false)
+  counting.current = !!sending && sending.phase === "wait"
+  useEffect(() => {
+    if (focus === false && counting.current) sendNow()
+  }, [focus])
+  useEffect(() => () => void (counting.current && sendNow()), [])
 
   return (
     <div className="chat">
@@ -408,13 +420,23 @@ function StepLines({ steps }: { steps: ChatToolStep[] }) {
 }
 
 /** An agent message; "show me the email" answers carry the email itself (lib/chat/service.ts). */
-function AgentTurn({ message }: { message: ChatMessage & { email?: ChatDraft } }) {
+function AgentTurn({ message }: { message: ChatMessage & { email?: ChatDraft; decided?: { at: string; by: string } } }) {
+  // The thread's own record of the decision (lib/chat/service.ts noteDecision): the "Decided at" line.
+  if (message.decided)
+    return (
+      <div className="chat-decided" role="status">
+        <p className="m strong">
+          <Icon name="check" size={16} /> Decided by {message.decided.by} at {message.decided.at}
+        </p>
+        <p className="s">{message.text.replace(/^Decided by .+? at \d{1,2}:\d{2}: /, "")}</p>
+      </div>
+    )
   const email = message.email
   return (
     <div className="turn agent">
       <Byline steps={message.toolSteps ?? []} />
       <Words text={message.text} />
-      {email && <EmailInChat draft={email} />}
+      {email && <EmailInChat draft={email} caseId={message.caseId} />}
     </div>
   )
 }
@@ -436,7 +458,11 @@ function PersonTurn({ message }: { message: ChatMessage }) {
 }
 
 /** "Show me the email": the email itself in the conversation, To and Subject over it, about eight lines until "Read it all". */
-function EmailInChat({ draft }: { draft: ChatDraft }) {
+function EmailInChat({ draft: agents, caseId }: { draft: ChatDraft; caseId: string }) {
+  // The person's edit from the sheet, when there is one for this very email.
+  const edit = useEdit(caseId)
+  const own = edit && edit.original.trim() === agents.text.trim() ? edit.text : undefined
+  const draft: ChatDraft = own ? { ...agents, text: own, translation: undefined } : agents
   const [all, setAll] = useState(false)
   const text = useRef<HTMLParagraphElement>(null)
   const [long, setLong] = useState(true)

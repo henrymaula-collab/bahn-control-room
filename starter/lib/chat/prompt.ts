@@ -2,6 +2,7 @@
 // it gets with every answer. The instructions stay byte-for-byte stable for
 // prompt caching; the case follows them.
 
+import { decidedBlock } from "./decided"
 import { gateWords, knowledgeWords } from "@/lib/control-room/chat-words"
 import type { CaseKnowledge, ChatMessage } from "@/lib/control-room/types-chat"
 import type { ChatCaseContext } from "./context"
@@ -47,6 +48,8 @@ export function contextBlock(ctx: ChatCaseContext, k: CaseKnowledge, shape: Open
     c.decideBy ? `Decide by: ${dayTime(c.decideBy)} Helsinki time.` : "",
     `Why it needs a person: ${c.reasons.map((r) => r.replace(/_/g, " ")).join(", ") || "not stated"}.`,
     `Status: ${c.status.replace(/_/g, " ")}. It is now ${dayTime(ctx.now)} Helsinki time (dataset time).`,
+    ``,
+    decidedBlock(ctx),
     ``,
     `# Options (the person picks one with the decision button, or says yes to your offer in the chat)`,
     list(options, (o) => `- ${o.id === c.suggestion.id ? "Suggestion" : "Alternative"} (id ${o.id}, button "${buttonLabel(o)}"): ${o.label}. Effect: ${o.effect}${o.changes?.length ? ` Changes: ${o.changes.map((ch) => ch.detail).join("; ")}.` : ""}`),

@@ -10,6 +10,8 @@ const cases: [string, "send" | "show" | null][] = [
   ["should I send the email?", null], ["what happens if I send the email", null], ["don't send the email", null],
   ["Who is the contact at the pickup place?", null], ["Why would they not send a driver?", null], ["If I send it, when does the agent call?", null],
   ["Send the email. What happens then?", null], ["Send a driver", null],
+  ["send it", "send"], ["should I send it?", null], ["what if I send it", null], ["What if I send it?", null], ["Should we send the email now?", null],
+  ["what happens if I wait?", null], ["Do I need to send it?", null], ["can I send it later?", null], ["Is it sent?", null], ["was the email sent?", null],
 ]
 
 test("send the email is the yes, show me the email asks for it, questions stay talk", () => {

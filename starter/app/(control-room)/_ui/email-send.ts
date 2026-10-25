@@ -35,6 +35,10 @@ export type SendWin = SendInfo & {
 }
 
 let state: SendWin | null = null
+// The person's own words for a case's email (the sheet's Edit), kept across panels until sent or cancelled,
+// so every way of sending (the sheet, the chat's button, a typed or spoken "send the email") sends them.
+type Edit = { original: string; text: string }
+const edits = new Map<string, Edit>()
 let commit: (() => Promise<string | undefined> | string | undefined | void) | null = null
 let restore: (() => void) | null = null
 let timer: ReturnType<typeof setInterval> | null = null
@@ -68,6 +72,7 @@ async function fire() {
   set({ ...state, phase: "saving", left: 0 })
   try {
     const at = run ? await run() : undefined
+    if (state) edits.delete(state.caseId)
     if (state)
       set({
         ...state,
@@ -172,4 +177,24 @@ export function recipient(to: string): {
 /** "The email in German to Kovellin Automobilhandel" (the language only when it is not English). */
 export function sentWhat(w: Pick<SendInfo, "noun" | "language" | "to">): string {
   return `The ${w.noun}${w.language !== "en" ? ` in ${languageName(w.language)}` : ""} to ${w.to}`
+}
+
+/** Keep (or with null, drop) the person's edit of this case's email. */
+export function setEdit(caseId: string, original: string, text: string | null) {
+  if (text === null || text.trim() === original.trim()) edits.delete(caseId)
+  else edits.set(caseId, { original, text })
+  emit()
+}
+export const editOf = (caseId: string): Edit | undefined => edits.get(caseId)
+export function useEdit(caseId: string): Edit | undefined {
+  return useSyncExternalStore(
+    (f) => (subs.add(f), () => subs.delete(f)),
+    () => edits.get(caseId),
+    () => undefined,
+  )
+}
+/** The edited words when they are an edit of this very text. */
+export function editedText(caseId: string, original: string | undefined): string | undefined {
+  const e = edits.get(caseId)
+  return e && original !== undefined && e.original.trim() === original.trim() ? e.text.trim() : undefined
 }

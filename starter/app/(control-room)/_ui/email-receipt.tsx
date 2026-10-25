@@ -1,7 +1,8 @@
 "use client"
 
 import Link from "next/link"
-import { useEffect, useRef } from "react"
+import { useEffect, useRef, useState } from "react"
+import type { AgentStep } from "@/lib/control-room/types"
 import { createPortal } from "react-dom"
 import { withoutBareTimes } from "./card-line"
 import { clearSend, sentWhat, type SendWin, useSendWindow } from "./email-send"
@@ -21,8 +22,41 @@ export function EmailReceipt({ caseId }: { caseId: string }) {
   return createPortal(<Receipt win={win} caseId={caseId} />, slot)
 }
 
+type Back = { case: { status: string; agentSteps: AgentStep[] } }
+
+/** The agent's call-back after the decision, once it has run (the case read back a few times, as the card does). */
+function useCallBack(caseId: string): { done: boolean; call?: AgentStep } {
+  const [back, setBack] = useState<{ done: boolean; call?: AgentStep }>({ done: false })
+  useEffect(() => {
+    let alive = true
+    let n = 0
+    let timer: ReturnType<typeof setTimeout> | undefined
+    const load = () =>
+      fetch(`/api/cr/cases/${encodeURIComponent(caseId)}`, { cache: "no-store" })
+        .then((r) => (r.ok ? (r.json() as Promise<Back>) : null))
+        .then((d) => {
+          if (!alive || !d) return
+          const steps = d.case.agentSteps ?? []
+          // The steps after the agent's last proposal are what it did once the person decided.
+          let at = -1
+          steps.forEach((s, i) => s.kind === "propose" && !/^Brought a person/.test(s.summary) && (at = i))
+          const call = at >= 0 ? steps.slice(at + 1).find((s) => s.kind === "call") : undefined
+          setBack({ done: d.case.status === "done", call })
+          if (!call && d.case.status !== "done" && n++ < 8) timer = setTimeout(load, 1500)
+        })
+        .catch(() => {})
+    load()
+    return () => {
+      alive = false
+      if (timer) clearTimeout(timer)
+    }
+  }, [caseId])
+  return back
+}
+
 function Receipt({ win, caseId }: { win: SendWin; caseId: string }) {
   const { href } = useNextCase()
+  const back = useCallBack(caseId)
   const next = useRef<HTMLAnchorElement>(null)
   const close = () => clearSend(caseId)
   useEffect(() => {
@@ -35,7 +69,11 @@ function Receipt({ win, caseId }: { win: SendWin; caseId: string }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
   const title = `${win.noun === "email" ? "Email" : "Message"} sent`
-  const more = [win.calls ? `Next, the agent calls ${win.calls}.` : "", withoutBareTimes(win.next ?? "")].filter(Boolean).join(" ")
+  // Before the call-back: what the agent does next. After it: what it did, in its own words (past tense).
+  const plan = withoutBareTimes(win.next ?? "")
+  const more = back.call
+    ? [withoutBareTimes(back.call.summary), plan].filter(Boolean).join(" ")
+    : [!back.done && win.calls ? `Next, the agent calls ${win.calls}.` : "", plan].filter(Boolean).join(" ")
   return (
     <aside className="panel send-panel email-receipt open" aria-label={title}>
       <div className="panel-head receipt-head">

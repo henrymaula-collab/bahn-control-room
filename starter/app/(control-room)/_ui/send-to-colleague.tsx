@@ -66,6 +66,11 @@ export function SendToColleague({ caseId, personId }: { caseId: string; personId
   return createPortal(<Panel key={caseId} caseId={caseId} personId={personId} shown={open === "colleague"} />, slot)
 }
 
+const brief = (c: ColleaguePick) => {
+  const rest = c.short.startsWith(`${c.name} `) ? c.short.slice(c.name.length + 1) : c.short
+  return `${rest.replace(/^./, (ch) => ch.toUpperCase())}.`
+}
+
 function Panel({ caseId, personId, shown }: { caseId: string; personId: string; shown: boolean }) {
   const { setOpen } = usePanel()
   const { rows, next, href } = useNeedsYou()
@@ -126,7 +131,6 @@ function Panel({ caseId, personId, shown }: { caseId: string; personId: string; 
           <Icon name="x" size={18} />
         </button>
       </div>
-      <p className="s colleague-lede">It leaves your tasks and opens in theirs.</p>
 
       {!data ? (
         <p className="s colleague-lede">Finding who can take it…</p>
@@ -143,7 +147,8 @@ function Panel({ caseId, personId, shown }: { caseId: string; personId: string; 
                   {c.avatar ? <img className="avatar" src={c.avatar} alt="" width={40} height={40} /> : <span className="avatar" />}
                   <span className="colleague-text">
                     <span className="m">{c.name}</span>
-                    <span className="s">{c.reason}</span>
+                    {/* The pick says the whole reason; the others a few words, so each stays one line. */}
+                    <span className="s">{i === 0 && data.pick ? c.reason : brief(c)}</span>
                   </span>
                   <span className="colleague-tick">{on && <Icon name="check" size={18} />}</span>
                 </button>

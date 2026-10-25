@@ -75,15 +75,17 @@
 .nav a[aria-current="page"] .count { color: var(--ink); }
 
 /* ---------- The dock (task-dock.tsx; needs:07 without the count, Henry 25 Oct) ----------
-   Floats at the bottom of the card column in Your tasks and stays while the case above it changes.
-   The card gets the room back as bottom padding, so its last row is never under the dock. */
-.work.has-dock .detail { padding-bottom: calc(max(calc(28 * var(--type-kf)), calc(56 * var(--cr-u, 1px))) + 72px); }
+   Sits at the bottom of the card column in Your tasks and stays while the case above it changes.
+   It has its own strip under the card (a second grid row), so it never covers the card's last row:
+   in Henry's Safari (1330 x 680 at 125 %) a floating dock sat on "Send to a colleague". */
+.work.has-dock { grid-template-rows: minmax(0, 1fr) auto; }
+.work.has-dock .detail { grid-row: 1; }
+/* A card taller than its room scrolls above the dock and fades out into the strip instead of a hard cut. */
+.work.has-dock .detail { -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 28px), transparent); mask-image: linear-gradient(to bottom, #000 calc(100% - 28px), transparent); }
 .work .task-dock-bay {
-  position: absolute; left: 0; right: 0; bottom: max(14px, calc(24 * var(--cr-u, 1px))); z-index: 12;
-  display: flex; justify-content: center; padding: 0 16px; pointer-events: none;
-  transition: right 200ms cubic-bezier(0.2, 0, 0, 1);
+  grid-row: 2; grid-column: 1 / -1; position: relative; z-index: 12;
+  display: flex; justify-content: center; padding: 6px 16px max(12px, calc(20 * var(--cr-u, 1px)));
 }
-.work.has-panel .task-dock-bay { right: var(--panel); }
 .task-dock { position: relative; pointer-events: auto; max-width: 100%; font-size: var(--type-body); line-height: var(--lh-body); }
 .task-dock-bar {
   display: flex; align-items: center; gap: 2px; min-height: 48px; padding: 4px; border-radius: 999px;
@@ -144,32 +146,35 @@
 @keyframes task-dock-fade { from { opacity: 0; transform: translateX(6px); } to { opacity: 1; transform: none; } }
 
 /* ---------- Send to a colleague (send-to-colleague.tsx), a side panel like Talk it through ---------- */
-.colleague-panel { display: flex; flex-direction: column; }
+/* The list scrolls; the line and the Send button stay at the bottom, so Send is always in view
+   (Henry's Safari at 125 % is about 540 px tall). */
+.panel.colleague-panel { display: flex; flex-direction: column; overflow: hidden; }
+.colleague-panel .colleague-list { flex: 1 1 auto; min-height: 0; overflow: hidden auto; overscroll-behavior: contain; padding: 0 12px; margin: 16px -12px 0; }
 .colleague-panel .colleague-lede { margin-top: 4px; color: var(--ink-2); }
-.colleague-list { display: flex; flex-direction: column; gap: 2px; margin-top: 20px; }
-.colleague-panel .colleague-label { display: block; margin: 14px 0 6px; color: var(--ink-2); }
-.colleague-list > div:first-child .colleague-label, .colleague-list .colleague-label:first-child { margin-top: 0; }
+.colleague-list { display: flex; flex-direction: column; gap: 2px; }
+.colleague-panel .colleague-label { display: block; margin: 18px 0 6px; color: var(--ink-2); }
+.colleague-list > div:first-child > .colleague-label:first-child { margin-top: 0; }
 .colleague-row {
   display: grid; grid-template-columns: auto minmax(0, 1fr) 20px; align-items: center; column-gap: 12px;
-  width: 100%; min-height: 44px; padding: 10px 12px; margin: 0 -12px; width: calc(100% + 24px);
+  min-height: 44px; padding: 8px 12px; margin: 0 -12px; width: calc(100% + 24px);
   border-radius: 12px; text-align: left; transition: background-color 100ms cubic-bezier(0.2, 0, 0, 1);
 }
 .colleague-row:hover { background: var(--raise); }
 .colleague-row[aria-checked="true"] { background: var(--raise); }
 .colleague-row:focus-visible { outline: 2px solid var(--ink); outline-offset: -2px; }
-.colleague-row .avatar { width: 40px; height: 40px; }
+.colleague-row .avatar { width: 36px; height: 36px; }
 .colleague-text { display: flex; flex-direction: column; min-width: 0; }
 .colleague-text .s { color: var(--ink-2); }
 .colleague-tick { display: inline-flex; color: var(--ink); }
-.colleague-send { display: flex; flex-direction: column; margin-top: 24px; padding-top: 20px; border-top: 1px solid rgb(18 17 14 / 0.08); }
+.colleague-send { flex: none; display: flex; flex-direction: column; margin-top: 12px; padding-top: 16px; border-top: 1px solid rgb(18 17 14 / 0.08); }
 .colleague-send .colleague-label { margin-top: 0; }
 .colleague-line {
-  width: 100%; resize: vertical; min-height: 4.2em; padding: 10px 12px; border-radius: 12px;
+  width: 100%; resize: none; min-height: 3.6em; padding: 8px 12px; border-radius: 12px;
   background: var(--page); box-shadow: inset 0 0 0 1px rgb(18 17 14 / 0.14);
 }
 .colleague-line:focus { outline: none; box-shadow: inset 0 0 0 2px var(--ink); }
 .colleague-line::placeholder { color: var(--ink-2); }
-.colleague-go { align-self: flex-start; margin-top: 16px; }
+.colleague-go { align-self: flex-start; margin-top: 12px; }
 .colleague-go:disabled { opacity: 0.6; }
 .colleague-error { margin-top: 10px; color: var(--now); }
 .task-dock-row + .task-dock-label { margin-top: 0.4em; }

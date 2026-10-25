@@ -74,7 +74,14 @@ npm run agent -- --list                      # cases, lessons, trust rules and r
 npx tsx scripts/chat.ts CD-420458 --person p-aino "Has this happened before?"
 ```
 
-The agent prints what it found, with the source of each fact, its suggestion and the draft message, and writes a trace to `traces/`. Its run lands in the database like any other, so run `npm run demo:reset` before showing the demo again. `npm run agent` reads `.env.local` but not `.env`; if you moved Postgres to another port, `export DATABASE_URL=...` first.
+The agent prints what it found, with the source of each fact, its suggestion and the draft message, and writes a trace to `traces/`. Its run lands in the database like any other, so run `npm run demo:reset` before showing the demo again.
+
+`npm run agent` reads `.env.local`, not `.env`. With the default ports it finds the database by itself. If your `.env` points elsewhere (another port or database), export the same line first, or the agent writes to the default database or, when none answers, to JSON files in `.cr-data/` that the app never shows:
+
+```sh
+export $(grep '^DATABASE_URL=' .env)
+npm run agent -- CD-420516 --provider mock
+```
 
 ## Checks
 

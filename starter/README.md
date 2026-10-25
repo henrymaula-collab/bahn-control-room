@@ -22,7 +22,7 @@ npm run dev
 
 Open http://localhost:3000.
 
-The control room engine lives in `lib/control-room/` and answers under `/api/cr/*` (desk, cases, decisions, chat, voice, history, kinds, trust rules, people). `npm run test:cr` runs its unit tests and `npm run smoke:cr` checks it end to end. The ops team and its past decisions are made up; only the pickup places and customers they point at come from the (fictional) dataset.
+The control room engine lives in `lib/control-room/` and answers under `/api/cr/*` (desk, cases, decisions, chat, voice, history, kinds, trust rules, people, hand-offs). `npm run test:cr` runs its unit tests and `npm run smoke:cr` checks it end to end. The ops team and its past decisions are made up; only the pickup places and customers they point at come from the (fictional) dataset.
 
 The Compose file uses three ports on this computer: 5438 for Postgres, 9009 and 9010 for the attachment store. If one of them is already in use, [docs/running.md](../docs/running.md) shows how to move them without editing `compose.yaml`.
 

@@ -4,6 +4,7 @@ import Link from "next/link"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react"
 import type { WorkLists, WorkRow } from "@/lib/control-room/types-v3"
+import { nextCase, previousCase } from "@/lib/handoff/order"
 import { lookOf, lookQuery } from "../tasks/look"
 import { Icon } from "./icons"
 
@@ -14,7 +15,7 @@ export type RowTime = Record<string, { text: string; now: boolean }>
  * One side panel at a time: the situation (always there by default), the conversation with the
  * agent, or the message about to be sent. Closing the chat or the message brings the situation back.
  */
-export type PanelKind = "situation" | "chat" | "email"
+export type PanelKind = "situation" | "chat" | "email" | "colleague"
 type Panel = {
   open: PanelKind | null
   /** null closes what is open and shows the case's default panel again. */
@@ -31,6 +32,26 @@ export const usePanel = () => useContext(PanelContext)
 type Others = { rows: WorkRow[]; times: RowTime; href: (id: string) => string; show: boolean }
 const OthersContext = createContext<Others>({ rows: [], times: {}, href: (id) => `/tasks/${id}`, show: false })
 export const useOtherTasks = () => useContext(OthersContext)
+
+/**
+ * Your tasks in order and where the open case sits in it (lib/handoff/order.ts has the rule).
+ * `next` is the case "Next case" opens, also right after the open case left the list.
+ */
+export type NeedsYou = {
+  rows: WorkRow[]
+  current: string
+  prev?: WorkRow
+  next?: WorkRow
+  times: RowTime
+  href: (id: string) => string
+}
+const NeedsContext = createContext<NeedsYou>({ rows: [], current: "", times: {}, href: (id) => `/tasks/${id}` })
+export const useNeedsYou = () => useContext(NeedsContext)
+/** The case "Next case" opens (C's card after a decision, T's receipt): `{ next, href }`, href undefined when nothing is left. */
+export function useNextCase(): { next?: WorkRow; href?: string } {
+  const { next, href } = useContext(NeedsContext)
+  return { next, href: next ? href(next.caseId) : undefined }
+}
 
 const typing = (t: EventTarget | null) => {
   const el = t as HTMLElement | null
@@ -53,8 +74,13 @@ export function WorkFrame({ lists, times, children }: { lists: WorkLists; times:
 
   const rows = lists.needYou
   const index = rows.findIndex((r) => r.caseId === current)
-  const prev = index > 0 ? rows[index - 1] : undefined
-  const next = index >= 0 ? rows[index + 1] : rows[0]
+  // The open case's own row, kept after it leaves the list (decided or sent on), so "next" is
+  // still the case that followed it.
+  const seen = useRef<WorkRow | undefined>(undefined)
+  if (index >= 0) seen.current = rows[index]
+  const at: WorkRow | string = index >= 0 ? rows[index] : seen.current?.caseId === current ? seen.current : current
+  const prev = previousCase(rows, at)
+  const next = current ? nextCase(rows, at) : rows[0]
 
   const setOpen = useCallback((o: PanelKind | null) => setOpenRaw(o ?? base), [base])
   const reset = useCallback((b: PanelKind | null) => (setBase(b), setOpenRaw(b)), [])
@@ -90,12 +116,14 @@ export function WorkFrame({ lists, times, children }: { lists: WorkLists; times:
     () => ({ rows: rows.filter((r) => r.caseId !== current), times, href, show: look === "menu" }),
     [rows, current, times, href, look],
   )
+  const needs = useMemo(() => ({ rows, current, prev, next, times, href }), [rows, current, prev, next, times, href])
   // The panel's room is kept from the first paint, so the card does not jump when it slides in.
   const withPanel = !!current && !!open
 
   return (
     <PanelContext.Provider value={panel}>
       <OthersContext.Provider value={others}>
+      <NeedsContext.Provider value={needs}>
         <div className={`work look-${look}${withPanel ? " has-panel" : ""}`}>
           {look === "column" && (
             <div className="list" ref={listRef}>
@@ -108,6 +136,7 @@ export function WorkFrame({ lists, times, children }: { lists: WorkLists; times:
           </div>
           <div ref={setSlot} style={{ display: "contents" }} />
         </div>
+      </NeedsContext.Provider>
       </OthersContext.Provider>
     </PanelContext.Provider>
   )

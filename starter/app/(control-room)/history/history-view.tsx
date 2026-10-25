@@ -4,6 +4,8 @@ import Link from "next/link"
 import { useEffect, useMemo, useRef, useState } from "react"
 import { dayKey, when } from "@/lib/control-room/format"
 import type { HistoryRow, HistoryView as View } from "@/lib/control-room/history"
+import type { ChatThread } from "@/lib/control-room/types-chat"
+import { CaseChat, useChatThread } from "../_ui/case-chat"
 
 export type HistoryState = {
   q: string
@@ -266,7 +268,41 @@ function Reason({ text, name, mine }: { text: string; name: string; mine: boolea
   return <>{mine ? `You ${own}` : text}</>
 }
 
-function Record({ row, now, me, lead, onClose }: { row: HistoryRow; now: string; me: string; lead: boolean; onClose: () => void }) {
+function Record(props: { row: HistoryRow; now: string; me: string; lead: boolean; onClose: () => void }) {
+  // Talk it through, after the fact (Henry, 25 Oct: a finished case goes to History, where you can open it and ask about it).
+  const [talk, setTalk] = useState(false)
+  const { thread, missing } = useChatThread(props.row.caseId, props.me)
+  useEffect(() => setTalk(false), [props.row.caseId])
+  const canTalk = !missing && props.row.by.id !== "agent"
+  if (talk && canTalk) return <Talk row={props.row} now={props.now} me={props.me} thread={thread} onBack={() => setTalk(false)} onClose={props.onClose} />
+  return <RecordFacts {...props} talk={canTalk ? () => setTalk(true) : undefined} />
+}
+
+/** The record's pane as the conversation with the agent about this case: the same chat as in Your tasks. */
+function Talk({ row, now, me, thread, onBack, onClose }: { row: HistoryRow; now: string; me: string; thread: ChatThread | null; onBack: () => void; onClose: () => void }) {
+  return (
+    <aside className="hist-record hist-talk" aria-label={`${row.car}, Talk it through`}>
+      <div className="hist-record-head hist-talk-head">
+        <div>
+          <button type="button" className="hist-back" onClick={onBack}>
+            <span className="hist-back-icon" aria-hidden="true">
+              <Chevron dir="right" />
+            </span>
+            The record
+          </button>
+          <h2 className="hist-record-car">Talk it through</h2>
+          <p className="hist-sub">{[row.car, row.reference].filter(Boolean).join(", ")}</p>
+        </div>
+        <button type="button" className="hist-close" onClick={onClose} aria-label="Close the record">
+          <Close />
+        </button>
+      </div>
+      <CaseChat thread={thread} personId={me} now={now} focus />
+    </aside>
+  )
+}
+
+function RecordFacts({ row, now, me, lead, onClose, talk }: { row: HistoryRow; now: string; me: string; lead: boolean; onClose: () => void; talk?: () => void }) {
   const mine = row.by.id === me
   const agent = row.by.id === "agent"
   const weight = row.weight
@@ -286,6 +322,16 @@ function Record({ row, now, me, lead, onClose }: { row: HistoryRow; now: string;
       </div>
 
       <p className="hist-headline">{row.headline}</p>
+
+      {talk && (
+        <button type="button" className="hist-talk-row" onClick={talk}>
+          <span className="hist-talk-text">
+            <span>Talk it through</span>
+            <span className="hist-quiet">Ask the agent about this case</span>
+          </span>
+          <Chevron dir="right" />
+        </button>
+      )}
 
       <dl className="hist-kv">
         <dt>Decided</dt>

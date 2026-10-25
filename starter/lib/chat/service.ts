@@ -3,8 +3,10 @@
 // app/api/cr/cases/[id]/chat only translate HTTP.
 
 import type { CaseKnowledge, ChatEvent, ChatMessage, ChatThread } from "@/lib/control-room/types-chat"
-import { answer, chatProvider, type ChatProvider } from "./brain"
+import { answer, type AnswerInput, chatProvider, type ChatProvider } from "./brain"
 import { loadContext, type ChatCaseContext } from "./context"
+import { directAnswer } from "./direct"
+import { chatIntent } from "./intent"
 import { computeKnowledge } from "./knowledge"
 import { buildOpener, type OpenerShape, type OpenerVariant, openerShape } from "./opener"
 import { chatStore, messageId } from "./store"
@@ -59,7 +61,7 @@ export async function prepareTurn(caseId: string, body: PostBody): Promise<{ ok:
   if (!body.person) return { ok: false, status: 400, error: "person is required" }
   if (!text) return { ok: false, status: 400, error: "text is required" }
   if (text.length > 4000) return { ok: false, status: 400, error: "text is too long (4000 characters at most)" }
-  const via = body.via === "voice" ? "voice" : "text"
+  const via: "voice" | "text" = body.via === "voice" ? "voice" : "text"
   const r = await loadContext(caseId, body.person)
   if (!r.ok) return r
   const p = prepare(r.ctx)
@@ -80,11 +82,16 @@ export async function prepareTurn(caseId: string, body: PostBody): Promise<{ ok:
       const mine: ChatMessage = { id: messageId("msg-p"), caseId: caseKey, role: "person", personId, text, via, at: new Date().toISOString() }
       await store.add(mine, personId)
       send({ type: "thinking" })
-      const res = await answer({ ...p, history, text, via, emit: (e) => send(e), signal }, provider)
+      const input: AnswerInput = { ...p, history, text, via, emit: (e: ChatEvent) => send(e), signal }
+      // "Send the email" / "show me the email" are commands, answered at once (direct.ts); the rest goes to the model.
+      const intent = chatIntent(text)
+      const res = (intent && (await directAnswer(input, intent))) || (await answer(input, provider))
       if (signal?.aborted) return
       const reply: ChatMessage = {
         id: messageId("msg-a"), caseId: caseKey, role: "agent", text: res.text || "I could not find an answer to that. The decision is yours.", via, at: new Date().toISOString(),
         toolSteps: res.toolSteps.map((s) => (s.status === "running" ? { ...s, status: "failed" as const } : s)),
+        // "Show me the email": the email rides on the message (ChatMessage plus one field), so it is there on reload and in History.
+        ...(res.email ? { email: res.email } : {}),
       }
       await store.add(reply, personId)
       send({ type: "done", message: reply })

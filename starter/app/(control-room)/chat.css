@@ -132,23 +132,84 @@
 }
 
 
-/* The agent's offer to do it: the option's own button and "Not now", right under its answer.
-   The tap is the person's decision; after it, one line of what happened. */
+/* The agent's line of reasoning over each answer (lab chat:06): what it read, one line, ellipsis when long */
+.byline .by-line { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.steps > summary.byline { max-width: 100%; }
 .turn-group { display: contents; }
-.chat-offer { margin-top: -10px; display: flex; flex-direction: column; gap: 8px; }
-.chat-offer-buttons { display: flex; flex-wrap: wrap; gap: 8px; }
-.chat-offer .btn { min-height: max(40px, calc(2.35 * var(--type-body))); padding: 0 1.06em; }
-.chat-offer .btn-plain { padding: 0 14px; }
-.chat-offer .btn:disabled { opacity: .5; }
-.chat-offer .chat-error { margin-top: 0; }
-.offer-done .byline span { display: inline-flex; align-items: center; gap: 4px; }
-/* The message the option sends, shown before the yes: a few lines, then "Read it all". */
-.chat-draft { display: flex; flex-direction: column; gap: 0.35em; padding: 0.7em 0.82em; border-radius: 0.7em; background: var(--raise); }
-.chat-draft .s { color: var(--ink-2); }
-.chat-draft .draft-text { white-space: pre-line; }
-.chat-draft .draft-text.clamped { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 4; line-clamp: 4; overflow: hidden; }
-.chat-draft .read-all { align-self: flex-start; display: inline-flex; align-items: center; gap: 2px; margin: 0 -6px; padding: 2px 6px; border-radius: 999px; color: var(--ink); font-weight: 400; }
-.chat-draft .read-all:hover { background: var(--press); }
+
+/* The offer in the field's place (lab chat:06): the question, what happens, two choices, the limit */
+.chat-approve {
+  flex: none; display: flex; flex-direction: column; gap: 6px;
+  margin: 0 max(12px, calc(16 * var(--cr-u, 1px))) max(12px, calc(16 * var(--cr-u, 1px)));
+  padding: 14px; border-radius: 18px; background: var(--raise);
+  animation: chat-dock-in 250ms cubic-bezier(0.2, 0, 0, 1) both;
+}
+@keyframes chat-dock-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+.approve-title { display: flex; align-items: center; gap: 0.5em; font-size: var(--type-headline); line-height: var(--lh-headline); letter-spacing: var(--track-headline); font-weight: 600; }
+.approve-title > span:not(.amark) { flex: 1; min-width: 0; }
+.approve-title .amark { width: 1.25em !important; height: 1.25em !important; }
+.approve-title .amark svg { width: 62%; height: 62%; }
+.approve-close { flex: none; width: 32px; height: 32px; margin: -6px -6px -6px 0; display: inline-flex; align-items: center; justify-content: center; border-radius: 8px; color: var(--ink-2); }
+.approve-close:hover { background: var(--press); color: var(--ink); }
+.approve-next { margin: 0 0 6px; color: var(--ink-2); }
+.choice {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  min-height: max(44px, calc(2.45 * var(--type-body))); padding: 0 14px; border-radius: 12px;
+  font-size: var(--type-body); line-height: var(--lh-body); text-align: left; color: var(--ink); background: var(--page);
+  box-shadow: 0 0 0 1px rgb(18 17 14 / 0.08);
+  transition: background-color 120ms cubic-bezier(0.2, 0, 0, 1), box-shadow 120ms cubic-bezier(0.2, 0, 0, 1);
+}
+.choice:hover:not(:disabled) { box-shadow: 0 0 0 1px rgb(18 17 14 / 0.22); }
+.choice.is-yes { background: var(--ink); color: var(--page); font-weight: 600; box-shadow: none; }
+.choice.is-yes:hover:not(:disabled) { background: var(--bx-color-grey-900, #2a2925); }
+.choice:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+.choice:disabled { opacity: 0.6; cursor: default; }
+.choice kbd { font-family: inherit; font-size: var(--type-subhead); line-height: 1; font-weight: 400; color: var(--ink-2); }
+.choice.is-yes kbd { color: rgb(255 254 247 / 0.7); }
+.approve-limit { margin-top: 2px; color: var(--ink-2); }
+.approve-choices { display: flex; gap: 8px; }
+.approve-choices .choice { flex: 1 1 0; min-width: 0; }
+.chat-approve + .composer { margin-top: 0; }
+.chat-approve { margin-bottom: 8px; }
+/* The send window: Undo with the time left as a thin line that runs out */
+.chat-approve.is-sending .choice { position: relative; overflow: hidden; }
+.send-count { position: absolute; left: 0; bottom: 0; height: 2px; width: 100%; background: var(--ink); transform-origin: left; transform: scaleX(var(--left, 1)); transition: transform 100ms linear; }
+
+/* After the yes: one line in the conversation (h43) */
+.chat-decided { display: flex; flex-direction: column; gap: 4px; margin-top: -6px; animation: chat-dock-in 200ms cubic-bezier(0.2, 0, 0, 1) both; }
+.chat-decided .strong { display: inline-flex; align-items: center; gap: 6px; font-weight: 600; }
+.chat-decided .s { color: var(--ink-2); }
+
+/* "Show me the email": the email itself, To and Subject over the text, about eight lines until Read it all */
+.chat-email { display: flex; flex-direction: column; gap: 0.5em; margin-top: 0.8em; padding: 0.8em 0.9em; border-radius: 0.8em; background: var(--raise); }
+.chat-email-meta { display: grid; grid-template-columns: auto minmax(0, 1fr); column-gap: 1em; row-gap: 0.2em; padding-bottom: 0.6em; border-bottom: 1px solid rgb(18 17 14 / 0.08); }
+.chat-email-meta dt { color: var(--ink-2); }
+.chat-email-text { white-space: pre-line; }
+.chat-email-text.clamped { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 8; line-clamp: 8; overflow: hidden; }
+.chat-email-en { color: var(--ink-2); margin-top: 0.4em; }
+.chat-email .read-all { align-self: flex-start; display: inline-flex; align-items: center; gap: 2px; margin: 0 -6px; padding: 2px 6px; border-radius: 999px; color: var(--ink); font-weight: 400; }
+.chat-email .read-all:hover { background: var(--press); }
+
+/* The receipt (lab decide:08, h48): over the panel after a decision in the chat */
+.email-receipt { display: flex; flex-direction: column; padding: 0; overflow: hidden; z-index: 12; background: var(--raise); }
+.receipt-head { flex: none; align-items: center; padding: max(12px, calc(16 * var(--cr-u, 1px))) max(20px, calc(28 * var(--cr-u, 1px))) 4px; }
+.receipt-body { flex: 1; min-height: 0; overflow: hidden auto; display: flex; flex-direction: column; justify-content: center; padding: 12px max(20px, calc(28 * var(--cr-u, 1px))) 12vh; }
+.receipt-rule { display: block; height: 1px; margin: 0 calc(-1 * max(20px, calc(28 * var(--cr-u, 1px)))) 1.2em 0; background: linear-gradient(90deg, var(--ink) 0, var(--ink) 2.2em, rgb(18 17 14 / 0.14) 2.2em); }
+.receipt-title { font-size: var(--type-title1); line-height: var(--lh-title1); letter-spacing: var(--track-title1); font-weight: 600; }
+.receipt-line { margin-top: 0.6em; color: var(--ink-2); font-size: var(--type-subhead); line-height: var(--lh-subhead); max-width: 26em; }
+.receipt-more { margin-top: 0.9em; color: var(--ink); font-size: var(--type-subhead); line-height: var(--lh-subhead); max-width: 26em; }
+.receipt-foot { flex: none; display: flex; justify-content: flex-end; gap: 8px; padding: 14px max(20px, calc(28 * var(--cr-u, 1px))) max(14px, calc(20 * var(--cr-u, 1px))); border-top: 1px solid rgb(18 17 14 / 0.06); }
+.receipt-foot .btn-secondary { background: var(--page); box-shadow: 0 0 0 1px rgb(18 17 14 / 0.08); }
+.receipt-foot .btn-secondary:hover { background: var(--press); }
+@media (prefers-reduced-motion: no-preference) {
+  .receipt-title, .receipt-line, .receipt-more { animation: receipt-in 280ms cubic-bezier(0.2, 0, 0, 1) both; }
+  .receipt-line { animation-delay: 60ms; }
+  .receipt-more { animation-delay: 120ms; }
+  .receipt-rule { animation: receipt-rule 420ms cubic-bezier(0.2, 0, 0, 1) both; transform-origin: left; }
+  @keyframes receipt-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+  @keyframes receipt-rule { from { transform: scaleX(0); } to { transform: none; } }
+}
+@media (prefers-reduced-motion: reduce) { .chat-approve, .chat-decided { animation: none; } }
 
 /* The dev-only feedback tool (app/layout.tsx, development only) rests in the side menu's empty
    space, at its right edge just above the person block, where it covers no control at any window
@@ -156,3 +217,5 @@
    wide and opens leftwards from the button, so on a laptop the opened toolbar runs a little past
    the window's left edge; drag it if a hidden control is needed. Its own default is bottom right. */
 agentation-toolbar.agentation-aside { top: auto; left: auto; right: calc(100vw - var(--side, 300px) + 12 * var(--cr-su, 1px)); bottom: calc(100 * var(--cr-su, 1px)); }
+/* The email sheet while its send window runs: the receipt's type, Undo at the foot */
+.send-window { display: flex; flex-direction: column; justify-content: center; padding-bottom: 12vh; }

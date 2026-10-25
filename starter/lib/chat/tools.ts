@@ -17,6 +17,7 @@ import type { Option } from "@/lib/control-room/types"
 import type { ChatAction, ChatToolStep } from "@/lib/control-room/types-chat"
 import type { ChatCaseContext } from "./context"
 import { withDepth } from "./depth"
+import type { ChatDraft, ChatOffer } from "./intent"
 import { answerWeight, earlierOfKind, recordOf } from "./knowledge"
 import { day, inPersonZone, shownAt, stamp } from "./words"
 
@@ -270,7 +271,9 @@ export function proposeOption(ctx: ChatCaseContext, input: { option_id?: unknown
     return { content: JSON.stringify({ error: `No option ${String(input.option_id)} on this case. Offer only the listed options; for anything else, say the card's Other options is the way.` }), isError: true }
   const summary = typeof input.summary === "string" && input.summary.trim() ? input.summary.trim().slice(0, 240) : fallbackSummary
   const draft = draftOf(ctx, option)
-  const action: ChatAction = { optionId: option.id, label: buttonLabel(option), summary, next: nextWords(option), ...(draft ? { draft } : {}) }
+  // The pickup place the agent calls back once it is decided (actions.ts carryOut), for the chat's receipt.
+  const offer: ChatOffer = { optionId: option.id, label: buttonLabel(option), summary, next: nextWords(option), ...(draft ? { draft } : {}), calls: ctx.order.pickup.name }
+  const action: ChatAction = offer
   return {
     action,
     content: JSON.stringify({
@@ -283,8 +286,9 @@ export function proposeOption(ctx: ChatCaseContext, input: { option_id?: unknown
 }
 
 /** The message the option sends, so the yes is given on the actual text: the option's draft, else its message change. */
-export function draftOf(ctx: ChatCaseContext, o: Option): ChatAction["draft"] {
-  if (o.draft?.text) return { to: o.draft.to, language: o.draft.language, text: o.draft.text, ...(o.draft.translation ? { translation: o.draft.translation } : {}) }
+export function draftOf(ctx: ChatCaseContext, o: Option): ChatDraft | undefined {
+  const subject = `${ctx.order.vehicle}, ${ctx.order.reference}`
+  if (o.draft?.text) return { to: o.draft.to, language: o.draft.language, text: o.draft.text, ...(o.draft.translation ? { translation: o.draft.translation } : {}), ...(/e-?mail/i.test(o.draft.to) ? { subject } : {}) }
   const msg = o.changes.find((ch) => ch.kind === "customer_message" || ch.kind === "driver_message")
   if (!msg?.detail) return undefined
   return { to: msg.kind === "customer_message" ? ctx.order.customer : "The driver", language: "en", text: msg.detail }

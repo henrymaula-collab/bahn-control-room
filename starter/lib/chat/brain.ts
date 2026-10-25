@@ -9,6 +9,7 @@ import { agentModel, agentProvider, claudeCodeEnv, effectiveProvider, paths, sup
 import type { BetaMessageParam } from "@/lib/agent/llm"
 import type { CaseKnowledge, ChatAction, ChatEvent, ChatMessage, ChatToolStep } from "@/lib/control-room/types-chat"
 import type { ChatCaseContext } from "./context"
+import type { ChatDraft } from "./intent"
 import { mockAnswer, mockPlan } from "./mock"
 import type { OpenerShape } from "./opener"
 import { chatSystem } from "./prompt"
@@ -47,6 +48,8 @@ export interface AnswerResult {
   toolSteps: ChatToolStep[]
   /** The option the agent offered to carry out, if it did (shown as one tap). */
   action?: ChatAction
+  /** The email itself, for the conversation ("show me the email"); kept on the saved message. */
+  email?: ChatDraft
   provider: ChatProvider
   model: string
 }
@@ -54,7 +57,7 @@ export interface AnswerResult {
 const MAX_TURNS = 4
 
 /** Runs tools and reports each as a step: running first, then done or failed. */
-class Steps {
+export class Steps {
   readonly list: ChatToolStep[] = []
   private run?: RunContext
   constructor(private ctx: ChatCaseContext, private emit: (e: ChatEvent) => void) {}

@@ -2,22 +2,27 @@
 
 import { useRouter } from "next/navigation"
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react"
+import { chatIntent, type ChatDraft, type ChatIntent, type ChatOffer, sendsOnly } from "@/lib/chat/intent"
 import { readChatEvents } from "@/lib/control-room/chat-sse"
 import { gateWords, knowledgeWords } from "@/lib/control-room/chat-words"
-import { clock, day, onDay } from "@/lib/control-room/format"
-import type { CaseKnowledge, ChatAction, ChatMessage, ChatThread, ChatToolStep } from "@/lib/control-room/types-chat"
+import { clock, day, languageName, onDay } from "@/lib/control-room/format"
+import type { CaseKnowledge, ChatMessage, ChatThread, ChatToolStep } from "@/lib/control-room/types-chat"
 import { decide } from "../actions"
 import { AgentMark } from "./agent-mark"
+import { EmailReceipt } from "./email-receipt"
+import { type SendInfo, openedFromChat, pauseSend, recipient, sentWhat, startSend, undoSend, useSendWindow } from "./email-send"
 import { Icon } from "./icons"
 import { VoiceButton, type SpeakInput } from "./voice-button"
+import { usePanel } from "./work-frame"
 
-// "Talk it through": the conversation with the agent beside a decision. The agent
-// answers from the case (order, calls, messages, earlier cases). Asked to do one of
-// the case's options, it offers it as one tap (an "action" event): the option's own
-// button plus "Not now". The tap is the person's decision and goes the same way as
-// the card's button (the decide action, POST /api/cr/decisions), with a short summary
-// of the conversation as the reason. Consumes GET/POST /api/cr/cases/:id/chat
-// (ChatThread, then a text/event-stream of ChatEvent per question).
+// "Talk it through": the conversation with the agent beside a decision. The agent answers from the
+// case (order, calls, messages, earlier cases) and shows what it read as one line over each answer.
+// Asked to do one of the case's options, it offers it in the field's place (lab chat:06): "Send the
+// email" and "See the email". "Send the email", tapped, typed or said, opens the short send window
+// (Sending, Undo) and then decides through the decide action the card's own save calls; the side panel
+// then shows the receipt (h48). "See the email" opens the email sheet (h47: Send, Edit, Cancel).
+// "Show me the email" puts the email itself in the conversation. Consumes GET/POST
+// /api/cr/cases/:id/chat (ChatThread, then a text/event-stream of ChatEvent per question).
 
 const chatUrl = (caseId: string) => `/api/cr/cases/${encodeURIComponent(caseId)}/chat`
 
@@ -29,7 +34,9 @@ export function useChatThread(caseId: string, personId: string) {
     let live = true
     setThread(null)
     setMissing(false)
-    fetch(`${chatUrl(caseId)}?person=${encodeURIComponent(personId)}`, { cache: "no-store" })
+    fetch(`${chatUrl(caseId)}?person=${encodeURIComponent(personId)}`, {
+      cache: "no-store",
+    })
       .then((r) => (r.ok ? (r.json() as Promise<ChatThread>) : null))
       .then((t) => live && (t ? setThread(t) : setMissing(true)))
       .catch(() => live && setMissing(true))
@@ -42,8 +49,32 @@ export function useChatThread(caseId: string, personId: string) {
 
 type Live = { steps: ChatToolStep[]; text: string }
 
-/** The agent's offer under its answer: open until the person taps, then the line of what happened. */
-type Offer = { after: string; action: ChatAction; state: "open" | "saving" | "done" | "failed"; line?: string; at?: string }
+/**
+ * The agent's offer after its answer. open: the two buttons stand in the field's place; sending: the
+ * send window runs; done: one line in the conversation says it was decided and when.
+ */
+type Offer = {
+  after: string
+  action: ChatOffer
+  state: "open" | "sending" | "done" | "failed"
+  at?: string
+}
+
+const infoOf = (caseId: string, action: ChatOffer): SendInfo | null => {
+  if (!action.draft) return null
+  const r = recipient(action.draft.to)
+  return {
+    caseId,
+    origin: "chat",
+    to: r.name,
+    how: r.how,
+    noun: r.noun,
+    language: action.draft.language,
+    subject: action.draft.subject,
+    next: action.next,
+    calls: action.calls,
+  }
+}
 
 export function CaseChat({ thread, personId, now, focus }: { thread: ChatThread | null; personId: string; now: string; focus?: boolean }) {
   const [messages, setMessages] = useState<ChatMessage[]>(thread?.messages ?? [])
@@ -51,6 +82,7 @@ export function CaseChat({ thread, personId, now, focus }: { thread: ChatThread 
   const [error, setError] = useState<string | null>(null)
   const [offer, setOffer] = useState<Offer | null>(null)
   const router = useRouter()
+  const panel = usePanel()
   const [draft, setDraft] = useState("")
   // The answer to a spoken question is read aloud as it streams (one id per answer; a new id stops the old one).
   const [speak, setSpeak] = useState<SpeakInput | null>(null)
@@ -59,6 +91,8 @@ export function CaseChat({ thread, personId, now, focus }: { thread: ChatThread 
   const field = useRef<HTMLTextAreaElement>(null)
   const pinned = useRef(true)
   const abort = useRef<AbortController | null>(null)
+  const caseId = thread?.caseId ?? ""
+  const win = useSendWindow(caseId)
 
   useEffect(() => setMessages(thread?.messages ?? []), [thread])
   useEffect(() => {
@@ -76,7 +110,40 @@ export function CaseChat({ thread, personId, now, focus }: { thread: ChatThread 
   useLayoutEffect(() => {
     const el = log.current
     if (el && pinned.current && (live || messages.length)) el.scrollTop = el.scrollHeight
-  }, [messages.length, live])
+  }, [messages.length, live, offer?.state])
+
+  // The yes: the send window first (Undo for a few seconds), then the decide action the card's save calls.
+  const sendIt = useCallback(
+    (o: Offer) => {
+      if (!thread) return
+      const info = infoOf(thread.caseId, o.action)
+      const decideNow = async () => {
+        const d = await decide({
+          id: `dec-${thread.caseId}-${Date.now().toString(36)}`,
+          caseId: thread.caseId,
+          optionId: o.action.optionId,
+          why: o.action.summary,
+        })
+        const at = clock(d.at)
+        setOffer({ ...o, state: "done", at })
+        router.refresh()
+        return at
+      }
+      if (!info) {
+        // An option that sends nothing: no window, the decision at once.
+        setOffer({ ...o, state: "sending" })
+        decideNow().catch(() => setOffer({ ...o, state: "failed" }))
+        return
+      }
+      setOffer({ ...o, state: "sending" })
+      startSend(
+        info,
+        () => decideNow().catch((e) => (setOffer({ ...o, state: "failed" }), Promise.reject(e))),
+        () => setOffer({ ...o, state: "open" }),
+      )
+    },
+    [thread, router],
+  )
 
   const send = useCallback(
     async (raw: string, via: "text" | "voice") => {
@@ -85,7 +152,16 @@ export function CaseChat({ thread, personId, now, focus }: { thread: ChatThread 
       setError(null)
       setDraft("")
       pinned.current = true
-      const mine: ChatMessage = { id: `local-${Date.now()}`, caseId: thread.caseId, role: "person", personId, text, via, at: new Date().toISOString() }
+      const intent: ChatIntent | null = chatIntent(text)
+      const mine: ChatMessage = {
+        id: `local-${Date.now()}`,
+        caseId: thread.caseId,
+        role: "person",
+        personId,
+        text,
+        via,
+        at: new Date().toISOString(),
+      }
       setMessages((m) => [...m, mine])
       // A new question sets an unanswered offer aside; a decided one keeps its line.
       setOffer((o) => (o && (o.state === "open" || o.state === "failed") ? null : o))
@@ -97,26 +173,42 @@ export function CaseChat({ thread, personId, now, focus }: { thread: ChatThread 
       try {
         const res = await fetch(chatUrl(thread.caseId), {
           method: "POST",
-          headers: { "Content-Type": "application/json", Accept: "text/event-stream" },
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "text/event-stream",
+          },
           body: JSON.stringify({ person: personId, text, via }),
           signal: ctrl.signal,
         })
         if (!res.ok || !res.body) throw new Error(`POST chat ${res.status}`)
         let done = false
-        let action: ChatAction | undefined
+        let action: ChatOffer | undefined
         for await (const ev of readChatEvents(res.body)) {
           if (ev.type === "tool") setLive((l) => l && { ...l, steps: upsert(l.steps, ev.step) })
-          else if (ev.type === "action") action = ev.action
+          else if (ev.type === "action") action = ev.action as ChatOffer
           else if (ev.type === "delta") {
             setLive((l) => l && { ...l, text: l.text + ev.text })
-            if (spoken) setSpeak((sp) => ({ id: answerId.current, text: (sp?.id === answerId.current ? sp.text : "") + ev.text }))
-          }
-          else if (ev.type === "done") {
+            if (spoken)
+              setSpeak((sp) => ({
+                id: answerId.current,
+                text: (sp?.id === answerId.current ? sp.text : "") + ev.text,
+              }))
+          } else if (ev.type === "done") {
             done = true
             setMessages((m) => [...m, ev.message])
             setLive(null)
-            if (action) setOffer({ after: ev.message.id, action, state: "open" })
-            if (spoken) setSpeak({ id: answerId.current, text: ev.message.text, done: true })
+            if (action) {
+              const o: Offer = { after: ev.message.id, action, state: "open" }
+              // "Send the email", typed or said, is the yes itself: straight into the send window.
+              if (intent === "send" && action.draft && sendsOnly(action.label)) sendIt(o)
+              else setOffer(o)
+            }
+            if (spoken)
+              setSpeak({
+                id: answerId.current,
+                text: ev.message.text,
+                done: true,
+              })
           } else if (ev.type === "error") throw new Error(ev.message)
         }
         if (!done) throw new Error("The answer stopped early")
@@ -126,23 +218,29 @@ export function CaseChat({ thread, personId, now, focus }: { thread: ChatThread 
         setError("No answer came through. Ask again.")
       }
     },
-    [thread, live, personId],
+    [thread, live, personId, sendIt],
   )
 
-  // The person's yes: the same decision path as the card's button, then the card shows it decided.
-  const confirm = useCallback(async () => {
-    if (!thread || !offer || offer.state === "saving" || offer.state === "done") return
-    const { action } = offer
-    setOffer({ ...offer, state: "saving" })
-    try {
-      const d = await decide({ id: `dec-${thread.caseId}-${Date.now().toString(36)}`, caseId: thread.caseId, optionId: action.optionId, why: action.summary })
-      const line = `${action.label}.${action.next ? ` ${action.next}` : ""}`
-      setOffer({ ...offer, state: "done", line, at: clock(d.at) })
-      router.refresh()
-    } catch {
-      setOffer({ ...offer, state: "failed" })
-    }
-  }, [thread, offer, router])
+  // "See the email": the email sheet (h47) over the panel, where Edit works; its Send ends in this chat's receipt.
+  const seeIt = useCallback(
+    (o: Offer) => {
+      if (!thread) return
+      openedFromChat(thread.caseId, {
+        next: o.action.next,
+        calls: o.action.calls,
+      })
+      panel.setOpen("email")
+    },
+    [thread, panel],
+  )
+
+  // Decided through the sheet opened from here: the chat says so too.
+  useEffect(() => {
+    if (win?.phase === "sent" && offer && offer.state !== "done") setOffer({ ...offer, state: "done", at: win.at })
+  }, [win?.phase, win?.at, offer])
+
+  const asking = offer && (offer.state === "open" || offer.state === "failed") ? offer : null
+  const sending = win && (win.phase === "wait" || win.phase === "saving") && win.origin === "chat" ? win : null
 
   return (
     <div className="chat">
@@ -165,7 +263,7 @@ export function CaseChat({ thread, personId, now, focus }: { thread: ChatThread 
               m.role === "agent" ? (
                 <div key={m.id} className="turn-group">
                   <AgentTurn message={m} />
-                  {offer?.after === m.id && <OfferTurn offer={offer} onYes={confirm} onNo={() => setOffer(null)} />}
+                  {offer?.after === m.id && offer.state === "done" && <DecidedLine offer={offer} />}
                 </div>
               ) : (
                 <PersonTurn key={m.id} message={m} />
@@ -178,6 +276,17 @@ export function CaseChat({ thread, personId, now, focus }: { thread: ChatThread 
           <LiveTurn live={{ steps: [], text: "" }} />
         )}
       </div>
+      {sending ? (
+        <SendingCard win={sending} />
+      ) : asking ? (
+        <OfferCard
+          offer={asking}
+          onYes={() => sendIt(asking)}
+          onSee={() => seeIt(asking)}
+          onNo={() => (setOffer(null), field.current?.focus({ preventScroll: true }))}
+        />
+      ) : null}
+      {/* The field stays under the offer: saying or typing "send the email" is the yes too. */}
       <form
         className="composer"
         onSubmit={(e) => {
@@ -213,6 +322,8 @@ export function CaseChat({ thread, personId, now, focus }: { thread: ChatThread 
           <Icon name="arrow-up" size={18} />
         </button>
       </form>
+
+      {thread && <EmailReceipt caseId={thread.caseId} />}
     </div>
   )
 }
@@ -237,24 +348,42 @@ function Words({ text }: { text: string }) {
   )
 }
 
-/** "3 steps ›": what the agent looked at, one tap deep. */
-function Steps({ steps, working }: { steps: ChatToolStep[]; working?: boolean }) {
-  const n = steps.length
-  // One step needs no disclosure: its own words are shorter than "1 step ›".
-  if (n <= 1)
+const lower = (s: string) => (s ? s[0].toLowerCase() + s.slice(1) : s)
+
+/** "Read the order, the call with Calverona Hamburg and looked up earlier cases": the steps as one plain line (lab chat:06). */
+export function stepSentence(steps: ChatToolStep[]): string {
+  const labels = steps.map((s) => s.label.replace(/: none( yet)?$/, ""))
+  if (labels.length <= 1) return labels[0] ?? ""
+  // A verb said once: "Read the order and the call with ..."
+  const verb = (l: string) => /^(Read|Looked up|Looked for|Checked|Found) /.exec(l)?.[1] ?? null
+  const parts = labels.map((l, i) => {
+    const v = verb(l)
+    const same = i > 0 && v && v === verb(labels[i - 1])
+    const t = same ? l.slice(v!.length + 1) : l
+    return i === 0 ? t : lower(t)
+  })
+  return `${parts.slice(0, -1).join(", ")} and ${parts[parts.length - 1]}`
+}
+
+/**
+ * What the agent read, over its answer: its line of reasoning in one line ("Read the order"), the
+ * whole list one tap deep when there is more than one step. While it works: the step it is on.
+ */
+function Byline({ steps, working }: { steps: ChatToolStep[]; working?: boolean }) {
+  const running = [...steps].reverse().find((s) => s.status === "running")
+  const line = running ? running.label : working ? (steps.length ? "Writing the answer" : "Reading the case") : stepSentence(steps)
+  if (steps.length <= 1 || working)
     return (
       <p className="byline s">
         <AgentMark working={working} />
-        {n === 1 && <span>{steps[0].label}</span>}
+        {line && <span className={`by-line${working ? " thinking" : ""}`}>{line}</span>}
       </p>
     )
   return (
     <details className="steps">
       <summary className="byline s">
-        <AgentMark working={working} />
-        <span>
-          {n} {n === 1 ? "step" : "steps"}
-        </span>
+        <AgentMark />
+        <span className="by-line">{line}</span>
         <Icon name="chevron-right" size={14} />
       </summary>
       <StepLines steps={steps} />
@@ -278,11 +407,14 @@ function StepLines({ steps }: { steps: ChatToolStep[] }) {
   )
 }
 
-function AgentTurn({ message }: { message: ChatMessage }) {
+/** An agent message; "show me the email" answers carry the email itself (lib/chat/service.ts). */
+function AgentTurn({ message }: { message: ChatMessage & { email?: ChatDraft } }) {
+  const email = message.email
   return (
     <div className="turn agent">
-      <Steps steps={message.toolSteps ?? []} />
+      <Byline steps={message.toolSteps ?? []} />
       <Words text={message.text} />
+      {email && <EmailInChat draft={email} />}
     </div>
   )
 }
@@ -303,53 +435,50 @@ function PersonTurn({ message }: { message: ChatMessage }) {
   )
 }
 
-/** One tap to let the agent do it: the option's own button and "Not now"; after the yes, one line of what happened. */
-function OfferTurn({ offer, onYes, onNo }: { offer: Offer; onYes: () => void; onNo: () => void }) {
-  if (offer.state === "done")
-    return (
-      <div className="turn agent offer-done" role="status">
-        <p className="byline s">
-          <AgentMark />
-          <span>
-            <Icon name="check" size={14} /> Decided{offer.at ? ` at ${offer.at}` : ""}
-          </span>
-        </p>
-        <Words text={offer.line ?? ""} />
-      </div>
-    )
-  const saving = offer.state === "saving"
-  return (
-    <div className="chat-offer">
-      {offer.action.draft && <OfferDraft draft={offer.action.draft} />}
-      <div className="chat-offer-buttons">
-        <button type="button" className="btn btn-primary" disabled={saving} onClick={onYes}>
-          {offer.action.label}
-        </button>
-        <button type="button" className="btn btn-plain" disabled={saving} onClick={onNo}>
-          Not now
-        </button>
-      </div>
-      {offer.state === "failed" && <p className="s now chat-error">This was not saved. Nothing was sent or booked. Try again.</p>}
-    </div>
-  )
-}
-
-/** The message itself before the yes: who it goes to and the text, a few lines until "Read it all ›". */
-function OfferDraft({ draft }: { draft: NonNullable<ChatAction["draft"]> }) {
+/** "Show me the email": the email itself in the conversation, To and Subject over it, about eight lines until "Read it all". */
+function EmailInChat({ draft }: { draft: ChatDraft }) {
   const [all, setAll] = useState(false)
-  const long = draft.text.length > 220 || draft.text.split("\n").length > 4
-  const translated = draft.translation && draft.language !== "en"
+  const text = useRef<HTMLParagraphElement>(null)
+  const [long, setLong] = useState(true)
+  useLayoutEffect(() => {
+    const el = text.current
+    if (el && !all) setLong(el.scrollHeight > el.clientHeight + 2)
+  }, [all, draft.text])
+  const r = recipient(draft.to)
+  const foreign = draft.language !== "en"
   return (
-    <div className="chat-draft">
-      <p className="s">To {draft.to}</p>
-      <p className={`m draft-text${all || !long ? "" : " clamped"}`}>{draft.text}</p>
-      {all && translated && (
+    <div className="chat-email" aria-label={`The ${r.noun}`}>
+      <dl className="chat-email-meta s">
+        <dt>To</dt>
+        <dd>
+          {r.name}
+          {r.how ? `, ${r.how}` : ""}
+        </dd>
+        {draft.subject && (
+          <>
+            <dt>Subject</dt>
+            <dd>{draft.subject}</dd>
+          </>
+        )}
+        {foreign && (
+          <>
+            <dt>Language</dt>
+            <dd>{languageName(draft.language)}</dd>
+          </>
+        )}
+      </dl>
+      <p ref={text} className={`m chat-email-text${all ? "" : " clamped"}`} lang={draft.language}>
+        {draft.text}
+      </p>
+      {all && foreign && draft.translation && (
         <>
-          <p className="s">In English</p>
-          <p className="m draft-text">{draft.translation}</p>
+          <p className="s chat-email-en">In English</p>
+          <p className="m chat-email-text" lang="en">
+            {draft.translation}
+          </p>
         </>
       )}
-      {!all && (long || translated) && (
+      {!all && (long || (foreign && !!draft.translation)) && (
         <button type="button" className="s read-all" onClick={() => setAll(true)}>
           Read it all
           <Icon name="chevron-right" size={14} />
@@ -359,22 +488,110 @@ function OfferDraft({ draft }: { draft: NonNullable<ChatAction["draft"]> }) {
   )
 }
 
-/** The answer on its way: the mark breathes, "Thinking", then each step as a quiet line; the text streams in. */
-function LiveTurn({ live }: { live: Live }) {
-  if (live.text)
-    return (
-      <div className="turn agent live">
-        <Steps steps={live.steps} working />
-        <Words text={live.text} />
+/**
+ * The offer in the field's place (lab chat:06): the question, what happens next, the filled
+ * "Send the email" (Enter, it has focus) and "See the email" (the sheet, where Edit works).
+ * Escape or the close says not now, and the field comes back.
+ */
+function OfferCard({ offer, onYes, onSee, onNo }: { offer: Offer; onYes: () => void; onSee: () => void; onNo: () => void }) {
+  const yes = useRef<HTMLButtonElement>(null)
+  useEffect(() => {
+    yes.current?.focus({ preventScroll: true })
+  }, [offer.after])
+  const { action } = offer
+  const email = !!action.draft
+  const noun = action.draft ? recipient(action.draft.to).noun : "email"
+  return (
+    <div
+      className="chat-approve"
+      role="group"
+      aria-label="The agent's offer"
+      onKeyDown={(e) => {
+        if (e.key === "Escape") {
+          e.preventDefault()
+          e.stopPropagation()
+          onNo()
+        }
+      }}
+    >
+      <div className="approve-title">
+        <AgentMark />
+        <span>{action.label}?</span>
+        <button type="button" className="approve-close" aria-label="Not now" onClick={onNo}>
+          <Icon name="x" size={16} />
+        </button>
       </div>
-    )
+      {action.next && <p className="approve-next s">Then {lower(action.next)}</p>}
+      <div className="approve-choices">
+        <button ref={yes} type="button" className="choice is-yes" onClick={onYes}>
+          <span>{action.label}</span>
+          <kbd aria-label="Enter">↵</kbd>
+        </button>
+        {email && sendsOnly(action.label) && (
+          <button type="button" className="choice" onClick={onSee}>
+            <span>See the {noun}</span>
+          </button>
+        )}
+      </div>
+      <p className="approve-limit s">
+        {offer.state === "failed"
+          ? "This was not saved. Nothing was sent or booked. Try again."
+          : `The agent never contacts a customer on its own. Nothing is sent before you choose.`}
+      </p>
+    </div>
+  )
+}
+
+/** The send window in the field's place: what is going where, a count, and Undo (held while pointed at). */
+function SendingCard({ win }: { win: NonNullable<ReturnType<typeof useSendWindow>> }) {
+  const saving = win.phase === "saving"
+  return (
+    <div className="chat-approve is-sending" role="status" aria-live="polite">
+      <div className="approve-title">
+        <AgentMark working />
+        <span>Sending</span>
+      </div>
+      <p className="approve-next s">
+        {sentWhat(win)}
+        {win.subject ? `, about ${win.subject}` : ""}.{" "}
+        {saving ? "Saving the decision." : `It goes in ${Math.max(1, Math.ceil(win.left))} s. Until then you can take it back.`}
+      </p>
+      <button
+        type="button"
+        className="choice"
+        disabled={saving}
+        onClick={() => undoSend()}
+        onPointerEnter={() => pauseSend(true)}
+        onPointerLeave={() => pauseSend(false)}
+        onFocus={() => pauseSend(true)}
+        onBlur={() => pauseSend(false)}
+      >
+        <span>Undo</span>
+        <span className="send-count" aria-hidden="true" style={{ ["--left" as string]: String(win.left / 5) }} />
+      </button>
+    </div>
+  )
+}
+
+/** After the yes: one line in the conversation (h43), what was decided and what the agent does next. */
+function DecidedLine({ offer }: { offer: Offer }) {
+  return (
+    <div className="chat-decided" role="status">
+      <p className="m strong">
+        <Icon name="check" size={16} /> Decided
+        {offer.at ? ` at ${offer.at}` : ""}
+      </p>
+      {offer.action.next && <p className="s">{offer.action.next}</p>}
+    </div>
+  )
+}
+
+/** The answer on its way: the mark breathes, the step it is on as one shimmering line; the text streams in. */
+function LiveTurn({ live }: { live: Live }) {
   return (
     <div className="turn agent live">
-      <p className="byline s">
-        <AgentMark working />
-        <span className="thinking">Thinking</span>
-      </p>
-      {live.steps.length > 0 && <StepLines steps={live.steps} />}
+      <Byline steps={live.steps} working />
+      {live.text && <Words text={live.text} />}
     </div>
   )
 }

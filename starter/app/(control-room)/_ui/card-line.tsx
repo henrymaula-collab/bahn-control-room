@@ -4,7 +4,7 @@
 // person one decision" step, the room clock and the case's decide-by. No hooks, so the server
 // page builds the data and the client card draws it.
 
-import { clock, minutesUntil, needsPersonNow, when } from "@/lib/control-room/format"
+import { NOW_WINDOW_MINUTES, clock, minutesUntil, when } from "@/lib/control-room/format"
 import type { AgentStep, Case } from "@/lib/control-room/types"
 import { AgentMark } from "./agent-mark"
 
@@ -12,10 +12,10 @@ export type TimeLine = {
   agentAt?: string // "12:01": when the agent brought the case to a person
   sentTo: string // "Sent it to you", "Sent it to Sofie"
   due?: { at: string; left?: string; red: boolean; past: boolean }
-  then?: string // the agent's next step, short
+  then?: { short: string; full: string } // the agent's next step: a few words, and the whole clause for hover
 }
 
-/** "60 min", "1 h 20 min", "5 h". */
+/** "59 min", "1 h 20 min", "5 h". */
 function leftWords(min: number) {
   if (min <= 90) return `${min} min`
   const h = Math.floor(min / 60)
@@ -29,40 +29,69 @@ export function pingStep(steps: AgentStep[]): AgentStep | undefined {
   return proposals.find((s) => /^Brought a person/.test(s.summary)) ?? proposals[0]
 }
 
-/**
- * The next line, short enough for the line's last stop: its first clause, without "After a yes,"
- * and "The agent" (the line already says whose step it is). "The agent checks with the branch
- * again at 10:00 and keeps the gig unpublished until ..." -> "Checks with the branch again at 10:00".
- */
-export function thenWords(next?: string): string | undefined {
-  if (!next) return undefined
-  let s = next.trim().replace(/^After a yes,\s*/i, "")
-  const cut = s.search(/,?\s(and then|and|until|so that|so|because)\s/)
-  if (cut > 0) s = s.slice(0, cut)
-  s = s.replace(/^the agent\s+/i, "").replace(/[.;,]$/, "")
-  // Still long for the line's last stop (Safari at 125 % gives it about 20 characters a line):
-  // end before the last trailing phrase that keeps it within SHORT. "Asks the pickup place to name the
-  // key holder at the collection bay desk" -> "Asks the pickup place to name the key holder".
-  if (s.length > SHORT) {
-    const ends = [...s.matchAll(/\s(?:at|about|in|on|for|from|with|by|before|after)\s/g)].map((m) => m.index ?? 0).filter((i) => i >= 20 && i <= SHORT)
-    if (ends.length) s = s.slice(0, ends[ends.length - 1])
-  }
-  return s ? s.charAt(0).toUpperCase() + s.slice(1) : undefined
-}
-const SHORT = 46
+const NAMES_A_DAY = /\b(?:mon|tue|wed|thu|fri|sat|sun)(?:day|sday|nesday|rsday|urday)?\b|\btoday\b|\btomorrow\b|\b\d{1,2}\s(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)\b/i
 
-export function timeLineFor(c: Case, now: string, next: string | undefined, sentTo: string): TimeLine {
+/**
+ * A clock time the agent wrote without a day or a zone ("checks with the branch again at 10:00") is
+ * dropped: the line cannot say which day or whose clock it is (the Ferrari's 10:00 is the 12:00
+ * Hamburg follow-up in UTC), and after "Decide by 13:00" it read as a time after 13:00. A time with
+ * its day named stays.
+ */
+export function withoutBareTimes(text: string): string {
+  if (NAMES_A_DAY.test(text)) return text
+  return text.replace(/\s(?:at|from|by|before|after|around)\s\d{1,2}[:.]\d{2}(?:\s(?:local time|UTC|CET|CEST|EET|EEST))?/gi, "")
+}
+
+/** One line under "Then" in Henry's Safari at 125 %: about this many characters. */
+const SHORT = 24
+
+/**
+ * The next line, short enough for one line under "Then": its first clause without "After a yes,",
+ * "The agent" (the line already says whose step it is) and a time with no day; then, while too long,
+ * cut before a trailing phrase (" to the customer", " again"). Always the case's own words, from the
+ * start. "The agent checks with the branch again at 10:00 and keeps the gig unpublished until ..."
+ * -> "Checks with the branch".
+ */
+export function thenWords(next?: string): { short: string; full: string } | undefined {
+  if (!next) return undefined
+  let s = withoutBareTimes(next.trim().replace(/^After a yes,\s*/i, ""))
+  const cut = s.search(/,?\s(and then|and|until|so that|so|because|;)\s/)
+  if (cut > 0) s = s.slice(0, cut)
+  s = s.replace(/^the agent\s+/i, "").replace(/[.;,]$/, "").trim()
+  if (!s) return undefined
+  const full = s.charAt(0).toUpperCase() + s.slice(1)
+  let short = full
+  if (short.length > SHORT) {
+    const ends = [...short.matchAll(/\s(?:to|for|about|at|in|on|with|from|by|before|after|again|until)\b/g)]
+      .map((m) => m.index ?? 0)
+      .filter((i) => i <= SHORT && short.slice(0, i).trim().split(/\s+/).length >= 2)
+    if (ends.length) short = short.slice(0, ends[ends.length - 1])
+  }
+  return { short, full }
+}
+
+/** The ISO time cut to its minute, so the minutes left agree with the clock times shown. */
+const toMinute = (iso: string) => new Date(Math.floor(Date.parse(iso) / 60_000) * 60_000).toISOString()
+
+/**
+ * Now is the room clock, but never before the agent's own ping: the agent brought the Ferrari at
+ * 12:01 while the room clock reads 12:00, so the line counts from 12:01 ("in 59 min"), and every
+ * time on the card (the line, the steps, the deadline) reads in order.
+ */
+export function timeLineFor(c: Case, roomNow: string, next: string | undefined, sentTo: string): TimeLine {
   const ping = pingStep(c.agentSteps)
+  const pingAt = ping?.at ?? c.createdAt
+  const now = toMinute(Date.parse(pingAt) > Date.parse(roomNow) ? pingAt : roomNow)
   const left = c.decideBy ? minutesUntil(c.decideBy, now) : undefined
   const past = left != null && left <= 0
   return {
-    agentAt: clock(ping?.at ?? c.createdAt),
+    agentAt: clock(pingAt),
     sentTo,
     due: c.decideBy
       ? {
           at: when(c.decideBy, now, undefined, true),
           left: left != null && left > 0 && left < 24 * 60 ? `in ${leftWords(Math.round(left))}` : undefined,
-          red: past || needsPersonNow(c, now),
+          red: past || (c.status === "waiting_for_person" && left != null && left <= NOW_WINDOW_MINUTES),
           past,
         }
       : undefined,
@@ -70,54 +99,40 @@ export function timeLineFor(c: Case, now: string, next: string | undefined, sent
   }
 }
 
-/** The line itself: agent, now, the deadline, then. Each stop a dot on the rail with its words under it. */
+/**
+ * The line itself: agent, now, the deadline, then. Each stop a mark on the rail with its words under
+ * it: one line, and at most one grey line under that (master, 10:00: compact for Safari at 125 %).
+ */
 export function CardTimeLine({ line }: { line: TimeLine }) {
   const { due } = line
   return (
     <ol className="cline" aria-label="Time line">
-      <li className="cline-stop cline-agent">
-        <span className="cline-rail" aria-hidden="true">
-          <AgentMark size={20} />
-        </span>
-        <span className="cline-what">
-          <span className="cline-main">
-            Agent <time className="num">{line.agentAt}</time>
-          </span>
-          <span className="cline-sub">{line.sentTo}</span>
-        </span>
-      </li>
-      <li className={`cline-stop cline-now${due?.red ? " to-red" : ""}`}>
-        <span className="cline-rail" aria-hidden="true">
-          <span className="cline-dot" />
-        </span>
-        <span className="cline-what">
-          <span className="cline-main">Now</span>
-        </span>
-      </li>
+      <Stop cls="cline-agent" mark={<AgentMark size={20} />} sub={line.sentTo}>
+        <span className="cline-strong">Agent</span> <time className="num">{line.agentAt}</time>
+      </Stop>
+      <Stop cls={`cline-now${due?.red ? " to-red" : ""}`}>Now</Stop>
       {due && (
-        <li className={`cline-stop cline-due${due.red ? " red" : ""}`}>
-          <span className="cline-rail" aria-hidden="true">
-            <span className="cline-dot" />
-          </span>
-          <span className="cline-what">
-            <span className="cline-main">
-              {due.past ? "Was due at" : "Decide by"} <time className="num">{due.at}</time>
-            </span>
-            {due.left && <span className="cline-sub">{due.left}</span>}
-          </span>
-        </li>
+        <Stop cls={`cline-due${due.red ? " red" : ""}`} sub={due.left}>
+          {due.past ? "Was due at" : "Decide by"} <time className="num">{due.at}</time>
+        </Stop>
       )}
       {line.then && (
-        <li className="cline-stop cline-then">
-          <span className="cline-rail" aria-hidden="true">
-            <span className="cline-dot" />
-          </span>
-          <span className="cline-what">
-            <span className="cline-main">Then</span>
-            <span className="cline-sub">{line.then}</span>
-          </span>
-        </li>
+        <Stop cls="cline-then" sub={line.then.short} title={line.then.full !== line.then.short ? line.then.full : undefined}>
+          Then
+        </Stop>
       )}
     </ol>
+  )
+}
+
+function Stop({ cls, mark, sub, title, children }: { cls: string; mark?: React.ReactNode; sub?: string; title?: string; children: React.ReactNode }) {
+  return (
+    <li className={`cline-stop ${cls}`} title={title}>
+      <span className="cline-rail" aria-hidden="true">
+        {mark ?? <span className="cline-dot" />}
+      </span>
+      <span className="cline-main">{children}</span>
+      {sub && <span className="cline-sub">{sub}</span>}
+    </li>
   )
 }

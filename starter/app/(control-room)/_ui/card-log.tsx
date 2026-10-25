@@ -58,7 +58,7 @@ const WEIGHT: Record<string, number> = { call: 0, message: 1, ask: 1, lookup: 2,
 /**
  * What the agent did before it brought the case to a person: everything before its first "propose"
  * step, less the follow-up it only planned ("wait"). The line names the step that says most (a call,
- * then a message, then the rest) with its time: "Called Calverona Hamburg in German at 12:01".
+ * then a message, then the rest): "Called Calverona Hamburg in German".
  */
 export function legworkOf(steps: AgentStep[]): Legwork | undefined {
   const stop = steps.findIndex((s) => s.kind === "propose")
@@ -67,5 +67,7 @@ export function legworkOf(steps: AgentStep[]): Legwork | undefined {
   const weight = (s: AgentStep) => (/^called\b/i.test(s.summary) ? 0 : (WEIGHT[s.kind] ?? 9))
   const lead = [...work].sort((a, b) => weight(a) - weight(b))[0]
   const first = (sentences(lead.summary)[0] ?? lead.summary).replace(/\.$/, "")
-  return { lead: `${first} at ${clock(lead.at)}`, more: work.length - 1, rows: work.map((s) => stepRow(s)) }
+  // No time on the closed line: it is on the time line above and on every step it opens to, and
+  // without it the line keeps to one line in Henry's Safari (card:20's wording).
+  return { lead: first, more: work.length - 1, rows: work.map((s) => stepRow(s)) }
 }

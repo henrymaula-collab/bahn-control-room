@@ -76,7 +76,9 @@
   --size-s: var(--type-subhead);
   --column: calc(32 * var(--card-ask));
   overflow: hidden auto;
-  padding: max(calc(28 * var(--type-kf)), calc(56 * var(--cr-u, 1px))) var(--card-pad);
+  /* Top and bottom air a little under the side air: with the time line, the question, its answer and all
+     three rows have to fit above the dock in Henry's Safari (1330 x 680 at 125 %). */
+  padding: max(calc(18 * var(--type-kf)), calc(40 * var(--cr-u, 1px))) var(--card-pad);
 }
 .work.look-switcher .detail { padding-top: max(16px, calc(28 * var(--cr-u, 1px))); }
 .work .detail-inner { font-size: var(--size-m); line-height: var(--lh-body); }
@@ -94,24 +96,24 @@
 /* The question: its own block, 1 em of its size under the situation, sitting on its answer. */
 .work .detail .question .ask {
   max-width: 32em; /* about 65 characters: two lines */
-  margin-top: 1em;
+  margin-top: 0.8em;
   font-size: var(--card-ask); line-height: var(--lh-title2); font-weight: 400;
   letter-spacing: var(--track-title2);
 }
 .work .question .context { margin-top: 0.667em; }
 /* The answer and Other options always on one line (Henry, Safari 21:30: Other options fell under it). */
-.work .answers { margin-top: calc(24 / 17 * 1em); gap: 0.5em; flex-wrap: nowrap; }
+.work .answers { margin-top: 1.1em; gap: 0.5em; flex-wrap: nowrap; }
 .work .answers .btn { flex: none; white-space: nowrap; }
 .work .answers .btn { min-height: max(44px, calc(2.6 * var(--size-m))); padding: 0 1.25em; font-size: var(--size-m); }
 .work .answers .btn-plain { padding: 0 0.92em; }
 .work .question .next { margin-top: 0.8em; max-width: 40em; }
 
 /* The rows under it */
-.work .work-rows { margin-top: 1.67em; }
+.work .work-rows { margin-top: 1.1em; }
 /* A row's title and its grey line stay one line each; a long one ends in an ellipsis. */
 .work .detail .row-link .title, .work .detail .row-link .sub, .work .detail .row > summary .title { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .work .detail .row > summary,
-.work .detail .row-link { gap: 0.83em; padding: 0.58em 0.83em; margin: 0 -0.83em; border-radius: 0.75em; }
+.work .detail .row-link { gap: 0.83em; padding: 0.42em 0.83em; margin: 0 -0.83em; border-radius: 0.75em; }
 .work .detail button.row-link { width: calc(100% + 1.67em); }
 .work .detail .chev svg { width: 1em; height: 1em; }
 .work .detail .row > .body { padding: 0.5em 0 1.33em; }
@@ -166,24 +168,24 @@
 .send-actions { display: flex; align-items: center; gap: 8px; }
 
 
-/* ---- The card's time line (Henry, 25 Oct, h24 + h39): agent, now, decide by, then, left to right
-   on one rail at the top of the card. Each stop: its mark on the rail, its words under it. The rail
-   is grey where it is past, ink to red for the time you have (the map's red within the hour), dotted
-   for what follows. Subhead size, so it fits the card's column in Safari at 125 %. */
+/* ---- The card's time line (Henry, 25 Oct, h24 + h39; master 10:00: compact for Safari at 125 %):
+   agent, now, decide by, then, left to right on one rail at the top of the card. Each stop: its mark
+   on the rail, one line of words under it and at most one grey line under that. The rail is grey
+   where it is past, ink to red for the time you have (the map's red within the hour), dotted for what
+   follows. The spare width goes to the hour between now and the deadline. */
 .work .cline {
-  --cl-rail: max(20px, calc(1.45 * var(--size-s)));
+  --cl-rail: max(18px, calc(1.3 * var(--size-s)));
   --cl-gap: 1.6em;
-  list-style: none; margin: 0 0 1.1em; padding: 0;
+  list-style: none; margin: 0 0 0.85em; padding: 0;
   display: flex; align-items: flex-start;
   max-width: calc(var(--card-measure, 24) * var(--size-l)); /* as wide as the situation under it */
   font-size: var(--size-s); line-height: var(--lh-subhead);
 }
-/* The spare width goes to the rail, most of it to the hour between now and the deadline. */
-.work .cline-stop { position: relative; flex: 1 0 auto; display: flex; flex-direction: column; padding-right: var(--cl-gap); --dotw: 8px; }
+.work .cline-stop { position: relative; flex: 1 0 auto; display: flex; flex-direction: column; min-width: 0; padding-right: var(--cl-gap); --dotw: 8px; }
 .work .cline-now { flex-grow: 2.5; min-width: 3.8em; } /* the hour you have is never a stub */
 .work .cline-stop:last-child { flex: 0 1 auto; padding-right: 0; }
-.work .cline-then { min-width: 7em; }
-.work .cline-rail { position: relative; height: var(--cl-rail); display: flex; align-items: center; }
+.work .cline-stop:last-child.cline-then { flex: 1 1 auto; min-width: 6em; } /* Then takes what is left */
+.work .cline-rail { position: relative; height: var(--cl-rail); margin-bottom: 0.1em; display: flex; align-items: center; }
 .work .cline-stop:not(:last-child) .cline-rail::after {
   content: ""; position: absolute; top: 50%; left: calc(var(--dotw) + 6px); right: 6px;
   height: 2px; margin-top: -1px; border-radius: 1px; background: var(--bx-color-grey-300);
@@ -200,14 +202,15 @@
 .work .cline-due .cline-dot { background: var(--page); border: 2px solid var(--ink); }
 .work .cline-due.red .cline-dot { background: var(--red); border: 0; box-shadow: 0 0 0 3px var(--bx-color-red-100); }
 .work .cline-then .cline-dot { background: var(--page); border: 2px solid var(--bx-color-grey-300); }
-.work .cline-what { display: flex; flex-direction: column; margin-top: 0.3em; }
-.work .cline-main { color: var(--ink); white-space: nowrap; }
+/* One line each: the words, then the grey line; Then's grey line ends in an ellipsis (whole on hover). */
+.work .cline-main, .work .cline-sub { white-space: nowrap; }
+.work .cline-main { color: var(--ink); }
 .work .cline-sub { color: var(--ink-2); }
-.work .cline-agent .cline-main { font-weight: 600; }
-.work .cline-agent .cline-main time { font-weight: 400; color: var(--ink-2); margin-left: 0.15em; }
+.work .cline-then .cline-sub { overflow: hidden; text-overflow: ellipsis; }
+.work .cline-strong { font-weight: 600; }
+.work .cline-agent .cline-main time { color: var(--ink-2); }
 .work .cline-due .cline-main { font-weight: 600; }
 .work .cline-due.red .cline-main { color: var(--now); }
-.work .cline-then .cline-sub { text-wrap: pretty; max-width: 22em; }
 .work .cline .num { font-variant-numeric: tabular-nums; }
 
 /* ---- The agent's legwork under the situation (h22): one grey line with a tick, opening to the steps. */

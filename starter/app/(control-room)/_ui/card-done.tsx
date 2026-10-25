@@ -10,6 +10,7 @@ import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
 import { languageName } from "@/lib/control-room/format"
 import type { AgentStep, Option } from "@/lib/control-room/types"
+import { withoutBareTimes } from "./card-line"
 import { CardLog, type LogRow, sentences, stepRow } from "./card-log"
 import { Keep } from "./text"
 import { useNextCase } from "./work-frame"
@@ -52,11 +53,11 @@ function recipient(to: string) {
   return { name: to.split(/,\s*/)[0].trim(), email: /e-?mail/i.test(to) }
 }
 
-/** What the agent does after the yes, from the option's effect: its sentences about the agent. */
+/** What the agent does after the yes, from the option's effect: its sentences about the agent (a time without its day dropped, as on the time line). */
 function agentPlan(o: Option): string[] {
   return sentences(o.effect)
     .filter((s) => !/^A person sends/i.test(s))
-    .map((s) => s.replace(/^After a yes,\s*/i, ""))
+    .map((s) => withoutBareTimes(s.replace(/^After a yes,\s*/i, "")))
     .map((s) => s.charAt(0).toUpperCase() + s.slice(1))
 }
 

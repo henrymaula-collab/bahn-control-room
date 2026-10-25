@@ -79,7 +79,12 @@ export function WorkFrame({ lists, times, children }: { lists: WorkLists; times:
   // still the case that followed it.
   const seen = useRef<WorkRow | undefined>(undefined)
   if (index >= 0) seen.current = rows[index]
-  const at: WorkRow | string = index >= 0 ? rows[index] : seen.current?.caseId === current ? seen.current : current
+  // On a fresh load of a case that already left Your tasks (decided), its row is in the other lists.
+  const known = useMemo(
+    () => (index >= 0 ? undefined : [...lists.agentWorking, ...lists.doneToday].find((r) => r.caseId === current)),
+    [index, lists.agentWorking, lists.doneToday, current],
+  )
+  const at: WorkRow | string = index >= 0 ? rows[index] : seen.current?.caseId === current ? seen.current : (known ?? current)
   const prev = previousCase(rows, at)
   const next = current ? nextCase(rows, at) : rows[0]
 

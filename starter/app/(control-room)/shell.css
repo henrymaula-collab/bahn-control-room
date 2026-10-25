@@ -80,8 +80,7 @@
    in Henry's Safari (1330 x 680 at 125 %) a floating dock sat on "Send to a colleague". */
 .work.has-dock { grid-template-rows: minmax(0, 1fr) auto; }
 .work.has-dock .detail { grid-row: 1; }
-/* A card taller than its room scrolls above the dock and fades out into the strip instead of a hard cut. */
-.work.has-dock .detail { -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 28px), transparent); mask-image: linear-gradient(to bottom, #000 calc(100% - 28px), transparent); }
+/* No fade above the dock: it dimmed the card's black Next case in Henry's Safari (master, 10:00). */
 .work .task-dock-bay {
   grid-row: 2; grid-column: 1 / -1; position: relative; z-index: 12;
   display: flex; justify-content: center; padding: 6px 16px max(12px, calc(20 * var(--cr-u, 1px)));

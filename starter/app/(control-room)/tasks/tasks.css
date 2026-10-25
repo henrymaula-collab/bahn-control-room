@@ -222,6 +222,7 @@
 .work .clegwork-line svg { flex: none; width: 1em; height: 1em; margin-top: 0.17em; }
 .work .clegwork-line > svg { color: var(--green); }
 /* The chevron follows the words, also when they wrap. */
+.work .clegwork-line .clegwork-tail { white-space: nowrap; }
 .work .clegwork-line .clegwork-chev { display: inline-block; margin: 0 0 0 0.3em; vertical-align: -0.14em; }
 .work .clegwork .clog { margin: 0.7em 0 0.4em; max-width: 40em; }
 .work .question .clegwork + .ask { margin-top: 0.75em; }
@@ -263,9 +264,9 @@
    legwork's, a call's long grey line kept to one line (the whole call is in Talk it through and
    History), and what is still to come at the grey line's size. */
 .work .card-done-log { margin-top: 1em; max-width: 36em; }
-.work .card-done-log .clog { font-size: var(--size-m); line-height: var(--lh-body); gap: 0.6em; }
-.work .card-done-log .clog-row:not(:last-child)::before { bottom: -0.6em; }
+.work .card-done-log .clog { font-size: var(--size-m); line-height: var(--lh-body); gap: 0.55em; }
+.work .card-done-log .clog-row:not(:last-child)::before { bottom: -0.55em; }
 .work .card-done-log .clog-sub { font-size: var(--size-s); line-height: var(--lh-subhead); }
 .work .card-done-log .clog-row.short .clog-sub { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 1; line-clamp: 1; overflow: hidden; }
 .work .card-done-log .is-next .clog-text { font-size: var(--size-s); line-height: var(--lh-subhead); }
-.work .card-done .answers { margin-top: 1.2em; }
+.work .card-done .answers { margin-top: 1em; }

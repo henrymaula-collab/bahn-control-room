@@ -5,6 +5,7 @@
 import type { CaseKnowledge, ChatEvent, ChatMessage, ChatThread } from "@/lib/control-room/types-chat"
 import { answer, type AnswerInput, chatProvider, type ChatProvider } from "./brain"
 import { loadContext, type ChatCaseContext } from "./context"
+import { cleanCase } from "./clean"
 import { directAnswer } from "./direct"
 import { chatIntent } from "./intent"
 import { computeKnowledge } from "./knowledge"
@@ -21,7 +22,10 @@ export interface Prepared {
   opener: ChatMessage
 }
 
-export function prepare(ctx: ChatCaseContext): Prepared {
+export function prepare(raw: ChatCaseContext): Prepared {
+  // The recorded trace's day-less clock times are out of everything the chat reads and says (clean.ts).
+  const clean = cleanCase(raw.case)
+  const ctx: ChatCaseContext = { ...raw, case: clean, snap: { ...raw.snap, cases: raw.snap.cases.map((c) => (c.id === clean.id ? clean : c)) } }
   // Engine: the loop's own knowledge (the card, Know-how and History count the same). Fixtures: the same gate over the chat's history.
   const known = ctx.knowledge ?? computeKnowledge({ case: ctx.case, kind: ctx.kind, history: ctx.history })
   // Precedents dated on the room's day when decided after its clock (words.ts shownAt): the opener, the prompt and the panel.

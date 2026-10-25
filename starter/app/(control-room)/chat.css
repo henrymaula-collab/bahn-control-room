@@ -167,8 +167,9 @@
 .choice kbd { font-family: inherit; font-size: var(--type-subhead); line-height: 1; font-weight: 400; color: var(--ink-2); }
 .choice.is-yes kbd { color: rgb(255 254 247 / 0.7); }
 .approve-limit { margin-top: 2px; color: var(--ink-2); }
-.approve-choices { display: flex; gap: 8px; }
-.approve-choices .choice { flex: 1 1 0; min-width: 0; }
+.approve-choices { display: flex; flex-wrap: wrap; gap: 8px; }
+/* Side by side when both fit on one line, stacked when the panel is narrow (Safari at 125 %) */
+.approve-choices .choice { flex: 1 1 auto; white-space: nowrap; }
 .chat-approve + .composer { margin-top: 0; }
 .chat-approve { margin-bottom: 8px; }
 /* The send window: Undo with the time left as a thin line that runs out */

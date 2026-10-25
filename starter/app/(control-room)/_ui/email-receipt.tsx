@@ -3,6 +3,7 @@
 import Link from "next/link"
 import { useEffect, useRef } from "react"
 import { createPortal } from "react-dom"
+import { withoutBareTimes } from "./card-line"
 import { clearSend, sentWhat, type SendWin, useSendWindow } from "./email-send"
 import { Icon } from "./icons"
 import { useNextCase, usePanel } from "./work-frame"
@@ -34,7 +35,7 @@ function Receipt({ win, caseId }: { win: SendWin; caseId: string }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
   const title = `${win.noun === "email" ? "Email" : "Message"} sent`
-  const more = [win.calls ? `Next, the agent calls ${win.calls}.` : "", win.next ?? ""].filter(Boolean).join(" ")
+  const more = [win.calls ? `Next, the agent calls ${win.calls}.` : "", withoutBareTimes(win.next ?? "")].filter(Boolean).join(" ")
   return (
     <aside className="panel send-panel email-receipt open" aria-label={title}>
       <div className="panel-head receipt-head">

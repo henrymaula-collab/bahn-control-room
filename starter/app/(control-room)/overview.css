@@ -239,38 +239,48 @@
 .main:has(.overview) .top { display: none; }
 /* Two classes on purpose: in dev, Next can re-insert control-room.css after this file on a
    client-side navigation, and its one-class .float { width: 300px } must never win here.
-   The panel is 840 x --cr-u wide (840 px at 2560 x 1300, 580 at 1512 x 800, 520 at
-   1280 x 720, see shell.css), so the map keeps about half the frame at every size; in very
-   narrow windows at least 176 px of map stays visible. Its type follows the panel's own
+   The panel is 840 x 40/34 x --cr-u wide (988 px at 2560 x 1300, 44 % of the map; 682 at
+   1512 x 800, 54 %; 495 in Henry's Safari, 59 %, where the 340 px cap holds), so the cars keep
+   the rest of the frame. Its type follows the panel's own
    width (container units), so the whole panel scales as one instead of wrapping or
    overflowing. No scroll box. */
 .overview { container-type: size; }
+/* Henry 25 Oct: "now that the card only has the essentials, it could be made a bit bigger". The
+   whole card scales by one factor, --wc = 40/34: its headline is Apple's Large Title at the
+   xxxLarge Dynamic Type size (40 pt, against 34 at the default size; HIG Typography), and the
+   width, padding, button and gaps grow with it, so the line breaks stay as they were. In small
+   frames (Henry's Safari, 1330 x 680 at 125 %) the width stops 340 px short of the map's right
+   edge, so the cars keep their room and the Danish dots stay clear. */
 .overview .float-me {
+  --wc: calc(40 / 34);
   top: calc(16 * var(--cr-u)); left: calc(16 * var(--cr-u)); right: auto; bottom: auto;
-  width: max(calc(360 * var(--type-kf)), min(calc(840 * var(--cr-u)), calc(100cqw - 176px)));
-  padding: calc(48 * var(--cr-u)) calc(52 * var(--cr-u)) calc(48 * var(--cr-u));
-  border-radius: calc(32 * var(--cr-u)); container-type: inline-size;
+  width: max(calc(360 * var(--wc) * var(--type-kf)), min(calc(840 * var(--wc) * var(--cr-u)), calc(100cqw - 340px)));
+  padding: calc(48 * var(--wc) * var(--cr-u)) calc(52 * var(--wc) * var(--cr-u));
+  border-radius: calc(32 * var(--wc) * var(--cr-u)); container-type: inline-size;
   /* Only the headline and the black pill now (Henry 25 Oct); never taller than the frame. */
   max-height: calc(100% - 32 * var(--cr-u)); overflow: hidden; display: flex; flex-direction: column;
 }
 .overview .float-me > * { flex: none; }
 .overview .float-me .welcome {
   font-family: "Owners Wide", var(--font-archivo), var(--font); font-stretch: 125%; font-variation-settings: "wdth" 125;
-  font-size: max(min(24px, var(--type-display)), min(var(--type-display), 7.6cqi)); line-height: var(--lh-display); font-weight: 600; letter-spacing: var(--track-display); text-wrap: balance;
+  font-size: max(min(calc(24px * var(--wc)), calc(var(--type-display) * var(--wc))), min(calc(var(--type-display) * var(--wc)), 7.6cqi));
+  line-height: var(--lh-display); font-weight: 600; letter-spacing: var(--track-display); text-wrap: balance;
   overflow-wrap: break-word;
 }
-/* "Bahn Express" in Archivo's true italic, same weight, echoing the "Control room" lockup. */
-/* The day said in the greeting, in two tones: who in ink, what in grey (lab welcome:01). */
+/* The day said in the greeting, in two tones: who in ink, what in grey (lab welcome:01); the
+   name in Archivo's true italic, same weight and colour (Henry 25 Oct). */
 .overview .float-me .welcome .fact { color: var(--ink-2); }
 .overview .float-me .welcome em { font-family: "Owners Wide", var(--font-archivo-italic), var(--font-archivo), var(--font); font-style: italic; font-weight: inherit; }
-.overview .float-me .me-tasks { margin-top: clamp(calc(18 * var(--type-kf)), 5.4cqi, 40px); }
+.overview .float-me .me-tasks { margin-top: clamp(calc(18 * var(--wc) * var(--type-kf)), 5.4cqi, calc(40px * var(--wc))); }
 .overview .float-me .tasks-today {
-  width: 100%; min-width: 0; justify-content: space-between; gap: calc(12 * var(--cr-u));
-  height: clamp(calc(52 * var(--type-kf)), 12.5cqi, 92px); padding: 0 clamp(calc(18 * var(--type-kf)), 4cqi, 32px) 0 clamp(calc(20 * var(--type-kf)), 5cqi, 40px);
-  font-family: var(--font); font-size: max(min(17px, var(--type-headline)), min(var(--type-headline), 4.1cqi)); line-height: var(--lh-headline); letter-spacing: var(--track-headline);
+  width: 100%; min-width: 0; justify-content: space-between; gap: calc(12 * var(--wc) * var(--cr-u));
+  height: clamp(calc(52 * var(--wc) * var(--type-kf)), 12.5cqi, calc(92px * var(--wc)));
+  padding: 0 clamp(calc(18 * var(--wc) * var(--type-kf)), 4cqi, calc(32px * var(--wc))) 0 clamp(calc(20 * var(--wc) * var(--type-kf)), 5cqi, calc(40px * var(--wc)));
+  font-family: var(--font); font-size: max(min(calc(17px * var(--wc)), calc(var(--type-headline) * var(--wc))), min(calc(var(--type-headline) * var(--wc)), 4.1cqi));
+  line-height: var(--lh-headline); letter-spacing: var(--track-headline);
 }
 .overview .float-me .tasks-today span { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
-.overview .float-me .tasks-today svg { width: clamp(calc(18 * var(--type-kf)), 4cqi, 32px); height: clamp(calc(18 * var(--type-kf)), 4cqi, 32px); flex: none; }
+.overview .float-me .tasks-today svg { width: clamp(calc(18 * var(--wc) * var(--type-kf)), 4cqi, calc(32px * var(--wc))); height: clamp(calc(18 * var(--wc) * var(--type-kf)), 4cqi, calc(32px * var(--wc))); flex: none; }
 
 /* ---------- The cars by state, floating on the map's bottom left (Henry 25 Oct: "move it down here
    so it just floats as a status, with no card behind it"). The map's key as one bar (lab welcome:09,
@@ -361,14 +371,15 @@
 }
 @keyframes map-dock-in { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
 .map-dock-x {
-  position: absolute; top: calc(8 * var(--type-k)); right: calc(8 * var(--type-k)); width: 44px; height: 44px;
+  position: absolute; top: calc(8 * var(--type-k)); right: calc(8 * var(--type-k)); width: max(44px, calc(40 * var(--type-k))); height: max(44px, calc(40 * var(--type-k)));
   display: grid; place-items: center; border-radius: 50%; color: var(--ink-2);
   transition: background-color 100ms var(--ease), color 100ms var(--ease);
 }
 .map-dock-x:hover { background: var(--raise); color: var(--ink); }
+.map-dock-x svg { width: calc(20 * var(--type-k)); height: calc(20 * var(--type-k)); }
 .map-dock-x:focus-visible { outline: 2px solid var(--ink); outline-offset: -2px; }
 .dock-card { display: flex; flex-direction: column; align-items: flex-start; }
-.dock-card .dc-r { padding-right: 40px; font-size: var(--type-title2); line-height: var(--lh-title2); letter-spacing: var(--track-title2); font-weight: 600; text-wrap: balance; }
+.dock-card .dc-r { padding-right: max(40px, calc(40 * var(--type-k))); font-size: var(--type-title2); line-height: var(--lh-title2); letter-spacing: var(--track-title2); font-weight: 600; text-wrap: balance; }
 .dock-card .dc-p { margin-top: calc(4 * var(--type-k)); font-size: var(--type-subhead); line-height: var(--lh-subhead); color: var(--ink-2); }
 .dock-card .dc-due { margin-top: 2px; font-size: var(--type-subhead); line-height: var(--lh-subhead); font-weight: 600; color: var(--ink-2); }
 .dock-card .dc-due.now { color: var(--now); }

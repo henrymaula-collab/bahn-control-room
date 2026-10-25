@@ -151,6 +151,8 @@
 .colleague-panel .colleague-list { flex: 1 1 auto; min-height: 0; overflow: hidden auto; overscroll-behavior: contain; padding: 0 12px; margin: 16px -12px 0; }
 .colleague-panel .colleague-lede { margin-top: 4px; color: var(--ink-2); }
 .colleague-list { display: flex; flex-direction: column; gap: 2px; }
+/* The list scrolls rather than squeezing its rows (a three-line reason overflowed its row in Safari). */
+.colleague-list .colleague-row, .colleague-list .colleague-label { flex-shrink: 0; }
 .colleague-panel .colleague-label { display: block; margin: 18px 0 6px; color: var(--ink-2); }
 .colleague-list > div:first-child > .colleague-label:first-child { margin-top: 0; }
 .colleague-row {

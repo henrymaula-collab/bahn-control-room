@@ -27,6 +27,7 @@ import { evaluateKind, onePerCase } from "./trust-gate"
 import type { OpsPerson } from "./types"
 import type { CaseRecord } from "./types-loop"
 import { findPerson, vehicleName } from "./v3"
+import { handoffHistoryRows } from "@/lib/handoff/history"
 
 export type HistoryGroup = "today" | "yesterday" | "week" | "month" | `m-${string}`
 
@@ -271,6 +272,9 @@ export function historyRows(state: EngineState): HistoryRow[] {
       live: true,
     })
   }
+
+  // Cases sent to a colleague: "Sent to Mikko at 09:52" under the sender (track N, lib/handoff).
+  rows.push(...handoffHistoryRows(state))
 
   return rows.sort((a, b) => b.shownAt.localeCompare(a.shownAt) || a.caseId.localeCompare(b.caseId))
 }

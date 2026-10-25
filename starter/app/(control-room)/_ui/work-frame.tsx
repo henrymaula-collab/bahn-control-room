@@ -7,6 +7,7 @@ import type { WorkLists, WorkRow } from "@/lib/control-room/types-v3"
 import { nextCase, previousCase } from "@/lib/handoff/order"
 import { lookOf, lookQuery } from "../tasks/look"
 import { Icon } from "./icons"
+import { TaskDock } from "./task-dock"
 
 /** Shown next to each row: the decide-by time, red only within the hour. Worked out on the server. */
 export type RowTime = Record<string, { text: string; now: boolean }>
@@ -113,18 +114,21 @@ export function WorkFrame({ lists, times, children }: { lists: WorkLists; times:
 
   const panel = useMemo(() => ({ open, setOpen, reset, slot }), [open, setOpen, reset, slot])
   const others = useMemo(
-    () => ({ rows: rows.filter((r) => r.caseId !== current), times, href, show: look === "menu" }),
-    [rows, current, times, href, look],
+    // The card's "Other tasks" row is replaced by the dock's Up next (Henry, 25 Oct); C removes the row.
+    () => ({ rows: rows.filter((r) => r.caseId !== current), times, href, show: false }),
+    [rows, current, times, href],
   )
   const needs = useMemo(() => ({ rows, current, prev, next, times, href }), [rows, current, prev, next, times, href])
   // The panel's room is kept from the first paint, so the card does not jump when it slides in.
   const withPanel = !!current && !!open
+  // The dock walks Your tasks in the default look (the switcher and the column have their own way on).
+  const dock = look === "menu" && !!current
 
   return (
     <PanelContext.Provider value={panel}>
       <OthersContext.Provider value={others}>
       <NeedsContext.Provider value={needs}>
-        <div className={`work look-${look}${withPanel ? " has-panel" : ""}`}>
+        <div className={`work look-${look}${withPanel ? " has-panel" : ""}${dock ? " has-dock" : ""}`}>
           {look === "column" && (
             <div className="list" ref={listRef}>
               <Rows rows={rows} current={current} times={times} href={href} />
@@ -134,6 +138,7 @@ export function WorkFrame({ lists, times, children }: { lists: WorkLists; times:
             {look === "switcher" && <Switcher rows={rows} index={index} next={next} times={times} href={href} />}
             {children}
           </div>
+          {dock && <TaskDock />}
           <div ref={setSlot} style={{ display: "contents" }} />
         </div>
       </NeedsContext.Provider>

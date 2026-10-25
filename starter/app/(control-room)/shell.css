@@ -73,3 +73,103 @@
 /* The selected menu row (press, #e2ded4) lifts its count to ink, as Apple's selected sidebar rows
    do: grey on press was 4.03:1, ink is 14.06:1. */
 .nav a[aria-current="page"] .count { color: var(--ink); }
+
+/* ---------- The dock (task-dock.tsx; needs:07 without the count, Henry 25 Oct) ----------
+   Floats at the bottom of the card column in Your tasks and stays while the case above it changes.
+   The card gets the room back as bottom padding, so its last row is never under the dock. */
+.work.has-dock .detail { padding-bottom: calc(max(calc(28 * var(--type-kf)), calc(56 * var(--cr-u, 1px))) + 72px); }
+.work .task-dock-bay {
+  position: absolute; left: 0; right: 0; bottom: max(14px, calc(24 * var(--cr-u, 1px))); z-index: 12;
+  display: flex; justify-content: center; padding: 0 16px; pointer-events: none;
+  transition: right 200ms cubic-bezier(0.2, 0, 0, 1);
+}
+.work.has-panel .task-dock-bay { right: var(--panel); }
+.task-dock { position: relative; pointer-events: auto; max-width: 100%; font-size: var(--type-body); line-height: var(--lh-body); }
+.task-dock-bar {
+  display: flex; align-items: center; gap: 2px; min-height: 48px; padding: 4px; border-radius: 999px;
+  background: var(--page); color: var(--ink);
+  box-shadow: 0 0 0 1px rgb(18 17 14 / 0.07), 0 1px 2px rgb(18 17 14 / 0.05), 0 10px 30px rgb(18 17 14 / 0.12);
+  transition: background-color 200ms cubic-bezier(0.2, 0, 0, 1), color 200ms cubic-bezier(0.2, 0, 0, 1);
+}
+.task-dock-step, .task-dock-where, .task-dock-next, .task-dock-open {
+  display: inline-flex; align-items: center; gap: 0.35em; min-height: 40px; border-radius: 999px;
+  transition: background-color 100ms cubic-bezier(0.2, 0, 0, 1);
+}
+.task-dock-step { justify-content: center; width: 40px; color: var(--ink); }
+.task-dock-step.off { color: var(--press); }
+.task-dock-where { padding: 0 0.6em 0 0.75em; color: var(--ink-2); font-size: var(--type-subhead); white-space: nowrap; }
+.task-dock-where svg { width: 0.9em; height: 0.9em; }
+.task-dock-next { min-width: 0; padding: 0 0.6em 0 0.95em; }
+.task-dock-next.off { color: var(--ink-2); font-size: var(--type-subhead); padding-right: 1.1em; }
+.task-dock-next svg { flex: none; width: 1em; height: 1em; color: var(--ink-2); }
+.task-dock-car { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 16em; }
+.task-dock-next time { flex: none; font-size: var(--type-subhead); font-weight: 600; color: var(--ink-2); }
+.task-dock-next time.now { color: var(--now); }
+.task-dock-step:not(.off):hover, .task-dock-where:hover, .task-dock-where[aria-expanded="true"], .task-dock-next:not(.off):hover { background: var(--raise); }
+.task-dock a:focus-visible, .task-dock button:focus-visible { outline: 2px solid var(--ink); outline-offset: -2px; }
+
+/* The note after a case was sent on: dark, what happened, Undo for 10 s. */
+.task-dock.told .task-dock-bar { background: var(--ink); color: var(--page); padding-left: 1em; gap: 0.6em; }
+.task-dock.told .task-dock-bar > svg { flex: none; width: 1.05em; height: 1.05em; }
+.task-dock-said { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.task-dock-open { padding: 0 1em; background: rgb(255 254 247 / 0.14); color: var(--page); font-weight: 600; white-space: nowrap; }
+.task-dock-open:hover { background: rgb(255 254 247 / 0.24); }
+.task-dock.told button:focus-visible { outline-color: var(--page); }
+
+/* Up next, opening upward from the dock: the rest of Your tasks in order, car, place, time. */
+.task-dock-queue {
+  position: absolute; left: 50%; bottom: calc(100% + 8px); width: min(22em, calc(var(--cr-vw, 100vw) - 32px)); transform: translateX(-50%);
+  padding: 0.45em; border-radius: 16px; background: var(--page);
+  box-shadow: 0 0 0 1px rgb(18 17 14 / 0.07), 0 12px 36px rgb(18 17 14 / 0.14);
+}
+.task-dock-scroll { max-height: min(26em, calc(var(--cr-vh, 100vh) - 200px)); overflow: hidden auto; overscroll-behavior: contain; }
+.task-dock-label { padding: 0.35em 0.6em 0.25em; color: var(--ink-2); font-size: var(--type-subhead); line-height: var(--lh-subhead); }
+.task-dock-row {
+  display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: 0.8em; padding: 0.4em 0.6em; border-radius: 0.6em;
+  transition: background-color 100ms cubic-bezier(0.2, 0, 0, 1);
+}
+.task-dock-row:hover, .task-dock-row:focus-visible { background: var(--raise); }
+.task-dock-row .task-dock-car { max-width: none; }
+.task-dock-place { grid-column: 1; color: var(--ink-2); font-size: var(--type-subhead); line-height: var(--lh-subhead); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.task-dock-row time { grid-row: 1; grid-column: 2; font-size: var(--type-subhead); line-height: calc(var(--lh-body) * var(--type-body)); font-weight: 600; color: var(--ink-2); white-space: nowrap; }
+.task-dock-row time.now { color: var(--now); }
+
+@media (prefers-reduced-motion: no-preference) {
+  .task-dock-queue { animation: task-dock-up 150ms cubic-bezier(0.2, 0, 0, 1); }
+  .task-dock-bar { animation: task-dock-in 200ms cubic-bezier(0.2, 0, 0, 1); }
+  .task-dock-next .task-dock-car { animation: task-dock-fade 200ms cubic-bezier(0.2, 0, 0, 1); }
+}
+@keyframes task-dock-up { from { opacity: 0; transform: translate(-50%, 8px); } to { opacity: 1; transform: translate(-50%, 0); } }
+@keyframes task-dock-in { from { opacity: 0.4; transform: translateY(6px) scale(0.98); } to { opacity: 1; transform: none; } }
+@keyframes task-dock-fade { from { opacity: 0; transform: translateX(6px); } to { opacity: 1; transform: none; } }
+
+/* ---------- Send to a colleague (send-to-colleague.tsx), a side panel like Talk it through ---------- */
+.colleague-panel { display: flex; flex-direction: column; }
+.colleague-panel .colleague-lede { margin-top: 4px; color: var(--ink-2); }
+.colleague-list { display: flex; flex-direction: column; gap: 2px; margin-top: 20px; }
+.colleague-panel .colleague-label { display: block; margin: 14px 0 6px; color: var(--ink-2); }
+.colleague-list > div:first-child .colleague-label, .colleague-list .colleague-label:first-child { margin-top: 0; }
+.colleague-row {
+  display: grid; grid-template-columns: auto minmax(0, 1fr) 20px; align-items: center; column-gap: 12px;
+  width: 100%; min-height: 44px; padding: 10px 12px; margin: 0 -12px; width: calc(100% + 24px);
+  border-radius: 12px; text-align: left; transition: background-color 100ms cubic-bezier(0.2, 0, 0, 1);
+}
+.colleague-row:hover { background: var(--raise); }
+.colleague-row[aria-checked="true"] { background: var(--raise); }
+.colleague-row:focus-visible { outline: 2px solid var(--ink); outline-offset: -2px; }
+.colleague-row .avatar { width: 40px; height: 40px; }
+.colleague-text { display: flex; flex-direction: column; min-width: 0; }
+.colleague-text .s { color: var(--ink-2); }
+.colleague-tick { display: inline-flex; color: var(--ink); }
+.colleague-send { display: flex; flex-direction: column; margin-top: 24px; padding-top: 20px; border-top: 1px solid rgb(18 17 14 / 0.08); }
+.colleague-send .colleague-label { margin-top: 0; }
+.colleague-line {
+  width: 100%; resize: vertical; min-height: 4.2em; padding: 10px 12px; border-radius: 12px;
+  background: var(--page); box-shadow: inset 0 0 0 1px rgb(18 17 14 / 0.14);
+}
+.colleague-line:focus { outline: none; box-shadow: inset 0 0 0 2px var(--ink); }
+.colleague-line::placeholder { color: var(--ink-2); }
+.colleague-go { align-self: flex-start; margin-top: 16px; }
+.colleague-go:disabled { opacity: 0.6; }
+.colleague-error { margin-top: 10px; color: var(--now); }
+.task-dock-row + .task-dock-label { margin-top: 0.4em; }

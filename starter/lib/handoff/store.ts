@@ -38,6 +38,7 @@ export async function colleagues(caseId: string, personId: string, given?: Engin
     cases: state.cases,
     decisions: state.decisions,
     place: place ? { name: place.name, country: place.country } : undefined,
+    passedOn: ((c as WithHandoffs).handoffs ?? []).map((h) => h.from),
   })
   return { pick: list[0] ?? null, others: list.slice(1) }
 }

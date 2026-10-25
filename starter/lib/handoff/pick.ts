@@ -8,6 +8,7 @@
 //    sender does not, the likely reason a case gets passed on), handled this kind at this pickup
 //    place, in this country, anywhere, fewest open tasks. Every count is decisions minus decisions
 //    later changed.
+//    Anyone who already passed this case on goes last.
 // 3. The first is the pick. Its line names the fact that put it first, so it is always true.
 //
 // A count, never a score or a rank (design/BAHN-VOCABULARY.md).
@@ -35,6 +36,8 @@ export type PickInput = {
   cases: Pick<Case, "status" | "routedTo">[]
   decisions: { personId: string; caseType: string; placeId?: string | null; country?: string | null; laterChanged: boolean }[]
   place?: { name: string; country?: string }
+  /** People who already passed this case on: they go last, never the pick ahead of someone new. */
+  passedOn?: string[]
 }
 
 const tasks = (n: number) => (n === 0 ? "no open tasks" : n === 1 ? "1 open task" : `${n} open tasks`)
@@ -63,8 +66,10 @@ export function colleaguesFor(input: PickInput): Colleague[] {
       open: open(p.id),
     }
   })
+  const passed = new Set(input.passedOn ?? [])
   stats.sort(
     (a, b) =>
+      Number(passed.has(a.p.id)) - Number(passed.has(b.p.id)) ||
       Number(b.speaks) - Number(a.speaks) ||
       b.atPlace - a.atPlace ||
       b.inCountry - a.inCountry ||
@@ -73,27 +78,42 @@ export function colleaguesFor(input: PickInput): Colleague[] {
       a.p.id.localeCompare(b.p.id),
   )
 
+  const country = place?.country ? COUNTRY_NAMES[place.country] ?? place.country : undefined
+  type S = (typeof stats)[number]
+  // The facts in the order that ranks people; the first true one is why this person is where they are.
+  const facts = (s: S): { key: string; text: string }[] => [
+    ...(s.speaks && languageName ? [{ key: "speaks", text: `reads ${languageName}` }] : []),
+    ...(s.atPlace > 0 && place ? [{ key: "atPlace", text: `has handled ${plural(s.atPlace, words.one, words.many)} at ${place.name}` }] : []),
+    ...(s.inCountry > 0 && country ? [{ key: "inCountry", text: `has handled ${plural(s.inCountry, words.one, words.many)} in ${country}` }] : []),
+    ...(s.ofType > 0 ? [{ key: "ofType", text: `has handled ${plural(s.ofType, words.one, words.many)}` }] : []),
+    { key: "open", text: `has ${tasks(s.open)}` },
+  ]
+  const same = (a: S, b: S, key: string) =>
+    key === "speaks" ? a.speaks === b.speaks : key === "open" ? a.open === b.open : a[key as "atPlace" | "inCountry" | "ofType"] === b[key as "atPlace" | "inCountry" | "ofType"]
+  const KEYS = ["speaks", "atPlace", "inCountry", "ofType", "open"]
+
   return stats.map((s, i) => {
     const name = s.p.name
-    let short: string
-    let reason: string
-    if (s.speaks && languageName) {
-      short = `${name} reads ${languageName}`
-      reason = `Reads ${languageName}, the language at ${place?.name ?? "the pickup place"}`
-    } else if (s.atPlace > 0 && place) {
-      short = `${name} has handled ${s.atPlace} at ${place.name}`
-      reason = `Has handled ${plural(s.atPlace, words.one, words.many)} at ${place.name}`
-    } else if (s.inCountry > 0 && place?.country) {
-      const country = COUNTRY_NAMES[place.country] ?? place.country
-      short = `${name} has handled ${s.inCountry} in ${country}`
-      reason = `Has handled ${plural(s.inCountry, words.one, words.many)} in ${country}`
-    } else if (s.ofType > 0) {
-      short = `${name} has handled ${s.ofType} like it`
-      reason = `Has handled ${plural(s.ofType, words.one, words.many)}`
-    } else {
-      short = `${name} has ${tasks(s.open)}`
-      reason = cap(i === 0 && stats.length > 1 ? `${tasks(s.open)}, the fewest on the desk` : tasks(s.open))
-    }
+    const own = facts(s)
+    const first = own[0]!
+    const alone =
+      first.key === "speaks"
+        ? `Reads ${languageName}, the language at ${place?.name ?? "the pickup place"}`
+        : first.key === "open"
+          ? cap(i === 0 && stats.length > 1 ? `${tasks(s.open)}, the fewest on the desk` : tasks(s.open))
+          : cap(first.text)
+    // The pick shares its first fact with the next person: say what put it first.
+    const runner = i === 0 ? stats[1] : undefined
+    const key = runner && first.key !== "open" && same(s, runner, first.key) ? KEYS.find((k) => !same(s, runner, k)) : undefined
+    const second = key ? own.find((f) => f.key === key) : undefined
+    const reason = second ? `${cap(first.text)} and ${second.text}` : alone
+    const short = {
+      speaks: `${name} reads ${languageName}`,
+      atPlace: `${name} has handled ${s.atPlace} at ${place?.name}`,
+      inCountry: `${name} has handled ${s.inCountry} in ${country}`,
+      ofType: `${name} has handled ${s.ofType} like it`,
+      open: `${name} has ${tasks(s.open)}`,
+    }[first.key]!
     return { personId: s.p.id, name, ...(s.p.avatar ? { avatar: s.p.avatar } : {}), short, reason: `${reason}.`, open: s.open }
   })
 }

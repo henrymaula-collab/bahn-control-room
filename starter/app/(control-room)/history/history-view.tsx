@@ -305,6 +305,8 @@ function Talk({ row, now, me, thread, onBack, onClose }: { row: HistoryRow; now:
 function RecordFacts({ row, now, me, lead, onClose, talk }: { row: HistoryRow; now: string; me: string; lead: boolean; onClose: () => void; talk?: () => void }) {
   const mine = row.by.id === me
   const agent = row.by.id === "agent"
+  // A case sent to a colleague (track N's hand-off rows): "Sent to Sofie at 12:06" and the line written with it.
+  const sent = row.counted.startsWith("Sent to")
   const weight = row.weight
     ? row.weight.value >= 1 ? "Full" : `${row.weight.value.toFixed(2)}: ${row.weight.held} of ${mine ? "your" : `${row.by.name}'s`} ${row.weight.decided} earlier decisions on this kind stood`
     : null
@@ -334,7 +336,7 @@ function RecordFacts({ row, now, me, lead, onClose, talk }: { row: HistoryRow; n
       )}
 
       <dl className="hist-kv">
-        <dt>Decided</dt>
+        <dt>{sent ? "Sent on" : "Decided"}</dt>
         <dd className="strong">{row.decision}</dd>
         {row.suggested && (
           <>
@@ -344,11 +346,11 @@ function RecordFacts({ row, now, me, lead, onClose, talk }: { row: HistoryRow; n
         )}
         {!agent && (
           <>
-            <dt>Reason</dt>
-            <dd>{row.reason ? <Reason text={row.reason} name={row.by.name} mine={mine} /> : <span className="hist-quiet">No reason given</span>}</dd>
+            <dt>{sent ? (mine ? "Your line" : `${row.by.name}'s line`) : "Reason"}</dt>
+            <dd>{row.reason ? <Reason text={row.reason} name={row.by.name} mine={mine} /> : <span className="hist-quiet">{sent ? "None" : "No reason given"}</span>}</dd>
           </>
         )}
-        <dt>Decided by</dt>
+        <dt>{sent ? "Sent by" : "Decided by"}</dt>
         <dd>{agent ? "Agent, under a trust rule" : mine ? "You" : row.by.name}</dd>
         <dt>When</dt>
         <dd className="num">
@@ -366,7 +368,7 @@ function RecordFacts({ row, now, me, lead, onClose, talk }: { row: HistoryRow; n
               <span className="hist-quiet"> {row.rule.evidence}{row.rule.turnedOnBy ? `, turned on by ${row.rule.turnedOnBy}` : ""}.</span>
             </dd>
           </>
-        ) : (
+        ) : sent ? null : (
           <>
             <dt>Toward a trust rule</dt>
             <dd>

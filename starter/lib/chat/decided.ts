@@ -20,7 +20,8 @@ export interface DecidedFacts {
   iso: string
   label: string
   sent?: string // "The email in German to Kovellin Automobilhandel"
-  next: string // "Next, the agent calls Calverona Hamburg. The agent checks ..."
+  next: string // "Next, the agent calls Calverona Hamburg. The agent checks ...", or the call it made
+  edited?: string // the person's own text of the email, when they changed it
 }
 
 /** The latest decision on this case, or null while it waits. */
@@ -35,8 +36,14 @@ export function decidedFacts(ctx: ChatCaseContext): DecidedFacts | null {
   const sent = draft
     ? `The ${noun}${draft.language !== "en" ? ` in ${LANG[draft.language] ?? draft.language}` : ""} to ${who}${d.editedDetail ? `, with ${by}'s own changes,` : ""}`
     : undefined
-  const next = [`Next, the agent calls ${ctx.order.pickup.name}.`, option ? nextWords(option) : ""].filter(Boolean).join(" ")
-  return { by, at: hhmm(d.at), iso: d.at, label: option?.label ?? "Something else", sent, next }
+  // Once the call-back has run (the thread read again, a reload): what the agent did, in its own words,
+  // as the receipt says it. The steps after the agent's last proposal are what it did after the decision.
+  const steps = ctx.case.agentSteps
+  let last = -1
+  steps.forEach((step, i) => step.kind === "propose" && !/^Brought a person/.test(step.summary) && (last = i))
+  const call = last >= 0 ? steps.slice(last + 1).find((step) => step.kind === "call") : undefined
+  const next = [call ? call.summary : `Next, the agent calls ${ctx.order.pickup.name}.`, option ? nextWords(option) : ""].filter(Boolean).join(" ")
+  return { by, at: hhmm(d.at), iso: d.at, label: option?.label ?? "Something else", sent, next, edited: d.editedDetail }
 }
 
 /** "Decided by Aino at 12:26: Ask the customer ... The email in German to Kovellin Automobilhandel went out at 12:26. Next, ..." */

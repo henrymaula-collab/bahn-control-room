@@ -6,12 +6,13 @@ import type { CaseKnowledge, ChatEvent, ChatMessage, ChatThread } from "@/lib/co
 import { answer, type AnswerInput, chatProvider, type ChatProvider } from "./brain"
 import { loadContext, type ChatCaseContext } from "./context"
 import { cleanCase } from "./clean"
-import { type DecidedMessage, decidedFacts, decidedLine } from "./decided"
+import { type DecidedMessage, decidedFacts, decidedLine, isDecided } from "./decided"
 import { directAnswer } from "./direct"
 import { chatIntent } from "./intent"
 import { computeKnowledge } from "./knowledge"
 import { buildOpener, type OpenerShape, type OpenerVariant, openerShape } from "./opener"
 import { chatStore, messageId } from "./store"
+import { roomNow } from "@/lib/control-room/room-clock"
 import { shownAt } from "./words"
 
 export type Failure = { ok: false; status: 400 | 404; error: string }
@@ -32,8 +33,25 @@ export function prepare(raw: ChatCaseContext): Prepared {
   // Precedents dated on the room's day when decided after its clock (words.ts shownAt): the opener, the prompt and the panel.
   const knowledge: CaseKnowledge = { ...known, precedents: known.precedents.map((p) => ({ ...p, at: shownAt(p.at, ctx.now) })) }
   const shape = openerShape(ctx, knowledge)
-  const { variant: _variant, ...opener } = buildOpener(ctx, knowledge)
+  const { variant: _variant, ...opener } = buildOpener(ctx, knowledge, ctx.now)
   return { ctx, knowledge, shape, opener }
+}
+
+/**
+ * Stored messages as the case stands now (a reload): the latest "Decided at" line says the call-back the
+ * agent already made, and an email shown before the send carries the person's own changes, as it went.
+ */
+function asDecidedNow(ctx: ChatCaseContext, messages: ChatMessage[]): ChatMessage[] {
+  const f = decidedFacts(ctx)
+  if (!f) return messages
+  let last = -1
+  messages.forEach((m, i) => isDecided(m) && (last = i))
+  return messages.map((m, i) => {
+    if (i === last) return { ...m, text: decidedLine(f) }
+    const email = (m as ChatMessage & { email?: { text: string } }).email
+    if (f.edited && email && m.at <= f.iso) return { ...m, email: { ...email, text: f.edited } } as ChatMessage
+    return m
+  })
 }
 
 /** GET /api/cr/cases/:id/chat?person=<id> */
@@ -42,7 +60,7 @@ export async function getThread(caseId: string, personId: string | null | undefi
   const r = await loadContext(caseId, personId)
   if (!r.ok) return r
   const p = prepare(r.ctx)
-  const messages = await chatStore().list(p.ctx.case.id, p.ctx.person.id)
+  const messages = asDecidedNow(p.ctx, await chatStore().list(p.ctx.case.id, p.ctx.person.id))
   return { ok: true, thread: { caseId: p.ctx.case.id, knowledge: p.knowledge, opener: p.opener, messages }, variant: p.shape.variant }
 }
 
@@ -84,7 +102,7 @@ export async function prepareTurn(caseId: string, body: PostBody): Promise<{ ok:
     }
     try {
       const history = await store.list(caseKey, personId)
-      const mine: ChatMessage = { id: messageId("msg-p"), caseId: caseKey, role: "person", personId, text, via, at: new Date().toISOString() }
+      const mine: ChatMessage = { id: messageId("msg-p"), caseId: caseKey, role: "person", personId, text, via, at: await roomNow() }
       await store.add(mine, personId)
       send({ type: "thinking" })
       const input: AnswerInput = { ...p, history, text, via, emit: (e: ChatEvent) => send(e), signal }
@@ -93,7 +111,7 @@ export async function prepareTurn(caseId: string, body: PostBody): Promise<{ ok:
       const res = (intent && (await directAnswer(input, intent))) || (await answer(input, provider))
       if (signal?.aborted) return
       const reply: ChatMessage = {
-        id: messageId("msg-a"), caseId: caseKey, role: "agent", text: res.text || "I could not find an answer to that. The decision is yours.", via, at: new Date().toISOString(),
+        id: messageId("msg-a"), caseId: caseKey, role: "agent", text: res.text || "I could not find an answer to that. The decision is yours.", via, at: await roomNow(),
         toolSteps: res.toolSteps.map((s) => (s.status === "running" ? { ...s, status: "failed" as const } : s)),
         // "Show me the email": the email rides on the message (ChatMessage plus one field), so it is there on reload and in History.
         ...(res.email ? { email: res.email } : {}),
@@ -158,7 +176,7 @@ export async function noteDecision(caseId: string, personId: string): Promise<vo
     role: "agent",
     text: decidedLine(f),
     via: "text",
-    at: new Date(Math.max(Date.parse(f.iso), Date.now())).toISOString(),
+    at: new Date(Math.max(Date.parse(f.iso), Date.parse(await roomNow()))).toISOString(),
     decided: { at: f.at, by: f.by },
   }
   await chatStore().add(message, ctx.person.id)

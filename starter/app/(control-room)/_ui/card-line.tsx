@@ -40,8 +40,16 @@ export function thenWords(next?: string): string | undefined {
   const cut = s.search(/,?\s(and then|and|until|so that|so|because)\s/)
   if (cut > 0) s = s.slice(0, cut)
   s = s.replace(/^the agent\s+/i, "").replace(/[.;,]$/, "")
+  // Still long for the line's last stop (Safari at 125 % gives it about 20 characters a line):
+  // end before the last trailing phrase that keeps it within SHORT. "Asks the pickup place to name the
+  // key holder at the collection bay desk" -> "Asks the pickup place to name the key holder".
+  if (s.length > SHORT) {
+    const ends = [...s.matchAll(/\s(?:at|about|in|on|for|from|with|by|before|after)\s/g)].map((m) => m.index ?? 0).filter((i) => i >= 20 && i <= SHORT)
+    if (ends.length) s = s.slice(0, ends[ends.length - 1])
+  }
   return s ? s.charAt(0).toUpperCase() + s.slice(1) : undefined
 }
+const SHORT = 46
 
 export function timeLineFor(c: Case, now: string, next: string | undefined, sentTo: string): TimeLine {
   const ping = pingStep(c.agentSteps)

@@ -172,7 +172,7 @@
    for what follows. Subhead size, so it fits the card's column in Safari at 125 %. */
 .work .cline {
   --cl-rail: max(20px, calc(1.45 * var(--size-s)));
-  --cl-gap: 1.8em;
+  --cl-gap: 1.6em;
   list-style: none; margin: 0 0 1.1em; padding: 0;
   display: flex; align-items: flex-start;
   max-width: calc(var(--card-measure, 24) * var(--size-l)); /* as wide as the situation under it */
@@ -180,7 +180,7 @@
 }
 /* The spare width goes to the rail, most of it to the hour between now and the deadline. */
 .work .cline-stop { position: relative; flex: 1 0 auto; display: flex; flex-direction: column; padding-right: var(--cl-gap); --dotw: 8px; }
-.work .cline-now { flex-grow: 2.5; min-width: 4.6em; } /* the hour you have is never a stub */
+.work .cline-now { flex-grow: 2.5; min-width: 3.8em; } /* the hour you have is never a stub */
 .work .cline-stop:last-child { flex: 0 1 auto; padding-right: 0; }
 .work .cline-then { min-width: 7em; }
 .work .cline-rail { position: relative; height: var(--cl-rail); display: flex; align-items: center; }
@@ -259,6 +259,13 @@
 
 /* ---- After a decision (decide:07, h25/h29): who and when, the log at body size, the black Next case. */
 .work .card-done .due { color: var(--ink-2); font-weight: 600; }
-.work .card-done-log { margin-top: 1.2em; max-width: 36em; }
-.work .card-done-log .clog { font-size: var(--size-m); line-height: var(--lh-body); }
+/* It has to leave Next case above the fold in Safari at 125 %: the log a little tighter than the
+   legwork's, a call's long grey line kept to one line (the whole call is in Talk it through and
+   History), and what is still to come at the grey line's size. */
+.work .card-done-log { margin-top: 1em; max-width: 36em; }
+.work .card-done-log .clog { font-size: var(--size-m); line-height: var(--lh-body); gap: 0.6em; }
+.work .card-done-log .clog-row:not(:last-child)::before { bottom: -0.6em; }
 .work .card-done-log .clog-sub { font-size: var(--size-s); line-height: var(--lh-subhead); }
+.work .card-done-log .clog-row.short .clog-sub { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 1; line-clamp: 1; overflow: hidden; }
+.work .card-done-log .is-next .clog-text { font-size: var(--size-s); line-height: var(--lh-subhead); }
+.work .card-done .answers { margin-top: 1.2em; }

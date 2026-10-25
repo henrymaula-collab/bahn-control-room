@@ -120,7 +120,7 @@ export function CardDone({
 
   const sent = option.draft ? recipient(option.draft.to) : null
   const where = back?.situation?.pickup?.place ?? place ?? "the pickup place"
-  const rows: LogRow[] = [{ state: "done", text: `${done.personName} decided`, sub: `${option.label.replace(/\.$/, "")}, at ${done.timeWords}${note ? `. ${note}` : ""}` }]
+  const rows: LogRow[] = [{ state: "done", text: `${done.personName} decided`, sub: `${option.label.replace(/\.$/, "")}${note ? `. ${note}` : ""}` }] // the time is in the line above
   if (sent && option.draft)
     rows.push({
       state: "done",
@@ -130,7 +130,7 @@ export function CardDone({
   const kind = saved ? kindRow(back!.knowledge) : null
   if (kind) rows.push(kind)
   const out = saved ? carriedOut(back!.case.agentSteps) : []
-  for (const s of out) rows.push(stepRow(s, false))
+  for (const s of out) rows.push({ ...stepRow(s, false), short: true })
   if (!saved || back!.case.status !== "done") {
     rows.push(out.length ? { state: "live", text: "The agent is still at work" } : { state: "live", text: `The agent calls ${where}`, sub: "To tell them what was decided" })
   }

@@ -6,13 +6,13 @@ import type { AgentStep } from "@/lib/control-room/types"
 import { clock } from "@/lib/control-room/format"
 import { Icon } from "./icons"
 
-export type LogRow = { state: "done" | "live" | "next"; text: string; sub?: string; at?: string }
+export type LogRow = { state: "done" | "live" | "next"; text: string; sub?: string; at?: string; short?: boolean /* the grey line kept to one line, whole on hover */ }
 
 export function CardLog({ rows, id }: { rows: LogRow[]; id?: string }) {
   return (
     <ol className="clog" id={id}>
       {rows.map((r, i) => (
-        <li key={i} className={`clog-row is-${r.state}`}>
+        <li key={i} className={`clog-row is-${r.state}${r.short ? " short" : ""}`} title={r.short && r.sub ? r.sub : undefined}>
           <span className="clog-mark" aria-hidden="true">
             {r.state === "done" ? <Icon name="check" size={12} /> : null}
           </span>
